@@ -1,0 +1,23 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "hot": "concurrently \"php artisan serve\" \"pnpm run dev\"",
+        "clear": "php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
+    },
+    "devDependencies": {
+        "autoprefixer": "^10.4.21",
+        "axios": "^1.6.4",
+        "concurrently": "^9.2.1",
+        "laravel-vite-plugin": "^1.0.0",
+        "pnpm": "^10.15.1",
+        "postcss": "^8.5.6",
+        "tailwindcss": "^4.1.13",
+        "vite": "^5.0.0"
+    },
+    "dependencies": {
+        "@tailwindcss/vite": "^4.1.13"
+    }
+}
