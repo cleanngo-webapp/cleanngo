@@ -25,7 +25,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'name' => ['required','string','max:255'],
             'email' => ['required','email','max:255','unique:users,email'],
-            'role' => ['required', Rule::in(['admin','staff','cleaner','customer'])],
+            'role' => ['required', Rule::in(['admin','employee','customer'])],
             'password' => ['required','string','min:6','confirmed'],
         ]);
 
@@ -74,8 +74,7 @@ class AuthController extends Controller
         }
         return match ($user->role) {
             'admin' => redirect()->route('preview.admin'),
-            'staff' => redirect()->route('preview.staff'),
-            'cleaner' => redirect()->route('preview.cleaner'),
+            'employee' => redirect()->route('preview.employee'),
             default => redirect()->route('preview.customer'),
         };
     }

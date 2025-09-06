@@ -29,6 +29,5 @@ Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->middleware(
 
 // Simple preview routes for role dashboards (no auth/guards yet)
 Route::view('/admin', 'admin.dashboard')->middleware(['auth','role:admin'])->name('preview.admin');
-Route::view('/staff', 'staff.dashboard')->middleware(['auth','role:staff'])->name('preview.staff');
-Route::view('/cleaner', 'cleaner.dashboard')->middleware(['auth','role:cleaner'])->name('preview.cleaner');
+Route::view('/employee', 'employee.dashboard')->middleware(['auth','role:employee'])->name('preview.employee');
 Route::view('/customer', 'customer.dashboard')->middleware(['auth','role:customer'])->name('preview.customer');
