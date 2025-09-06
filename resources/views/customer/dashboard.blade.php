@@ -6,7 +6,7 @@
 {{-- Customer Dashboard View --}}
 {{-- Purpose: Allow customers to see bookings and request new services --}}
 
-<div class="max-w-4xl mx-auto p-6">
+<div class="max-w-4xl mx-auto my-10 p-6">
 	<h1 class="text-2xl font-bold">Customer Dashboard</h1>
 	<p class="mt-2 text-gray-600">Track your bookings and manage your addresses.</p>
 

@@ -24,8 +24,8 @@
 					<input type="password" name="password" class="mt-1 w-full border rounded px-3 py-2" required />
 				</div>
 				<div class="flex justify-between items-center">
-					<a href="{{ route('register') }}" class="text-emerald-700">Sign Up</a>
-					<button class="bg-blue-600 text-white px-4 py-2 rounded" type="submit">Sign In</button>
+					<a href="{{ route('register') }}" class="text-emerald-700 cursor-pointer">Sign Up</a>
+					<button class="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer" type="submit">Sign In</button>
 				</div>
 			</form>
 		</div>

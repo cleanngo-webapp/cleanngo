@@ -6,7 +6,7 @@
 {{-- Cleaner Dashboard View --}}
 {{-- Purpose: Daily jobs for cleaners, with simple instructions --}}
 
-<div class="max-w-3xl mx-auto p-6">
+<div class="max-w-3xl mx-auto my-10 p-6">
 	<h1 class="text-2xl font-bold">Cleaner Dashboard</h1>
 	<p class="mt-2 text-gray-600">Your assigned jobs for today will appear here.</p>
 

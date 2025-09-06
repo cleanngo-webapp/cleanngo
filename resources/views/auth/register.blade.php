@@ -40,8 +40,8 @@
 				<input type="password" name="password_confirmation" class="mt-1 w-full border rounded px-3 py-2" required />
 			</div>
 			<div class="flex justify-between items-center">
-				<a href="{{ route('login') }}" class="text-emerald-700">Cancel</a>
-				<button class="bg-emerald-700 text-white px-4 py-2 rounded" type="submit">Sign Up</button>
+				<a href="{{ route('login') }}" class="text-emerald-700 cursor-pointer">Cancel</a>
+				<button class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer" type="submit">Sign Up</button>
 			</div>
 		</form>
 	</div>

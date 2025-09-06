@@ -7,12 +7,13 @@
     <title>@yield('title','Dashboard')</title>
 </head>
 <body class="min-h-screen bg-gray-100">
-    <nav class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="font-bold">Clean N' Go</div>
+    <nav class="bg-[#248639] fixed top-0 left-0 right-0 z-50">
+        <div class="max-w-7xl mx-auto h-16 flex justify-between items-center">
+            <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
             <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button class="text-sm px-3 py-1 rounded bg-gray-800 text-white">Logout</button>
+                @csrf  
+                <button class="text-xl px-3 py-1 rounded text-white cursor-pointer"> <i class="ri-logout-box-line"></i> Logout</button>
+               
             </form>
         </div>
     </nav>
