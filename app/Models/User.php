@@ -50,4 +50,15 @@ class User extends Authenticatable
     {
         return $this->password_hash;
     }
+
+    // Relationships
+    public function customer()
+    {
+        return $this->hasOne(Customer::class);
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
+    }
 }
