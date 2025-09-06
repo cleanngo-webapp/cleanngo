@@ -6,7 +6,7 @@
     @vite(['resources/css/app.css','resources/js/app.js'])
     <title>@yield('title', 'Auth')</title>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-emerald-300 to-green-900">
+<body class="min-h-screen bg-gradient-to-b from-emerald-300 to-green-900 font-sans">
     @yield('content')
 </body>
 </html>
