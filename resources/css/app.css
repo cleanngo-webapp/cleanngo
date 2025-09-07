@@ -3,7 +3,7 @@
 @import "tailwindcss";
 
 @theme {
-    /* Tailwind v4: define brand colors as tokens so bg-brand-*, text-brand-* work */
+    
     --color-brand-green: #248639;
     --color-brand-gray: #d9d9d9;
     --color-brand-highlight: #42a457;
