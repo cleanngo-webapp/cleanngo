@@ -5,7 +5,6 @@
 @section('content')
 {{-- Admin Dashboard View --}}
 {{-- Purpose: Landing page for admin users to manage the system --}}
-{{-- Notes: Keep this simple; wire up actual data later. --}}
 
 <div class="max-w-7xl mx-auto my-10 p-6">
 	<h1 class="text-2xl font-bold">Admin Dashboard</h1>
