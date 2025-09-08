@@ -1,31 +1,31 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title','Admin Dashboard')
 
 @section('content')
-{{-- Admin Dashboard View --}}
-{{-- Purpose: Landing page for admin users to manage the system --}}
+{{-- Admin Dashboard - 2 rows x 3 cards --}}
 
-<div class="max-w-7xl mx-auto my-10 p-6">
-	<h1 class="text-2xl font-bold">Admin Dashboard</h1>
-	<p class="mt-2 text-gray-600">Use this area to oversee bookings, staff, inventory, and reports.</p>
+<div class="max-w-6xl mx-auto">
+	<h1 class="text-3xl font-extrabold">Dashboard</h1>
 
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-		<div class="p-4 rounded border bg-white">
-			<h2 class="font-semibold">Bookings</h2>
-			<p class="text-sm text-gray-500">Upcoming schedules and assignments</p>
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+		<div class="bg-white rounded-xl p-4 shadow-sm">
+			<h2 class="font-semibold">Total Bookings</h2>
 		</div>
-		<div class="p-4 rounded border bg-white">
-			<h2 class="font-semibold">Staff</h2>
-			<p class="text-sm text-gray-500">Availability and performance</p>
+		<div class="bg-white rounded-xl p-4 shadow-sm">
+			<h2 class="font-semibold">Today's Bookings</h2>
 		</div>
-		<div class="p-4 rounded border bg-white">
-			<h2 class="font-semibold">Inventory</h2>
-			<p class="text-sm text-gray-500">Supply levels and usage</p>
+		<div class="bg-white rounded-xl p-4 shadow-sm">
+			<h2 class="font-semibold">Active Services</h2>
 		</div>
-		<div class="p-4 rounded border bg-white">
-			<h2 class="font-semibold">Reports</h2>
-			<p class="text-sm text-gray-500">Daily stats and payroll summaries</p>
+		<div class="bg-white rounded-xl p-4 shadow-sm">
+			<h2 class="font-semibold">Employees Assigned Today</h2>
+		</div>
+		<div class="bg-white rounded-xl p-4 shadow-sm">
+			<h2 class="font-semibold">Completed Jobs Today</h2>
+		</div>
+		<div class="bg-white rounded-xl p-4 shadow-sm">
+			<h2 class="font-semibold">Low Stock Items</h2>
 		</div>
 	</div>
 </div>

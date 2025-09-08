@@ -28,6 +28,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->middleware('auth')->name('dashboard.redirect');
 
 // Simple preview routes for role dashboards (no auth/guards yet)
-Route::view('/admin', 'admin.dashboard')->middleware(['auth','role:admin'])->name('preview.admin');
-Route::view('/employee', 'employee.dashboard')->middleware(['auth','role:employee'])->name('preview.employee');
+// Employee routes
+Route::middleware(['auth','role:employee'])->prefix('employee')->name('employee.')->group(function () {
+    Route::view('/', 'employee.dashboard')->name('dashboard');
+    Route::view('/jobs', 'employee.jobs')->name('jobs');
+    Route::view('/payroll', 'employee.payroll')->name('payroll');
+    Route::view('/notifications', 'employee.notifications')->name('notifications');
+});
 Route::view('/customer', 'customer.dashboard')->middleware(['auth','role:customer'])->name('preview.customer');
+
+// Admin routes with sidebar layout pages
+Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::view('/', 'admin.dashboard')->name('dashboard');
+    Route::view('/bookings', 'admin.bookings')->name('bookings');
+    Route::view('/employees', 'admin.employees')->name('employees');
+    Route::view('/inventory', 'admin.inventory')->name('inventory');
+    Route::view('/customers', 'admin.customers')->name('customers');
+    Route::view('/gallery', 'admin.gallery')->name('gallery');
+    Route::view('/settings', 'admin.settings')->name('settings');
+});

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.employee')
 
 @section('title','Employee Dashboard')
 
@@ -6,12 +6,39 @@
 {{-- Employee Dashboard View --}}
 {{-- Purpose: Daily jobs for cleaners, with simple instructions --}}
 
-<div class="max-w-3xl mx-auto my-10 p-6">
-	<h1 class="text-2xl font-bold">Employee Dashboard</h1>
-	<p class="mt-2 text-gray-600">Your assigned jobs for today will appear here.</p>
+<div class="max-w-6xl mx-auto">
+	<h1 class="text-3xl font-extrabold">Dashboard</h1>
 
-	<div class="mt-4 p-4 rounded border bg-white">
-		<p class="text-gray-700">No jobs assigned yet.</p>
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+		<div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Jobs Assigned Today</h2></div>
+		<div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Jobs Completed Today</h2></div>
+		<div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Pending Jobs</h2></div>
+	</div>
+
+	<div class="mt-6 bg-white rounded-xl border">
+		<div class="p-3 font-semibold text-center">Today's Job List</div>
+		<div class="grid grid-cols-7 text-sm font-semibold">
+			<div class="p-2">Booking ID</div>
+			<div class="p-2">Service Type</div>
+			<div class="p-2">Customer Name</div>
+			<div class="p-2">Time/Schedule</div>
+			<div class="p-2">Status</div>
+			<div class="p-2">Action</div>
+			<div class="p-2"></div>
+		</div>
+		<div class="grid grid-cols-7 text-sm">
+			<div class="p-2">B001</div>
+			<div class="p-2">Sofa Cleaning</div>
+			<div class="p-2">Ana Cruz</div>
+			<div class="p-2">Sept 12, 10:00 AM</div>
+			<div class="p-2">Pending</div>
+			<div class="p-2">[ Start Job ]</div>
+			<div class="p-2"></div>
+		</div>
+	</div>
+
+	<div class="mt-10 border rounded-xl bg-white p-8 h-64 flex items-center justify-center text-gray-500">
+		<div class="text-center font-semibold">calendar where scheduled<br>services are here</div>
 	</div>
 </div>
 @endsection

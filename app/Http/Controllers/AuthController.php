@@ -91,8 +91,8 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
         return match ($user->role) {
-            'admin' => redirect()->route('preview.admin'),
-            'employee' => redirect()->route('preview.employee'),
+            'admin' => redirect()->route('admin.dashboard'),
+            'employee' => redirect()->route('employee.dashboard'),
             default => redirect()->route('preview.customer'),
         };
     }
