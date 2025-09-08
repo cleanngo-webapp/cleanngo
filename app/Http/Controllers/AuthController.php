@@ -22,15 +22,17 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Validate registration with unique username and email
         $data = $request->validate([
-            'name' => ['required','string','max:255'],
+            'username' => ['required','string','alpha_dash','min:3','max:50','unique:users,username'],
             'email' => ['required','email','max:255','unique:users,email'],
             'role' => ['required', Rule::in(['admin','employee','customer'])],
             'password' => ['required','string','min:6','confirmed'],
         ]);
 
+        // Create the user using the new username field
         $user = User::create([
-            'name' => $data['name'],
+            'username' => $data['username'],
             'email' => $data['email'],
             'role' => $data['role'],
             'password_hash' => Hash::make($data['password']),
@@ -42,15 +44,31 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required','email'],
+        // Accept either email or username in a single field
+        $data = $request->validate([
+            'login' => ['required','string','max:255'],
             'password' => ['required','string'],
         ]);
 
-        // Manually attempt using custom password field
-        $user = User::where('email', $credentials['email'])->first();
-        if (!$user || !Hash::check($credentials['password'], $user->password_hash)) {
-            return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+        $login = $data['login'];
+        $isEmail = filter_var($login, FILTER_VALIDATE_EMAIL) !== false;
+
+        // Find by email or username depending on the input
+        $userQuery = User::query();
+        $user = $isEmail
+            ? $userQuery->where('email', $login)->first()
+            : $userQuery->where('username', $login)->first();
+
+        if (!$user) {
+            // Provide specific feedback based on the identifier type
+            $message = $isEmail ? 'Email not found' : 'Username not found';
+            return back()->withErrors(['login' => $message])->withInput();
+        }
+
+        if (!Hash::check($data['password'], $user->password_hash)) {
+            return back()->withErrors(['password' => 'Incorrect password'])->withInput([
+                'login' => $login,
+            ]);
         }
 
         Auth::login($user, $request->boolean('remember'));

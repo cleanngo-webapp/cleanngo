@@ -16,12 +16,15 @@
 		<form method="POST" action="{{ route('register.post') }}" class="mt-6 space-y-4">
 			@csrf
 			<div>
-				<label class="block text-sm font-medium">Email</label>
-				<input type="email" name="email" value="{{ old('email') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your email" required />
+				<label class="block text-sm font-medium">Username</label>
+				<input type="text" name="username" value="{{ old('username') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Choose a username" required />
+				@error('username')
+					<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+				@enderror
 			</div>
 			<div>
-				<label class="block text-sm font-medium">Name</label>
-				<input type="text" name="name" value="{{ old('name') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your name" required />
+				<label class="block text-sm font-medium">Email</label>
+				<input type="email" name="email" value="{{ old('email') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your email" required />
 			</div>
 			<div>
 				<label class="block text-sm font-medium">Role</label>

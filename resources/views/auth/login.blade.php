@@ -17,8 +17,11 @@
 			<form method="POST" action="{{ route('login.post') }}" class="mt-6 space-y-4">
 				@csrf
 				<div>
-					<label class="block text-sm font-medium">Email</label>
-					<input type="email" name="email" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your email" required />
+					<label class="block text-sm font-medium">Email or Username</label>
+					<input type="text" name="login" value="{{ old('login') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your email or username" required />
+					@error('login')
+						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+					@enderror
 				</div>
 				<div>
 					<label class="block text-sm font-medium">Password</label>
@@ -28,6 +31,9 @@
 							<i class="ri-eye-line text-xl"></i>
 						</button>
 					</div>
+					@error('password')
+						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+					@enderror
 				</div>
 				<div class="flex justify-between items-center">
 					<a href="{{ route('register') }}" class="text-emerald-700 cursor-pointer hover:text-brand-highlight">Sign Up</a>
