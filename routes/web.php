@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\EmployeeProfileController;
+use App\Http\Controllers\AdminEmployeeController;
 
 Route::redirect('/', '/login');
 
@@ -35,6 +37,8 @@ Route::middleware(['auth','role:employee'])->prefix('employee')->name('employee.
     Route::view('/jobs', 'employee.jobs')->name('jobs');
     Route::view('/payroll', 'employee.payroll')->name('payroll');
     Route::view('/notifications', 'employee.notifications')->name('notifications');
+    Route::get('/profile', [EmployeeProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [EmployeeProfileController::class, 'update'])->name('profile.update');
     // Calendar events feed for employee (own assignments only)
     Route::get('/calendar/events', [CalendarController::class, 'employeeEvents'])->name('calendar.events');
 });
@@ -44,7 +48,7 @@ Route::view('/customer', 'customer.dashboard')->middleware(['auth','role:custome
 Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/', 'admin.dashboard')->name('dashboard');
     Route::view('/bookings', 'admin.bookings')->name('bookings');
-    Route::view('/employees', 'admin.employees')->name('employees');
+    Route::get('/employees', [AdminEmployeeController::class, 'index'])->name('employees');
     Route::view('/inventory', 'admin.inventory')->name('inventory');
     Route::view('/customers', 'admin.customers')->name('customers');
     Route::view('/gallery', 'admin.gallery')->name('gallery');

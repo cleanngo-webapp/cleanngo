@@ -9,8 +9,8 @@
 <body class="min-h-screen bg-emerald-100 font-sans">
     <header class="h-12 md:h-14 bg-emerald-300 flex items-center justify-end pr-4">
         <div class="flex items-center gap-4 text-emerald-900">
-            <i class="ri-notification-3-line"></i>
-            <i class="ri-user-3-fill"></i>
+            <a href="{{ route('employee.notifications') }}" class="hover:text-emerald-950"><i class="ri-notification-3-line"></i></a>
+            <a href="{{ route('employee.profile.show') }}" class="hover:text-emerald-950"><i class="ri-user-3-fill"></i></a>
         </div>
     </header>
     <div class="flex">
@@ -24,6 +24,7 @@
                 <a href="{{ route('employee.jobs') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.jobs') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-briefcase-2-line"></i> <span>My Jobs</span></a>
                 <a href="{{ route('employee.payroll') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.payroll') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-money-dollar-circle-line"></i> <span>Payroll</span></a>
                 <a href="{{ route('employee.notifications') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.notifications') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-notification-3-line"></i> <span>Notifications</span></a>
+                <a href="{{ route('employee.profile.show') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.profile.*') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-user-3-fill"></i> <span>My Profile</span></a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button class="w-full text-left flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors"><i class="ri-logout-box-line"></i> <span>Logout</span></button>

@@ -12,26 +12,42 @@
         <div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Today's Bookings</h2></div>
     </div>
 
-    <div class="mt-8 bg-white rounded-xl border">
-        <div class="p-3 font-semibold text-center">Employee Records Table</div>
-        <div class="border-t grid grid-cols-7 text-sm font-semibold">
-            <div class="p-2">Employee ID</div>
-            <div class="p-2">Name</div>
-            <div class="p-2">Specializations</div>
-            <div class="p-2">Contact</div>
-            <div class="p-2">Status</div>
-            <div class="p-2">Jobs Assigned Today</div>
-            <div class="p-2">Actions</div>
-        </div>
-        <div class="grid grid-cols-7 text-sm">
-            <div class="p-2">E001</div>
-            <div class="p-2">Jay Bro</div>
-            <div class="p-2">Carpet Clean</div>
-            <div class="p-2">0987683765</div>
-            <div class="p-2">On Duty</div>
-            <div class="p-2">1</div>
-            <div class="p-2">...</div>
-        </div>
+    <div class="mt-8 bg-white rounded-xl border overflow-x-auto">
+        <div class="p-3 font-semibold text-center">Employee Records</div>
+        <table class="min-w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr class="text-left">
+                    <th class="px-3 py-2">Employee ID</th>
+                    <th class="px-3 py-2">Full Name</th>
+                    <th class="px-3 py-2">Contact</th>
+                    <th class="px-3 py-2">Status</th>
+                    <th class="px-3 py-2">Jobs Assigned Today</th>
+                    <th class="px-3 py-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($employees as $emp)
+                    <tr class="border-t">
+                        <td class="px-3 py-2">{{ $emp->employee_code ?? ($emp->employee_id ? sprintf('EMP-%03d', $emp->employee_id) : '—') }}</td>
+                        <td class="px-3 py-2">{{ trim(($emp->first_name ?? '') . ' ' . ($emp->last_name ?? '')) ?: $emp->username }}</td>
+                        <td class="px-3 py-2">{{ $emp->contact_number ?? $emp->phone ?? '—' }}</td>
+                        <td class="px-3 py-2">{{ $emp->employment_status ? ucfirst($emp->employment_status) : (($emp->is_active ?? true) ? 'Active' : 'Inactive') }}</td>
+                        <td class="px-3 py-2">{{ $emp->jobs_assigned_today ?? 0 }}</td>
+                        <td class="px-3 py-2">
+                            <span class="relative group inline-block">
+                                <button class="px-2 py-1 rounded hover:bg-gray-100" aria-label="Actions">
+                                    <i class="ri-more-2-fill"></i>
+                                </button>
+                                <span class="absolute left-1/2 -translate-x-1/2 mt-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap">View Information</span>
+                            </span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="6" class="px-3 py-6 text-center text-gray-500">No employees found.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+        <div class="p-3">{{ $employees->links() }}</div>
     </div>
 
     <div class="mt-8 bg-white rounded-xl border">

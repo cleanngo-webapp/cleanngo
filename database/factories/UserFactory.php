@@ -27,6 +27,9 @@ class UserFactory extends Factory
             // Adopt new schema fields for this app
             'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'phone' => fake()->phoneNumber(),
             'role' => fake()->randomElement(['customer','employee','admin']),
             // Application stores password in password_hash
             'password_hash' => static::$password ??= Hash::make('password'),

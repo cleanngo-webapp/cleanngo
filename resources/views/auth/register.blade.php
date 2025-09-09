@@ -15,6 +15,22 @@
 		@endif
 		<form method="POST" action="{{ route('register.post') }}" class="mt-6 space-y-4">
 			@csrf
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label class="block text-sm font-medium">First Name</label>
+					<input type="text" name="first_name" value="{{ old('first_name') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your first name" required />
+					@error('first_name')
+						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+					@enderror
+				</div>
+				<div>
+					<label class="block text-sm font-medium">Last Name</label>
+					<input type="text" name="last_name" value="{{ old('last_name') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your last name" required />
+					@error('last_name')
+						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+					@enderror
+				</div>
+			</div>
 			<div>
 				<label class="block text-sm font-medium">Username</label>
 				<input type="text" name="username" value="{{ old('username') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Choose a username" required />
@@ -25,6 +41,10 @@
 			<div>
 				<label class="block text-sm font-medium">Email</label>
 				<input type="email" name="email" value="{{ old('email') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your email" required />
+			</div>
+			<div>
+				<label class="block text-sm font-medium">Contact</label>
+				<input type="text" name="contact" value="{{ old('contact') }}" class="mt-1 w-full border rounded px-3 py-2" placeholder="Enter your contact number" />
 			</div>
 			<div>
 				<label class="block text-sm font-medium">Role</label>

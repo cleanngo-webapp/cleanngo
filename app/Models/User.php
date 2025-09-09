@@ -21,6 +21,9 @@ class User extends Authenticatable
         // Replaced legacy `name` with `username` for authentication
         'username',
         'email',
+        'first_name',
+        'last_name',
+        'phone',
         'role',
         'password_hash',
     ];

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -22,10 +23,13 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // Validate registration with unique username and email
+        // Validate registration with unique username and email, plus profile fields
         $data = $request->validate([
             'username' => ['required','string','alpha_dash','min:3','max:50','unique:users,username'],
             'email' => ['required','email','max:255','unique:users,email'],
+            'first_name' => ['required','string','max:100'],
+            'last_name' => ['required','string','max:100'],
+            'contact' => ['nullable','string','max:50'],
             'role' => ['required', Rule::in(['admin','employee','customer'])],
             'password' => ['required','string','min:6','confirmed'],
         ]);
@@ -34,9 +38,26 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $data['username'],
             'email' => $data['email'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'phone' => $data['contact'] ?? null,
             'role' => $data['role'],
             'password_hash' => Hash::make($data['password']),
         ]);
+
+        // If the registered user is an employee, create the employee profile row immediately
+        if ($user->role === 'employee') {
+            Employee::create([
+                'user_id' => $user->id,
+                'is_cleaner' => true,
+                'is_active' => true,
+                'contact_number' => $user->phone,
+                'email_address' => $user->email,
+                'employment_status' => 'active',
+                'date_hired' => now()->toDateString(),
+                'employee_code' => 'E' . now()->format('Y') . str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT),
+            ]);
+        }
 
         Auth::login($user);
         return redirect()->route('dashboard.redirect');
