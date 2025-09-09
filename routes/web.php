@@ -49,6 +49,10 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
     Route::view('/', 'admin.dashboard')->name('dashboard');
     Route::view('/bookings', 'admin.bookings')->name('bookings');
     Route::get('/employees', [AdminEmployeeController::class, 'index'])->name('employees');
+    Route::get('/employee/{userId}', [AdminEmployeeController::class, 'show'])->name('employee.show');
+    Route::put('/employee/{userId}', [AdminEmployeeController::class, 'update'])->name('employee.update');
+    Route::post('/employee/{employeeId}/increment-jobs', [AdminEmployeeController::class, 'incrementJobsCompleted'])->name('employee.increment-jobs');
+    Route::post('/employees/update-job-counts', [AdminEmployeeController::class, 'updateAllJobCounts'])->name('employees.update-job-counts');
     Route::view('/inventory', 'admin.inventory')->name('inventory');
     Route::view('/customers', 'admin.customers')->name('customers');
     Route::view('/gallery', 'admin.gallery')->name('gallery');

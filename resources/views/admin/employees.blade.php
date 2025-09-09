@@ -34,12 +34,12 @@
                         <td class="px-3 py-2">{{ $emp->employment_status ? ucfirst($emp->employment_status) : (($emp->is_active ?? true) ? 'Active' : 'Inactive') }}</td>
                         <td class="px-3 py-2">{{ $emp->jobs_assigned_today ?? 0 }}</td>
                         <td class="px-3 py-2">
-                            <span class="relative group inline-block">
-                                <button class="px-2 py-1 rounded hover:bg-gray-100" aria-label="Actions">
-                                    <i class="ri-more-2-fill"></i>
-                                </button>
+                            <a href="{{ route('admin.employee.show', $emp->user_id) }}" 
+                               class="relative group inline-block px-2 py-1 rounded hover:bg-gray-100" 
+                               aria-label="View Employee Information">
+                                <i class="ri-more-2-fill"></i>
                                 <span class="absolute left-1/2 -translate-x-1/2 mt-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap">View Information</span>
-                            </span>
+                            </a>
                         </td>
                     </tr>
                 @empty
