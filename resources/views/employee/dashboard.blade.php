@@ -37,8 +37,8 @@
 		</div>
 	</div>
 
-	<div class="mt-10 border rounded-xl bg-white p-8 h-64 flex items-center justify-center text-gray-500">
-		<div class="text-center font-semibold">calendar where scheduled<br>services are here</div>
+	<div class="mt-10 bg-white rounded-xl p-4">
+		<div id="employee-calendar" data-events-url="{{ route('employee.calendar.events') }}"></div>
 	</div>
 </div>
 @endsection

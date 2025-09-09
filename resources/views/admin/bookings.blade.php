@@ -6,11 +6,8 @@
 <div class="max-w-6xl mx-auto">
     <h1 class="text-2xl font-bold text-center">Bookings and Scheduling</h1>
 
-    <div class="mt-6 border rounded-xl bg-white p-8 h-64 flex items-center justify-center text-gray-500">
-        <div class="text-center">
-            <p class="font-semibold">calendar where scheduled services</p>
-            <p class="font-semibold">are here</p>
-        </div>
+    <div class="mt-6 bg-white rounded-xl p-4">
+        <div id="admin-calendar" data-events-url="{{ route('admin.calendar.events') }}"></div>
     </div>
 
     <div class="mt-6 overflow-auto">
