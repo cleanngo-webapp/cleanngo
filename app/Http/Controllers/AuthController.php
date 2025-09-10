@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
@@ -57,6 +59,23 @@ class AuthController extends Controller
                 'date_hired' => now()->toDateString(),
                 'employee_code' => 'E' . now()->format('Y') . str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT),
             ]);
+        }
+        // If the registered user is a customer, create the customer profile row with a unique code
+        elseif ($user->role === 'customer') {
+            // Generate a unique CYYYYXXX code
+            $year = now()->format('Y');
+            for ($i = 0; $i < 1000; $i++) {
+                $suffix = str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT);
+                $code = 'C' . $year . $suffix;
+                $exists = DB::table('customers')->where('customer_code', $code)->exists();
+                if (!$exists) {
+                    Customer::create([
+                        'user_id' => $user->id,
+                        'customer_code' => $code,
+                    ]);
+                    break;
+                }
+            }
         }
 
         Auth::login($user);

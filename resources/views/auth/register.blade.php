@@ -51,7 +51,6 @@
 				<select name="role" class="mt-1 w-full border rounded px-3 py-2" required>
 					<option value="customer">Customer</option>
 					<option value="employee">Employee</option>
-					<option value="admin">Admin</option>
 				</select>
 			</div>
 			<div>

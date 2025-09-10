@@ -17,6 +17,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EmployeeProfileController;
 use App\Http\Controllers\AdminEmployeeController;
+use App\Http\Controllers\AdminCustomerController;
 
 Route::redirect('/', '/login');
 
@@ -54,7 +55,7 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group
     Route::post('/employee/{employeeId}/increment-jobs', [AdminEmployeeController::class, 'incrementJobsCompleted'])->name('employee.increment-jobs');
     Route::post('/employees/update-job-counts', [AdminEmployeeController::class, 'updateAllJobCounts'])->name('employees.update-job-counts');
     Route::view('/inventory', 'admin.inventory')->name('inventory');
-    Route::view('/customers', 'admin.customers')->name('customers');
+    Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers');
     Route::view('/gallery', 'admin.gallery')->name('gallery');
     Route::view('/settings', 'admin.settings')->name('settings');
     // Calendar events feed for admin
