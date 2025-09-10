@@ -1,7 +1,5 @@
 import "./bootstrap";
 import "remixicon/fonts/remixicon.css";
-
-// Lightweight FullCalendar integration: load only when target containers exist
 import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 
@@ -27,6 +25,39 @@ function renderCalendar(el) {
         events: el.dataset.eventsUrl,
         headerToolbar: { start: "prev,next today", center: "title", end: "" },
         buttonText: { today: "Today" },
+        displayEventTime: false,
+        eventDidMount: function (info) {
+            const props = info.event.extendedProps || {};
+            const content = document.createElement("div");
+            content.className =
+                "absolute z-[999] hidden bg-white border rounded shadow p-2 text-xs";
+            content.style.minWidth = "220px";
+            content.innerHTML = `
+                <div class="font-semibold mb-1">${
+                    props.code || info.event.title
+                }</div>
+                <div><span class="text-gray-500">When:</span> ${
+                    props.start_text || info.event.title
+                }</div>
+                <div><span class="text-gray-500">Employee:</span> ${
+                    props.employee_name || "—"
+                }</div>
+                <div><span class="text-gray-500">Customer:</span> ${
+                    props.customer_name || ""
+                }</div>
+                <div><span class="text-gray-500">Status:</span> ${
+                    props.status || ""
+                }</div>
+            `;
+            info.el.style.position = "relative";
+            info.el.appendChild(content);
+            info.el.addEventListener("mouseenter", () => {
+                content.classList.remove("hidden");
+            });
+            info.el.addEventListener("mouseleave", () => {
+                content.classList.add("hidden");
+            });
+        },
     });
     calendar.render();
     applyTodayButtonStyles(el);

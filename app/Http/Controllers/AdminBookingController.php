@@ -38,7 +38,7 @@ class AdminBookingController extends Controller
         $customers = DB::table('users')->where('role','customer')->orderBy('first_name')->orderBy('last_name')->get(['id','first_name','last_name']);
         $employees = DB::table('users')->where('role','employee')->orderBy('first_name')->orderBy('last_name')->get(['id','first_name','last_name']);
 
-        // Pull booking item summaries and detailed lines for receipts (DB-agnostic, aggregate in PHP)
+        // Pull booking item summaries and detailed lines for receipts
         $bookingIds = collect($bookings->items())->pluck('id')->all();
         $itemsByBooking = collect();
         $receiptData = [];

@@ -32,7 +32,7 @@
 
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl p-8 text-center text-gray-700 font-semibold">MY EARNINGS</div>
-        <div class="bg-white rounded-xl p-8 text-center text-gray-700 font-semibold">DEDUCTIONS<br><span class="text-sm font-normal">Late / Absences<br>Cash Advances</span></div>
+        
     </div>
 </div>
 @endsection
