@@ -7,10 +7,10 @@
     <!-- Header with employee info -->
     <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
         <div class="flex items-center justify-between">
-            <div>
+            <div class="flex flex-col gap-2">
                 <h1 class="text-3xl font-extrabold">{{ trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: $user->username }}</h1>
                 <p class="text-gray-600">Employee ID: {{ $user->employee?->employee_code ?? sprintf('EMP-%03d', $user->employee?->id ?? 0) }}</p>
-                <p class="text-sm text-gray-500">Role: {{ ucfirst($user->role) }}</p>
+                <!-- <p class="text-sm text-gray-500">Role: {{ ucfirst($user->role) }}</p> -->
             </div>
             <div class="text-right">
                 <a href="{{ route('admin.employees') }}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
@@ -99,7 +99,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Employment Type</label>
-                    <select name="employment_type" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <select name="employment_type" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer">
                         <option value="">Select Type</option>
                         @foreach (['full-time'=>'Full-time','part-time'=>'Part-time','contract'=>'Contract'] as $k => $v)
                             <option value="{{ $k }}" @selected(old('employment_type', $user->employee?->employment_type) === $k)>{{ $v }}</option>
@@ -109,11 +109,11 @@
                 <div>
                     <label class="block text-sm font-medium">Date Hired</label>
                     <input type="date" name="date_hired" value="{{ old('date_hired', optional($user->employee?->date_hired)->format('Y-m-d')) }}" 
-                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Employment Status</label>
-                    <select name="employment_status" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <select name="employment_status" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer">
                         @foreach (['active'=>'Active','inactive'=>'Inactive','terminated'=>'Terminated'] as $k => $v)
                             <option value="{{ $k }}" @selected(old('employment_status', $user->employee?->employment_status) === $k)>{{ $v }}</option>
                         @endforeach
@@ -166,10 +166,10 @@
 
         <!-- Action Buttons -->
         <div class="flex justify-end space-x-4">
-            <a href="{{ route('admin.employees') }}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+            <a href="{{ route('admin.employees') }}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 cursor-pointer">
                 Cancel
             </a>
-            <button type="submit" class="bg-emerald-700 text-white px-6 py-2 rounded hover:bg-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+            <button type="submit" class="bg-emerald-700 text-white px-6 py-2 rounded hover:bg-emerald-700/80 hover:text-white focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 cursor-pointer">
                 Save Changes
             </button>
         </div>

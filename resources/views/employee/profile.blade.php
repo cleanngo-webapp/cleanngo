@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Date of Birth</label>
-                    <input type="date" name="date_of_birth" value="{{ old('date_of_birth', optional($employee?->date_of_birth)->format('Y-m-d')) }}" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                    <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $employee?->date_of_birth ? (\Carbon\Carbon::parse($employee->date_of_birth)->format('Y-m-d')) : null) }}" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Gender</label>
@@ -63,7 +63,7 @@
         </div>
 
         <div class="flex justify-end">
-            <button class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer">Save Changes</button>
+            <button class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Save Changes</button>
         </div>
     </form>
 

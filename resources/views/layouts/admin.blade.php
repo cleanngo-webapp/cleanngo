@@ -11,7 +11,6 @@
     <header class="h-12 md:h-14 bg-emerald-300 flex items-center justify-end pr-4">
         <div class="flex items-center gap-4 text-emerald-900">
             <i class="ri-notification-3-line"></i>
-            <i class="ri-user-3-fill"></i>
         </div>
     </header>
     <div class="flex">

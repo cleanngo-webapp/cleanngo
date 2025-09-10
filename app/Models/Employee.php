@@ -16,6 +16,11 @@ class Employee extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'date_of_birth' => 'date',
+        'date_hired' => 'date',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
