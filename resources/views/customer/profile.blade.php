@@ -23,16 +23,16 @@
 				<div class="grid grid-cols-2 gap-2">
 					<input name="label" class="border rounded px-2 py-1" placeholder="Label (Home, Office)">
 					<input name="line1" required class="border rounded px-2 py-1 col-span-2" placeholder="Address line">
-					<input name="city" class="border rounded px-2 py-1" placeholder="City">
+					<input name="city" class="border rounded px-2 py-1" placeholder="City/Municipality">
 					<input name="province" class="border rounded px-2 py-1" placeholder="Province">
-					<input name="postal_code" class="border rounded px-2 py-1" placeholder="Postal Code">
+					<input name="postal_code" class="border rounded px-2 py-1" placeholder="Postal Code/Zip Code">
 				</div>
 
 				<div id="map" class="h-64 rounded border"></div>
 				<input type="hidden" name="latitude" id="lat">
 				<input type="hidden" name="longitude" id="lng">
 				<label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_primary" value="1"> Set as primary</label>
-				<button class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700 hover:text-white">Save Address</button>
+				<button class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Save Address</button>
 			</form>
 
 			<div class="mt-4">
@@ -49,12 +49,12 @@
 						<div class="flex items-center gap-2">
 							<form method="POST" action="{{ route('customer.address.primary', $addr->id) }}">
 								@csrf
-								<button class="px-2 py-1 text-sm rounded border cursor-pointer hover:bg-emerald-700 hover:text-white">Make Primary</button>
+								<button class="px-2 py-1 text-sm rounded border cursor-pointer hover:bg-emerald-700 hover:text-white w-28 whitespace-nowrap">Make Primary</button>
 							</form>
 							<form method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">
 								@csrf
 								@method('DELETE')
-								<button class="px-2 py-1 text-sm rounded border text-red-600 cursor-pointer hover:bg-red-600 hover:text-white">Delete</button>
+								<button class="px-2 py-1 text-sm rounded border text-red-600 cursor-pointer hover:bg-red-600 hover:text-white w-20 whitespace-nowrap">Delete</button>
 							</form>
 						</div>
 					</div>

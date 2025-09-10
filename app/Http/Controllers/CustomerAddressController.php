@@ -34,7 +34,7 @@ class CustomerAddressController extends Controller
             Address::create($data);
         });
 
-        return redirect()->route('preview.customer')->with('status', 'Address saved');
+        return redirect()->route('customer.profile')->with('status', 'Address saved');
     }
 
     public function destroy(Address $address)

@@ -17,12 +17,19 @@ class AdminBookingController extends Controller
             ->leftJoin('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
             ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
             ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
+            ->leftJoin('addresses as a', 'a.id', '=', 'b.address_id')
             ->select([
-                'b.id', 'b.code', 'b.scheduled_start', 'b.status',
+                'b.id', 'b.code', 'b.scheduled_start', 'b.status', 'b.address_id',
                 's.name as service_name',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw("CONCAT(eu.first_name,' ',eu.last_name) as employee_name"),
                 DB::raw('e.user_id as employee_user_id'),
+                DB::raw('bsa.employee_id as assigned_employee_id'),
+                DB::raw("COALESCE(a.line1,'') as address_line1"),
+                DB::raw("COALESCE(a.city,'') as address_city"),
+                DB::raw("COALESCE(a.province,'') as address_province"),
+                DB::raw('a.latitude as address_latitude'),
+                DB::raw('a.longitude as address_longitude'),
             ])
             ->orderByDesc('b.scheduled_start')
             ->paginate(15);
@@ -31,29 +38,57 @@ class AdminBookingController extends Controller
         $customers = DB::table('users')->where('role','customer')->orderBy('first_name')->orderBy('last_name')->get(['id','first_name','last_name']);
         $employees = DB::table('users')->where('role','employee')->orderBy('first_name')->orderBy('last_name')->get(['id','first_name','last_name']);
 
-        // Pull booking item summaries (DB-agnostic, aggregate in PHP)
+        // Pull booking item summaries and detailed lines for receipts (DB-agnostic, aggregate in PHP)
         $bookingIds = collect($bookings->items())->pluck('id')->all();
         $itemsByBooking = collect();
+        $receiptData = [];
         if (!empty($bookingIds)) {
             $rows = DB::table('booking_items')
                 ->whereIn('booking_id', $bookingIds)
                 ->orderBy('booking_id')
-                ->get(['booking_id','item_type','quantity']);
+                ->get(['booking_id','item_type','quantity','area_sqm','unit_price_cents','line_total_cents']);
             $grouped = [];
             foreach ($rows as $r) {
-                $label = trim(($r->item_type ?? 'item') . ' x ' . (int)$r->quantity);
-                $grouped[$r->booking_id][] = $label;
+                // Summary label
+                $label = trim(($r->item_type ?? 'item') . ' x ' . (int)($r->quantity ?? 0));
+                $itemsByBooking[$r->booking_id] = isset($itemsByBooking[$r->booking_id])
+                    ? ($itemsByBooking[$r->booking_id] . ', ' . $label)
+                    : $label;
+                // Detailed lines
+                $grouped[$r->booking_id][] = [
+                    'item_type' => $r->item_type,
+                    'quantity' => (int)($r->quantity ?? 0),
+                    'area_sqm' => $r->area_sqm !== null ? (float)$r->area_sqm : null,
+                    'unit_price' => $r->unit_price_cents !== null ? ((int)$r->unit_price_cents)/100 : null,
+                    'line_total' => $r->line_total_cents !== null ? ((int)$r->line_total_cents)/100 : null,
+                ];
             }
-            foreach ($grouped as $bid => $labels) {
-                $itemsByBooking[$bid] = implode(', ', $labels);
+            foreach ($grouped as $bid => $lines) {
+                $total = 0.0;
+                foreach ($lines as $ln) { $total += (float)($ln['line_total'] ?? 0); }
+                $receiptData[$bid] = [ 'lines' => $lines, 'total' => $total ];
             }
         }
+
+        // Build locations payload for map modal
+        $locationsData = collect($bookings->items())->mapWithKeys(function($b){
+            $addrParts = array_filter([$b->address_line1 ?? null, $b->address_city ?? null, $b->address_province ?? null]);
+            return [
+                $b->id => [
+                    'address' => implode(', ', $addrParts),
+                    'lat' => $b->address_latitude,
+                    'lng' => $b->address_longitude,
+                ]
+            ];
+        })->all();
 
         return view('admin.bookings', [
             'bookings' => $bookings,
             'customers' => $customers,
             'employees' => $employees,
             'itemSummaries' => $itemsByBooking,
+            'locationsData' => $locationsData,
+            'receiptData' => $receiptData,
         ]);
     }
 
@@ -113,11 +148,17 @@ class AdminBookingController extends Controller
 
     public function updateStatus(Request $request, $bookingId)
     {
-        $request->validate(['status' => 'required|in:pending,confirmed,cancelled,completed']);
+        $request->validate(['status' => 'required|in:pending,in_progress,confirmed,cancelled,completed']);
+        if ($request->status === 'cancelled') {
+            // Delete the booking when cancelled as requested
+            DB::table('booking_staff_assignments')->where('booking_id', $bookingId)->delete();
+            DB::table('booking_items')->where('booking_id', $bookingId)->delete();
+            DB::table('bookings')->where('id', $bookingId)->delete();
+            return back()->with('status','Booking cancelled and removed');
+        }
         DB::table('bookings')->where('id', $bookingId)->update([
             'status' => $request->status,
             'updated_at' => now(),
-            'cancelled_at' => $request->status === 'cancelled' ? now() : null,
         ]);
         return back();
     }

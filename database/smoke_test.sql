@@ -22,6 +22,9 @@ INSERT INTO inventory_items (sku, name, unit) VALUES ('SOAP-1L','All-purpose Soa
 INSERT INTO inventory_transactions (item_id, type, quantity) VALUES (1,'purchase',10);
 INSERT INTO inventory_transactions (item_id, booking_id, employee_id, type, quantity) VALUES (1,1,1,'usage',2);
 
+
+SELECT * FROM users;
+
 -- Show quick results
 SELECT * FROM inventory_stock_levels;
 SELECT * FROM employee_job_stats;

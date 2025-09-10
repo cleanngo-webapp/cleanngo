@@ -253,7 +253,7 @@ function openBookingForm(){
       <input type="hidden" name="total" id="booking_total">
       <input type="hidden" name="items_json" id="items_json">
       <div class="flex justify-end gap-2 mt-2">
-        <button type="submit" class="px-3 py-2 bg-emerald-700 text-white rounded hover:bg-emerald-700/80 hover:text-whit" @if(!$primary) disabled @endif>Book Now</button>
+        <button type="submit" class="px-3 py-2 bg-emerald-700 text-white rounded hover:bg-emerald-700/80 hover:text-whit cursor-pointer" @if(!$primary) disabled @endif>Book Now</button>
       </div>
     </form>
   </div>
