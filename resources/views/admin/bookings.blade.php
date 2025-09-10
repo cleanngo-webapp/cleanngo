@@ -19,7 +19,7 @@
                 <tr class="text-left font-semibold">
                     <th class="p-2">Booking ID</th>
                     <th class="p-2">Date & Time</th>
-                    <th class="p-2">Customer</th>
+                    <th class="p-2">Customer Name</th>
                     <th class="p-2">Assigned Employee</th>
                     <th class="p-2">Status</th>
                     <th class="p-2">Actions</th>
@@ -165,7 +165,8 @@
                 <div class="font-semibold">Customer Location</div>
                 <button class="cursor-pointer" onclick="closeLocation()">✕</button>
             </div>
-            <div id="locationAddress" class="text-sm mb-2 text-gray-700"></div>
+            <div id="locationAddress" class="text-sm mb-1 text-gray-700"></div>
+            <div id="locationPhone" class="text-xs mb-2 text-gray-500"></div>
             <div id="adminLocationMap" class="h-80 rounded border"></div>
         </div>
     </div>
@@ -207,7 +208,9 @@
         const data = locationsData[String(bookingId)] || locationsData[bookingId];
         const modal = document.getElementById('location-modal');
         const addr = document.getElementById('locationAddress');
+        const phone = document.getElementById('locationPhone');
         addr.textContent = data?.address || 'No address available';
+        phone.textContent = data?.phone ? ('Contact: ' + data.phone) : '';
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         setTimeout(() => {

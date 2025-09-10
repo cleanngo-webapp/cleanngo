@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EmployeeProfileController;
+use App\Http\Controllers\EmployeeJobsController;
 use App\Http\Controllers\AdminEmployeeController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminBookingController;
@@ -40,7 +41,9 @@ Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->name('dashb
 // Employee routes
 Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('employee.')->group(function () {
     Route::view('/', 'employee.dashboard')->name('dashboard');
-    Route::view('/jobs', 'employee.jobs')->name('jobs');
+    Route::get('/jobs', [EmployeeJobsController::class, 'index'])->name('jobs');
+    Route::post('/jobs/{bookingId}/start', [EmployeeJobsController::class, 'start'])->name('jobs.start');
+    Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
     Route::view('/payroll', 'employee.payroll')->name('payroll');
     Route::view('/notifications', 'employee.notifications')->name('notifications');
     Route::get('/profile', [EmployeeProfileController::class, 'show'])->name('profile.show');

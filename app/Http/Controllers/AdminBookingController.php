@@ -22,6 +22,7 @@ class AdminBookingController extends Controller
                 'b.id', 'b.code', 'b.scheduled_start', 'b.status', 'b.address_id',
                 's.name as service_name',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
+                DB::raw('u.phone as customer_phone'),
                 DB::raw("CONCAT(eu.first_name,' ',eu.last_name) as employee_name"),
                 DB::raw('e.user_id as employee_user_id'),
                 DB::raw('bsa.employee_id as assigned_employee_id'),
@@ -78,6 +79,7 @@ class AdminBookingController extends Controller
                     'address' => implode(', ', $addrParts),
                     'lat' => $b->address_latitude,
                     'lng' => $b->address_longitude,
+                    'phone' => $b->customer_phone,
                 ]
             ];
         })->all();
