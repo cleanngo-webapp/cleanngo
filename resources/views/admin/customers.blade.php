@@ -42,7 +42,7 @@
                         </td>
                         <td class="px-3 py-2">{{ $cust->bookings_count ?? 0 }}</td>
                         <td class="px-3 py-2">
-                            <a href="#" class="text-emerald-700 hover:underline">View</a>
+                            <button class="text-emerald-700 hover:underline" onclick="window.dispatchEvent(new CustomEvent('showCustomerMap',{detail:{userId:{{ $cust->user_id }}}}))">View</button>
                         </td>
                     </tr>
                 @empty
@@ -54,6 +54,39 @@
             <div class="p-3">{{ $customers->links() }}</div>
         @endisset
     </div>
+    <div id="customer-map-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center">
+        <div class="bg-white rounded-xl w-full max-w-2xl p-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="font-semibold">Customer Address</div>
+                <button onclick="hideCustMap()">✕</button>
+            </div>
+            <div id="customerMap" class="h-80 rounded border"></div>
+        </div>
+    </div>
+    @push('scripts')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+    var custMap, custMarker;
+    function hideCustMap(){ document.getElementById('customer-map-modal').classList.add('hidden'); }
+    window.addEventListener('showCustomerMap', async function(e){
+        const userId = e.detail.userId;
+        // fetch primary address for the customer
+        const res = await fetch('/api/user/'+userId+'/primary-address');
+        const data = await res.json();
+        document.getElementById('customer-map-modal').classList.remove('hidden');
+        setTimeout(function(){
+            if(!custMap){
+                custMap = L.map('customerMap').setView([14.5995,120.9842], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(custMap);
+            }
+            var lat = data?.latitude ?? 14.5995, lng = data?.longitude ?? 120.9842;
+            if(!custMarker){ custMarker = L.marker([lat,lng]).addTo(custMap); } else { custMarker.setLatLng([lat,lng]); }
+            custMap.setView([lat,lng], 15);
+        }, 50);
+    });
+    </script>
+    @endpush
 </div>
 @endsection
 

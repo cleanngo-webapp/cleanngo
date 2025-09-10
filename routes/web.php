@@ -18,6 +18,8 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EmployeeProfileController;
 use App\Http\Controllers\AdminEmployeeController;
 use App\Http\Controllers\AdminCustomerController;
+use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\CustomerAddressController;
 
 Route::redirect('/', '/login');
 
@@ -43,7 +45,12 @@ Route::middleware(['auth','role:employee'])->prefix('employee')->name('employee.
     // Calendar events feed for employee (own assignments only)
     Route::get('/calendar/events', [CalendarController::class, 'employeeEvents'])->name('calendar.events');
 });
-Route::view('/customer', 'customer.dashboard')->middleware(['auth','role:customer'])->name('preview.customer');
+Route::middleware(['auth','role:customer'])->group(function () {
+    Route::get('/customer', [CustomerDashboardController::class, 'show'])->name('preview.customer');
+    Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');
+    Route::delete('/customer/addresses/{address}', [CustomerAddressController::class, 'destroy'])->name('customer.address.destroy');
+    Route::post('/customer/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])->name('customer.address.primary');
+});
 
 // Admin routes with sidebar layout pages
 Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
