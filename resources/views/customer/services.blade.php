@@ -8,15 +8,15 @@
 
     <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Left: Services Nav -->
-        <aside class="bg-white rounded-xl border p-3">
-            <div class="font-semibold mb-2">Services</div>
+        <aside class="bg-emerald-700 rounded-xl border-none p-3">
+            <div class="font-semibold mb-2 text-center text-white">SERVICES</div>
             <div class="flex flex-col">
-                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="sofa">Sofa/ Mattress Deep Cleaning</button>
-                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="carpet">Carpet Deep Cleaning</button>
-                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="carInterior">Home Service Car Interior Detailing</button>
-                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="postConstruction">Post Construction Cleaning</button>
-                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="disinfection">Enhanced Disinfection</button>
-                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="glass">Glass Cleaning</button>
+                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="sofa">Sofa / Mattress Deep Cleaning</button>
+                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="carpet">Carpet Deep Cleaning</button>
+                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="carInterior">Home Service Car Interior Detailing</button>
+                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="postConstruction">Post Construction Cleaning</button>
+                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="disinfection">Enhanced Disinfection</button>
+                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="glass">Glass Cleaning</button>
             </div>
         </aside>
 
@@ -24,72 +24,72 @@
         <section class="bg-white rounded-xl border p-4 md:col-span-1" id="serviceForms">
             <!-- Sofa/Mattress -->
             <div data-form="sofa" class="hidden">
-                <h2 class="font-semibold">Sofa Deep Cleaning</h2>
-                <div class="mt-3 grid grid-cols-3 gap-2 text-sm">
-                    <label>1 seater <input id="sofa_1" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>2 seater <input id="sofa_2" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>3 seater <input id="sofa_3" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>4 seater <input id="sofa_4" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>5 seater <input id="sofa_5" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>6 seater <input id="sofa_6" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>7 seater <input id="sofa_7" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>8 seater <input id="sofa_8" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>L-shape <input id="sofa_l" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>Cross Sectional <input id="sofa_cross" type="number" min="0" value="0" class="border rounded px-2 py-1 w-24 ml-2"></label>
+                <h2 class="font-semibold text-center">Sofa Deep Cleaning</h2>
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <div class="flex items-center gap-2"><span class="flex-1">1 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_1" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">2 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_2" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">3 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_3" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">4 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_4" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">5 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_5" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">6 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_6" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">7 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_7" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">8 seater</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_8" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">L-shape</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_l" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Cross Sectional</span><span class="w-10 text-center text-gray-600">Qty</span><input id="sofa_cross" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
                 </div>
-                <h2 class="font-semibold mt-6">Mattress Deep Cleaning</h2>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <label>Single bed <input id="mattress_single" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>Double bed <input id="mattress_double" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>King bed <input id="mattress_king" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>California bed <input id="mattress_california" type="number" min="0" value="0" class="border rounded px-2 py-1 w-24 ml-2"></label>
-                </div>
+                <h2 class="font-semibold mt-6 text-center">Mattress Deep Cleaning</h2>
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <div class="flex items-center gap-2"><span class="flex-1">Single bed</span><span class="w-10 text-center text-gray-600">Qty</span><input id="mattress_single" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Double bed</span><span class="w-10 text-center text-gray-600">Qty</span><input id="mattress_double" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">King bed</span><span class="w-10 text-center text-gray-600">Qty</span><input id="mattress_king" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">California bed</span><span class="w-10 text-center text-gray-600">Qty</span><input id="mattress_california" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+            </div>
             </div>
 
             <!-- Carpet -->
             <div data-form="carpet" class="hidden">
                 <h2 class="font-semibold">Carpet Deep Cleaning</h2>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <label>How many square meters? <input id="carpet_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
-                    <label>Quantity <input id="carpet_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-gray-600">Qty</span><input id="carpet_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-gray-600">Qty</span><input id="carpet_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
                 </div>
             </div>
 
             <!-- Car Interior -->
             <div data-form="carInterior" class="hidden">
                 <h2 class="font-semibold">Home Service Car Interior Detailing</h2>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <label>Sedan <input id="car_sedan" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>SUV <input id="car_suv" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>Van <input id="car_van" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
-                    <label>Coaster <input id="car_coaster" type="number" min="0" value="0" class="border rounded px-2 py-1 w-24 ml-2"></label>
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <div class="flex items-center gap-2"><span class="flex-1">Sedan</span><span class="w-10 text-center text-gray-600">Qty</span><input id="car_sedan" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">SUV</span><span class="w-10 text-center text-gray-600">Qty</span><input id="car_suv" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Van</span><span class="w-10 text-center text-gray-600">Qty</span><input id="car_van" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Coaster</span><span class="w-10 text-center text-gray-600">Qty</span><input id="car_coaster" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
                 </div>
             </div>
 
             <!-- Post Construction -->
             <div data-form="postConstruction" class="hidden">
                 <h2 class="font-semibold">Post Construction Cleaning</h2>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <label>How many square meters? <input id="pcc_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
-                    <label>Quantity <input id="pcc_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-gray-600">Qty</span><input id="pcc_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-gray-600">Qty</span><input id="pcc_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
                 </div>
             </div>
 
             <!-- Enhanced Disinfection -->
             <div data-form="disinfection" class="hidden">
                 <h2 class="font-semibold">Enhanced Disinfection</h2>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <label>How many square meters? <input id="disinfect_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
-                    <label>Quantity <input id="disinfect_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-gray-600">Qty</span><input id="disinfect_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-gray-600">Qty</span><input id="disinfect_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
                 </div>
             </div>
 
             <!-- Glass -->
             <div data-form="glass" class="hidden">
                 <h2 class="font-semibold">Glass Cleaning</h2>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <label>How many square meters? <input id="glass_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
-                    <label>Quantity <input id="glass_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
+                <div class="mt-3 flex flex-col gap-2 text-sm">
+                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-gray-600">Qty</span><input id="glass_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-gray-600">Qty</span><input id="glass_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
                 </div>
             </div>
         </section>
@@ -116,6 +116,13 @@ const forms = document.querySelectorAll('#serviceForms [data-form]');
 const navButtons = document.querySelectorAll('[data-service]');
 function showForm(name){
   forms.forEach(f => f.classList.toggle('hidden', f.getAttribute('data-form') !== name));
+  // Highlight active left nav item
+  navButtons.forEach(btn => {
+    const isActive = btn.dataset.service === name;
+    btn.classList.toggle('bg-white', isActive);
+    btn.classList.toggle('text-black', isActive);
+    btn.classList.toggle('text-white', !isActive);
+  });
   const titles = {
     sofa: 'Sofa / Mattress Deep Cleaning',
     carpet: 'Carpet Deep Cleaning',
@@ -222,7 +229,7 @@ function openBookingForm(){
   window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }
 </script>
-<div id="booking-modal" class="fixed inset-0 bg-black/40 flex hidden items-center justify-center">
+<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center">
   <div class="bg-white rounded-xl w-full max-w-lg p-4">
     <div class="flex items-center justify-between mb-2">
       <div class="font-semibold">Confirm Booking</div>

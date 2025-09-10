@@ -11,13 +11,13 @@
         <div class="max-w-7xl mx-auto h-16 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
-                <a href="{{ route('preview.customer') }}" class="border rounded-full border-white px-2 py-2 text-white hover:bg-white/10 hover:text-emerald-700">Overview</a>
-                <a href="{{ route('customer.services') }}" class="border rounded-full border-white px-2 py-2 text-white hover:bg-white/10 hover:text-emerald-700">Request an Estimate</a>
-                <a href="{{ route('customer.profile') }}" class="border rounded-full border-white px-2 py-2 text-white hover:bg-white/10 hover:text-emerald-700">Profile</a>
+                <a href="{{ route('preview.customer') }}" class="border rounded-full border-white px-2 py-2 text-white hover:bg-white hover:text-emerald-700">Overview</a>
+                <a href="{{ route('customer.services') }}" class="border rounded-full border-white px-2 py-2 text-white hover:bg-white hover:text-emerald-700">Request an Estimate</a>
+                <a href="{{ route('customer.profile') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">Profile</a>
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf  
-                <button class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white/10 hover:text-emerald-700"> <i class="ri-logout-box-line"></i> Logout</button>
+                <button class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700"> <i class="ri-logout-box-line"></i> Logout</button>
                
             </form>
         </div>
