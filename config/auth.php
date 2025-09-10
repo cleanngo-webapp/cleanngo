@@ -36,7 +36,21 @@ return [
     */
 
     'guards' => [
+        // Legacy/default guard (not used for role routes)
         'web' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        // Role-isolated session guards to allow simultaneous logins per role
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'employee' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'customer' => [
             'driver' => 'session',
             'provider' => 'users',
         ],

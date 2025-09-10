@@ -1,13 +1,12 @@
 @extends('layouts.app')
 
-@section('title','Customer Dashboard')
+@section('title','Profile')
 
 @section('content')
-{{-- Customer Dashboard View --}}
-{{-- Purpose: Allow customers to see bookings and request new services --}}
+{{-- Customer Profile: Bookings tracker and Address book --}}
 
-<div class="max-w-4xl mx-auto my-10 p-6">
-	<h1 class="text-2xl font-bold">Customer Dashboard</h1>
+<div class="max-w-4xl mx-auto pt-20 pb-10 p-6">
+	<h1 class="text-2xl font-bold">Bookings and Addresses</h1>
 	<p class="mt-2 text-gray-600">Track your bookings and manage your addresses.</p>
 
 	<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,3 +106,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+

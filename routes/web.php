@@ -20,6 +20,8 @@ use App\Http\Controllers\AdminEmployeeController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerAddressController;
+use App\Http\Controllers\CustomerHomeController;
+use App\Http\Controllers\CustomerBookingController;
 
 Route::redirect('/', '/login');
 
@@ -35,7 +37,7 @@ Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->middleware(
 
 // Simple preview routes for role dashboards (no auth/guards yet)
 // Employee routes
-Route::middleware(['auth','role:employee'])->prefix('employee')->name('employee.')->group(function () {
+Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('employee.')->group(function () {
     Route::view('/', 'employee.dashboard')->name('dashboard');
     Route::view('/jobs', 'employee.jobs')->name('jobs');
     Route::view('/payroll', 'employee.payroll')->name('payroll');
@@ -45,15 +47,18 @@ Route::middleware(['auth','role:employee'])->prefix('employee')->name('employee.
     // Calendar events feed for employee (own assignments only)
     Route::get('/calendar/events', [CalendarController::class, 'employeeEvents'])->name('calendar.events');
 });
-Route::middleware(['auth','role:customer'])->group(function () {
-    Route::get('/customer', [CustomerDashboardController::class, 'show'])->name('preview.customer');
+Route::middleware(['auth:customer','role:customer'])->group(function () {
+    Route::get('/customer', [CustomerHomeController::class, 'home'])->name('preview.customer');
+    Route::get('/customer/profile', [CustomerDashboardController::class, 'show'])->name('customer.profile');
+    Route::view('/customer/services', 'customer.services')->name('customer.services');
+    Route::post('/customer/bookings', [CustomerBookingController::class, 'create'])->name('customer.bookings.create');
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');
     Route::delete('/customer/addresses/{address}', [CustomerAddressController::class, 'destroy'])->name('customer.address.destroy');
     Route::post('/customer/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])->name('customer.address.primary');
 });
 
 // Admin routes with sidebar layout pages
-Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/', 'admin.dashboard')->name('dashboard');
     Route::view('/bookings', 'admin.bookings')->name('bookings');
     Route::get('/employees', [AdminEmployeeController::class, 'index'])->name('employees');

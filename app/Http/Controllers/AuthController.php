@@ -78,7 +78,9 @@ class AuthController extends Controller
             }
         }
 
-        Auth::login($user);
+        // Log in to the appropriate role guard to avoid logging out other roles
+        $guard = $user->role;
+        Auth::guard($guard)->login($user);
         return redirect()->route('dashboard.redirect');
     }
 
@@ -111,13 +113,17 @@ class AuthController extends Controller
             ]);
         }
 
-        Auth::login($user, $request->boolean('remember'));
+        // Use role-specific guard
+        $guard = $user->role;
+        Auth::guard($guard)->login($user, $request->boolean('remember'));
         return redirect()->route('dashboard.redirect');
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        // Logout only from the current guard if present
+        $guard = Auth::getDefaultDriver();
+        try { Auth::guard($guard)->logout(); } catch (\Throwable $e) { Auth::logout(); }
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');

@@ -16,7 +16,7 @@ class CustomerDashboardController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('customer.dashboard', [
+        return view('customer.profile', [
             'addresses' => $addresses,
         ]);
     }

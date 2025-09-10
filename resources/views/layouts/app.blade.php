@@ -9,7 +9,12 @@
 <body class="min-h-screen bg-gray-100 font-sans">
     <nav class="bg-brand-green fixed top-0 left-0 right-0 z-50">
         <div class="max-w-7xl mx-auto h-16 flex justify-between items-center">
-            <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
+            <div class="flex items-center gap-4">
+                <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
+                <a class="border rounded border-white" href="{{ route('preview.customer') }}" class="text-white">Overview</a>
+                <a class="border rounded border-white" href="{{ route('customer.services') }}" class="text-white">Request an Estimate</a>
+                <a class="border rounded border-white" href="{{ route('customer.profile') }}" class="text-white">Profile</a>
+            </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf  
                 <button class="text-xl px-3 py-1 rounded text-white cursor-pointer"> <i class="ri-logout-box-line"></i> Logout</button>
