@@ -48,7 +48,7 @@
 			</div>
 			<div>
 				<label class="block text-sm font-medium">Role</label>
-				<select name="role" class="mt-1 w-full border rounded px-3 py-2" required>
+				<select name="role" class="mt-1 w-full border rounded px-3 py-2 cursor-pointer" required>
 					<option value="customer">Customer</option>
 					<option value="employee">Employee</option>
 				</select>
@@ -58,7 +58,7 @@
 				<div class="relative">
 					<input id="register_password" type="password" name="password" class="mt-1 w-full border rounded px-3 pr-10 py-2" placeholder="Enter your password" required />
 					<button type="button" class="absolute inset-y-0 right-2 my-auto text-gray-500 hover:text-gray-700" aria-label="Toggle password visibility" data-toggle-password data-target="#register_password">
-						<i class="ri-eye-line text-xl"></i>
+						<i class="ri-eye-line text-xl cursor-pointer"></i>
 					</button>
 				</div>
 			</div>
@@ -67,7 +67,7 @@
 				<div class="relative">
 					<input id="register_password_confirmation" type="password" name="password_confirmation" class="mt-1 w-full border rounded px-3 pr-10 py-2" placeholder="Confirm your password" required />
 					<button type="button" class="absolute inset-y-0 right-2 my-auto text-gray-500 hover:text-gray-700" aria-label="Toggle password visibility" data-toggle-password data-target="#register_password_confirmation">
-						<i class="ri-eye-line text-xl"></i>
+						<i class="ri-eye-line text-xl cursor-pointer"></i>
 					</button>
 				</div>
 			</div>

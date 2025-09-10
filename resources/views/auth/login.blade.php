@@ -28,7 +28,7 @@
 					<div class="relative">
 						<input id="login_password" type="password" name="password" class="mt-1 w-full border rounded px-3 pr-10 py-2" placeholder="Enter your password" required />
 						<button type="button" class="absolute inset-y-0 right-2 my-auto text-gray-500 hover:text-gray-700" aria-label="Toggle password visibility" data-toggle-password data-target="#login_password">
-							<i class="ri-eye-line text-xl"></i>
+							<i class="ri-eye-line text-xl cursor-pointer"></i>
 						</button>
 					</div>
 					@error('password')

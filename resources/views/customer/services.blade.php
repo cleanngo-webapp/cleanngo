@@ -9,7 +9,7 @@
     <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Left: Services Nav -->
         <aside class="bg-white rounded-xl border p-3">
-            <div class="font-semibold text-center mb-2">Services</div>
+            <div class="font-semibold mb-2">Services</div>
             <div class="flex flex-col">
                 <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="sofa">Sofa/ Mattress Deep Cleaning</button>
                 <button class="text-left px-3 py-2 rounded hover:bg-gray-100" data-service="carpet">Carpet Deep Cleaning</button>
@@ -24,7 +24,7 @@
         <section class="bg-white rounded-xl border p-4 md:col-span-1" id="serviceForms">
             <!-- Sofa/Mattress -->
             <div data-form="sofa" class="hidden">
-                <h2 class="font-semibold text-center">Sofa Deep Cleaning</h2>
+                <h2 class="font-semibold">Sofa Deep Cleaning</h2>
                 <div class="mt-3 grid grid-cols-3 gap-2 text-sm">
                     <label>1 seater <input id="sofa_1" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
                     <label>2 seater <input id="sofa_2" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
@@ -37,7 +37,7 @@
                     <label>L-shape <input id="sofa_l" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
                     <label>Cross Sectional <input id="sofa_cross" type="number" min="0" value="0" class="border rounded px-2 py-1 w-24 ml-2"></label>
                 </div>
-                <h2 class="font-semibold text-center mt-6">Mattress Deep Cleaning</h2>
+                <h2 class="font-semibold mt-6">Mattress Deep Cleaning</h2>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <label>Single bed <input id="mattress_single" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
                     <label>Double bed <input id="mattress_double" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
@@ -48,7 +48,7 @@
 
             <!-- Carpet -->
             <div data-form="carpet" class="hidden">
-                <h2 class="font-semibold text-center">Carpet Deep Cleaning</h2>
+                <h2 class="font-semibold">Carpet Deep Cleaning</h2>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <label>How many square meters? <input id="carpet_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
                     <label>Quantity <input id="carpet_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
@@ -57,7 +57,7 @@
 
             <!-- Car Interior -->
             <div data-form="carInterior" class="hidden">
-                <h2 class="font-semibold text-center">Home Service Car Interior Detailing</h2>
+                <h2 class="font-semibold">Home Service Car Interior Detailing</h2>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <label>Sedan <input id="car_sedan" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
                     <label>SUV <input id="car_suv" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 ml-2"></label>
@@ -68,7 +68,7 @@
 
             <!-- Post Construction -->
             <div data-form="postConstruction" class="hidden">
-                <h2 class="font-semibold text-center">Post Construction Cleaning</h2>
+                <h2 class="font-semibold">Post Construction Cleaning</h2>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <label>How many square meters? <input id="pcc_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
                     <label>Quantity <input id="pcc_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
@@ -77,7 +77,7 @@
 
             <!-- Enhanced Disinfection -->
             <div data-form="disinfection" class="hidden">
-                <h2 class="font-semibold text-center">Enhanced Disinfection</h2>
+                <h2 class="font-semibold">Enhanced Disinfection</h2>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <label>How many square meters? <input id="disinfect_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
                     <label>Quantity <input id="disinfect_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
@@ -86,7 +86,7 @@
 
             <!-- Glass -->
             <div data-form="glass" class="hidden">
-                <h2 class="font-semibold text-center">Glass Cleaning</h2>
+                <h2 class="font-semibold">Glass Cleaning</h2>
                 <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <label>How many square meters? <input id="glass_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
                     <label>Quantity <input id="glass_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-full ml-2"></label>
@@ -184,10 +184,45 @@ document.addEventListener('input', function(e){ if(e.target.closest('input')) ca
 
 function openBookingForm(){
   const total = calc();
-  window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total}}));
+  // Build items payload to persist line items
+  const items = [];
+  const addItem = (type, qty, unitPrice, areaSqm) => {
+    qty = parseInt(qty||0); if(!qty && !areaSqm) return; items.push({ type, qty, unitPrice, areaSqm }); };
+  // Sofa/Mattress
+  addItem('sofa_1_seater', document.getElementById('sofa_1').value, 4000);
+  addItem('sofa_2_seater', document.getElementById('sofa_2').value, 4000);
+  addItem('sofa_3_seater', document.getElementById('sofa_3').value, 4000);
+  addItem('sofa_4_seater', document.getElementById('sofa_4').value, 4000);
+  addItem('sofa_5_seater', document.getElementById('sofa_5').value, 4000);
+  addItem('sofa_6_seater', document.getElementById('sofa_6').value, 4000);
+  addItem('sofa_7_seater', document.getElementById('sofa_7').value, 4000);
+  addItem('sofa_8_seater', document.getElementById('sofa_8').value, 4000);
+  addItem('sofa_l_shape', document.getElementById('sofa_l').value, 4000);
+  addItem('sofa_cross', document.getElementById('sofa_cross').value, 4000);
+  addItem('mattress_single', document.getElementById('mattress_single').value, 4000);
+  addItem('mattress_double', document.getElementById('mattress_double').value, 4000);
+  addItem('mattress_king', document.getElementById('mattress_king').value, 4000);
+  addItem('mattress_california', document.getElementById('mattress_california').value, 4000);
+  // Carpet/Post/Disinfect/Glass (sqm * qty * 500)
+  const addSqm = (label, sqmId, qtyId) => {
+    const sqm = parseFloat(document.getElementById(sqmId)?.value||0);
+    const qty = parseInt(document.getElementById(qtyId)?.value||0);
+    if (sqm>0 && qty>0) items.push({ type: label, qty, unitPrice: 500, areaSqm: sqm });
+  };
+  addSqm('carpet_sqm', 'carpet_sqm', 'carpet_qty');
+  addSqm('post_construction_sqm', 'pcc_sqm', 'pcc_qty');
+  addSqm('disinfect_sqm', 'disinfect_sqm', 'disinfect_qty');
+  addSqm('glass_sqm', 'glass_sqm', 'glass_qty');
+  // Car detailing
+  addItem('car_sedan', document.getElementById('car_sedan').value, 4000);
+  addItem('car_suv', document.getElementById('car_suv').value, 4000);
+  addItem('car_van', document.getElementById('car_van').value, 4000);
+  addItem('car_coaster', document.getElementById('car_coaster').value, 4000);
+
+  window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }
 </script>
-<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center">
+<div id="booking-modal" class="fixed inset-0 bg-black/40 flex hidden items-center justify-center">
   <div class="bg-white rounded-xl w-full max-w-lg p-4">
     <div class="flex items-center justify-between mb-2">
       <div class="font-semibold">Confirm Booking</div>
@@ -209,8 +244,9 @@ function openBookingForm(){
         <label class="text-sm">Time <input required type="time" name="time" class="border rounded px-2 py-1 w-full"></label>
       </div>
       <input type="hidden" name="total" id="booking_total">
+      <input type="hidden" name="items_json" id="items_json">
       <div class="flex justify-end gap-2 mt-2">
-        <button type="submit" class="px-3 py-2 bg-emerald-700 text-white rounded" @if(!$primary) disabled @endif>Book Now</button>
+        <button type="submit" class="px-3 py-2 bg-emerald-700 text-white rounded hover:bg-emerald-700/80 hover:text-whit" @if(!$primary) disabled @endif>Book Now</button>
       </div>
     </form>
   </div>
@@ -220,6 +256,7 @@ function openBookingForm(){
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.getElementById('booking_total').value = e.detail.total;
+    document.getElementById('items_json').value = JSON.stringify(e.detail.items||[]);
   });
   </script>
 </div>

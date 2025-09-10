@@ -11,9 +11,9 @@
         <div class="max-w-7xl mx-auto h-16 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
-                <a class="border rounded border-white" href="{{ route('preview.customer') }}" class="text-white">Overview</a>
-                <a class="border rounded border-white" href="{{ route('customer.services') }}" class="text-white">Request an Estimate</a>
-                <a class="border rounded border-white" href="{{ route('customer.profile') }}" class="text-white">Profile</a>
+                <a href="{{ route('preview.customer') }}" class="text-white">Overview</a>
+                <a href="{{ route('customer.services') }}" class="text-white">Request an Estimate</a>
+                <a href="{{ route('customer.profile') }}" class="text-white">Profile</a>
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf  

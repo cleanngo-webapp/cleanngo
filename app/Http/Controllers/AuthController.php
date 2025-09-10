@@ -132,15 +132,20 @@ class AuthController extends Controller
     // Redirect to role dashboard
     public function redirectByRole()
     {
-        $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login');
+        // Detect logged-in user from any role-specific guard
+        foreach (['admin', 'employee', 'customer'] as $guard) {
+            if (Auth::guard($guard)->check()) {
+                Auth::shouldUse($guard);
+                $role = $guard;
+                return match ($role) {
+                    'admin' => redirect()->route('admin.dashboard'),
+                    'employee' => redirect()->route('employee.dashboard'),
+                    'customer' => redirect()->route('preview.customer'),
+                    default => redirect()->route('login'),
+                };
+            }
         }
-        return match ($user->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'employee' => redirect()->route('employee.dashboard'),
-            default => redirect()->route('preview.customer'),
-        };
+        return redirect()->route('login');
     }
 }
 

@@ -18,6 +18,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EmployeeProfileController;
 use App\Http\Controllers\AdminEmployeeController;
 use App\Http\Controllers\AdminCustomerController;
+use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerAddressController;
 use App\Http\Controllers\CustomerHomeController;
@@ -33,7 +34,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Role redirector
-Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->middleware('auth')->name('dashboard.redirect');
+Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->name('dashboard.redirect');
 
 // Simple preview routes for role dashboards (no auth/guards yet)
 // Employee routes
@@ -61,6 +62,10 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
 Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::view('/', 'admin.dashboard')->name('dashboard');
     Route::view('/bookings', 'admin.bookings')->name('bookings');
+    Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings');
+    Route::post('/bookings', [AdminBookingController::class, 'store'])->name('bookings.store');
+    Route::post('/bookings/{bookingId}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
+    Route::match(['post','get'], '/bookings/{bookingId}/assign', [AdminBookingController::class, 'assignEmployee'])->name('bookings.assign');
     Route::get('/employees', [AdminEmployeeController::class, 'index'])->name('employees');
     Route::get('/employee/{userId}', [AdminEmployeeController::class, 'show'])->name('employee.show');
     Route::put('/employee/{userId}', [AdminEmployeeController::class, 'update'])->name('employee.update');
