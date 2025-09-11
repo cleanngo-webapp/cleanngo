@@ -24,18 +24,18 @@ class EmployeeJobsController extends Controller
             ->leftJoin('customers as c', 'c.id', '=', 'b.customer_id')
             ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
             ->leftJoin('booking_staff_assignments as a', 'a.booking_id', '=', 'b.id')
-            ->leftJoin('addresses as addr', 'addr.id', '=', 'b.address_id')
+            ->leftJoin('addresses as primary_addr', 'primary_addr.id', '=', 'c.default_address_id')
             ->where('a.employee_id', $employeeId)
             ->orderByDesc('b.scheduled_start')
             ->select([
                 'b.id', 'b.code', 'b.status', 'b.scheduled_start',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw('u.phone as customer_phone'),
-                DB::raw("COALESCE(addr.line1,'') as address_line1"),
-                DB::raw("COALESCE(addr.barangay,'') as address_barangay"),
-                DB::raw("COALESCE(addr.city,'') as address_city"),
-                DB::raw("COALESCE(addr.province,'') as address_province"),
-                'addr.latitude', 'addr.longitude',
+                DB::raw("COALESCE(primary_addr.line1,'') as address_line1"),
+                DB::raw("COALESCE(primary_addr.barangay,'') as address_barangay"),
+                DB::raw("COALESCE(primary_addr.city,'') as address_city"),
+                DB::raw("COALESCE(primary_addr.province,'') as address_province"),
+                'primary_addr.latitude', 'primary_addr.longitude',
             ])
             ->paginate(15);
 

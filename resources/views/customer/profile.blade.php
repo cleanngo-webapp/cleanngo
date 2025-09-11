@@ -38,7 +38,7 @@
 				<input type="hidden" name="longitude" id="lng">
 				<label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_primary" value="1"> Set as Primary</label>
 				<div class="flex justify-center">
-				<button class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Save Address</button>
+				<button type="button" class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="openSaveAddressConfirm()">Save Address</button>
 				</div>
 			</form>
 
@@ -47,7 +47,7 @@
 				@forelse(($addresses ?? []) as $addr)
 					<div class="border rounded p-2 mb-2 flex items-center justify-between">
 						<div>
-							<div class="font-medium">Address @if($addr->is_primary) <span class="text-xs text-emerald-700">(Primary)</span> @endif</div>
+							<div class="font-medium">{{ ucfirst($addr->label ?? 'Address') }} @if($addr->is_primary) <span class="text-xs text-emerald-700">(Primary)</span> @endif</div>
 							<div class="text-sm text-gray-600">{{ $addr->line1 }}{{ $addr->barangay ? ', '.$addr->barangay : '' }}{{ $addr->city ? ', '.$addr->city : '' }}{{ $addr->province ? ', '.$addr->province : '' }}</div>
 							@if($addr->latitude && $addr->longitude)
 								<div class="text-xs text-gray-500">Lat: {{ $addr->latitude }}, Lng: {{ $addr->longitude }}</div>
@@ -55,14 +55,17 @@
 						</div>
 						<div class="flex items-center gap-2">
 							<form id="make-primary-{{ $addr->id }}" method="POST" action="{{ route('customer.address.primary', $addr->id) }}">@csrf</form>
-							<form id="delete-address-{{ $addr->id }}" method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">@csrf @method('DELETE')</form>
+							<form id="delete-address-{{ $addr->id }}" method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">
+								@csrf 
+								@method('DELETE')
+							</form>
 
 							@if($addr->is_primary)
 								<button class="px-2 py-1 text-sm rounded border w-28 whitespace-nowrap bg-brand-green/80 border-gray-300 text-white cursor-not-allowed" disabled>Primary</button>
 							@else
 								<button type="button" class=" bg-emerald-700 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white w-28 whitespace-nowrap" onclick="openPrimaryConfirm('make-primary-{{ $addr->id }}')">Make Primary</button>
 							@endif
-							<button type="button" class="bg-red-600 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-red-600/80 hover:text-white w-20 whitespace-nowrap" onclick="openDeleteConfirm('delete-address-{{ $addr->id }}')">Delete</button>
+							<button type="button" class="bg-red-600 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-red-600/80 hover:text-white w-20 whitespace-nowrap" onclick="openDeleteConfirm('delete-address-{{ $addr->id }}')" data-address-id="{{ $addr->id }}">Delete</button>
 						</div>
 					</div>
 					@empty
@@ -136,23 +139,66 @@ document.addEventListener('DOMContentLoaded', function() {
 // Modal helpers for address actions
 var pendingFormId = null;
 function openPrimaryConfirm(formId){
+    console.log('Opening primary confirm for:', formId);
     pendingFormId = formId;
     const m = document.getElementById('confirm-primary-modal');
     m.classList.remove('hidden'); m.classList.add('flex');
 }
 function openDeleteConfirm(formId){
+    console.log('Opening delete confirm for:', formId);
     pendingFormId = formId;
     const m = document.getElementById('confirm-delete-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+}
+function openSaveAddressConfirm(){
+    console.log('Opening save address confirm');
+    const m = document.getElementById('confirm-save-address-modal');
     m.classList.remove('hidden'); m.classList.add('flex');
 }
 function closeModal(id){
     const m = document.getElementById(id);
     m.classList.add('hidden'); m.classList.remove('flex');
 }
+function submitAddressForm(){
+    console.log('Submitting address form');
+    const form = document.querySelector('form[action*="customer.address.store"]');
+    if (form) {
+        form.submit();
+    } else {
+        console.error('Address form not found');
+    }
+}
 function submitPendingForm(){
+    console.log('submitPendingForm called with pendingFormId:', pendingFormId);
     if (pendingFormId) {
         var f = document.getElementById(pendingFormId);
-        if (f) { f.submit(); }
+        if (f) { 
+            console.log('Submitting form:', pendingFormId, f.action, f.method);
+            // Ensure the form has the correct method and CSRF token
+            if (f.method.toLowerCase() !== 'post') {
+                f.method = 'POST';
+            }
+            // Check if CSRF token exists
+            var csrfToken = f.querySelector('input[name="_token"]');
+            if (!csrfToken) {
+                console.error('CSRF token missing from form');
+                return;
+            }
+            // For primary address, we don't need DELETE method override
+            var methodField = f.querySelector('input[name="_method"]');
+            if (methodField && methodField.value === 'DELETE') {
+                // This is a delete form, check method override
+                if (!methodField) {
+                    console.error('Method override missing from form');
+                    return;
+                }
+            }
+            f.submit(); 
+        } else {
+            console.error('Form not found:', pendingFormId);
+        }
+    } else {
+        console.error('No pending form ID');
     }
 }
 // Attach immediately in case this script executes after DOM is ready
@@ -161,7 +207,19 @@ function submitPendingForm(){
     if (mp) mp.addEventListener('click', submitPendingForm);
     var del = document.getElementById('confirm-delete-yes');
     if (del) del.addEventListener('click', submitPendingForm);
+    var save = document.getElementById('confirm-save-address-yes');
+    if (save) save.addEventListener('click', submitAddressForm);
 })();
+
+// Also attach on DOM ready as backup
+document.addEventListener('DOMContentLoaded', function(){
+    var mp = document.getElementById('confirm-primary-yes');
+    if (mp) mp.addEventListener('click', submitPendingForm);
+    var del = document.getElementById('confirm-delete-yes');
+    if (del) del.addEventListener('click', submitPendingForm);
+    var save = document.getElementById('confirm-save-address-yes');
+    if (save) save.addEventListener('click', submitAddressForm);
+});
 </script>
 @endpush
 
@@ -172,7 +230,7 @@ function submitPendingForm(){
         <p class="text-sm text-gray-600 mt-1">Are you sure you want to make this the primary address?</p>
         <div class="mt-4 flex justify-end gap-2">
             <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-primary-modal')">Cancel</button>
-            <button id="confirm-primary-yes" type="button" class="px-3 py-2 rounded bg-emerald-700 text-white cursor-pointer hover:bg-emerald-700/90">Make Primary</button>
+            <button id="confirm-primary-yes" type="button" class="px-3 py-2 rounded bg-emerald-700 text-white cursor-pointer hover:bg-emerald-700/90" onclick="submitPendingForm()">Make Primary</button>
         </div>
     </div>
 </div>
@@ -185,6 +243,18 @@ function submitPendingForm(){
         <div class="mt-4 flex justify-end gap-2">
             <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-delete-modal')">Cancel</button>
             <button id="confirm-delete-yes" type="button" class="px-3 py-2 rounded bg-red-600 text-white cursor-pointer hover:bg-red-700" onclick="if(window.pendingFormId){ var f=document.getElementById(window.pendingFormId); if(f){ f.submit(); } }">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Save Address Modal -->
+<div id="confirm-save-address-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-xl w-full max-w-sm p-4">
+        <div class="font-semibold text-lg">Save Address</div>
+        <p class="text-sm text-gray-600 mt-1">Are you sure you want to save this address?</p>
+        <div class="mt-4 flex justify-end gap-2">
+            <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-save-address-modal')">Cancel</button>
+            <button id="confirm-save-address-yes" type="button" class="px-3 py-2 rounded bg-emerald-700 text-white cursor-pointer hover:bg-emerald-700/90" onclick="submitAddressForm()">Save Address</button>
         </div>
     </div>
 </div>

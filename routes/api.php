@@ -21,10 +21,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Primary address lookup for admin map modal
 Route::get('/user/{userId}/primary-address', function ($userId) {
-    $addr = DB::table('addresses')
-        ->where('user_id', $userId)
-        ->orderByDesc('is_primary')
-        ->orderBy('id')
-        ->first(['line1','barangay','city','province','latitude','longitude']);
+    $addr = DB::table('addresses as a')
+        ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+        ->where('a.user_id', $userId)
+        ->orderByDesc('a.is_primary')
+        ->orderBy('a.id')
+        ->first(['a.line1','a.barangay','a.city','a.province','a.latitude','a.longitude','u.phone']);
     return response()->json($addr);
 });

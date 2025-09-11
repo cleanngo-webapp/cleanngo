@@ -22,6 +22,7 @@ class AdminCustomerController extends Controller
                 'customers.id as customer_id',
                 'customers.customer_code',
                 DB::raw("COALESCE(addr.line1, '') as address_line1"),
+                DB::raw("COALESCE(addr.barangay, '') as address_barangay"),
                 DB::raw("COALESCE(addr.city, '') as address_city"),
                 DB::raw("COALESCE(addr.province, '') as address_province"),
             ])

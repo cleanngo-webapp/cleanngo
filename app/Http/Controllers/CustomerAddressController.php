@@ -32,7 +32,14 @@ class CustomerAddressController extends Controller
                 DB::table('addresses')->where('user_id', $user->id)->update(['is_primary' => false]);
             }
             try {
-                Address::create($data);
+                $address = Address::create($data);
+                
+                // If this is the primary address, update the customer's default_address_id
+                if (!empty($data['is_primary'])) {
+                    DB::table('customers')
+                        ->where('user_id', $user->id)
+                        ->update(['default_address_id' => $address->id]);
+                }
             } catch (\Illuminate\Database\QueryException $e) {
                 // Handle possible sequence desync in Postgres (duplicate key on addresses_pkey)
                 $message = $e->getMessage();
@@ -40,7 +47,14 @@ class CustomerAddressController extends Controller
                 if ($code === '23505' && (str_contains($message, 'addresses_pkey') || str_contains($message, 'duplicate key'))) {
                     // Reseed sequence to max(id)+1 and retry
                     DB::statement("SELECT setval(pg_get_serial_sequence('addresses','id'), COALESCE((SELECT MAX(id) FROM addresses), 0) + 1, false)");
-                    Address::create($data);
+                    $address = Address::create($data);
+                    
+                    // If this is the primary address, update the customer's default_address_id
+                    if (!empty($data['is_primary'])) {
+                        DB::table('customers')
+                            ->where('user_id', $user->id)
+                            ->update(['default_address_id' => $address->id]);
+                    }
                 } else {
                     throw $e;
                 }
@@ -86,6 +100,16 @@ class CustomerAddressController extends Controller
                     // Ensure only this one is primary
                     DB::table('addresses')->where('user_id', $user->id)->update(['is_primary' => false]);
                     $replacement->update(['is_primary' => true]);
+                    
+                    // Update the customer's default_address_id to the replacement
+                    DB::table('customers')
+                        ->where('user_id', $user->id)
+                        ->update(['default_address_id' => $replacement->id]);
+                } else {
+                    // No replacement address, clear the default_address_id
+                    DB::table('customers')
+                        ->where('user_id', $user->id)
+                        ->update(['default_address_id' => null]);
                 }
             }
         });
@@ -99,6 +123,11 @@ class CustomerAddressController extends Controller
         DB::transaction(function () use ($address, $user) {
             DB::table('addresses')->where('user_id', $user->id)->update(['is_primary' => false]);
             $address->update(['is_primary' => true]);
+            
+            // Update the customer's default_address_id to match the new primary address
+            DB::table('customers')
+                ->where('user_id', $user->id)
+                ->update(['default_address_id' => $address->id]);
         });
         return back()->with('status', 'Primary address updated');
     }
