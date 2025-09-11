@@ -30,6 +30,11 @@ class AdminEmployeeController extends Controller
                 'employees.employment_status',
                 'employees.is_active',
             ])
+            ->selectSub(function ($q) {
+                $q->from('booking_staff_assignments as bsa')
+                  ->whereColumn('bsa.employee_id', 'employees.id')
+                  ->selectRaw('count(*)');
+            }, 'total_bookings')
             ->selectSub(function ($q) use ($today) {
                 $q->from('booking_staff_assignments as bsa')
                   ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')

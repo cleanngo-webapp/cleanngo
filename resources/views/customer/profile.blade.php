@@ -15,28 +15,31 @@
 			<p class="text-sm text-gray-500">You have no upcoming bookings.</p>
 		</div>
 		<div class="p-4 rounded border bg-white">
-			<h2 class="font-semibold">Addresses</h2>
+			<h2 class="font-semibold">Add New Address</h2>
 			<p class="text-sm text-gray-500">Add or select your service location.</p>
 
 			<form method="POST" action="{{ route('customer.address.store') }}" class="mt-3 space-y-2">
 				@csrf
 				<div class="grid grid-cols-2 gap-2">
-					<input name="label" class="border rounded px-2 py-1" placeholder="Label (Home, Office)">
+					<input name="label" class="border rounded px-2 py-1 col-span-2" placeholder="Label (Home, Office)">
 					<input name="line1" required class="border rounded px-2 py-1 col-span-2" placeholder="Address line">
 					<input name="city" class="border rounded px-2 py-1" placeholder="City/Municipality">
 					<input name="province" class="border rounded px-2 py-1" placeholder="Province">
 					<input name="postal_code" class="border rounded px-2 py-1" placeholder="Postal Code/Zip Code">
+					<button type="button" id="auto-locate" class="px-2 py-1 rounded border bg-emerald-700 text-white hover:bg-emerald-700/80 hover:text-white cursor-pointer"> <i class="ri-map-pin-line"></i> Auto Locate</button>
 				</div>
 
 				<div id="map" class="h-64 rounded border"></div>
 				<input type="hidden" name="latitude" id="lat">
 				<input type="hidden" name="longitude" id="lng">
-				<label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_primary" value="1"> Set as primary</label>
+				<label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_primary" value="1"> Set as Primary</label>
+				<div class="flex justify-center">
 				<button class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Save Address</button>
+				</div>
 			</form>
 
 			<div class="mt-4">
-				<h3 class="font-semibold mb-2">Your Addresses</h3>
+				<h3 class="font-semibold mb-2">Manage Addresses</h3>
 				@forelse(($addresses ?? []) as $addr)
 					<div class="border rounded p-2 mb-2 flex items-center justify-between">
 						<div>
@@ -51,7 +54,7 @@
 							<form id="delete-address-{{ $addr->id }}" method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">@csrf @method('DELETE')</form>
 
 							@if($addr->is_primary)
-								<button class="px-2 py-1 text-sm rounded border w-28 whitespace-nowrap bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed" disabled>Primary</button>
+								<button class="px-2 py-1 text-sm rounded border w-28 whitespace-nowrap bg-brand-green/80 border-gray-300 text-white cursor-not-allowed" disabled>Primary</button>
 							@else
 								<button type="button" class=" bg-emerald-700 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white w-28 whitespace-nowrap" onclick="openPrimaryConfirm('make-primary-{{ $addr->id }}')">Make Primary</button>
 							@endif
@@ -101,6 +104,27 @@ document.addEventListener('DOMContentLoaded', function() {
             var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
             map.setView(latlng, 15);
             setLatLng(latlng);
+        });
+    }
+
+    // Auto Locate button
+    var autoBtn = document.getElementById('auto-locate');
+    function handleLocateSuccess(pos){
+        var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+        map.setView(latlng, 16);
+        setLatLng(latlng);
+    }
+    function handleLocateError(err){
+        console.warn('Geolocation error', err);
+        alert('Unable to get your location. Please allow location permission and try again. If you are not on http://localhost or https, the browser may block geolocation.');
+    }
+    if (autoBtn) {
+        autoBtn.addEventListener('click', function(){
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser.');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(handleLocateSuccess, handleLocateError, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
         });
     }
 });

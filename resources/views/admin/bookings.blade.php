@@ -16,6 +16,9 @@
         </div>
         <table class="min-w-full bg-white rounded border text-sm">
             <thead class="bg-emerald-50">
+                <tr class="text-left font-semibold border-b">
+                    <th class="p-2 text-center text-2xl" colspan="8">Booking Records Table</th>
+                </tr>
                 <tr class="text-left font-semibold">
                     <th class="p-2">Booking ID</th>
                     <th class="p-2">Date & Time</th>
