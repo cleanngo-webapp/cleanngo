@@ -80,6 +80,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers');
     Route::view('/gallery', 'admin.gallery')->name('gallery');
     Route::view('/settings', 'admin.settings')->name('settings');
+    Route::view('/payroll', 'admin.payroll')->name('payroll');
     // Calendar events feed for admin
     Route::get('/calendar/events', [CalendarController::class, 'adminEvents'])->name('calendar.events');
 });
