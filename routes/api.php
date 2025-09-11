@@ -25,6 +25,6 @@ Route::get('/user/{userId}/primary-address', function ($userId) {
         ->where('user_id', $userId)
         ->orderByDesc('is_primary')
         ->orderBy('id')
-        ->first(['line1','city','province','latitude','longitude']);
+        ->first(['line1','barangay','city','province','latitude','longitude']);
     return response()->json($addr);
 });

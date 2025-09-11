@@ -13,7 +13,7 @@ class CustomerAddressController extends Controller
     {
         $user = Auth::user();
         $data = $request->validate([
-            'label' => 'nullable|string|max:100',
+            'label' => 'nullable|in:home,office',
             'line1' => 'required|string|max:255',
             'line2' => 'nullable|string|max:255',
             'barangay' => 'nullable|string|max:100',
@@ -54,7 +54,26 @@ class CustomerAddressController extends Controller
     {
         $user = Auth::user();
         abort_if($address->user_id !== $user->id, 403);
-        DB::transaction(function () use ($address, $user) {
+        // Check if any bookings still reference this address
+        $bookingsCount = DB::table('bookings')->where('address_id', $address->id)->count();
+        // Find an alternative address for potential reassignment
+        $alternative = Address::where('user_id', $user->id)
+            ->where('id', '!=', $address->id)
+            ->orderByDesc('is_primary')
+            ->orderBy('id')
+            ->first();
+
+        // If this address is referenced by bookings and there is no alternative, block deletion
+        if ($bookingsCount > 0 && !$alternative) {
+            return back()->with('status', 'Cannot delete this address because it is used by existing bookings. Please add another address first.');
+        }
+
+        DB::transaction(function () use ($address, $user, $bookingsCount, $alternative) {
+            // Reassign bookings to an alternative address, if needed
+            if ($bookingsCount > 0 && $alternative) {
+                DB::table('bookings')->where('address_id', $address->id)->update(['address_id' => $alternative->id]);
+            }
+
             $wasPrimary = (bool) $address->is_primary;
             $address->delete();
 

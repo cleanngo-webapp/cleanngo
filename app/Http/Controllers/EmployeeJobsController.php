@@ -32,6 +32,7 @@ class EmployeeJobsController extends Controller
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw('u.phone as customer_phone'),
                 DB::raw("COALESCE(addr.line1,'') as address_line1"),
+                DB::raw("COALESCE(addr.barangay,'') as address_barangay"),
                 DB::raw("COALESCE(addr.city,'') as address_city"),
                 DB::raw("COALESCE(addr.province,'') as address_province"),
                 'addr.latitude', 'addr.longitude',
@@ -40,7 +41,7 @@ class EmployeeJobsController extends Controller
 
         // Build map payload
         $locationsData = collect($bookings->items())->mapWithKeys(function ($b) {
-            $parts = array_filter([$b->address_line1 ?? null, $b->address_city ?? null, $b->address_province ?? null]);
+            $parts = array_filter([$b->address_line1 ?? null, $b->address_barangay ?? null, $b->address_city ?? null, $b->address_province ?? null]);
             return [
                 $b->id => [
                     'address' => implode(', ', $parts),

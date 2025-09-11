@@ -21,11 +21,15 @@
 			<form method="POST" action="{{ route('customer.address.store') }}" class="mt-3 space-y-2">
 				@csrf
 				<div class="grid grid-cols-2 gap-2">
-					<input name="label" class="border rounded px-2 py-1 col-span-2" placeholder="Label (Home, Office)">
-					<input name="line1" required class="border rounded px-2 py-1 col-span-2" placeholder="Address line">
+					<input name="line1" required class="border rounded px-2 py-1 col-span-2" placeholder="Address Line">
+					<input name="barangay" class="border rounded px-2 py-1" placeholder="Barangay">
 					<input name="city" class="border rounded px-2 py-1" placeholder="City/Municipality">
 					<input name="province" class="border rounded px-2 py-1" placeholder="Province">
 					<input name="postal_code" class="border rounded px-2 py-1" placeholder="Postal Code/Zip Code">
+                    <select name="label" class="border rounded px-2 py-1">
+                        <option value="home">Home</option>
+                        <option value="office">Office</option>
+                    </select>
 					<button type="button" id="auto-locate" class="px-2 py-1 rounded border bg-emerald-700 text-white hover:bg-emerald-700/80 hover:text-white cursor-pointer"> <i class="ri-map-pin-line"></i> Auto Locate</button>
 				</div>
 
@@ -43,8 +47,8 @@
 				@forelse(($addresses ?? []) as $addr)
 					<div class="border rounded p-2 mb-2 flex items-center justify-between">
 						<div>
-							<div class="font-medium">{{ $addr->label ?? 'Address' }} @if($addr->is_primary) <span class="text-xs text-emerald-700">(Primary)</span> @endif</div>
-							<div class="text-sm text-gray-600">{{ $addr->line1 }} {{ $addr->city ? ', '.$addr->city : '' }} {{ $addr->province ? ', '.$addr->province : '' }}</div>
+							<div class="font-medium">Address @if($addr->is_primary) <span class="text-xs text-emerald-700">(Primary)</span> @endif</div>
+							<div class="text-sm text-gray-600">{{ $addr->line1 }}{{ $addr->barangay ? ', '.$addr->barangay : '' }}{{ $addr->city ? ', '.$addr->city : '' }}{{ $addr->province ? ', '.$addr->province : '' }}</div>
 							@if($addr->latitude && $addr->longitude)
 								<div class="text-xs text-gray-500">Lat: {{ $addr->latitude }}, Lng: {{ $addr->longitude }}</div>
 							@endif
@@ -130,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Modal helpers for address actions
-let pendingFormId = null;
+var pendingFormId = null;
 function openPrimaryConfirm(formId){
     pendingFormId = formId;
     const m = document.getElementById('confirm-primary-modal');
@@ -145,12 +149,19 @@ function closeModal(id){
     const m = document.getElementById(id);
     m.classList.add('hidden'); m.classList.remove('flex');
 }
-window.addEventListener('DOMContentLoaded', function(){
+function submitPendingForm(){
+    if (pendingFormId) {
+        var f = document.getElementById(pendingFormId);
+        if (f) { f.submit(); }
+    }
+}
+// Attach immediately in case this script executes after DOM is ready
+(function(){
     var mp = document.getElementById('confirm-primary-yes');
-    if (mp) mp.addEventListener('click', function(){ if(pendingFormId){ document.getElementById(pendingFormId).submit(); }});
+    if (mp) mp.addEventListener('click', submitPendingForm);
     var del = document.getElementById('confirm-delete-yes');
-    if (del) del.addEventListener('click', function(){ if(pendingFormId){ document.getElementById(pendingFormId).submit(); }});
-});
+    if (del) del.addEventListener('click', submitPendingForm);
+})();
 </script>
 @endpush
 
@@ -173,7 +184,7 @@ window.addEventListener('DOMContentLoaded', function(){
         <p class="text-sm text-gray-600 mt-1">Are you sure you want to delete this address?</p>
         <div class="mt-4 flex justify-end gap-2">
             <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-delete-modal')">Cancel</button>
-            <button id="confirm-delete-yes" type="button" class="px-3 py-2 rounded bg-red-600 text-white cursor-pointer hover:bg-red-700">Delete</button>
+            <button id="confirm-delete-yes" type="button" class="px-3 py-2 rounded bg-red-600 text-white cursor-pointer hover:bg-red-700" onclick="if(window.pendingFormId){ var f=document.getElementById(window.pendingFormId); if(f){ f.submit(); } }">Delete</button>
         </div>
     </div>
 </div>

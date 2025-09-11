@@ -84,7 +84,7 @@
         modalEl.classList.add('flex');
         const addrEl = document.getElementById('custLocationAddress');
         const phoneEl = document.getElementById('custLocationPhone');
-        const composed = [data?.line1, data?.city, data?.province].filter(Boolean).join(', ');
+        const composed = [data?.line1, data?.barangay, data?.city, data?.province].filter(Boolean).join(', ');
         addrEl.textContent = composed || 'No address available';
         phoneEl.textContent = data?.phone ? ('Contact: ' + data.phone) : '';
         setTimeout(function(){
