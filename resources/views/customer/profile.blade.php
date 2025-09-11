@@ -47,21 +47,21 @@
 							@endif
 						</div>
 						<div class="flex items-center gap-2">
-							<form method="POST" action="{{ route('customer.address.primary', $addr->id) }}">
-								@csrf
-								<button class="px-2 py-1 text-sm rounded border cursor-pointer hover:bg-emerald-700 hover:text-white w-28 whitespace-nowrap">Make Primary</button>
-							</form>
-							<form method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">
-								@csrf
-								@method('DELETE')
-								<button class="px-2 py-1 text-sm rounded border text-red-600 cursor-pointer hover:bg-red-600 hover:text-white w-20 whitespace-nowrap">Delete</button>
-							</form>
+							<form id="make-primary-{{ $addr->id }}" method="POST" action="{{ route('customer.address.primary', $addr->id) }}">@csrf</form>
+							<form id="delete-address-{{ $addr->id }}" method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">@csrf @method('DELETE')</form>
+
+							@if($addr->is_primary)
+								<button class="px-2 py-1 text-sm rounded border w-28 whitespace-nowrap bg-gray-200 border-gray-300 text-gray-500 cursor-not-allowed" disabled>Primary</button>
+							@else
+								<button type="button" class=" bg-emerald-700 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white w-28 whitespace-nowrap" onclick="openPrimaryConfirm('make-primary-{{ $addr->id }}')">Make Primary</button>
+							@endif
+							<button type="button" class="bg-red-600 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-red-600/80 hover:text-white w-20 whitespace-nowrap" onclick="openDeleteConfirm('delete-address-{{ $addr->id }}')">Delete</button>
 						</div>
 					</div>
-				@empty
-					<p class="text-sm text-gray-500">No addresses yet.</p>
-				@endforelse
-			</div>
+					@empty
+						<p class="text-sm text-gray-500">No addresses yet.</p>
+					@endforelse
+				</div>
 		</div>
 	</div>
 </div>
@@ -104,7 +104,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Modal helpers for address actions
+let pendingFormId = null;
+function openPrimaryConfirm(formId){
+    pendingFormId = formId;
+    const m = document.getElementById('confirm-primary-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+}
+function openDeleteConfirm(formId){
+    pendingFormId = formId;
+    const m = document.getElementById('confirm-delete-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeModal(id){
+    const m = document.getElementById(id);
+    m.classList.add('hidden'); m.classList.remove('flex');
+}
+window.addEventListener('DOMContentLoaded', function(){
+    var mp = document.getElementById('confirm-primary-yes');
+    if (mp) mp.addEventListener('click', function(){ if(pendingFormId){ document.getElementById(pendingFormId).submit(); }});
+    var del = document.getElementById('confirm-delete-yes');
+    if (del) del.addEventListener('click', function(){ if(pendingFormId){ document.getElementById(pendingFormId).submit(); }});
+});
 </script>
 @endpush
+
+<!-- Confirm Make Primary Modal -->
+<div id="confirm-primary-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-xl w-full max-w-sm p-4">
+        <div class="font-semibold text-lg">Make Primary Address</div>
+        <p class="text-sm text-gray-600 mt-1">Are you sure you want to make this the primary address?</p>
+        <div class="mt-4 flex justify-end gap-2">
+            <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-primary-modal')">Cancel</button>
+            <button id="confirm-primary-yes" type="button" class="px-3 py-2 rounded bg-emerald-700 text-white cursor-pointer hover:bg-emerald-700/90">Make Primary</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div id="confirm-delete-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-xl w-full max-w-sm p-4">
+        <div class="font-semibold text-lg">Delete Address</div>
+        <p class="text-sm text-gray-600 mt-1">Are you sure you want to delete this address?</p>
+        <div class="mt-4 flex justify-end gap-2">
+            <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-delete-modal')">Cancel</button>
+            <button id="confirm-delete-yes" type="button" class="px-3 py-2 rounded bg-red-600 text-white cursor-pointer hover:bg-red-700">Delete</button>
+        </div>
+    </div>
+</div>
 
 
