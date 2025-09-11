@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,11 +16,12 @@
     
             <!-- Nav Links + Logout -->
             <div class="flex items-center gap-4">
-                <a href="{{ route('preview.customer') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">Overview</a>
-                <a href="{{ route('customer.services') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">Request an Estimate</a>
-                <a href="#" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">Gallery</a>
-                <a href="#" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">About Us</a>
-                <a href="{{ route('customer.profile') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">Profile</a>
+                <a href="{{ route('preview.customer') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'preview.customer' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Overview</a>
+                <a href="{{ route('customer.allservices') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.allservices' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Services</a>
+                <a href="{{ route('customer.services') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.services' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Request an Estimate</a>
+                <a href="{{ route('customer.gallery') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.gallery' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Gallery</a>
+                <a href="{{ route('preview.customer') }}#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">About Us</a>
+                <a href="{{ route('customer.profile') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.profile' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Profile</a>
     
                 <form method="POST" action="{{ route('logout') }}" class="ml-2">
                     @csrf  

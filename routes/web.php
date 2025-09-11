@@ -54,6 +54,8 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
 Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer', [CustomerHomeController::class, 'home'])->name('preview.customer');
     Route::get('/customer/profile', [CustomerDashboardController::class, 'show'])->name('customer.profile');
+    Route::view('/customer/all-services', 'customer.allservices')->name('customer.allservices');
+    Route::view('/customer/gallery', 'customer.csgallery')->name('customer.gallery');
     Route::view('/customer/services', 'customer.services')->name('customer.services');
     Route::post('/customer/bookings', [CustomerBookingController::class, 'create'])->name('customer.bookings.create');
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');
