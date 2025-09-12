@@ -20,10 +20,12 @@ use App\Http\Controllers\EmployeeJobsController;
 use App\Http\Controllers\AdminEmployeeController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminBookingController;
+use App\Http\Controllers\AdminGalleryController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerAddressController;
 use App\Http\Controllers\CustomerHomeController;
 use App\Http\Controllers\CustomerBookingController;
+use App\Http\Controllers\CustomerGalleryController;
 
 Route::redirect('/', '/login');
 
@@ -55,7 +57,8 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer', [CustomerHomeController::class, 'home'])->name('preview.customer');
     Route::get('/customer/profile', [CustomerDashboardController::class, 'show'])->name('customer.profile');
     Route::view('/customer/all-services', 'customer.allservices')->name('customer.allservices');
-    Route::view('/customer/gallery', 'customer.csgallery')->name('customer.gallery');
+    Route::get('/customer/gallery', [CustomerGalleryController::class, 'index'])->name('customer.gallery');
+    Route::get('/customer/gallery/{serviceType}', [CustomerGalleryController::class, 'showService'])->name('customer.gallery.service');
     Route::view('/customer/services', 'customer.services')->name('customer.services');
     Route::post('/customer/bookings', [CustomerBookingController::class, 'create'])->name('customer.bookings.create');
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');
@@ -78,7 +81,11 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/employees/update-job-counts', [AdminEmployeeController::class, 'updateAllJobCounts'])->name('employees.update-job-counts');
     Route::view('/inventory', 'admin.inventory')->name('inventory');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers');
-    Route::view('/gallery', 'admin.gallery')->name('gallery');
+    Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('gallery');
+    Route::get('/gallery/{serviceType}', [AdminGalleryController::class, 'showService'])->name('gallery.service');
+    Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('gallery.store');
+    Route::put('/gallery/{id}', [AdminGalleryController::class, 'update'])->name('gallery.update');
+    Route::delete('/gallery/{id}', [AdminGalleryController::class, 'destroy'])->name('gallery.destroy');
     Route::view('/settings', 'admin.settings')->name('settings');
     Route::view('/payroll', 'admin.payroll')->name('payroll');
     // Calendar events feed for admin
