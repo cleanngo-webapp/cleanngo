@@ -18,8 +18,11 @@
                     <div class="text-lg font-semibold">Carpet Deep Cleaning</div>
                     <p class="text-white/90 text-sm mt-2">Removes dirt and allergens to restore freshness and promote a healthier home.</p>
                 </div>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#carpet" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                    <button onclick="event.stopPropagation(); showCommentsModal('carpet', 'Carpet Deep Cleaning')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
                 </div>
             </div>
         </div>
@@ -34,8 +37,11 @@
                     <div class="text-lg font-semibold">Enhanced Disinfection</div>
                     <p class="text-white/90 text-sm mt-2">Advanced disinfection for safer homes and workplaces.</p>
                 </div>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#disinfection" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                    <button onclick="event.stopPropagation(); showCommentsModal('disinfection', 'Enhanced Disinfection')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
                 </div>
             </div>
         </div>
@@ -50,8 +56,11 @@
                     <div class="text-lg font-semibold">Glass Cleaning</div>
                     <p class="text-white/90 text-sm mt-2">Streak-free shine for windows and glass surfaces.</p>
                 </div>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#glass" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                    <button onclick="event.stopPropagation(); showCommentsModal('glass', 'Glass Cleaning')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
                 </div>
             </div>
         </div>
@@ -66,8 +75,11 @@
                     <div class="text-lg font-semibold">Home Service Car Interior Detailing</div>
                     <p class="text-white/90 text-sm mt-2">Specialized deep cleaning right at your doorstep for a refreshed car interior.</p>
                 </div>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#carInterior" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                    <button onclick="event.stopPropagation(); showCommentsModal('carInterior', 'Home Service Car Interior Detailing')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
                 </div>
             </div>
         </div>
@@ -83,8 +95,11 @@
                     <div class="text-lg font-semibold">Post Construction Cleaning</div>
                     <p class="text-white/90 text-sm mt-2">Thorough cleanup to remove dust and debris for move-in ready spaces.</p>
                 </div>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#postConstruction" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                    <button onclick="event.stopPropagation(); showCommentsModal('postConstruction', 'Post Construction Cleaning')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
                 </div>
             </div>
         </div>
@@ -99,11 +114,494 @@
                     <div class="text-lg font-semibold">Sofa / Mattress Deep Cleaning</div>
                     <p class="text-white/90 text-sm mt-2">Eliminates dust, stains, and allergens to restore comfort and hygiene.</p>
                 </div>
-                <div class="mt-4 flex justify-center">
+                <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#sofa" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                        <button onclick="event.stopPropagation(); showCommentsModal('sofa', 'Sofa / Mattress Deep Cleaning')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+{{-- Comments Modal --}}
+<div id="commentsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display: none;">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        {{-- Modal Header --}}
+        <div class="bg-emerald-600 text-white p-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold" id="modalServiceName">Service Comments</h3>
+            <button onclick="closeCommentsModal()" class="text-white hover:text-gray-200 text-xl font-bold cursor-pointer">
+                ×
+            </button>
+        </div>
+
+        {{-- Modal Body --}}
+        <div class="p-4 max-h-[60vh] overflow-y-auto">
+            {{-- Add Comment Form --}}
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h4 class="text-md font-semibold text-gray-900 mb-3">Add Your Comment</h4>
+                <form id="commentForm" class="space-y-3">
+                    <input type="hidden" id="serviceType" name="service_type">
+                    
+                    {{-- Rating --}}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rating (Optional)</label>
+                        <div class="flex space-x-1" id="ratingStars">
+                          <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="1">★</button>
+                          <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="2">★</button>
+                          <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="3">★</button>
+                          <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="4">★</button>
+                          <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="5">★</button>
+                        </div>
+                        <input type="hidden" id="rating" name="rating">
+                      </div>
+
+                    {{-- Comment Text --}}
+                    <div>
+                        <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Your Comment</label>
+                        <textarea id="comment" name="comment" rows="3" 
+                                  placeholder="Share your experience with this service..."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                  required></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Minimum 10 characters, maximum 1000 characters</p>
+                    </div>
+
+                    {{-- Submit Button --}}
+                    <div class="flex justify-end">
+                        <button type="submit" id="submitCommentBtn"
+                                class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
+                            <span id="submitText">Post Comment</span>
+                            <span id="submitLoading" class="hidden">Posting...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Comments List --}}
+            <div id="commentsList" class="space-y-4">
+                <div class="text-center py-8">
+                    <div class="text-gray-400 text-4xl mb-2">💬</div>
+                    <p class="text-gray-500">Loading comments...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Edit Comment Modal --}}
+<div id="editCommentModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display: none;">
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div class="p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Comment</h3>
+            
+            <form id="editCommentForm" class="space-y-4">
+                <input type="hidden" id="editCommentId">
+                
+                {{-- Rating --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                    <div class="flex space-x-1" id="editRatingStars">
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="1">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="2">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="3">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="4">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="5">★</button>
+                    </div>
+                    <input type="hidden" id="editRating" name="rating">
+                </div>
+
+                {{-- Comment Text --}}
+                <div>
+                    <label for="editComment" class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+                    <textarea id="editComment" name="comment" rows="3" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              required></textarea>
+                </div>
+
+                {{-- Buttons --}}
+                <div class="flex space-x-3 justify-end">
+                    <button type="button" 
+                            onclick="closeEditCommentModal()"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                        Update Comment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentServiceType = null;
+let currentServiceName = null;
+
+// Show comments modal
+function showCommentsModal(serviceType, serviceName) {
+    currentServiceType = serviceType;
+    currentServiceName = serviceName;
+    
+    document.getElementById('modalServiceName').textContent = serviceName + ' - Comments';
+    document.getElementById('serviceType').value = serviceType;
+    
+    const modal = document.getElementById('commentsModal');
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Load comments
+    loadComments(serviceType);
+}
+
+// Close comments modal
+function closeCommentsModal() {
+    const modal = document.getElementById('commentsModal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    document.getElementById('commentForm').reset();
+    resetRating();
+}
+
+// Load comments for a service
+async function loadComments(serviceType) {
+    console.log('Loading comments for service:', serviceType);
+    
+    try {
+        const response = await fetch(`/service-comments/${serviceType}`);
+        console.log('Comments response status:', response.status);
+        
+        const data = await response.json();
+        console.log('Comments data received:', data);
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        displayComments(data.comments);
+    } catch (error) {
+        console.error('Error loading comments:', error);
+        document.getElementById('commentsList').innerHTML = `
+            <div class="text-center py-8">
+                <div class="text-red-400 text-4xl mb-2">⚠️</div>
+                <p class="text-red-500">Failed to load comments. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+// Display comments in the modal
+function displayComments(comments) {
+    console.log('Displaying comments:', comments);
+    const commentsList = document.getElementById('commentsList');
+    
+    if (comments.length === 0) {
+        console.log('No comments to display');
+        commentsList.innerHTML = `
+            <div class="text-center py-8">
+                <div class="text-gray-400 text-4xl mb-2">💬</div>
+                <p class="text-gray-500">No comments yet. Be the first to share your experience!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log('Rendering', comments.length, 'comments');
+    
+    commentsList.innerHTML = comments.map(comment => `
+        <div class="border border-gray-200 rounded-lg p-4">
+            <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center space-x-2">
+                    <span class="font-semibold text-gray-900">${comment.customer_name}</span>
+                    ${comment.rating ? `<div class="flex text-yellow-400">${'★'.repeat(comment.rating)}${'☆'.repeat(5-comment.rating)}</div>` : ''}
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-500">${comment.formatted_date}</span>
+                    ${comment.is_edited ? '<span class="text-xs text-gray-400">(edited)</span>' : ''}
+                </div>
+            </div>
+            <p class="text-gray-700 mb-3">${comment.comment}</p>
+            ${comment.can_edit || comment.can_delete ? `
+                <div class="flex space-x-2">
+                    ${comment.can_edit ? `<button onclick="editComment(${comment.id}, '${comment.comment.replace(/'/g, "\\'")}', ${comment.rating || 0})" class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>` : ''}
+                    ${comment.can_delete ? `<button onclick="deleteComment(${comment.id})" class="text-red-600 hover:text-red-800 text-sm">Delete</button>` : ''}
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+// Rating functionality
+function setupRating(starsContainer, ratingInput) {
+    const stars = starsContainer.querySelectorAll('button');
+    
+    stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+            const rating = index + 1;
+            ratingInput.value = rating;
+            
+            // Update star display
+            stars.forEach((s, i) => {
+                s.textContent = i < rating ? '★' : '☆';
+                s.className = i < rating ? 'text-yellow-400 text-xl' : 'text-gray-300 hover:text-yellow-400 text-xl';
+            });
+        });
+        
+        star.addEventListener('mouseenter', () => {
+            const rating = index + 1;
+            stars.forEach((s, i) => {
+                s.textContent = i < rating ? '★' : '☆';
+                s.className = i < rating ? 'text-yellow-400 text-xl' : 'text-gray-300 text-xl';
+            });
+        });
+    });
+    
+    starsContainer.addEventListener('mouseleave', () => {
+        const currentRating = parseInt(ratingInput.value) || 0;
+        stars.forEach((s, i) => {
+            s.textContent = i < currentRating ? '★' : '☆';
+            s.className = i < currentRating ? 'text-yellow-400 text-xl' : 'text-gray-300 hover:text-yellow-400 text-xl';
+        });
+    });
+}
+
+// Reset rating display
+function resetRating() {
+    const stars = document.querySelectorAll('#ratingStars button');
+    const ratingInput = document.getElementById('rating');
+    ratingInput.value = '';
+    
+    stars.forEach(star => {
+        star.textContent = '☆';
+        star.className = 'text-gray-300 hover:text-yellow-400 text-xl';
+    });
+}
+
+// Submit comment form
+document.getElementById('commentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    console.log('Form submit event triggered!');
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitCommentBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoading = document.getElementById('submitLoading');
+    
+    submitBtn.disabled = true;
+    submitText.classList.add('hidden');
+    submitLoading.classList.remove('hidden');
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    // Debug: Log the data being sent
+    console.log('Submitting comment data:', data);
+    console.log('Form validation check - comment length:', data.comment ? data.comment.length : 'no comment');
+    console.log('Form validation check - service type:', data.service_type);
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        showNotification('Security token missing. Please refresh the page.', 'error');
+        resetSubmitButton();
+        return;
+    }
+    
+    try {
+        console.log('Making request to /service-comments with data:', data);
+        
+        const response = await fetch('/service-comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        if (response.ok && result.success) {
+            console.log('Comment added successfully, reloading comments...');
+            // Reload comments
+            loadComments(currentServiceType);
+            // Reset form
+            this.reset();
+            resetRating();
+            // Show success message
+            showNotification('Comment added successfully!', 'success');
+        } else {
+            // Handle validation errors
+            if (result.details) {
+                let errorMessage = 'Validation errors:\n';
+                for (const [field, errors] of Object.entries(result.details)) {
+                    errorMessage += `${field}: ${errors.join(', ')}\n`;
+                }
+                showNotification(errorMessage, 'error');
+            } else {
+                throw new Error(result.error || 'Failed to add comment');
+            }
+        }
+    } catch (error) {
+        console.error('Error adding comment:', error);
+        showNotification('Failed to add comment: ' + error.message, 'error');
+    } finally {
+        resetSubmitButton();
+    }
+});
+
+// Reset submit button state
+function resetSubmitButton() {
+    const submitBtn = document.getElementById('submitCommentBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoading = document.getElementById('submitLoading');
+    
+    submitBtn.disabled = false;
+    submitText.classList.remove('hidden');
+    submitLoading.classList.add('hidden');
+}
+
+// Edit comment
+function editComment(commentId, commentText, rating) {
+    document.getElementById('editCommentId').value = commentId;
+    document.getElementById('editComment').value = commentText;
+    document.getElementById('editRating').value = rating;
+    
+    // Update rating stars
+    const stars = document.querySelectorAll('#editRatingStars button');
+    stars.forEach((star, index) => {
+        star.textContent = index < rating ? '★' : '☆';
+        star.className = index < rating ? 'text-yellow-400 text-xl' : 'text-gray-300 hover:text-yellow-400 text-xl';
+    });
+    
+    const modal = document.getElementById('editCommentModal');
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close edit comment modal
+function closeEditCommentModal() {
+    const modal = document.getElementById('editCommentModal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Delete comment
+async function deleteComment(commentId) {
+    if (!confirm('Are you sure you want to delete this comment?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/service-comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            loadComments(currentServiceType);
+            showNotification('Comment deleted successfully!', 'success');
+        } else {
+            throw new Error(result.error || 'Failed to delete comment');
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        showNotification('Failed to delete comment. Please try again.', 'error');
+    }
+}
+
+// Submit edit comment form
+document.getElementById('editCommentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const commentId = document.getElementById('editCommentId').value;
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    try {
+        const response = await fetch(`/service-comments/${commentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            closeEditCommentModal();
+            loadComments(currentServiceType);
+            showNotification('Comment updated successfully!', 'success');
+        } else {
+            throw new Error(result.error || 'Failed to update comment');
+        }
+    } catch (error) {
+        console.error('Error updating comment:', error);
+        showNotification('Failed to update comment. Please try again.', 'error');
+    }
+});
+
+// Show notification
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Initialize rating functionality when modal opens
+document.addEventListener('DOMContentLoaded', function() {
+    setupRating(document.getElementById('ratingStars'), document.getElementById('rating'));
+    setupRating(document.getElementById('editRatingStars'), document.getElementById('editRating'));
+    
+    // Close modals when clicking outside
+    document.getElementById('commentsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCommentsModal();
+        }
+    });
+    
+    document.getElementById('editCommentModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeEditCommentModal();
+        }
+    });
+    
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeCommentsModal();
+            closeEditCommentModal();
+        }
+    });
+});
+</script>
 @endsection

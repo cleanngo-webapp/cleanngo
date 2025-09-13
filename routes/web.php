@@ -26,6 +26,7 @@ use App\Http\Controllers\CustomerAddressController;
 use App\Http\Controllers\CustomerHomeController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerGalleryController;
+use App\Http\Controllers\ServiceCommentController;
 
 Route::redirect('/', '/login');
 
@@ -64,6 +65,30 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');
     Route::delete('/customer/addresses/{address}', [CustomerAddressController::class, 'destroy'])->name('customer.address.destroy');
     Route::post('/customer/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])->name('customer.address.primary');
+    
+    // Service Comments routes
+    Route::get('/service-comments/{serviceType}', [ServiceCommentController::class, 'getComments'])->name('service.comments.get');
+    Route::post('/service-comments', [ServiceCommentController::class, 'store'])->name('service.comments.store');
+    Route::put('/service-comments/{id}', [ServiceCommentController::class, 'update'])->name('service.comments.update');
+    Route::delete('/service-comments/{id}', [ServiceCommentController::class, 'destroy'])->name('service.comments.destroy');
+    
+    // Debug route to check comments
+    Route::get('/debug-comments', function() {
+        $comments = App\Models\ServiceComment::with('customer')->get();
+        return response()->json([
+            'total_comments' => $comments->count(),
+            'comments' => $comments->map(function($c) {
+                return [
+                    'id' => $c->id,
+                    'service_type' => $c->service_type,
+                    'is_approved' => $c->is_approved,
+                    'customer_id' => $c->customer_id,
+                    'customer_name' => $c->customer ? $c->customer->first_name : 'No customer',
+                    'comment_preview' => substr($c->comment, 0, 50)
+                ];
+            })
+        ]);
+    });
 });
 
 // Admin routes with sidebar layout pages
