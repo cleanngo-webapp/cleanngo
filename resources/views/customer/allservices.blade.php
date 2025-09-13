@@ -164,7 +164,7 @@
                                   placeholder="Share your experience with this service..."
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                   required></textarea>
-                        <p class="text-xs text-gray-500 mt-1">Minimum 10 characters, maximum 1000 characters</p>
+                        <p class="text-xs text-gray-500 mt-1">Minimum 1 character, maximum 1000 characters</p>
                     </div>
 
                     {{-- Submit Button --}}
@@ -223,11 +223,11 @@
                 <div class="flex space-x-3 justify-end">
                     <button type="button" 
                             onclick="closeEditCommentModal()"
-                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer">
                         Cancel
                     </button>
                     <button type="submit" 
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer">
                         Update Comment
                     </button>
                 </div>
@@ -236,9 +236,43 @@
     </div>
 </div>
 
+{{-- Delete Confirmation Modal --}}
+<div id="deleteCommentModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display: none;">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="text-center">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Delete Comment</h3>
+                <p class="text-sm text-gray-500 mb-6">
+                    Are you sure you want to delete this comment? This action cannot be undone.
+                </p>
+                <div class="flex space-x-3 justify-center">
+                    <button type="button" 
+                            onclick="closeDeleteCommentModal()"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="button" 
+                            onclick="confirmDeleteComment()"
+                            class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer">
+                        Delete Comment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let currentServiceType = null;
 let currentServiceName = null;
+let commentToDelete = null;
 
 // Show comments modal
 function showCommentsModal(serviceType, serviceName) {
@@ -329,8 +363,8 @@ function displayComments(comments) {
             <p class="text-gray-700 mb-3">${comment.comment}</p>
             ${comment.can_edit || comment.can_delete ? `
                 <div class="flex space-x-2">
-                    ${comment.can_edit ? `<button onclick="editComment(${comment.id}, '${comment.comment.replace(/'/g, "\\'")}', ${comment.rating || 0})" class="text-blue-600 hover:text-blue-800 text-sm">Edit</button>` : ''}
-                    ${comment.can_delete ? `<button onclick="deleteComment(${comment.id})" class="text-red-600 hover:text-red-800 text-sm">Delete</button>` : ''}
+                    ${comment.can_edit ? `<button onclick="editComment(${comment.id}, '${comment.comment.replace(/'/g, "\\'")}', ${comment.rating || 0})" class="text-blue-600 hover:text-blue-800 text-sm cursor-pointer">Edit</button>` : ''}
+                    ${comment.can_delete ? `<button onclick="deleteComment(${comment.id})" class="text-red-600 hover:text-red-800 text-sm cursor-pointer">Delete</button>` : ''}
                 </div>
             ` : ''}
         </div>
@@ -501,14 +535,32 @@ function closeEditCommentModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Delete comment
-async function deleteComment(commentId) {
-    if (!confirm('Are you sure you want to delete this comment?')) {
+// Delete comment - show confirmation modal
+function deleteComment(commentId) {
+    commentToDelete = commentId;
+    const modal = document.getElementById('deleteCommentModal');
+    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close delete confirmation modal
+function closeDeleteCommentModal() {
+    const modal = document.getElementById('deleteCommentModal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    commentToDelete = null;
+}
+
+// Confirm delete comment
+async function confirmDeleteComment() {
+    if (!commentToDelete) {
         return;
     }
     
     try {
-        const response = await fetch(`/service-comments/${commentId}`, {
+        const response = await fetch(`/service-comments/${commentToDelete}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -526,6 +578,8 @@ async function deleteComment(commentId) {
     } catch (error) {
         console.error('Error deleting comment:', error);
         showNotification('Failed to delete comment. Please try again.', 'error');
+    } finally {
+        closeDeleteCommentModal();
     }
 }
 
@@ -595,11 +649,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    document.getElementById('deleteCommentModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteCommentModal();
+        }
+    });
+    
     // Close modals with Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeCommentsModal();
             closeEditCommentModal();
+            closeDeleteCommentModal();
         }
     });
 });

@@ -76,7 +76,7 @@ class ServiceCommentController extends Controller
         try {
             $request->validate([
                 'service_type' => 'required|in:carpet,disinfection,glass,carInterior,postConstruction,sofa',
-                'comment' => 'required|string|min:10|max:1000',
+                'comment' => 'required|string|min:1|max:1000',
                 'rating' => 'nullable|integer|min:1|max:5'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -190,7 +190,7 @@ class ServiceCommentController extends Controller
     {
         // Validate the request
         $request->validate([
-            'comment' => 'required|string|min:10|max:1000',
+            'comment' => 'required|string|min:1|max:1000',
             'rating' => 'nullable|integer|min:1|max:5'
         ]);
 
@@ -298,7 +298,14 @@ class ServiceCommentController extends Controller
     private function canEditComment($comment, $customer = null)
     {
         if (!$customer) {
-            $customer = Auth::guard('customer')->user();
+            $user = Auth::guard('customer')->user();
+            if (!$user) {
+                $user = Auth::user();
+            }
+            if (!$user) {
+                return false;
+            }
+            $customer = $user->customer;
         }
 
         if (!$customer) {
@@ -315,7 +322,14 @@ class ServiceCommentController extends Controller
     private function canDeleteComment($comment, $customer = null)
     {
         if (!$customer) {
-            $customer = Auth::guard('customer')->user();
+            $user = Auth::guard('customer')->user();
+            if (!$user) {
+                $user = Auth::user();
+            }
+            if (!$user) {
+                return false;
+            }
+            $customer = $user->customer;
         }
 
         if (!$customer) {
