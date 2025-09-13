@@ -96,12 +96,29 @@
 
         <!-- Right: Receipt -->
         <aside class="bg-white rounded-xl border p-4">
-            <div class="font-semibold">Total Estimation</div>
-            <div class="text-xs text-gray-500" id="receipt_title">Sofa / Mattress Deep Cleaning</div>
-            <div class="mt-2 text-sm" id="receipt_lines"></div>
-            <div class="mt-2 text-sm flex justify-between"><span>Subtotal</span> <span id="estimate_subtotal">PHP 0.00</span></div>
-            <div class="text-sm flex justify-between font-semibold"><span>TOTAL</span> <span id="estimate_total">PHP 0.00</span></div>
-            <button class="mt-3 px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="openBookingForm()">Book Now</button>
+            <div class="font-bold text-lg uppercase mb-2">Total Estimation</div>
+            <div class="text-xs text-gray-500 mb-3" id="receipt_title">Sofa / Mattress Deep Cleaning</div>
+            
+            <!-- Service Items List -->
+            <div id="receipt_lines" class="space-y-3 mb-4"></div>
+            
+            <!-- Separator Line -->
+            <div class="border-t border-gray-300 my-3"></div>
+            
+            <!-- Totals -->
+            <div class="space-y-1">
+                <div class="text-sm flex justify-between">
+                    <span>Subtotal</span> 
+                    <span id="estimate_subtotal">PHP 0.00</span>
+                </div>
+                <div class="text-sm flex justify-between font-bold">
+                    <span>TOTAL</span> 
+                    <span id="estimate_total">PHP 0.00</span>
+                </div>
+            </div>
+            
+            <!-- Book Now Button -->
+            <button class="mt-4 w-full px-4 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200" onclick="openBookingForm()">Book Now</button>
         </aside>
     </div>
 </div>
@@ -147,47 +164,173 @@ document.addEventListener('DOMContentLoaded', () => {
 function calc(){
   const receipt = [];
   let subtotal = 0;
+  let itemCounter = 1;
 
-  // 4000 per unit items
   const u = id => parseInt(document.getElementById(id)?.value || 0);
-  const addLine = (label, qty, price) => { if(qty>0){ receipt.push(`<div class=\"flex justify-between\"><span>${label} x ${qty}</span><span>${peso(qty*price)}</span></div>`); subtotal += qty*price; } };
-
-  addLine('Sofa 1-seater', u('sofa_1'), 4000);
-  addLine('Sofa 2-seater', u('sofa_2'), 4000);
-  addLine('Sofa 3-seater', u('sofa_3'), 4000);
-  addLine('Sofa 4-seater', u('sofa_4'), 4000);
-  addLine('Sofa 5-seater', u('sofa_5'), 4000);
-  addLine('Sofa 6-seater', u('sofa_6'), 4000);
-  addLine('Sofa 7-seater', u('sofa_7'), 4000);
-  addLine('Sofa 8-seater', u('sofa_8'), 4000);
-  addLine('Sofa L-shape', u('sofa_l'), 4000);
-  addLine('Sofa Cross Sectional', u('sofa_cross'), 4000);
-
-  addLine('Mattress Single', u('mattress_single'), 4000);
-  addLine('Mattress Double', u('mattress_double'), 4000);
-  addLine('Mattress King', u('mattress_king'), 4000);
-  addLine('Mattress California', u('mattress_california'), 4000);
-
-  // sqm * qty * 500 services
   const s = id => parseFloat(document.getElementById(id)?.value || 0);
-  const sqmLine = (label, sqmId, qtyId) => {
-    const sqm = s(sqmId), qty = s(qtyId);
-    if (sqm>0 && qty>0) {
-      const amt = sqm * qty * 500;
-      receipt.push(`<div class=\"flex justify-between\"><span>${label}: ${sqm} sqm x ${qty}</span><span>${peso(amt)}</span></div>`);
-      subtotal += amt;
-    }
-  };
-  sqmLine('Carpet Deep Cleaning', 'carpet_sqm', 'carpet_qty');
-  sqmLine('Post Construction Cleaning', 'pcc_sqm', 'pcc_qty');
-  sqmLine('Enhanced Disinfection', 'disinfect_sqm', 'disinfect_qty');
-  sqmLine('Glass Cleaning', 'glass_sqm', 'glass_qty');
 
-  // Car detailing (4000 per qty by type)
-  addLine('Car Detailing - Sedan', u('car_sedan'), 4000);
-  addLine('Car Detailing - SUV', u('car_suv'), 4000);
-  addLine('Car Detailing - Van', u('car_van'), 4000);
-  addLine('Car Detailing - Coaster', u('car_coaster'), 4000);
+  // Group Sofa and Mattress services together
+  const sofaItems = [];
+  const sofaInputs = [
+    {id: 'sofa_1', label: '1 seater', qty: u('sofa_1')},
+    {id: 'sofa_2', label: '2 seater', qty: u('sofa_2')},
+    {id: 'sofa_3', label: '3 seater', qty: u('sofa_3')},
+    {id: 'sofa_4', label: '4 seater', qty: u('sofa_4')},
+    {id: 'sofa_5', label: '5 seater', qty: u('sofa_5')},
+    {id: 'sofa_6', label: '6 seater', qty: u('sofa_6')},
+    {id: 'sofa_7', label: '7 seater', qty: u('sofa_7')},
+    {id: 'sofa_8', label: '8 seater', qty: u('sofa_8')},
+    {id: 'sofa_l', label: 'L-shape', qty: u('sofa_l')},
+    {id: 'sofa_cross', label: 'Cross Sectional', qty: u('sofa_cross')}
+  ];
+
+  const mattressItems = [];
+  const mattressInputs = [
+    {id: 'mattress_single', label: 'Single', qty: u('mattress_single')},
+    {id: 'mattress_double', label: 'Double', qty: u('mattress_double')},
+    {id: 'mattress_king', label: 'King', qty: u('mattress_king')},
+    {id: 'mattress_california', label: 'California', qty: u('mattress_california')}
+  ];
+
+  // Collect sofa items
+  sofaInputs.forEach(item => {
+    if (item.qty > 0) {
+      sofaItems.push({...item, price: 4000, total: item.qty * 4000});
+    }
+  });
+
+  // Collect mattress items
+  mattressInputs.forEach(item => {
+    if (item.qty > 0) {
+      mattressItems.push({...item, price: 4000, total: item.qty * 4000});
+    }
+  });
+
+  // Create combined Sofa/Mattress card if any items exist
+  if (sofaItems.length > 0 || mattressItems.length > 0) {
+    const allItems = [...sofaItems, ...mattressItems];
+    const totalAmount = allItems.reduce((sum, item) => sum + item.total, 0);
+    
+    let itemsHtml = '';
+    allItems.forEach(item => {
+      itemsHtml += `
+        <div class="flex justify-between items-center py-1">
+          <div class="flex-1">
+            <span class="text-xs text-gray-600">${item.label}</span>
+            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
+          </div>
+          <span class="text-xs font-semibold">${peso(item.total)}</span>
+        </div>
+      `;
+    });
+
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
+            <div class="mt-2 space-y-1">
+              ${itemsHtml}
+            </div>
+          </div>
+          <button onclick="removeSofaMattressGroup()" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+        </div>
+        <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+          <span class="text-xs text-gray-500">Total</span>
+          <span class="font-semibold">${peso(totalAmount)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += totalAmount;
+    itemCounter++;
+  }
+
+  // Car Interior Detailing - group by type
+  const carItems = [];
+  const carInputs = [
+    {id: 'car_sedan', label: 'Sedan', qty: u('car_sedan')},
+    {id: 'car_suv', label: 'SUV', qty: u('car_suv')},
+    {id: 'car_van', label: 'Van', qty: u('car_van')},
+    {id: 'car_coaster', label: 'Coaster', qty: u('car_coaster')}
+  ];
+
+  carInputs.forEach(item => {
+    if (item.qty > 0) {
+      carItems.push({...item, price: 4000, total: item.qty * 4000});
+    }
+  });
+
+  if (carItems.length > 0) {
+    const totalAmount = carItems.reduce((sum, item) => sum + item.total, 0);
+    
+    let itemsHtml = '';
+    carItems.forEach(item => {
+      itemsHtml += `
+        <div class="flex justify-between items-center py-1">
+          <div class="flex-1">
+            <span class="text-xs text-gray-600">${item.label}</span>
+            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
+          </div>
+          <span class="text-xs font-semibold">${peso(item.total)}</span>
+        </div>
+      `;
+    });
+
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
+            <div class="mt-2 space-y-1">
+              ${itemsHtml}
+            </div>
+          </div>
+          <button onclick="removeCarGroup()" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+        </div>
+        <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+          <span class="text-xs text-gray-500">Total</span>
+          <span class="font-semibold">${peso(totalAmount)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += totalAmount;
+    itemCounter++;
+  }
+
+  // SQM-based services (each as separate card)
+  const sqmServices = [
+    {label: 'Carpet Deep Cleaning', sqmId: 'carpet_sqm', qtyId: 'carpet_qty'},
+    {label: 'Post Construction Cleaning', sqmId: 'pcc_sqm', qtyId: 'pcc_qty'},
+    {label: 'Enhanced Disinfection', sqmId: 'disinfect_sqm', qtyId: 'disinfect_qty'},
+    {label: 'Glass Cleaning', sqmId: 'glass_sqm', qtyId: 'glass_qty'}
+  ];
+
+  sqmServices.forEach(service => {
+    const sqm = s(service.sqmId), qty = s(service.qtyId);
+    if (sqm > 0 && qty > 0) {
+      const amt = sqm * qty * 500;
+      receipt.push(`
+        <div class="border border-gray-200 rounded-lg p-3">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex-1">
+              <div class="font-semibold text-sm">${itemCounter}. ${service.label}</div>
+              <div class="text-xs text-gray-600">How many square meters?</div>
+              <div class="text-xs text-gray-500 text-right">${sqm}</div>
+              <div class="text-xs text-gray-600">Qty</div>
+              <div class="text-xs text-gray-500 text-right">${qty}</div>
+            </div>
+            <button onclick="removeSqmItem('${service.sqmId}', '${service.qtyId}')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs text-gray-500">x ${qty}</span>
+            <span class="font-semibold">${peso(amt)}</span>
+          </div>
+        </div>
+      `);
+      subtotal += amt;
+      itemCounter++;
+    }
+  });
 
   document.getElementById('receipt_lines').innerHTML = receipt.join('');
   document.getElementById('estimate_subtotal').textContent = peso(subtotal);
@@ -195,6 +338,38 @@ function calc(){
   return subtotal;
 }
 document.addEventListener('input', function(e){ if(e.target.closest('input')) calc(); });
+
+// Remove item functions
+function removeItem(inputId) {
+  document.getElementById(inputId).value = 0;
+  calc();
+}
+
+function removeSqmItem(sqmId, qtyId) {
+  document.getElementById(sqmId).value = 0;
+  document.getElementById(qtyId).value = 0;
+  calc();
+}
+
+function removeSofaMattressGroup() {
+  // Clear all sofa inputs
+  ['sofa_1', 'sofa_2', 'sofa_3', 'sofa_4', 'sofa_5', 'sofa_6', 'sofa_7', 'sofa_8', 'sofa_l', 'sofa_cross'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  // Clear all mattress inputs
+  ['mattress_single', 'mattress_double', 'mattress_king', 'mattress_california'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  calc();
+}
+
+function removeCarGroup() {
+  // Clear all car inputs
+  ['car_sedan', 'car_suv', 'car_van', 'car_coaster'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  calc();
+}
 
 function openBookingForm(){
   const total = calc();
