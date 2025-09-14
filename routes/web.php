@@ -17,9 +17,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\EmployeeProfileController;
 use App\Http\Controllers\EmployeeJobsController;
+use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\AdminEmployeeController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminBookingController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminGalleryController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\CustomerAddressController;
@@ -43,7 +45,7 @@ Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->name('dashb
 // Simple preview routes for role dashboards (no auth/guards yet)
 // Employee routes
 Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('employee.')->group(function () {
-    Route::view('/', 'employee.dashboard')->name('dashboard');
+    Route::get('/', [EmployeeDashboardController::class, 'index'])->name('dashboard');
     Route::get('/jobs', [EmployeeJobsController::class, 'index'])->name('jobs');
     Route::post('/jobs/{bookingId}/start', [EmployeeJobsController::class, 'start'])->name('jobs.start');
     Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
@@ -93,7 +95,7 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
 
 // Admin routes with sidebar layout pages
 Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::view('/', 'admin.dashboard')->name('dashboard');
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::view('/bookings', 'admin.bookings')->name('bookings');
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings');
     Route::post('/bookings', [AdminBookingController::class, 'store'])->name('bookings.store');

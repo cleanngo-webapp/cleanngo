@@ -12,8 +12,8 @@
         <div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Today's Bookings</h2></div>
     </div>
 
-    <div class="mt-6 overflow-auto">
-        <table class="min-w-full bg-white rounded border text-sm">
+    <div class="mt-6 overflow-auto rounded-xl">
+        <table class="min-w-full bg-white rounded-xl text-sm">
             <thead class="bg-emerald-50">
                 <tr class="font-semibold border-b">
                     <th class="p-2 text-center text-2xl" colspan="8">Employee Records Table</th>
