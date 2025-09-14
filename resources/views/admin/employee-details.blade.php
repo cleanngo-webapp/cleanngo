@@ -94,12 +94,12 @@
                 <div>
                     <label class="block text-sm font-medium">Department</label>
                     <input type="text" name="department" value="{{ old('department', $user->employee?->department) }}" 
-                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                           class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
                            placeholder="e.g., Operations, Customer Service" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Employment Type</label>
-                    <select name="employment_type" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer">
+                    <select name="employment_type" class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer">
                         <option value="">Select Type</option>
                         @foreach (['full-time'=>'Full-time','part-time'=>'Part-time','contract'=>'Contract'] as $k => $v)
                             <option value="{{ $k }}" @selected(old('employment_type', $user->employee?->employment_type) === $k)>{{ $v }}</option>
@@ -109,11 +109,11 @@
                 <div>
                     <label class="block text-sm font-medium">Date Hired</label>
                     <input type="date" name="date_hired" value="{{ old('date_hired', optional($user->employee?->date_hired)->format('Y-m-d')) }}" 
-                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" />
+                           class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Employment Status</label>
-                    <select name="employment_status" class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer">
+                    <select name="employment_status" class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer">
                         @foreach (['active'=>'Active','inactive'=>'Inactive','terminated'=>'Terminated'] as $k => $v)
                             <option value="{{ $k }}" @selected(old('employment_status', $user->employee?->employment_status) === $k)>{{ $v }}</option>
                         @endforeach
@@ -122,7 +122,7 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium">Work Schedule</label>
                     <input type="text" name="work_schedule" value="{{ old('work_schedule', $user->employee?->work_schedule) }}" 
-                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                           class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
                            placeholder="8:00 AM – 5:00 PM (Mon–Sat)" />
                 </div>
             </div>
@@ -146,19 +146,19 @@
                 <div>
                     <label class="block text-sm font-medium">Recent Job</label>
                     <input type="text" name="recent_job" value="{{ old('recent_job', $user->employee?->recent_job) }}" 
-                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                           class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
                            placeholder="e.g., Office Cleaning - ABC Building" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Attendance</label>
                     <input type="text" name="attendance_summary" value="{{ old('attendance_summary', $user->employee?->attendance_summary) }}" 
-                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                           class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
                            placeholder="98% (Last 3 months)" />
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Performance Rating</label>
                     <input type="text" name="performance_rating" value="{{ old('performance_rating', $user->employee?->performance_rating) }}" 
-                           class="mt-1 w-full border rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                           class="mt-1 w-full border border-gray-100 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
                            placeholder="4.5/5" />
                 </div>
             </div>
