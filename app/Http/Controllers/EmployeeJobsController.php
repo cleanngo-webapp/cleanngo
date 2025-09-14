@@ -17,16 +17,24 @@ class EmployeeJobsController extends Controller
                 'bookings' => $empty,
                 'locationsData' => [],
                 'receiptData' => [],
+                'search' => '',
+                'sort' => 'date',
+                'sortOrder' => 'desc'
             ]);
         }
 
-        $bookings = DB::table('bookings as b')
+        // Get search and sort parameters
+        $search = $request->get('search', '');
+        $sort = $request->get('sort', 'date'); // 'date' or 'customer'
+        $sortOrder = $request->get('sort_order', 'desc'); // 'asc' or 'desc'
+
+        // Build the base query
+        $query = DB::table('bookings as b')
             ->leftJoin('customers as c', 'c.id', '=', 'b.customer_id')
             ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
             ->leftJoin('booking_staff_assignments as a', 'a.booking_id', '=', 'b.id')
             ->leftJoin('addresses as primary_addr', 'primary_addr.id', '=', 'c.default_address_id')
             ->where('a.employee_id', $employeeId)
-            ->orderByDesc('b.scheduled_start')
             ->select([
                 'b.id', 'b.code', 'b.status', 'b.scheduled_start',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
@@ -36,8 +44,30 @@ class EmployeeJobsController extends Controller
                 DB::raw("COALESCE(primary_addr.city,'') as address_city"),
                 DB::raw("COALESCE(primary_addr.province,'') as address_province"),
                 'primary_addr.latitude', 'primary_addr.longitude',
-            ])
-            ->paginate(15);
+            ]);
+
+        // Apply search logic - search across relevant fields
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('b.code', 'like', "%{$search}%")
+                  ->orWhere('u.first_name', 'like', "%{$search}%")
+                  ->orWhere('u.last_name', 'like', "%{$search}%")
+                  ->orWhere('u.phone', 'like', "%{$search}%")
+                  ->orWhere('b.status', 'like', "%{$search}%")
+                  ->orWhereRaw("CONCAT(u.first_name, ' ', u.last_name) LIKE ?", ["%{$search}%"]);
+            });
+        }
+
+        // Apply sorting with order
+        if ($sort === 'customer') {
+            $query->orderBy('u.first_name', $sortOrder)
+                  ->orderBy('u.last_name', $sortOrder);
+        } else {
+            // Default sort by date
+            $query->orderBy('b.scheduled_start', $sortOrder);
+        }
+
+        $bookings = $query->paginate(15);
 
         // Build map payload
         $locationsData = collect($bookings->items())->mapWithKeys(function ($b) {
@@ -78,6 +108,9 @@ class EmployeeJobsController extends Controller
             'bookings' => $bookings,
             'locationsData' => $locationsData,
             'receiptData' => $receiptData,
+            'search' => $search,
+            'sort' => $sort,
+            'sortOrder' => $sortOrder
         ]);
     }
 

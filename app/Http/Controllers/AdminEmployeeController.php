@@ -10,9 +10,14 @@ use Illuminate\Support\Facades\DB;
 
 class AdminEmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $today = Carbon::today();
+        
+        // Get search and sort parameters
+        $search = $request->get('search', '');
+        $sort = $request->get('sort', 'employee_id'); // 'employee_id' or 'name'
+        $sortOrder = $request->get('sort_order', 'asc'); // 'asc' or 'desc'
 
         // Get statistics for the dashboard cards
         $employeesAssignedToday = DB::table('booking_staff_assignments')
@@ -30,8 +35,8 @@ class AdminEmployeeController extends Controller
             ->whereDate('scheduled_start', $today)
             ->count();
 
-        // List ALL users with role=employee (even if employees row not created yet)
-        $employees = DB::table('users')
+        // Build the base query
+        $query = DB::table('users')
             ->leftJoin('employees', 'employees.user_id', '=', 'users.id')
             ->where('users.role', 'employee')
             ->select([
@@ -57,15 +62,40 @@ class AdminEmployeeController extends Controller
                   ->whereDate('b.scheduled_start', $today)
                   ->whereColumn('bsa.employee_id', 'employees.id')
                   ->selectRaw('count(*)');
-            }, 'jobs_assigned_today')
-            ->orderBy('employees.id', 'asc')
-            ->paginate(15);
+            }, 'jobs_assigned_today');
+
+        // Apply search logic - search across all relevant fields
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('users.first_name', 'like', "%{$search}%")
+                  ->orWhere('users.last_name', 'like', "%{$search}%")
+                  ->orWhere('users.username', 'like', "%{$search}%")
+                  ->orWhere('users.phone', 'like', "%{$search}%")
+                  ->orWhere('employees.employee_code', 'like', "%{$search}%")
+                  ->orWhere('employees.contact_number', 'like', "%{$search}%")
+                  ->orWhereRaw("CONCAT(users.first_name, ' ', users.last_name) LIKE ?", ["%{$search}%"]);
+            });
+        }
+
+        // Apply sorting with order
+        if ($sort === 'name') {
+            $query->orderBy('users.first_name', $sortOrder)
+                  ->orderBy('users.last_name', $sortOrder);
+        } else {
+            // Default sort by employee_id
+            $query->orderBy('employees.id', $sortOrder);
+        }
+
+        $employees = $query->paginate(15);
 
         return view('admin.employees', compact(
             'employees',
             'employeesAssignedToday',
             'completedJobsToday',
-            'todayBookings'
+            'todayBookings',
+            'search',
+            'sort',
+            'sortOrder'
         ));
     }
 

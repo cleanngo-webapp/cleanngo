@@ -57,8 +57,39 @@
         </div>
     </div>
 
-    {{-- Employee Records Section --}}
+    {{-- Search and Sort Section --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <input type="text" 
+                           id="search-employees" 
+                           value="{{ $search ?? '' }}"
+                           placeholder="Search employees by Name, Employee ID, or Phone" 
+                           class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'employee_id') === 'employee_id' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('employee_id')">
+                        <i class="ri-user-settings-line mr-2"></i>
+                        Sort by Employee ID
+                        <i class="ri-arrow-{{ ($sort ?? 'employee_id') === 'employee_id' && ($sortOrder ?? 'asc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
+                    </button>
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'employee_id') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('name')">
+                        <i class="ri-user-line mr-2"></i>
+                        Sort by Name
+                        <i class="ri-arrow-{{ ($sort ?? 'employee_id') === 'name' && ($sortOrder ?? 'asc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Employee Records Section --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
         <div class="p-6 border-b border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -80,7 +111,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody id="employees-table-body" class="bg-white divide-y divide-gray-200">
                     @forelse ($employees as $emp)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -132,11 +163,108 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-6 py-4 border-t border-gray-100">
+        <div id="pagination-container" class="px-6 py-4 border-t border-gray-100">
             {{ $employees->links() }}
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+// Global variables for search and sort
+let currentSort = '{{ $sort ?? "employee_id" }}';
+let currentSortOrder = '{{ $sortOrder ?? "asc" }}';
+let searchTimeout;
+
+// Search and sort functionality
+function toggleSort(sortType) {
+    if (currentSort === sortType) {
+        // Toggle sort order if same sort type
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        // Set new sort type with default ascending order
+        currentSort = sortType;
+        currentSortOrder = 'asc';
+    }
+    
+    // Update button styles and icons
+    updateSortButtons();
+    
+    // Perform search/sort
+    performSearch();
+}
+
+function updateSortButtons() {
+    const buttons = document.querySelectorAll('[onclick^="toggleSort"]');
+    buttons.forEach(btn => {
+        btn.classList.remove('bg-emerald-600', 'text-white');
+        btn.classList.add('bg-gray-100', 'text-gray-700');
+        
+        // Update arrow icons
+        const icon = btn.querySelector('i:last-child');
+        if (btn.onclick.toString().includes(currentSort)) {
+            btn.classList.remove('bg-gray-100', 'text-gray-700');
+            btn.classList.add('bg-emerald-600', 'text-white');
+            icon.className = `ri-arrow-${currentSortOrder === 'desc' ? 'down' : 'up'}-line ml-2`;
+        } else {
+            icon.className = 'ri-arrow-up-line ml-2';
+        }
+    });
+}
+
+// Auto-search on input (with debounce)
+document.getElementById('search-employees').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        performSearch();
+    }, 300); // 300ms delay for faster response
+});
+
+// AJAX search function
+function performSearch() {
+    const searchTerm = document.getElementById('search-employees').value;
+    const url = new URL('{{ route("admin.employees") }}', window.location.origin);
+    
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    }
+    url.searchParams.set('sort', currentSort);
+    url.searchParams.set('sort_order', currentSortOrder);
+    
+    // Show loading state
+    const tableBody = document.getElementById('employees-table-body');
+    const paginationContainer = document.getElementById('pagination-container');
+    tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">Searching...</td></tr>';
+    paginationContainer.innerHTML = '';
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract table body content
+            const newTableBody = doc.getElementById('employees-table-body');
+            const newPagination = doc.getElementById('pagination-container');
+            
+            if (newTableBody) {
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+            if (newPagination) {
+                paginationContainer.innerHTML = newPagination.innerHTML;
+            }
+            
+            // Update URL without page refresh
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+        });
+}
+</script>
+@endpush
 @endsection
 
 
