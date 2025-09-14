@@ -6,75 +6,92 @@
 <div class="max-w-6xl mx-auto">
     <h1 class="text-2xl font-bold text-center">Bookings and Scheduling</h1>
 
-    <div class="mt-6 bg-white rounded-xl p-4">
-        <div id="admin-calendar" data-events-url="{{ route('admin.calendar.events') }}"></div>
+    <div class="max-w-3xl mx-auto mt-6 bg-white rounded-xl p-4">
+        <div id="admin-calendar" class="max-w-3xl mx-auto" data-events-url="{{ route('admin.calendar.events') }}"></div>
     </div>
 
-    <div class="mt-6 overflow-auto">
-        <div class="flex justify-end mb-2">
-            <button class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="document.getElementById('create-booking-modal').classList.remove('hidden')">+ Add Booking and Schedule</button>
+    {{-- Booking Records Section --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Booking Records</h2>
+                    <p class="text-sm text-gray-500 mt-1">Manage all customer bookings and assignments</p>
+                </div>
+                <button class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer" onclick="document.getElementById('create-booking-modal').classList.remove('hidden')">
+                    <i class="ri-add-line"></i>
+                    Add Booking
+                </button>
+            </div>
         </div>
-        <table class="min-w-full bg-white rounded border text-sm">
-            <thead class="bg-emerald-50">
-                <tr class="text-left font-semibold border-b">
-                    <th class="p-2 text-center text-2xl" colspan="8">Booking Records Table</th>
-                </tr>
-                <tr class="text-left font-semibold">
-                    <th class="p-2">Booking ID</th>
-                    <th class="p-2">Date & Time</th>
-                    <th class="p-2">Customer Name</th>
-                    <th class="p-2">Assigned Employee</th>
-                    <th class="p-2">Status</th>
-                    <th class="p-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($bookings as $b)
-                <tr class="border-t">
-                    <td class="p-2">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</td>
-                    <td class="p-2">{{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('m/d/y g:i A') : '—' }}</td>
-                    <td class="p-2">{{ $b->customer_name ?? '—' }}</td>
-                    <td class="p-2">
-                        @if(!empty($b->assigned_employee_id))
-                            {{ $b->employee_name ?? '—' }}
-                        @else
-                            <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
-                                @csrf
-                                <select name="employee_user_id" class="border rounded px-2 py-1 text-sm assign-select cursor-pointer">
-                                    <option class="cursor-pointer" value="">Assign Employee</option>
-                                    @foreach($employees as $e)
-                                        <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
-                                    @endforeach
-                                </select>
-                            </form>
-                        @endif
-                    </td>
-                    <td class="p-2">
-                        <select class="border rounded px-2 py-1 text-sm status-select cursor-pointer" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
-                            <option value="pending" {{ $b->status==='pending'?'selected':'' }}>Pending</option>
-                            <option value="in_progress" {{ $b->status==='in_progress'?'selected':'' }}>In Progress</option>
-                            <option value="confirmed" {{ $b->status==='confirmed'?'selected':'' }}>Confirm</option>
-                            <option value="completed" {{ $b->status==='completed'?'selected':'' }}>Completed</option>
-                            <option value="cancelled" {{ $b->status==='cancelled'?'selected':'' }}>Cancel</option>
-                        </select>
-                    </td>
-                    <td class="p-2">
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="px-2 py-1 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="openReceipt({{ $b->id }})" title="View Receipt">
-                                <span class="sr-only">View Receipt</span>
-                                <i class="ri-receipt-line"></i>
-                            </button>
-                            <button type="button" class="px-2 py-1 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="openLocation({{ $b->id }})" title="View Location">
-                                <span class="sr-only">View Location</span>
-                                <i class="ri-map-pin-line"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="mt-2">{{ $bookings->links() }}</div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Employee</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($bookings as $b)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y g:i A') : '—' }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $b->customer_name ?? '—' }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if(!empty($b->assigned_employee_id))
+                                <div class="text-sm text-gray-900">{{ $b->employee_name ?? '—' }}</div>
+                            @else
+                                <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
+                                    @csrf
+                                    <select name="employee_user_id" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
+                                        <option class="cursor-pointer" value="">Assign Employee</option>
+                                        @foreach($employees as $e)
+                                            <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <select class="text-sm border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 status-select cursor-pointer" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
+                                <option value="pending" {{ $b->status==='pending'?'selected':'' }}>Pending</option>
+                                <option value="in_progress" {{ $b->status==='in_progress'?'selected':'' }}>In Progress</option>
+                                <option value="confirmed" {{ $b->status==='confirmed'?'selected':'' }}>Confirmed</option>
+                                <option value="completed" {{ $b->status==='completed'?'selected':'' }}>Completed</option>
+                                <option value="cancelled" {{ $b->status==='cancelled'?'selected':'' }}>Cancelled</option>
+                            </select>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openReceipt({{ $b->id }})" title="View Receipt">
+                                    <i class="ri-receipt-line"></i>
+                                </button>
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openLocation({{ $b->id }})" title="View Location">
+                                    <i class="ri-map-pin-line"></i>                                    
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $bookings->links() }}
+        </div>
     </div>
 
     <div id="create-booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">

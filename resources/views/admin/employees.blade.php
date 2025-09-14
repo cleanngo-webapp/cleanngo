@@ -6,50 +6,135 @@
 <div class="max-w-6xl mx-auto">
     <h1 class="text-3xl font-extrabold text-center">Manage Employees & Payroll</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Employees Assigned Today</h2></div>
-        <div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Completed Jobs Today</h2></div>
-        <div class="bg-white rounded-xl p-4 shadow-sm"><h2 class="font-semibold">Today's Bookings</h2></div>
+    {{-- Employee Statistics Cards --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {{-- Employees Assigned Today Card --}}
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Employees Assigned Today</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($employeesAssignedToday ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Working on jobs today</p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        {{-- Completed Jobs Today Card --}}
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Completed Jobs Today</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($completedJobsToday ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Jobs finished today</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-lg">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        {{-- Today's Bookings Card --}}
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Today's Bookings</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($todayBookings ?? 0) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Scheduled for today</p>
+                </div>
+                <div class="bg-purple-100 p-3 rounded-lg">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="mt-6 overflow-auto rounded-xl">
-        <table class="min-w-full bg-white rounded-xl text-sm">
-            <thead class="bg-emerald-50">
-                <tr class="font-semibold border-b">
-                    <th class="p-2 text-center text-2xl" colspan="8">Employee Records Table</th>
-                </tr>
-                <tr class="text-left font-semibold">
-                    <th class="p-2">Employee ID</th>
-                    <th class="p-2">Full Name</th>
-                    <th class="p-2">Contact</th>
-                    <th class="p-2">Status</th>
-                    <th class="p-2">Total Bookings</th>
-                    <th class="p-2">Jobs Assigned Today</th>
-                    <th class="p-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($employees as $emp)
-                    <tr class="border-t">
-                        <td class="p-2">{{ $emp->employee_code ?? ($emp->employee_id ? sprintf('EMP-%03d', $emp->employee_id) : '—') }}</td>
-                        <td class="p-2">{{ trim(($emp->first_name ?? '') . ' ' . ($emp->last_name ?? '')) ?: $emp->username }}</td>
-                        <td class="p-2">{{ $emp->contact_number ?? $emp->phone ?? '—' }}</td>
-                        <td class="p-2">{{ $emp->employment_status ? ucfirst($emp->employment_status) : (($emp->is_active ?? true) ? 'Active' : 'Inactive') }}</td>
-                        <td class="p-2">{{ $emp->total_bookings ?? 0 }}</td>
-                        <td class="p-2">{{ $emp->jobs_assigned_today ?? 0 }}</td>
-                        <td class="p-2">
-                            <a href="{{ route('admin.employee.show', $emp->user_id) }}" class="px-2 py-1 border rounded inline-flex items-center gap-1 cursor-pointer hover:bg-emerald-700/80 hover:text-white" aria-label="View Employee Information">
-                                <i class="ri-eye-line"></i>
-                                <span class="sr-only">View</span>
-                            </a>
+    {{-- Employee Records Section --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Employee Records</h2>
+                    <p class="text-sm text-gray-500 mt-1">Manage employee information and job assignments</p>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Bookings</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jobs Assigned Today</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse ($employees as $emp)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ $emp->employee_code ?? ($emp->employee_id ? sprintf('EMP-%03d', $emp->employee_id) : '—') }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ trim(($emp->first_name ?? '') . ' ' . ($emp->last_name ?? '')) ?: $emp->username }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $emp->contact_number ?? $emp->phone ?? '—' }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @php
+                                $status = $emp->employment_status ? ucfirst($emp->employment_status) : (($emp->is_active ?? true) ? 'Active' : 'Inactive');
+                                $statusColors = [
+                                    'Active' => 'bg-green-100 text-green-800',
+                                    'Inactive' => 'bg-red-100 text-red-800',
+                                    'Employed' => 'bg-blue-100 text-blue-800',
+                                    'Terminated' => 'bg-gray-100 text-gray-800',
+                                    'On Leave' => 'bg-yellow-100 text-yellow-800'
+                                ];
+                            @endphp
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$status] ?? 'bg-gray-100 text-gray-800' }}">
+                                {{ $status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ number_format($emp->total_bookings ?? 0) }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ number_format($emp->jobs_assigned_today ?? 0) }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.employee.show', $emp->user_id) }}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" aria-label="View Employee Information">
+                                    <i class="ri-eye-line mr-1"></i>
+                                    View Details
+                                </a>
+                            </div>
                         </td>
                     </tr>
-                @empty
-                    <tr><td colspan="7" class="p-6 text-center text-gray-500">No employees found.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-        <div class="mt-2">{{ $employees->links() }}</div>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
+                            No employees found
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $employees->links() }}
+        </div>
     </div>
 </div>
 @endsection

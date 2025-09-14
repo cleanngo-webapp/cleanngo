@@ -4,60 +4,95 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-extrabold">My Jobs</h1>
+    <h1 class="text-3xl font-extrabold text-center">My Jobs</h1>
 
-    <div class="mt-6 overflow-auto">
-        <table class="min-w-full bg-white rounded border text-sm">
-            <thead class="bg-emerald-50">
-                <tr class="text-left font-semibold">
-                    <th class="p-2">Booking ID</th>
-                    <th class="p-2">Date & Time</th>
-                    <th class="p-2">Customer Name</th>
-                    <th class="p-2">Status</th>
-                    <th class="p-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($bookings as $b)
-                <tr class="border-t">
-                    <td class="p-2">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</td>
-                    <td class="p-2">{{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('m/d/y g:i A') : '—' }}</td>
-                    <td class="p-2">{{ $b->customer_name ?? '—' }}</td>
-                    <td class="p-2 capitalize">{{ $b->status }}</td>
-                    <td class="p-2">
-                        <div class="flex items-center gap-2">
-                            @if($b->status === 'in_progress')
-                                <form method="POST" action="{{ route('employee.jobs.complete', $b->id) }}">
-                                    @csrf
-                                    <button class="px-2 py-1 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" title="Mark as complete">
-                                        <span class="sr-only">Complete</span>
-                                        <i class="ri-check-line"></i>
-                                    </button>
-                                </form>
-                            @elseif($b->status === 'pending' || $b->status === 'confirmed')
-                                <form method="POST" action="{{ route('employee.jobs.start', $b->id) }}">
-                                    @csrf
-                                    <button class="px-2 py-1 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" title="Start Job">
-                                        <span class="sr-only">Start</span>
-                                        <i class="ri-play-line"></i>
-                                    </button>
-                                </form>
-                            @endif
-                            <button type="button" class="px-2 py-1 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="openEmpReceipt({{ $b->id }})" title="View Receipt">
-                                <span class="sr-only">View Receipt</span>
-                                <i class="ri-receipt-line"></i>
-                            </button>
-                            <button type="button" class="px-2 py-1 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="openEmpLocation({ id: {{ $b->id }}, lat: {{ $b->latitude ?? 0 }}, lng: {{ $b->longitude ?? 0 }} })" title="View Location">
-                                <span class="sr-only">View Location</span>
-                                <i class="ri-map-pin-line"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="mt-2">{{ $bookings->links() }}</div>
+    {{-- My Jobs Section --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">My Job Assignments</h2>
+                    <p class="text-sm text-gray-500 mt-1">Manage your assigned jobs and track progress</p>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($bookings as $b)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y g:i A') : '—' }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ $b->customer_name ?? '—' }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @php
+                                $statusColors = [
+                                    'pending' => 'bg-yellow-100 text-yellow-800',
+                                    'confirmed' => 'bg-blue-100 text-blue-800',
+                                    'in_progress' => 'bg-purple-100 text-purple-800',
+                                    'completed' => 'bg-green-100 text-green-800',
+                                    'cancelled' => 'bg-red-100 text-red-800',
+                                    'no_show' => 'bg-gray-100 text-gray-800'
+                                ];
+                            @endphp
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$b->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                {{ ucfirst(str_replace('_', ' ', $b->status)) }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                @if($b->status === 'in_progress')
+                                    <form method="POST" action="{{ route('employee.jobs.complete', $b->id) }}" class="inline">
+                                        @csrf
+                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                            <i class="ri-check-line mr-1"></i>
+                                            Complete
+                                        </button>
+                                    </form>
+                                @elseif($b->status === 'pending' || $b->status === 'confirmed')
+                                    <form method="POST" action="{{ route('employee.jobs.start', $b->id) }}" class="inline">
+                                        @csrf
+                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
+                                            <i class="ri-play-line mr-1"></i>
+                                            Start Job
+                                        </button>
+                                    </form>
+                                @endif
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Receipt">
+                                    <i class="ri-receipt-line mr-1"></i>
+                                    Receipt
+                                </button>
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpLocation({ id: {{ $b->id }}, lat: {{ $b->latitude ?? 0 }}, lng: {{ $b->longitude ?? 0 }} })" title="View Location">
+                                    <i class="ri-map-pin-line mr-1"></i>
+                                    Location
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $bookings->links() }}
+        </div>
     </div>
     <div id="job-map-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
         <div class="bg-white rounded-xl w-full max-w-2xl p-4">

@@ -14,6 +14,22 @@ class AdminEmployeeController extends Controller
     {
         $today = Carbon::today();
 
+        // Get statistics for the dashboard cards
+        $employeesAssignedToday = DB::table('booking_staff_assignments')
+            ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+            ->whereDate('bookings.scheduled_start', $today)
+            ->distinct('booking_staff_assignments.employee_id')
+            ->count('booking_staff_assignments.employee_id');
+
+        $completedJobsToday = DB::table('bookings')
+            ->where('status', 'completed')
+            ->whereDate('completed_at', $today)
+            ->count();
+
+        $todayBookings = DB::table('bookings')
+            ->whereDate('scheduled_start', $today)
+            ->count();
+
         // List ALL users with role=employee (even if employees row not created yet)
         $employees = DB::table('users')
             ->leftJoin('employees', 'employees.user_id', '=', 'users.id')
@@ -45,7 +61,12 @@ class AdminEmployeeController extends Controller
             ->orderBy('employees.id', 'asc')
             ->paginate(15);
 
-        return view('admin.employees', compact('employees'));
+        return view('admin.employees', compact(
+            'employees',
+            'employeesAssignedToday',
+            'completedJobsToday',
+            'todayBookings'
+        ));
     }
 
     /**
