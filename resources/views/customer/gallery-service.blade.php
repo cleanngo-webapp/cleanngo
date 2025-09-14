@@ -43,14 +43,15 @@
 </div>
 
 {{-- Image Modal --}}
-<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
-    <div class="relative max-w-4xl max-h-full">
+<div id="imageModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="relative max-w-4xl max-h-[90vh] w-full">
         <button onclick="closeImageModal()" 
-                class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-gray-300 z-10">
+                class="absolute top-5 right-2 text-white text-3xl font-bold hover:text-gray-300 z-10 cursor-pointer bg-black/50 rounded-full w-10 h-10 flex items-center justify-center">
             ×
         </button>
-        <img id="modalImage" src="" alt="" class="max-w-full max-h-full rounded-lg">
-        <div id="modalCaption" class="text-white text-center mt-4"></div>
+        <img id="modalImage" src="" alt="" class="w-full h-full object-contain rounded-lg">
+        <div id="modalCaption" class="text-white text-center mt-4 text-lg font-medium bg-black/50 rounded-lg px-4 py-2">
+        </div>
     </div>
 </div>
 
@@ -59,11 +60,13 @@ function openImageModal(imageSrc, caption) {
     document.getElementById('modalImage').src = imageSrc;
     document.getElementById('modalCaption').textContent = caption;
     document.getElementById('imageModal').classList.remove('hidden');
+    document.getElementById('imageModal').classList.add('flex');
     document.body.style.overflow = 'hidden';
 }
 
 function closeImageModal() {
     document.getElementById('imageModal').classList.add('hidden');
+    document.getElementById('imageModal').classList.remove('flex');
     document.body.style.overflow = 'auto';
 }
 

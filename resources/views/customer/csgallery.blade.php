@@ -24,6 +24,11 @@
                             <div class="text-right">
                                 <div class="text-3xl font-bold">{{ $galleryImages[$service['type']]->count() }}</div>
                                 <div class="text-white/90 text-sm">{{ $galleryImages[$service['type']]->count() == 1 ? 'Image' : 'Images' }}</div>
+                                {{-- View All Button --}}
+                                <a href="{{ route('customer.gallery.service', $service['type']) }}" 
+                                   class="mt-3 inline-block bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium cursor-pointer">
+                                    View All →
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -60,28 +65,39 @@
 </div>
 
 {{-- Image Modal --}}
-<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
-    <div class="relative max-w-4xl max-h-full">
+<div id="imageModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+    <div class="relative max-w-4xl max-h-[90vh] w-full">
         <button onclick="closeImageModal()" 
-                class="absolute top-4 right-4 text-white text-2xl font-bold hover:text-gray-300 z-10">
+                class="absolute top-5 right-2 text-white text-3xl font-bold hover:text-gray-300 z-10 cursor-pointer bg-black/50 rounded-full w-10 h-10 flex items-center justify-center">
             ×
         </button>
-        <img id="modalImage" src="" alt="" class="max-w-full max-h-full rounded-lg">
-        <div id="modalCaption" class="text-white text-center mt-4"></div>
+        <img id="modalImage" src="" alt="" class="w-full h-full object-contain rounded-lg">
+        <div id="modalCaption" class="text-white text-center mt-4 text-lg font-medium bg-black/50 rounded-lg px-4 py-2">
+        </div>
     </div>
 </div>
 
 <script>
 function openImageModal(imageSrc, caption) {
+    // Set the image source and caption
     document.getElementById('modalImage').src = imageSrc;
     document.getElementById('modalCaption').textContent = caption;
+    
+    // Show the modal by removing hidden class and adding flex
     document.getElementById('imageModal').classList.remove('hidden');
+    document.getElementById('imageModal').classList.add('flex');
+    
+    // Prevent body scrolling when modal is open
     document.body.style.overflow = 'hidden';
 }
 
 function closeImageModal() {
+    // Hide the modal by adding hidden class and removing flex
     document.getElementById('imageModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
+    document.getElementById('imageModal').classList.remove('flex');
+    
+    // Restore body scrolling
+    document.body.style.overflow = 'auto';  
 }
 
 // Close modal when clicking outside the image
