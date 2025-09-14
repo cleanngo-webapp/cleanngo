@@ -29,6 +29,8 @@ use App\Http\Controllers\CustomerHomeController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerGalleryController;
 use App\Http\Controllers\ServiceCommentController;
+use App\Http\Controllers\AdminSettingsController;
+use App\Http\Controllers\EmployeeSettingsController;
 
 Route::redirect('/', '/login');
 
@@ -53,6 +55,9 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::view('/notifications', 'employee.notifications')->name('notifications');
     Route::get('/profile', [EmployeeProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [EmployeeProfileController::class, 'update'])->name('profile.update');
+    // Settings routes for employee
+    Route::get('/settings', [EmployeeSettingsController::class, 'index'])->name('settings');
+    Route::put('/settings/password', [EmployeeSettingsController::class, 'updatePassword'])->name('settings.password.update');
     // Calendar events feed for employee (own assignments only)
     Route::get('/calendar/events', [CalendarController::class, 'employeeEvents'])->name('calendar.events');
 });
@@ -113,7 +118,9 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('gallery.store');
     Route::put('/gallery/{id}', [AdminGalleryController::class, 'update'])->name('gallery.update');
     Route::delete('/gallery/{id}', [AdminGalleryController::class, 'destroy'])->name('gallery.destroy');
-    Route::view('/settings', 'admin.settings')->name('settings');
+    Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
+    Route::put('/settings/password', [AdminSettingsController::class, 'updatePassword'])->name('settings.password.update');
+    Route::put('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
     Route::view('/payroll', 'admin.payroll')->name('payroll');
     // Calendar events feed for admin
     Route::get('/calendar/events', [CalendarController::class, 'adminEvents'])->name('calendar.events');

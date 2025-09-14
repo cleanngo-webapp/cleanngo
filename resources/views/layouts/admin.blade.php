@@ -6,6 +6,7 @@
     @vite(['resources/css/app.css','resources/js/app.js'])
     <title>@yield('title','Admin')</title>
     {{-- Tailwind classes are applied inline on links for reliability --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="min-h-screen bg-emerald-100 font-sans">
     <header class="h-12 md:h-14 bg-emerald-900 text-white flex items-center justify-between px-4">

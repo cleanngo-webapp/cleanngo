@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @vite(['resources/css/app.css','resources/js/app.js'])
     <title>@yield('title','Employee')</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="min-h-screen bg-emerald-100 font-sans">
     <header class="h-12 md:h-14 bg-emerald-900 text-white flex items-center justify-between px-4">
@@ -28,6 +29,7 @@
                 <a href="{{ route('employee.payroll') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.payroll') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-money-dollar-circle-line"></i> <span>Payroll</span></a>
                 <a href="{{ route('employee.notifications') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.notifications') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-notification-3-line"></i> <span>Notifications</span></a>
                 <a href="{{ route('employee.profile.show') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.profile.*') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-user-3-fill"></i> <span>My Profile</span></a>
+                <a href="{{ route('employee.settings') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.settings') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-settings-3-line"></i> <span>Settings</span></a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button class="w-full text-left flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors"><i class="ri-logout-box-line"></i> <span>Logout</span></button>
