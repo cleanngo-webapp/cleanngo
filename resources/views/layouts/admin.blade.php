@@ -20,8 +20,8 @@
     </header>
     <div class="flex">
         <aside class="w-56 bg-emerald-700 text-white min-h-[calc(100vh-3.5rem)]">
-            <div class="flex items-center gap-2 px-4 py-4">
-                <img src="{{ asset('assets/clean_saver_logo.png') }}" class="h-8" alt="Logo">
+            <div class="bg-brand-green flex items-center gap-2 px-4 py-4 w-full">
+                <span class="text-white font-semibold">Hi, {{ auth()->user()->first_name }}!</span>
             </div>
             <nav class="px-2 space-y-1">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-home-3-line"></i> <span>Dashboard</span></a>
