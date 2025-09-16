@@ -49,7 +49,7 @@
 														$statusClass = $statusClasses[$booking->status] ?? 'bg-gray-100 text-gray-800';
 													@endphp
 													<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
-														{{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+														{{ $booking->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $booking->status)) }}
 													</span>
 													<span class="text-sm font-mono text-gray-500">#{{ $booking->code }}</span>
 												</div>

@@ -84,7 +84,7 @@
                                 ];
                             @endphp
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$b->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                {{ ucfirst(str_replace('_', ' ', $b->status)) }}
+                                {{ $b->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $b->status)) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">

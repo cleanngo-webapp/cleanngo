@@ -24,7 +24,7 @@
                 <i class="ri-admin-line"></i>
                 <span class="text-white font-semibold">Hi, {{ auth()->user()->first_name }}!</span>
             </div>
-            <nav class="px-2 space-y-1">
+            <nav class="mt-2 px-2 space-y-1">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-home-3-line"></i> <span>Dashboard</span></a>
                 <a href="{{ route('admin.bookings') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.bookings') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-calendar-2-line"></i> <span>Bookings</span></a>
                 <a href="{{ route('admin.employees') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.employees') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-team-line"></i> <span>Employees</span></a>

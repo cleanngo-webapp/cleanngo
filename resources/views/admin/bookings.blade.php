@@ -95,7 +95,7 @@
                                     $statusClass = $statusClasses[$b->status] ?? 'bg-gray-100 text-gray-800';
                                 @endphp
                                 <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusClass }}">
-                                    {{ ucfirst(str_replace('_', ' ', $b->status)) }}
+                                    {{ $b->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $b->status)) }}
                                 </span>
                             @endif
                         </td>

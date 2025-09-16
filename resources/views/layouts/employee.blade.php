@@ -24,7 +24,7 @@
                 <i class="ri-user-line"></i>
                 <span class=" text-white font-semibold">Hi, {{ auth()->user()->first_name }}!</span>
             </div>
-            <nav class="px-2 space-y-1">
+            <nav class="mt-2 px-2 space-y-1">
                 <a href="{{ route('employee.dashboard') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.dashboard') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-home-3-line"></i> <span>Dashboard</span></a>
                 <a href="{{ route('employee.jobs') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.jobs') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-briefcase-2-line"></i> <span>My Jobs</span></a>
                 <a href="{{ route('employee.payroll') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('employee.payroll') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-money-dollar-circle-line"></i> <span>Payroll</span></a>
