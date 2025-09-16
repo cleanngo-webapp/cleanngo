@@ -141,7 +141,7 @@
 							<div class="text-sm text-gray-900">{{ $booking->first_name }} {{ $booking->last_name }}</div>
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap">
-							<div class="text-sm text-gray-900">{{ $booking->service_name }}</div>
+							<div class="text-sm text-gray-900">{{ $serviceSummaries[$booking->id] ?? ($booking->service_name ?? 'General Service') }}</div>
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap">
 							<div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($booking->scheduled_start)->format('M j, Y g:i A') }}</div>
