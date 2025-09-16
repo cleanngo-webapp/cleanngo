@@ -8,9 +8,9 @@
 
     <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Left: Services Nav -->
-        <aside class="bg-emerald-700 rounded-xl border-none p-3">
-            <div class="font-semibold mb-2 text-center text-white">SERVICES</div>
-            <div class="flex flex-col">
+        <aside class="bg-emerald-700 flex flex-col rounded-xl border-none p-3 gap-2">
+            <div class="font-semibold flex flex-col mb-2 text-center text-white">SERVICES</div>
+            <div class="flex flex-col gap-2">
                 <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="sofa">Sofa / Mattress Deep Cleaning</button>
                 <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="carpet">Carpet Deep Cleaning</button>
                 <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="carInterior">Home Service Car Interior Detailing</button>
@@ -95,7 +95,7 @@
         </section>
 
         <!-- Right: Receipt -->
-        <aside class="bg-white rounded-xl border p-4">
+        <aside class="bg-white rounded-xl shadow-sm p-4">
             <div class="font-bold text-lg uppercase mb-2">Total Estimation</div>
             <div class="text-xs text-gray-500 mb-3" id="receipt_title">Sofa / Mattress Deep Cleaning</div>
             

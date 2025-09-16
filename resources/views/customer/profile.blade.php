@@ -3,75 +3,284 @@
 @section('title','Profile')
 
 @section('content')
-{{-- Customer Profile: Bookings tracker and Address book --}}
+{{-- Customer Profile: Modern Bookings tracker and Address book --}}
 
-<div class="max-w-4xl mx-auto pt-20 pb-10 p-6">
-	<h1 class="text-2xl font-bold">Bookings and Addresses</h1>
-	<p class="mt-2 text-gray-600">Track your bookings and manage your addresses.</p>
-
-	<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-		<div class="p-4 rounded shadow-sm bg-white">
-			<h2 class="font-semibold">Upcoming Bookings</h2>
-			<p class="text-sm text-gray-500">You have no upcoming bookings.</p>
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+	<div class="max-w-7xl mx-auto pt-20 pb-10 px-4 sm:px-6 lg:px-8">
+		<!-- Header Section -->
+		<div class="mb-8">
+			<h1 class="text-3xl font-bold text-gray-900 mb-2">My Dashboard</h1>
+			<p class="text-lg text-gray-600">Manage your bookings and service addresses</p>
 		</div>
-		<div class="p-4 rounded shadow-sm bg-white">
-			<h2 class="font-semibold">Add New Address</h2>
-			<p class="text-sm text-gray-500">Add or select your service location.</p>
 
-			<form method="POST" action="{{ route('customer.address.store') }}" class="mt-3 space-y-2">
-				@csrf
-				<div class="grid grid-cols-2 gap-2">
-					<input name="line1" required class="border rounded px-2 py-1 col-span-2" placeholder="Address Line">
-					<input name="barangay" class="border rounded px-2 py-1" placeholder="Barangay">
-					<input name="city" class="border rounded px-2 py-1" placeholder="City/Municipality">
-					<input name="province" class="border rounded px-2 py-1" placeholder="Province">
-					<input name="postal_code" class="border rounded px-2 py-1" placeholder="Postal Code/Zip Code">
-                    <select name="label" class="border rounded px-2 py-1">
-                        <option value="home">Home</option>
-                        <option value="office">Office</option>
-                    </select>
-					<button type="button" id="auto-locate" class="px-2 py-1 rounded border bg-emerald-700 text-white hover:bg-emerald-700/80 hover:text-white cursor-pointer"> <i class="ri-map-pin-line"></i> Auto Locate</button>
-				</div>
-
-				<div id="map" class="h-64 rounded border"></div>
-				<input type="hidden" name="latitude" id="lat">
-				<input type="hidden" name="longitude" id="lng">
-				<label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_primary" value="1"> Set as Primary</label>
-				<div class="flex justify-center">
-				<button type="button" class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="openSaveAddressConfirm()">Save Address</button>
-				</div>
-			</form>
-
-			<div class="mt-4">
-				<h3 class="font-semibold mb-2">Manage Addresses</h3>
-				@forelse(($addresses ?? []) as $addr)
-					<div class="border rounded p-2 mb-2 flex items-center justify-between">
-						<div>
-							<div class="font-medium">{{ ucfirst($addr->label ?? 'Address') }} @if($addr->is_primary) <span class="text-xs text-emerald-700">(Primary)</span> @endif</div>
-							<div class="text-sm text-gray-600">{{ $addr->line1 }}{{ $addr->barangay ? ', '.$addr->barangay : '' }}{{ $addr->city ? ', '.$addr->city : '' }}{{ $addr->province ? ', '.$addr->province : '' }}</div>
-							@if($addr->latitude && $addr->longitude)
-								<div class="text-xs text-gray-500">Lat: {{ $addr->latitude }}, Lng: {{ $addr->longitude }}</div>
-							@endif
-						</div>
-						<div class="flex items-center gap-2">
-							<form id="make-primary-{{ $addr->id }}" method="POST" action="{{ route('customer.address.primary', $addr->id) }}">@csrf</form>
-							<form id="delete-address-{{ $addr->id }}" method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">
-								@csrf 
-								@method('DELETE')
-							</form>
-
-							@if($addr->is_primary)
-								<button class="px-2 py-1 text-sm rounded border w-28 whitespace-nowrap bg-brand-green/80 border-gray-300 text-white cursor-not-allowed" disabled>Primary</button>
-							@else
-								<button type="button" class=" bg-emerald-700 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white w-28 whitespace-nowrap" onclick="openPrimaryConfirm('make-primary-{{ $addr->id }}')">Make Primary</button>
-							@endif
-							<button type="button" class="bg-red-600 text-white px-2 py-1 text-sm rounded border cursor-pointer hover:bg-red-600/80 hover:text-white w-20 whitespace-nowrap" onclick="openDeleteConfirm('delete-address-{{ $addr->id }}')" data-address-id="{{ $addr->id }}">Delete</button>
+		<!-- Main Content Grid -->
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+			<!-- Bookings Section - Takes 2 columns on large screens -->
+			<div class="lg:col-span-2">
+				<div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+					<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
+						<div class="flex items-center justify-between">
+							<div>
+								<h2 class="text-xl font-semibold text-white">My Bookings</h2>
+								<p class="text-emerald-100 text-sm mt-1">Track your service appointments</p>
+							</div>
+							<div class="bg-white/20 rounded-full p-3">
+								<i class="ri-calendar-check-line text-2xl text-white"></i>
+							</div>
 						</div>
 					</div>
-					@empty
-						<p class="text-sm text-gray-500">No addresses yet.</p>
-					@endforelse
+					
+					<div class="p-6">
+						@if($bookings->count() > 0)
+							<div class="space-y-4">
+								@foreach($bookings as $booking)
+									<div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-gray-50/50">
+										<div class="flex items-start justify-between">
+											<div class="flex-1">
+												<div class="flex items-center gap-3 mb-2">
+													<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+														@if($booking->status === 'completed') bg-green-100 text-green-800
+														@elseif($booking->status === 'confirmed') bg-blue-100 text-blue-800
+														@elseif($booking->status === 'in_progress') bg-yellow-100 text-yellow-800
+														@elseif($booking->status === 'cancelled') bg-red-100 text-red-800
+														@else bg-gray-100 text-gray-800
+														@endif">
+														{{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+													</span>
+													<span class="text-sm font-mono text-gray-500">#{{ $booking->code }}</span>
+												</div>
+												
+												<h3 class="font-semibold text-gray-900 mb-1">{{ $booking->service_name ?? 'General Service' }}</h3>
+												<p class="text-sm text-gray-600 mb-2">{{ $booking->full_address ?? 'Address not specified' }}</p>
+												
+												<div class="flex items-center gap-4 text-sm text-gray-500">
+													<div class="flex items-center gap-1">
+														<i class="ri-calendar-line"></i>
+														<span>{{ \Carbon\Carbon::parse($booking->scheduled_start)->format('M j, Y') }}</span>
+													</div>
+													<div class="flex items-center gap-1">
+														<i class="ri-time-line"></i>
+														<span>{{ \Carbon\Carbon::parse($booking->scheduled_start)->format('g:i A') }}</span>
+													</div>
+													@if($booking->employee_name)
+														<div class="flex items-center gap-1">
+															<i class="ri-user-line"></i>
+															<span>{{ $booking->employee_name }}</span>
+														</div>
+													@endif
+												</div>
+											</div>
+											
+											<div class="text-right">
+												<div class="text-lg font-semibold text-gray-900">
+													₱{{ number_format($booking->total_due_cents / 100, 2) }}
+												</div>
+												<div class="text-xs text-gray-500 capitalize">
+													{{ str_replace('_', ' ', $booking->payment_status) }}
+												</div>
+											</div>
+										</div>
+									</div>
+								@endforeach
+							</div>
+						@else
+							<div class="text-center py-12">
+								<div class="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+									<i class="ri-calendar-line text-2xl text-gray-400"></i>
+								</div>
+								<h3 class="text-lg font-medium text-gray-900 mb-2">No bookings yet</h3>
+								<p class="text-gray-500 mb-4">You haven't made any service bookings yet.</p>
+								<a href="{{ route('customer.services') }}" class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+									<i class="ri-add-line mr-2"></i>
+									Book a Service
+								</a>
+							</div>
+						@endif
+					</div>
 				</div>
+			</div>
+
+			<!-- Address Management Section -->
+			<div class="lg:col-span-1">
+				<div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+					<div class="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
+						<div class="flex items-center justify-between">
+							<div>
+								<h2 class="text-xl font-semibold text-white">Addresses</h2>
+								<p class="text-blue-100 text-sm mt-1">Manage service locations</p>
+							</div>
+							<div class="bg-white/20 rounded-full p-3">
+								<i class="ri-map-pin-line text-2xl text-white"></i>
+							</div>
+						</div>
+					</div>
+					
+					<div class="p-6">
+						<!-- Add New Address Form -->
+						<div class="mb-6">
+							<h3 class="font-semibold text-gray-900 mb-3">Add New Address</h3>
+
+							<form method="POST" action="{{ route('customer.address.store') }}" class="space-y-4">
+								@csrf
+								
+								<!-- Address Line 1 -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Address Line</label>
+									<input name="line1" required 
+										class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" 
+										placeholder="Enter your address">
+								</div>
+								
+								<!-- Location Details Grid -->
+								<div class="grid grid-cols-2 gap-3">
+									<div>
+										<label class="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
+										<input name="barangay" 
+											class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" 
+											placeholder="Barangay">
+									</div>
+									<div>
+										<label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+										<input name="city" 
+											class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" 
+											placeholder="City/Municipality">
+									</div>
+									<div>
+										<label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+										<input name="province" 
+											class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" 
+											placeholder="Province">
+									</div>
+									<div>
+										<label class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+										<input name="postal_code" 
+											class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors" 
+											placeholder="Postal Code">
+									</div>
+								</div>
+								
+								<!-- Address Type and Auto Locate -->
+								<div class="flex gap-3">
+									<div class="flex-1">
+										<label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+										<select name="label" 
+											class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
+											<option value="home">Home</option>
+											<option value="office">Office</option>
+										</select>
+									</div>
+									<div class="flex items-end">
+										<button type="button" id="auto-locate" 
+											class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 cursor-pointer">
+											<i class="ri-map-pin-line"></i>
+											<span class="hidden sm:inline">Auto Locate</span>
+										</button>
+									</div>
+								</div>
+
+								<!-- Map Container -->
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Location Map</label>
+									<div id="map" class="h-48 rounded-lg border border-gray-300 overflow-hidden"></div>
+									<input type="hidden" name="latitude" id="lat">
+									<input type="hidden" name="longitude" id="lng">
+								</div>
+								
+								<!-- Primary Address Checkbox -->
+								<div class="flex items-center">
+									<input type="checkbox" name="is_primary" value="1" id="is_primary" 
+										class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded cursor-pointer">
+									<label for="is_primary" class="ml-2 block text-sm text-gray-700">
+										Set as primary address
+									</label>
+								</div>
+								
+								<!-- Save Button -->
+								<button type="button" onclick="openSaveAddressConfirm()" 
+									class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium cursor-pointer">
+									<i class="ri-save-line mr-2"></i>
+									Save Address
+								</button>
+							</form>
+						</div>
+
+						<!-- Manage Existing Addresses -->
+						<div>
+							<h3 class="font-semibold text-gray-900 mb-4">Your Addresses</h3>
+							@forelse(($addresses ?? []) as $addr)
+								<div class="border border-gray-200 rounded-xl p-4 mb-3 hover:shadow-md transition-all duration-200 bg-gray-50/50">
+									<div class="flex flex-col gap-3">
+										<!-- Address header with label and primary badge -->
+										<div class="flex items-center justify-between">
+											<div class="flex items-center gap-2">
+												<div class="flex items-center gap-1">
+													@if($addr->label === 'home')
+														<i class="ri-home-line text-emerald-600"></i>
+													@else
+														<i class="ri-building-line text-emerald-600"></i>
+													@endif
+													<span class="font-medium text-gray-900">{{ ucfirst($addr->label ?? 'Address') }}</span>
+												</div>
+												@if($addr->is_primary)
+													<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+														<i class="ri-star-fill mr-1"></i>
+														Primary
+													</span>
+												@endif
+											</div>
+										</div>
+										
+										<!-- Address content and action buttons -->
+										<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+											<div class="flex-1 min-w-0">
+												<div class="text-sm text-gray-600 mb-1 break-words">
+													{{ $addr->line1 }}{{ $addr->barangay ? ', '.$addr->barangay : '' }}{{ $addr->city ? ', '.$addr->city : '' }}{{ $addr->province ? ', '.$addr->province : '' }}
+												</div>
+												@if($addr->postal_code)
+													<div class="text-xs text-gray-500">{{ $addr->postal_code }}</div>
+												@endif
+											</div>
+											
+											<!-- Action buttons - always in column layout -->
+											<div class="flex flex-col gap-2 flex-shrink-0">
+												<form id="make-primary-{{ $addr->id }}" method="POST" action="{{ route('customer.address.primary', $addr->id) }}">@csrf</form>
+												<form id="delete-address-{{ $addr->id }}" method="POST" action="{{ route('customer.address.destroy', $addr->id) }}">
+													@csrf 
+													@method('DELETE')
+												</form>
+
+												@if($addr->is_primary)
+													<button class="px-3 py-1.5 text-xs rounded-lg bg-gray-200 text-gray-500 cursor-not-allowed whitespace-nowrap w-full" disabled>
+														<i class="ri-star-fill mr-1"></i>
+														Primary
+													</button>
+												@else
+													<button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer whitespace-nowrap w-full" onclick="openPrimaryConfirm('make-primary-{{ $addr->id }}')">
+														<i class="ri-star-line mr-1"></i>
+														Make Primary
+													</button>
+												@endif
+												<button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer whitespace-nowrap w-full" onclick="openDeleteConfirm('delete-address-{{ $addr->id }}')" data-address-id="{{ $addr->id }}">
+													<i class="ri-delete-bin-line mr-1"></i>
+													Delete
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							@empty
+								<div class="text-center py-8">
+									<div class="bg-gray-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+										<i class="ri-map-pin-line text-xl text-gray-400"></i>
+									</div>
+									<p class="text-sm text-gray-500">No addresses saved yet</p>
+									<p class="text-xs text-gray-400 mt-1">Add your first address above</p>
+								</div>
+							@endforelse
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -161,11 +370,20 @@ function closeModal(id){
 }
 function submitAddressForm(){
     console.log('Submitting address form');
-    const form = document.querySelector('form[action*="customer.address.store"]');
-    if (form) {
-        form.submit();
+    // Look specifically for the address form by finding the form that contains the line1 input
+    const line1Input = document.querySelector('input[name="line1"]');
+    if (line1Input) {
+        const form = line1Input.closest('form');
+        if (form) {
+            console.log('Found address form:', form);
+            form.submit();
+        } else {
+            console.error('Could not find form containing line1 input');
+            alert('Error: Address form not found. Please refresh the page and try again.');
+        }
     } else {
-        console.error('Address form not found');
+        console.error('Line1 input not found');
+        alert('Error: Address form not found. Please refresh the page and try again.');
     }
 }
 function submitPendingForm(){
@@ -224,37 +442,70 @@ document.addEventListener('DOMContentLoaded', function(){
 @endpush
 
 <!-- Confirm Make Primary Modal -->
-<div id="confirm-primary-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
-    <div class="bg-white rounded-xl w-full max-w-sm p-4">
-        <div class="font-semibold text-lg">Make Primary Address</div>
-        <p class="text-sm text-gray-600 mt-1">Are you sure you want to make this the primary address?</p>
-        <div class="mt-4 flex justify-end gap-2">
-            <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-primary-modal')">Cancel</button>
-            <button id="confirm-primary-yes" type="button" class="px-3 py-2 rounded bg-emerald-700 text-white cursor-pointer hover:bg-emerald-700/90" onclick="submitPendingForm()">Make Primary</button>
+<div id="confirm-primary-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="bg-blue-100 rounded-full p-2">
+                <i class="ri-star-line text-blue-600 text-xl"></i>
+            </div>
+            <div>
+                <div class="font-semibold text-lg text-gray-900">Make Primary Address</div>
+                <p class="text-sm text-gray-600">Set this as your default service location</p>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-6">Are you sure you want to make this the primary address? This will be used as the default location for new bookings.</p>
+        <div class="flex justify-end gap-3">
+            <button type="button" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="closeModal('confirm-primary-modal')">Cancel</button>
+            <button id="confirm-primary-yes" type="button" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer" onclick="submitPendingForm()">
+                <i class="ri-star-fill mr-2"></i>
+                Make Primary
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Confirm Delete Modal -->
-<div id="confirm-delete-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
-    <div class="bg-white rounded-xl w-full max-w-sm p-4">
-        <div class="font-semibold text-lg">Delete Address</div>
-        <p class="text-sm text-gray-600 mt-1">Are you sure you want to delete this address?</p>
-        <div class="mt-4 flex justify-end gap-2">
-            <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-delete-modal')">Cancel</button>
-            <button id="confirm-delete-yes" type="button" class="px-3 py-2 rounded bg-red-600 text-white cursor-pointer hover:bg-red-700" onclick="if(window.pendingFormId){ var f=document.getElementById(window.pendingFormId); if(f){ f.submit(); } }">Delete</button>
+<div id="confirm-delete-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="bg-red-100 rounded-full p-2">
+                <i class="ri-delete-bin-line text-red-600 text-xl"></i>
+            </div>
+            <div>
+                <div class="font-semibold text-lg text-gray-900">Delete Address</div>
+                <p class="text-sm text-gray-600">This action cannot be undone</p>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-6">Are you sure you want to delete this address? Any upcoming bookings at this location may be affected.</p>
+        <div class="flex justify-end gap-3">
+            <button type="button" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="closeModal('confirm-delete-modal')">Cancel</button>
+            <button id="confirm-delete-yes" type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer" onclick="if(window.pendingFormId){ var f=document.getElementById(window.pendingFormId); if(f){ f.submit(); } }">
+                <i class="ri-delete-bin-fill mr-2"></i>
+                Delete Address
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Confirm Save Address Modal -->
-<div id="confirm-save-address-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
-    <div class="bg-white rounded-xl w-full max-w-sm p-4">
-        <div class="font-semibold text-lg">Save Address</div>
-        <p class="text-sm text-gray-600 mt-1">Are you sure you want to save this address?</p>
-        <div class="mt-4 flex justify-end gap-2">
-            <button type="button" class="px-3 py-2 rounded border cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeModal('confirm-save-address-modal')">Cancel</button>
-            <button id="confirm-save-address-yes" type="button" class="px-3 py-2 rounded bg-emerald-700 text-white cursor-pointer hover:bg-emerald-700/90" onclick="submitAddressForm()">Save Address</button>
+<div id="confirm-save-address-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-gray-100">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="bg-green-100 rounded-full p-2">
+                <i class="ri-save-line text-green-600 text-xl"></i>
+            </div>
+            <div>
+                <div class="font-semibold text-lg text-gray-900">Save Address</div>
+                <p class="text-sm text-gray-600">Add this location to your address book</p>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-6">Are you sure you want to save this address? You can use it for future service bookings.</p>
+        <div class="flex justify-end gap-3">
+            <button type="button" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer" onclick="closeModal('confirm-save-address-modal')">Cancel</button>
+            <button id="confirm-save-address-yes" type="button" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer" onclick="submitAddressForm()">
+                <i class="ri-save-fill mr-2"></i>
+                Save Address
+            </button>
         </div>
     </div>
 </div>
