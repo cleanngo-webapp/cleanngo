@@ -80,13 +80,31 @@
 													₱{{ number_format($booking->total_due_cents / 100, 2) }}
 												</div>
 												<div class="text-xs text-gray-500 capitalize">
-													{{ str_replace('_', ' ', $booking->payment_status) }}
+													@if($booking->status === 'completed' && $booking->payment_proof_status === 'approved')
+														Paid
+													@else
+														{{ str_replace('_', ' ', $booking->payment_proof_status ?? $booking->payment_status) }}
+													@endif
 												</div>
+												@if($booking->status === 'completed' && $booking->payment_proof_status === 'approved' && $booking->payment_method)
+													<div class="text-xs text-gray-400 mt-1">
+														<i class="ri-bank-card-line mr-1"></i>
+														{{ ucfirst($booking->payment_method) }}
+													</div>
+												@endif
 												@if($booking->status === 'pending')
 													<div class="mt-2">
 														<button onclick="openCancelModal({{ $booking->id }}, '{{ $booking->code }}')" 
 																class="px-3 py-1 bg-red-500 text-white text-xs rounded cursor-pointer hover:bg-red-600 transition-colors duration-200">
 															Cancel Booking
+														</button>
+													</div>
+												@elseif($booking->status === 'completed' && $booking->payment_proof_status === 'approved')
+													<div class="mt-2">
+														<button onclick="openCustomerReceipt({{ $booking->id }})" 
+																class="px-3 py-1 bg-emerald-600 text-white text-xs rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200">
+															<i class="ri-receipt-line mr-1"></i>
+															View Receipt
 														</button>
 													</div>
 												@endif
@@ -296,6 +314,14 @@
 		</div>
 	</div>
 </div>
+
+<!-- Receipt Modal Component -->
+@include('components.receipt-modal', [
+    'modalId' => 'customer-receipt-modal',
+    'receiptData' => $receiptData ?? [],
+    'bookingId' => null
+])
+
 @endsection
 
 @push('scripts')
@@ -489,6 +515,11 @@ document.addEventListener('keydown', function(e) {
         closeCancelModal();
     }
 });
+
+// Receipt modal function
+function openCustomerReceipt(bookingId) {
+    openReceipt('customer-receipt-modal', bookingId, @json($receiptData ?? []));
+}
 
 // Address deletion validation functions
 function checkAddressCount(addressCount, formId) {

@@ -124,9 +124,9 @@
                                         </button>
                                     </form>
                                 @endif
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Receipt">
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Service Summary">
                                     <i class="ri-receipt-line mr-1"></i>
-                                    Receipt
+                                    Service Summary
                                 </button>
                                 <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpLocation({ id: {{ $b->id }}, lat: {{ $b->latitude ?? 0 }}, lng: {{ $b->longitude ?? 0 }} })" title="View Location">
                                     <i class="ri-map-pin-line mr-1"></i>
@@ -158,7 +158,7 @@
     <div id="payment-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
         <div class="bg-white rounded-xl w-full max-w-md p-4">
             <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Attach Payment Proof</div>
+                <div class="font-semibold">Attach Proof of Payment</div>
                 <button class="cursor-pointer" onclick="closePaymentModal()">✕</button>
             </div>
             <form id="payment-form" method="POST" enctype="multipart/form-data">
@@ -177,8 +177,22 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Payment Proof Image</label>
-                    <input type="file" name="proof_image" accept="image/*" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" required>
+                    <input type="file" name="proof_image" accept="image/*" id="proof-image-input" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" required>
                     <p class="text-xs text-gray-500 mt-1">Upload receipt or cash in hand image (max 2MB)</p>
+                    
+                    <!-- Image Preview Container -->
+                    <div id="image-preview-container" class="mt-3 hidden">
+                        <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
+                            <div class="relative">
+                                <img id="image-preview" src="" alt="Payment proof preview" class="w-full h-48 object-contain rounded border bg-white">
+                                <button type="button" id="remove-image-preview" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer" title="Remove image">
+                                    ✕
+                                </button>
+                            </div>
+                            <p id="image-info" class="text-xs text-gray-500 mt-2"></p>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closePaymentModal()">Cancel</button>
@@ -254,7 +268,76 @@ function closePaymentModal() {
     currentBookingId = null;
     // Reset form
     document.getElementById('payment-form').reset();
+    // Hide image preview
+    hideImagePreview();
 }
+
+// Image preview functionality
+function showImagePreview(file) {
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImage = document.getElementById('image-preview');
+    const imageInfo = document.getElementById('image-info');
+    
+    // Validate file size (2MB limit)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+        alert('File size must be less than 2MB');
+        document.getElementById('proof-image-input').value = '';
+        return;
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        document.getElementById('proof-image-input').value = '';
+        return;
+    }
+    
+    // Create file reader to display image
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        imageInfo.textContent = `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        previewContainer.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function hideImagePreview() {
+    const previewContainer = document.getElementById('image-preview-container');
+    const previewImage = document.getElementById('image-preview');
+    const imageInfo = document.getElementById('image-info');
+    
+    previewContainer.classList.add('hidden');
+    previewImage.src = '';
+    imageInfo.textContent = '';
+}
+
+// Add event listeners for image preview
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('proof-image-input');
+    const removePreviewBtn = document.getElementById('remove-image-preview');
+    
+    // Handle file input change
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                showImagePreview(file);
+            } else {
+                hideImagePreview();
+            }
+        });
+    }
+    
+    // Handle remove preview button
+    if (removePreviewBtn) {
+        removePreviewBtn.addEventListener('click', function() {
+            document.getElementById('proof-image-input').value = '';
+            hideImagePreview();
+        });
+    }
+});
 
 // Global variables for search and sort
 let currentSort = '{{ $sort ?? "date" }}';
