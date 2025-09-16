@@ -150,6 +150,22 @@ class AdminBookingController extends Controller
     public function updateStatus(Request $request, $bookingId)
     {
         $request->validate(['status' => 'required|in:pending,in_progress,confirmed,cancelled,completed']);
+        
+        $booking = DB::table('bookings')->where('id', $bookingId)->first();
+        if (!$booking) {
+            return back()->withErrors(['status' => 'Booking not found.']);
+        }
+        
+        // Only allow status changes for confirmed bookings
+        if ($booking->status !== 'confirmed') {
+            return back()->withErrors(['status' => 'Status can only be changed for confirmed bookings.']);
+        }
+        
+        // Only allow in_progress, completed, and cancelled for confirmed bookings
+        if (!in_array($request->status, ['in_progress', 'completed', 'cancelled'])) {
+            return back()->withErrors(['status' => 'Only In Progress, Completed, and Cancelled statuses are allowed for confirmed bookings.']);
+        }
+        
         if ($request->status === 'cancelled') {
             // Delete the booking when cancelled as requested
             DB::table('booking_staff_assignments')->where('booking_id', $bookingId)->delete();
@@ -157,6 +173,7 @@ class AdminBookingController extends Controller
             DB::table('bookings')->where('id', $bookingId)->delete();
             return back()->with('status','Booking cancelled and removed');
         }
+        
         DB::table('bookings')->where('id', $bookingId)->update([
             'status' => $request->status,
             'updated_at' => now(),
@@ -164,9 +181,52 @@ class AdminBookingController extends Controller
         return back();
     }
 
+    /**
+     * Handle booking confirmation or cancellation from pending status
+     * This is the new workflow where pending bookings must be confirmed or cancelled first
+     */
+    public function confirm(Request $request, $bookingId)
+    {
+        $request->validate(['action' => 'required|in:confirm,cancel']);
+        
+        $booking = DB::table('bookings')->where('id', $bookingId)->first();
+        if (!$booking || $booking->status !== 'pending') {
+            return back()->withErrors(['confirm' => 'Booking not found or not in pending status.']);
+        }
+        
+        if ($request->action === 'confirm') {
+            // Confirm the booking - change status to confirmed
+            DB::table('bookings')->where('id', $bookingId)->update([
+                'status' => 'confirmed',
+                'updated_at' => now(),
+            ]);
+            return back()->with('status', 'Booking confirmed successfully. You can now assign employees and change status.');
+        } else {
+            // Cancel the booking - delete it completely
+            DB::table('booking_staff_assignments')->where('booking_id', $bookingId)->delete();
+            DB::table('booking_items')->where('booking_id', $bookingId)->delete();
+            DB::table('bookings')->where('id', $bookingId)->delete();
+            return back()->with('status', 'Booking cancelled and removed.');
+        }
+    }
+
     public function assignEmployee(Request $request, $bookingId)
     {
         $request->validate(['employee_user_id' => 'required|exists:users,id']);
+        
+        // Check if booking exists and is confirmed
+        $booking = DB::table('bookings')->where('id', $bookingId)->first();
+        if (!$booking) {
+            return back()->withErrors(['assign' => 'Booking not found.']);
+        }
+        
+        if ($booking->status !== 'confirmed') {
+            if ($booking->status === 'cancelled') {
+                return back()->withErrors(['assign' => 'Cannot assign employees to cancelled bookings.']);
+            }
+            return back()->withErrors(['assign' => 'Booking must be confirmed before assigning employees.']);
+        }
+        
         $employeeId = DB::table('employees')->where('user_id', $request->employee_user_id)->value('id');
         if ($employeeId) {
             // Do not allow reassignment once any employee is assigned to this booking

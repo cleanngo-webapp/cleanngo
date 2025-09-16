@@ -51,7 +51,11 @@
                             <div class="text-sm text-gray-900">{{ $b->customer_name ?? '—' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if(!empty($b->assigned_employee_id))
+                            @if($b->status === 'pending')
+                                <div class="text-sm text-gray-500 italic">Confirm booking first</div>
+                            @elseif($b->status === 'cancelled')
+                                <div class="text-sm text-gray-500 italic">Booking cancelled</div>
+                            @elseif(!empty($b->assigned_employee_id))
                                 <div class="text-sm text-gray-900">{{ $b->employee_name ?? '—' }}</div>
                             @else
                                 <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
@@ -66,16 +70,37 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <select class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 status-select cursor-pointer" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
-                                <option value="pending" {{ $b->status==='pending'?'selected':'' }}>Pending</option>
-                                <option value="in_progress" {{ $b->status==='in_progress'?'selected':'' }}>In Progress</option>
-                                <option value="confirmed" {{ $b->status==='confirmed'?'selected':'' }}>Confirmed</option>
-                                <option value="completed" {{ $b->status==='completed'?'selected':'' }}>Completed</option>
-                                <option value="cancelled" {{ $b->status==='cancelled'?'selected':'' }}>Cancelled</option>
-                            </select>
+                            @if($b->status === 'pending')
+                                {{-- Show confirmation buttons for pending bookings --}}
+                                <div class="flex gap-2">
+                                    <button class="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors cursor-pointer" 
+                                            onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'confirm')">
+                                        Confirm
+                                    </button>
+                                    <button class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer" 
+                                            onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'cancel')">
+                                        Cancel
+                                    </button>
+                                </div>
+                            @else
+                                {{-- Show status with colored span --}}
+                                <span class="px-2 py-1 text-xs font-medium rounded-full
+                                    @if($b->status === 'confirmed') bg-blue-100 text-blue-800
+                                    @elseif($b->status === 'in_progress') bg-yellow-100 text-yellow-800
+                                    @elseif($b->status === 'completed') bg-green-100 text-green-800
+                                    @elseif($b->status === 'cancelled') bg-red-100 text-red-800
+                                    @else bg-gray-100 text-gray-800 @endif">
+                                    {{ ucfirst(str_replace('_', ' ', $b->status)) }}
+                                </span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
+                                @if($b->status === 'confirmed')
+                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openStatusChangeModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" title="Change Status">
+                                        <i class="ri-arrow-up-down-line"></i>
+                                    </button>
+                                @endif
                                 <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openAdminReceipt({{ $b->id }})" title="View Receipt">
                                     <i class="ri-receipt-line"></i>
                                 </button>
@@ -184,6 +209,43 @@
         </div>
     </div>
 
+    <!-- Booking Confirmation Modal -->
+    <div id="booking-confirm-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-md p-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="font-semibold" id="confirmModalTitle">Confirm Booking</div>
+                <button class="cursor-pointer" onclick="closeConfirmModal()">✕</button>
+            </div>
+            <p id="confirmModalText" class="mb-4 text-sm">Are you sure you want to confirm this booking?</p>
+            <div class="flex justify-end gap-2">
+                <button class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closeConfirmModal()">Cancel</button>
+                <button id="confirmModalAction" class="px-3 py-2 text-white rounded cursor-pointer hover:opacity-90">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Change Modal -->
+    <div id="status-change-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-md p-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="font-semibold">Change Booking Status</div>
+                <button class="cursor-pointer" onclick="closeStatusChangeModal()">✕</button>
+            </div>
+            <p id="statusChangeModalText" class="mb-4 text-sm">Select new status for this booking:</p>
+            <div class="mb-4">
+                <select id="statusChangeSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500">
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closeStatusChangeModal()">Cancel</button>
+                <button id="statusChangeConfirm" class="px-3 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700">Update Status</button>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -229,6 +291,111 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
+    
+    // Booking confirmation modal handlers
+    let pendingConfirmAction = null;
+    function openConfirmModal(bookingId, bookingCode, action) {
+        pendingConfirmAction = { bookingId, bookingCode, action };
+        const modal = document.getElementById('booking-confirm-modal');
+        const title = document.getElementById('confirmModalTitle');
+        const text = document.getElementById('confirmModalText');
+        const actionBtn = document.getElementById('confirmModalAction');
+        
+        if (action === 'confirm') {
+            title.textContent = 'Confirm Booking';
+            text.textContent = `Are you sure you want to confirm booking ${bookingCode}? This will allow employee assignment and status changes.`;
+            actionBtn.textContent = 'Confirm Booking';
+            actionBtn.className = 'px-3 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700';
+        } else if (action === 'cancel') {
+            title.textContent = 'Cancel Booking';
+            text.textContent = `Are you sure you want to cancel booking ${bookingCode}? This action cannot be undone.`;
+            actionBtn.textContent = 'Cancel Booking';
+            actionBtn.className = 'px-3 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700';
+        }
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    
+    function closeConfirmModal() {
+        const modal = document.getElementById('booking-confirm-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        pendingConfirmAction = null;
+    }
+    
+    // Handle confirmation modal action
+    document.getElementById('confirmModalAction').addEventListener('click', function() {
+        if (!pendingConfirmAction) return;
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/bookings/${pendingConfirmAction.bookingId}/confirm`;
+        
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+        
+        const action = document.createElement('input');
+        action.type = 'hidden';
+        action.name = 'action';
+        action.value = pendingConfirmAction.action;
+        
+        form.appendChild(csrf);
+        form.appendChild(action);
+        document.body.appendChild(form);
+        form.submit();
+        
+        closeConfirmModal();
+    });
+    
+    // Status change modal handlers
+    let pendingStatusChange = null;
+    function openStatusChangeModal(bookingId, bookingCode) {
+        pendingStatusChange = { bookingId, bookingCode };
+        const modal = document.getElementById('status-change-modal');
+        const text = document.getElementById('statusChangeModalText');
+        text.textContent = `Select new status for booking ${bookingCode}:`;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    
+    function closeStatusChangeModal() {
+        const modal = document.getElementById('status-change-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        pendingStatusChange = null;
+    }
+    
+    // Handle status change confirmation
+    document.getElementById('statusChangeConfirm').addEventListener('click', function() {
+        if (!pendingStatusChange) return;
+        
+        const newStatus = document.getElementById('statusChangeSelect').value;
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/bookings/${pendingStatusChange.bookingId}/status`;
+        
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+        
+        const status = document.createElement('input');
+        status.type = 'hidden';
+        status.name = 'status';
+        status.value = newStatus;
+        
+        form.appendChild(csrf);
+        form.appendChild(status);
+        document.body.appendChild(form);
+        form.submit();
+        
+        closeStatusChangeModal();
+    });
+    
     // Status modal handlers
     let pendingStatus = null;
     function openStatusModal(bookingId, bookingCode, newStatus){
@@ -299,16 +466,7 @@
                 openModal(form, name);
             });
         });
-        // Hook up status selectors
-        document.querySelectorAll('.status-select').forEach(function(sel){
-            sel.setAttribute('data-current', sel.value);
-            sel.addEventListener('change', function(){
-                const bid = sel.getAttribute('data-booking-id');
-                const code = sel.getAttribute('data-booking-code');
-                const newStatus = sel.value;
-                openStatusModal(bid, code, newStatus);
-            });
-        });
+        // Status selectors are now handled by the status change button in actions column
     })();
     </script>
     @endpush

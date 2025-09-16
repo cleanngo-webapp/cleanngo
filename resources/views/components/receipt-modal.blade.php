@@ -15,7 +15,7 @@
 <div id="{{ $modalId }}" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
     <div class="bg-white rounded-xl w-full max-w-md p-4">
         <div class="flex items-center justify-between mb-2">
-            <div class="font-semibold">Service Receipt</div>
+            <div class="font-semibold">Service Summary</div>
             <button class="cursor-pointer" onclick="closeReceipt('{{ $modalId }}')">✕</button>
         </div>
         <div id="{{ $modalId }}-body" class="text-sm space-y-1"></div>
