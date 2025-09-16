@@ -54,7 +54,7 @@
 													<span class="text-sm font-mono text-gray-500">#{{ $booking->code }}</span>
 												</div>
 												
-												<h3 class="font-semibold text-gray-900 mb-1">{{ $booking->service_name ?? 'General Service' }}</h3>
+												<h3 class="font-semibold text-gray-900 mb-1">{{ $serviceSummaries[$booking->id] ?? ($booking->service_name ?? 'General Service') }}</h3>
 												<p class="text-sm text-gray-600 mb-2">{{ $booking->full_address ?? 'Address not specified' }}</p>
 												
 												<div class="flex items-center gap-4 text-sm text-gray-500">

@@ -48,8 +48,9 @@ class CustomerDashboardController extends Controller
                 ->get();
         }
 
-        // Build receipt data for the receipt modal (same structure as admin/employee controllers)
+        // Build receipt data and service summaries for the receipt modal
         $receiptData = [];
+        $serviceSummaries = [];
         $bookingIds = $bookings->pluck('id')->all();
         if (!empty($bookingIds)) {
             $rows = DB::table('booking_items')
@@ -69,8 +70,37 @@ class CustomerDashboardController extends Controller
             }
             foreach ($grouped as $bid => $lines) {
                 $total = 0.0;
-                foreach ($lines as $ln) { $total += (float)($ln['line_total'] ?? 0); }
+                $serviceCategories = [];
+                foreach ($lines as $ln) { 
+                    $total += (float)($ln['line_total'] ?? 0);
+                    // Map item types to service categories
+                    $itemType = $ln['item_type'];
+                    $category = '';
+                    
+                    if (strpos($itemType, 'sofa') === 0) {
+                        $category = 'Sofa Cleaning';
+                    } elseif (strpos($itemType, 'mattress') === 0) {
+                        $category = 'Mattress Cleaning';
+                    } elseif (strpos($itemType, 'car') === 0) {
+                        $category = 'Car Cleaning';
+                    } elseif (strpos($itemType, 'carpet') === 0) {
+                        $category = 'Carpet Deep Cleaning';
+                    } elseif (strpos($itemType, 'post_construction') === 0) {
+                        $category = 'Post Construction Cleaning';
+                    } elseif (strpos($itemType, 'disinfect') === 0) {
+                        $category = 'Enhanced Disinfection';
+                    } elseif (strpos($itemType, 'glass') === 0) {
+                        $category = 'Glass Cleaning';
+                    } else {
+                        $category = ucwords(str_replace('_', ' ', $itemType));
+                    }
+                    
+                    if (!in_array($category, $serviceCategories)) {
+                        $serviceCategories[] = $category;
+                    }
+                }
                 $receiptData[$bid] = [ 'lines' => $lines, 'total' => $total ];
+                $serviceSummaries[$bid] = implode(', ', $serviceCategories);
             }
         }
 
@@ -78,6 +108,7 @@ class CustomerDashboardController extends Controller
             'addresses' => $addresses,
             'bookings' => $bookings,
             'receiptData' => $receiptData,
+            'serviceSummaries' => $serviceSummaries,
         ]);
     }
 }
