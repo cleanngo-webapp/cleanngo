@@ -136,18 +136,12 @@
             <div id="jobMap" class="h-80 rounded border"></div>
         </div>
     </div>
-    <div id="emp-receipt-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-md p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Service Receipt</div>
-                <button class="cursor-pointer" onclick="closeEmpReceipt()">✕</button>
-            </div>
-            <div id="empReceiptBody" class="text-sm space-y-1"></div>
-            <div class="mt-4 flex justify-end">
-                <button class="bg-emerald-700 text-white px-3 py-2 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeEmpReceipt()">Close</button>
-            </div>
-        </div>
-    </div>
+    <!-- Receipt Modal Component -->
+    @include('components.receipt-modal', [
+        'modalId' => 'emp-receipt-modal',
+        'receiptData' => $receiptData ?? [],
+        'bookingId' => null
+    ])
 </div>
 @endsection
 @push('scripts')
@@ -185,24 +179,9 @@ function openEmpLocation(payload){
 // Make locations available globally for address/phone rendering
 window.empLocations = @json($locationsData ?? []);
 const empReceipts = @json($receiptData ?? []);
-function peso(v){ return 'PHP ' + Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+// Receipt functions now handled by the component
 function openEmpReceipt(id){
-    const data = empReceipts[String(id)] || empReceipts[id];
-    const modal = document.getElementById('emp-receipt-modal');
-    const body = document.getElementById('empReceiptBody');
-    if(!data){
-        body.innerHTML = '<div class="text-sm text-gray-500">No items recorded for this booking.</div>';
-    } else {
-        const lines = (data.lines||[]).map(l=>`<div class=\"flex justify-between\"><span>${l.label}</span><span>${peso(l.amount)}</span></div>`).join('');
-        body.innerHTML = lines + `<div class=\"mt-2 flex justify-between font-semibold\"><span>Total</span><span>${peso(data.total||0)}</span></div>`;
-    }
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
-function closeEmpReceipt(){
-    const modal = document.getElementById('emp-receipt-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    openReceipt('emp-receipt-modal', id, empReceipts);
 }
 
 // Global variables for search and sort

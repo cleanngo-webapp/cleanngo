@@ -82,25 +82,29 @@ class EmployeeJobsController extends Controller
             ];
         })->all();
 
-        // Build simple receipt payload similar to admin
+        // Build receipt payload with same structure as admin controller
         $receiptData = [];
         $bookingIds = collect($bookings->items())->pluck('id')->all();
         if (!empty($bookingIds)) {
             $rows = DB::table('booking_items')
                 ->whereIn('booking_id', $bookingIds)
+                ->orderBy('booking_id')
                 ->get(['booking_id','item_type','quantity','area_sqm','unit_price_cents','line_total_cents']);
-            $group = [];
+            $grouped = [];
             foreach ($rows as $r) {
-                $group[$r->booking_id][] = $r;
+                // Detailed lines with same structure as admin
+                $grouped[$r->booking_id][] = [
+                    'item_type' => $r->item_type,
+                    'quantity' => (int)($r->quantity ?? 0),
+                    'area_sqm' => $r->area_sqm !== null ? (float)$r->area_sqm : null,
+                    'unit_price' => $r->unit_price_cents !== null ? ((int)$r->unit_price_cents)/100 : null,
+                    'line_total' => $r->line_total_cents !== null ? ((int)$r->line_total_cents)/100 : null,
+                ];
             }
-            foreach ($group as $bid => $items) {
-                $total = 0.0; $lines = [];
-                foreach ($items as $it) {
-                    $amt = ($it->line_total_cents ?? 0) / 100.0; $total += $amt;
-                    $label = trim(($it->item_type ?? 'item') . ' x ' . (int)($it->quantity ?? 0) . ($it->area_sqm ? (' @ '.$it->area_sqm.' sqm') : ''));
-                    $lines[] = ['label' => $label, 'amount' => $amt];
-                }
-                $receiptData[$bid] = ['lines' => $lines, 'total' => $total];
+            foreach ($grouped as $bid => $lines) {
+                $total = 0.0;
+                foreach ($lines as $ln) { $total += (float)($ln['line_total'] ?? 0); }
+                $receiptData[$bid] = [ 'lines' => $lines, 'total' => $total ];
             }
         }
 

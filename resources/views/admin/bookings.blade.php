@@ -76,7 +76,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openReceipt({{ $b->id }})" title="View Receipt">
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openAdminReceipt({{ $b->id }})" title="View Receipt">
                                     <i class="ri-receipt-line"></i>
                                 </button>
                                 <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openLocation({{ $b->id }})" title="View Location">
@@ -142,25 +142,18 @@
             </div>
             <p id="assignModalText" class="mb-4 text-sm">Are you sure you want to assign this employee? This cannot be changed later.</p>
             <div class="flex justify-end gap-2">
-                <button id="assignModalCancel" class="px-3 py-2 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Cancel</button>
+                <button id="assignModalCancel" class="px-3 py-2 bg-gray-500 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Cancel</button>
                 <button id="assignModalConfirm" class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Confirm</button>
             </div>
         </div>
         </div>
 
-    <!-- Receipt Modal -->
-    <div id="receipt-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-md p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Service Receipt</div>
-                <button onclick="closeReceipt()">✕</button>
-            </div>
-            <div id="receiptBody" class="text-sm space-y-1"></div>
-            <div class="mt-4 flex justify-end">
-                <button class="bg-emerald-700 text-white px-3 py-2 border rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white" onclick="closeReceipt()">Close</button>
-            </div>
-        </div>
-        </div>
+    <!-- Receipt Modal Component -->
+    @include('components.receipt-modal', [
+        'modalId' => 'receipt-modal',
+        'receiptData' => $receiptData ?? [],
+        'bookingId' => null
+    ])
 
     <!-- Status Change Modal -->
     <div id="status-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
@@ -200,27 +193,9 @@
     function peso(v){
         return 'PHP ' + Number(v||0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
-    function openReceipt(bookingId){
-        const data = receiptData[String(bookingId)] || receiptData[bookingId];
-        const modal = document.getElementById('receipt-modal');
-        const body = document.getElementById('receiptBody');
-        if (!data){
-            body.innerHTML = '<div class="text-sm text-gray-500">No items recorded for this booking.</div>';
-        } else {
-            const lines = (data.lines||[]).map(l => {
-                const left = [l.item_type, (l.area_sqm? (l.area_sqm+' sqm'): null), (l.quantity? ('x '+l.quantity): null)].filter(Boolean).join(' ');
-                const right = peso(l.line_total ?? ((l.unit_price||0)*(l.quantity||1)));
-                return `<div class="flex justify-between"><span>${left}</span><span>${right}</span></div>`;
-            }).join('');
-            body.innerHTML = lines + `<div class="mt-2 flex justify-between font-semibold"><span>Total</span><span>${peso(data.total||0)}</span></div>`;
-        }
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-    function closeReceipt(){
-        const modal = document.getElementById('receipt-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+    // Receipt functions now handled by the component
+    function openAdminReceipt(bookingId){
+        openReceipt('receipt-modal', bookingId, receiptData);
     }
     // Location modal handlers and Leaflet map
     let adminMap = null; let adminMarker = null;
