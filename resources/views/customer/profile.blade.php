@@ -38,13 +38,17 @@
 										<div class="flex items-start justify-between">
 											<div class="flex-1">
 												<div class="flex items-center gap-3 mb-2">
-													<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-														@if($booking->status === 'completed') bg-green-100 text-green-800
-														@elseif($booking->status === 'confirmed') bg-blue-100 text-blue-800
-														@elseif($booking->status === 'in_progress') bg-yellow-100 text-yellow-800
-														@elseif($booking->status === 'cancelled') bg-red-100 text-red-800
-														@else bg-gray-100 text-gray-800
-														@endif">
+													@php
+														$statusClasses = [
+															'pending' => 'bg-orange-100 text-orange-800',
+															'completed' => 'bg-green-100 text-green-800',
+															'confirmed' => 'bg-blue-100 text-blue-800',
+															'in_progress' => 'bg-yellow-100 text-yellow-800',
+															'cancelled' => 'bg-red-100 text-red-800'
+														];
+														$statusClass = $statusClasses[$booking->status] ?? 'bg-gray-100 text-gray-800';
+													@endphp
+													<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
 														{{ ucfirst(str_replace('_', ' ', $booking->status)) }}
 													</span>
 													<span class="text-sm font-mono text-gray-500">#{{ $booking->code }}</span>
@@ -78,6 +82,14 @@
 												<div class="text-xs text-gray-500 capitalize">
 													{{ str_replace('_', ' ', $booking->payment_status) }}
 												</div>
+												@if($booking->status === 'pending')
+													<div class="mt-2">
+														<button onclick="openCancelModal({{ $booking->id }}, '{{ $booking->code }}')" 
+																class="px-3 py-1 bg-red-500 text-white text-xs rounded cursor-pointer hover:bg-red-600 transition-colors duration-200">
+															Cancel Booking
+														</button>
+													</div>
+												@endif
 											</div>
 										</div>
 									</div>
@@ -260,7 +272,7 @@
 														Make Primary
 													</button>
 												@endif
-												<button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer whitespace-nowrap w-full" onclick="openDeleteConfirm('delete-address-{{ $addr->id }}')" data-address-id="{{ $addr->id }}">
+												<button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors cursor-pointer whitespace-nowrap w-full" onclick="checkAddressCount({{ $addresses->count() }}, 'delete-address-{{ $addr->id }}')" data-address-id="{{ $addr->id }}">
 													<i class="ri-delete-bin-line mr-1"></i>
 													Delete
 												</button>
@@ -438,6 +450,73 @@ document.addEventListener('DOMContentLoaded', function(){
     var save = document.getElementById('confirm-save-address-yes');
     if (save) save.addEventListener('click', submitAddressForm);
 });
+
+// Cancel Booking Modal Functions
+let currentBookingId = null;
+
+function openCancelModal(bookingId, bookingCode) {
+    currentBookingId = bookingId;
+    document.getElementById('cancel-booking-code').textContent = bookingCode;
+    document.getElementById('cancel-booking-modal').classList.remove('hidden');
+    document.getElementById('cancel-booking-modal').classList.add('flex');
+}
+
+function closeCancelModal() {
+    document.getElementById('cancel-booking-modal').classList.add('hidden');
+    document.getElementById('cancel-booking-modal').classList.remove('flex');
+    currentBookingId = null;
+}
+
+function confirmCancelBooking() {
+    if (!currentBookingId) return;
+    
+    // Set up the form action and submit
+    const form = document.getElementById('cancel-booking-form');
+    form.action = `/customer/bookings/${currentBookingId}/cancel`;
+    form.submit();
+}
+
+// Close modal when clicking outside the modal content
+document.getElementById('cancel-booking-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCancelModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeCancelModal();
+    }
+});
+
+// Address deletion validation functions
+function checkAddressCount(addressCount, formId) {
+    if (addressCount <= 1) {
+        // Show the cannot delete modal
+        openCannotDeleteModal();
+    } else {
+        // Proceed with normal delete confirmation
+        openDeleteConfirm(formId);
+    }
+}
+
+function openCannotDeleteModal() {
+    document.getElementById('cannot-delete-address-modal').classList.remove('hidden');
+    document.getElementById('cannot-delete-address-modal').classList.add('flex');
+}
+
+function closeCannotDeleteModal() {
+    document.getElementById('cannot-delete-address-modal').classList.add('hidden');
+    document.getElementById('cannot-delete-address-modal').classList.remove('flex');
+}
+
+// Close cannot delete modal when clicking outside
+document.getElementById('cannot-delete-address-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCannotDeleteModal();
+    }
+});
 </script>
 @endpush
 
@@ -510,4 +589,93 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
 </div>
 
+<!-- Cancel Booking Confirmation Modal -->
+<div id="cancel-booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+    <div class="bg-white rounded-xl w-full max-w-md p-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="font-semibold text-lg">Cancel Booking</div>
+            <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeCancelModal()">✕</button>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="text-sm text-gray-600">
+                Are you sure you want to cancel booking <span id="cancel-booking-code" class="font-mono font-semibold text-gray-900"></span>?
+            </div>
+            
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div class="flex items-start gap-2">
+                    <i class="ri-error-warning-line text-red-500 text-lg mt-0.5"></i>
+                    <div class="text-sm text-red-700">
+                        <div class="font-medium mb-1">This action cannot be undone.</div>
+                        <div>Once cancelled, you'll need to create a new booking if you want to reschedule.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hidden form for cancellation -->
+        <form id="cancel-booking-form" method="POST" class="hidden">
+            @csrf
+        </form>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-3 pt-4">
+            <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 transition-colors duration-200" onclick="closeCancelModal()">
+                Keep Booking
+            </button>
+            <button type="button" class="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 transition-colors duration-200" onclick="confirmCancelBooking()">
+                Cancel Booking
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Cannot Delete Last Address Modal -->
+<div id="cannot-delete-address-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+    <div class="bg-white rounded-xl w-full max-w-md p-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="font-semibold text-lg">Cannot Delete Address</div>
+            <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeCannotDeleteModal()">✕</button>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <div class="flex items-start gap-2">
+                    <i class="ri-error-warning-line text-orange-500 text-lg mt-0.5"></i>
+                    <div class="text-sm text-orange-700">
+                        <div class="font-medium mb-1">You cannot delete your last address.</div>
+                        <div>You must have at least one address saved to use our services.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-sm text-gray-600">
+                To delete this address, please:
+            </div>
+            
+            <div class="space-y-2 text-sm text-gray-600">
+                <div class="flex items-center gap-2">
+                    <i class="ri-add-line text-emerald-600"></i>
+                    <span>Add a new address first</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="ri-star-line text-emerald-600"></i>
+                    <span>Make it your primary address</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="ri-delete-bin-line text-emerald-600"></i>
+                    <span>Then you can delete this one</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-3 pt-4">
+            <button type="button" class="px-4 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200" onclick="closeCannotDeleteModal()">
+                <i class="ri-add-line mr-2"></i>
+                Add New Address
+            </button>
+        </div>
+    </div>
+</div>
 

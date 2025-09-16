@@ -91,6 +91,38 @@ class CustomerBookingController extends Controller
 
         return back()->with('status','Booking successful!');
     }
+
+    /**
+     * Cancel a booking (only if status is pending)
+     * This method allows customers to cancel their own pending bookings
+     */
+    public function cancel(Request $request, $bookingId)
+    {
+        $user = Auth::user();
+        
+        // Get the booking and verify ownership
+        $booking = DB::table('bookings as b')
+            ->join('customers as c', 'c.id', '=', 'b.customer_id')
+            ->where('b.id', $bookingId)
+            ->where('c.user_id', $user->id)
+            ->where('b.status', 'pending') // Only allow cancellation of pending bookings
+            ->select('b.*')
+            ->first();
+
+        if (!$booking) {
+            return back()->withErrors(['cancel' => 'Booking not found or cannot be cancelled.']);
+        }
+
+        // Update booking status to cancelled
+        DB::table('bookings')->where('id', $bookingId)->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancelled_reason' => 'Cancelled by customer',
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('status', 'Booking cancelled successfully.');
+    }
 }
 
 ?>

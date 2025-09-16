@@ -83,6 +83,7 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer/gallery/{serviceType}', [CustomerGalleryController::class, 'showService'])->name('customer.gallery.service');
     Route::view('/customer/services', 'customer.services')->name('customer.services');
     Route::post('/customer/bookings', [CustomerBookingController::class, 'create'])->name('customer.bookings.create');
+    Route::post('/customer/bookings/{bookingId}/cancel', [CustomerBookingController::class, 'cancel'])->name('customer.bookings.cancel');
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');
     Route::delete('/customer/addresses/{address}', [CustomerAddressController::class, 'destroy'])->name('customer.address.destroy');
     Route::post('/customer/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])->name('customer.address.primary');

@@ -411,41 +411,97 @@ function openBookingForm(){
   window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }
 </script>
-<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center">
+<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
   <div class="bg-white rounded-xl w-full max-w-lg p-4">
-    <div class="flex items-center justify-between mb-2">
-      <div class="font-semibold">Confirm Booking</div>
-      <button onclick="const modal = document.getElementById('booking-modal'); modal.classList.add('hidden'); modal.classList.remove('flex');">✕</button>
+    <div class="flex items-center justify-between mb-4">
+      <div class="font-semibold text-lg">Confirm Booking</div>
+      <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeBookingModal()">✕</button>
     </div>
-    <form method="POST" action="{{ route('customer.bookings.create') }}" class="space-y-2">
+    
+    <form method="POST" action="{{ route('customer.bookings.create') }}" class="space-y-4">
       @csrf
-      <div>Name: <span class="font-medium">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</span></div>
-      <div>Contact: <span class="font-medium">{{ auth()->user()->phone ?? '—' }}</span></div>
-      @php $primary = optional(DB::table('addresses')->where('user_id', auth()->id())->orderByDesc('is_primary')->orderBy('id')->first()); @endphp
-      @if(!$primary)
-        <div class="text-red-600">Please set your address first before booking.</div>
-      @else
-        <div>Address: <span class="font-medium">{{ $primary->line1 }} {{ $primary->city ? ', '.$primary->city : '' }} {{ $primary->province ? ', '.$primary->province : '' }}</span></div>
-        <input type="hidden" name="address_id" value="{{ $primary->id }}">
-      @endif
-      <div class="grid grid-cols-2 gap-2">
-        <label class="text-sm">Date <input required type="date" name="date" class="border rounded px-2 py-1 w-full"></label>
-        <label class="text-sm">Time <input required type="time" name="time" class="border rounded px-2 py-1 w-full"></label>
+      
+      <!-- Customer Information Section -->
+      <div class="space-y-2">
+        <div class="text-sm">
+          <span class="text-gray-600">Name:</span> 
+          <span class="font-medium">{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</span>
+        </div>
+        <div class="text-sm">
+          <span class="text-gray-600">Contact:</span> 
+          <span class="font-medium">{{ auth()->user()->phone ?? '—' }}</span>
+        </div>
+        
+        @php $primary = optional(DB::table('addresses')->where('user_id', auth()->id())->orderByDesc('is_primary')->orderBy('id')->first()); @endphp
+        @if(!$primary)
+          <div class="text-red-600 text-sm bg-red-50 p-2 rounded border border-red-200">
+            Please set your address first before booking.
+          </div>
+        @else
+          <div class="text-sm">
+            <span class="text-gray-600">Address:</span> 
+            <span class="font-medium">{{ $primary->line1 }} {{ $primary->city ? ', '.$primary->city : '' }} {{ $primary->province ? ', '.$primary->province : '' }}</span>
+          </div>
+          <input type="hidden" name="address_id" value="{{ $primary->id }}">
+        @endif
       </div>
+      
+      <!-- Date and Time Selection -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+          <input required type="date" name="date" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+          <input required type="time" name="time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+        </div>
+      </div>
+      
+      <!-- Hidden fields for booking data -->
       <input type="hidden" name="total" id="booking_total">
       <input type="hidden" name="items_json" id="items_json">
-      <div class="flex justify-end gap-2 mt-2">
-        <button type="submit" class="px-3 py-2 bg-emerald-700 text-white rounded hover:bg-emerald-700/80 hover:text-whit cursor-pointer" @if(!$primary) disabled @endif>Book Now</button>
+      
+      <!-- Action Buttons -->
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 transition-colors duration-200" onclick="closeBookingModal()">
+          Cancel
+        </button>
+        <button type="submit" class="px-4 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-800 transition-colors duration-200" @if(!$primary) disabled @endif>
+          Book Now
+        </button>
       </div>
     </form>
   </div>
   <script>
+  // Function to close the booking modal
+  function closeBookingModal() {
+    const modal = document.getElementById('booking-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  // Event listener for opening the booking modal
   window.addEventListener('openBookingModal', function(e){
     const modal = document.getElementById('booking-modal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     document.getElementById('booking_total').value = e.detail.total;
     document.getElementById('items_json').value = JSON.stringify(e.detail.items||[]);
+  });
+
+  // Close modal when clicking outside the modal content
+  document.getElementById('booking-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeBookingModal();
+    }
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeBookingModal();
+    }
   });
   </script>
 </div>
