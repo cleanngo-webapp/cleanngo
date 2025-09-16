@@ -85,12 +85,16 @@
                                 </div>
                             @else
                                 {{-- Show status with colored span --}}
-                                <span class="px-2 py-1 text-xs font-medium rounded-full
-                                    @if($b->status === 'confirmed') bg-blue-100 text-blue-800
-                                    @elseif($b->status === 'in_progress') bg-yellow-100 text-yellow-800
-                                    @elseif($b->status === 'completed') bg-green-100 text-green-800
-                                    @elseif($b->status === 'cancelled') bg-red-100 text-red-800
-                                    @else bg-gray-100 text-gray-800 @endif">
+                                @php
+                                    $statusClasses = [
+                                        'confirmed' => 'bg-blue-100 text-blue-800',
+                                        'in_progress' => 'bg-yellow-100 text-yellow-800',
+                                        'completed' => 'bg-green-100 text-green-800',
+                                        'cancelled' => 'bg-red-100 text-red-800'
+                                    ];
+                                    $statusClass = $statusClasses[$b->status] ?? 'bg-gray-100 text-gray-800';
+                                @endphp
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusClass }}">
                                     {{ ucfirst(str_replace('_', ' ', $b->status)) }}
                                 </span>
                             @endif
@@ -99,9 +103,15 @@
                             @if($b->status === 'in_progress' || $b->status === 'completed')
                                 @if($b->payment_proof_id)
                                     <button class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full
-                                        @if($b->payment_status === 'approved') bg-green-100 text-green-800
-                                        @elseif($b->payment_status === 'declined') bg-red-100 text-red-800
-                                        @else bg-yellow-100 text-yellow-800 @endif
+                                        @php
+                                            $paymentStatusClasses = [
+                                                'approved' => 'bg-green-100 text-green-800',
+                                                'declined' => 'bg-red-100 text-red-800',
+                                                'pending' => 'bg-yellow-100 text-yellow-800'
+                                            ];
+                                            $paymentStatusClass = $paymentStatusClasses[$b->payment_status] ?? 'bg-yellow-100 text-yellow-800';
+                                        @endphp
+                                        {{ $paymentStatusClass }}
                                         hover:opacity-80 transition-colors cursor-pointer"
                                         onclick="openPaymentProofModal({{ $b->payment_proof_id }})" 
                                         title="View payment proof">
