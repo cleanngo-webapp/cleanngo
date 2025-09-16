@@ -21,6 +21,7 @@
     <div class="flex">
         <aside class="w-56 bg-emerald-700 text-white min-h-[calc(100vh-3.5rem)]">
             <div class="bg-brand-green flex items-center gap-2 px-4 py-4 w-full">
+                <i class="ri-admin-line"></i>
                 <span class="text-white font-semibold">Hi, {{ auth()->user()->first_name }}!</span>
             </div>
             <nav class="px-2 space-y-1">

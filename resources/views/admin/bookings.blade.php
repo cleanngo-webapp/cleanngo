@@ -56,7 +56,7 @@
                             @else
                                 <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
                                     @csrf
-                                    <select name="employee_user_id" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
+                                    <select name="employee_user_id" class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
                                         <option class="cursor-pointer" value="">Assign Employee</option>
                                         @foreach($employees as $e)
                                             <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
@@ -66,7 +66,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <select class="text-sm border-gray-300 rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 status-select cursor-pointer" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
+                            <select class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 status-select cursor-pointer" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
                                 <option value="pending" {{ $b->status==='pending'?'selected':'' }}>Pending</option>
                                 <option value="in_progress" {{ $b->status==='in_progress'?'selected':'' }}>In Progress</option>
                                 <option value="confirmed" {{ $b->status==='confirmed'?'selected':'' }}>Confirmed</option>
