@@ -75,6 +75,14 @@ class PaymentProofController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        // Update the booking's payment status and payment method when payment proof is approved
+        DB::table('bookings')->where('id', $proof->booking_id)->update([
+            'payment_status' => 'paid',
+            'payment_method' => $proof->payment_method,
+            'amount_paid_cents' => $proof->amount * 100, // Convert to cents
+            'updated_at' => now(),
+        ]);
+
         return back()->with('status', 'Payment proof approved successfully.');
     }
 

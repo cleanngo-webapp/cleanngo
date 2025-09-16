@@ -31,6 +31,8 @@ use App\Http\Controllers\CustomerGalleryController;
 use App\Http\Controllers\ServiceCommentController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\EmployeeSettingsController;
+use App\Http\Controllers\AdminPayrollController;
+use App\Http\Controllers\EmployeePayrollController;
 
 Route::redirect('/', '/login');
 
@@ -66,7 +68,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::post('/jobs/{bookingId}/start', [EmployeeJobsController::class, 'start'])->name('jobs.start');
     Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
     Route::post('/payment-proof/{bookingId}/upload', [App\Http\Controllers\PaymentProofController::class, 'upload'])->name('payment-proof.upload');
-    Route::view('/payroll', 'employee.payroll')->name('payroll');
+    Route::get('/payroll', [EmployeePayrollController::class, 'index'])->name('payroll');
     Route::view('/notifications', 'employee.notifications')->name('notifications');
     Route::get('/profile', [EmployeeProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [EmployeeProfileController::class, 'update'])->name('profile.update');
@@ -141,7 +143,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
     Route::put('/settings/password', [AdminSettingsController::class, 'updatePassword'])->name('settings.password.update');
     Route::put('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
-    Route::view('/payroll', 'admin.payroll')->name('payroll');
+    Route::get('/payroll', [AdminPayrollController::class, 'index'])->name('payroll');
     // Calendar events feed for admin
     Route::get('/calendar/events', [CalendarController::class, 'adminEvents'])->name('calendar.events');
 });
