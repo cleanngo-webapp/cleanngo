@@ -106,7 +106,6 @@ class AdminBookingController extends Controller
 
         $customerId = DB::table('customers')->where('user_id', $data['user_id'])->value('id');
         if (!$customerId) {
-            // Create minimal customer row if missing
             $customerId = DB::table('customers')->insertGetId([
                 'user_id' => $data['user_id'],
                 'customer_code' => $this->generateCode('C'),
