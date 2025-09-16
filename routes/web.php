@@ -34,6 +34,20 @@ use App\Http\Controllers\EmployeeSettingsController;
 
 Route::redirect('/', '/login');
 
+// Sitemap route
+Route::get('/sitemap.xml', function () {
+    return response()->view('sitemap')->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
+// Legal pages
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy');
+})->name('privacy-policy');
+
+Route::get('/terms-of-service', function () {
+    return view('terms-of-service');
+})->name('terms-of-service');
+
 // Auth routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');

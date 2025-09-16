@@ -139,13 +139,13 @@
         {{-- Modal Body --}}
         <div class="p-4 max-h-[60vh] overflow-y-auto">
             {{-- Add Comment Form --}}
-            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg h-80 flex flex-col">
                 <h4 class="text-md font-semibold text-gray-900 mb-3">Add Your Comment</h4>
-                <form id="commentForm" class="space-y-3">
+                <form id="commentForm" class="space-y-3 flex-1 flex flex-col">
                     <input type="hidden" id="serviceType" name="service_type">
                     
                     {{-- Rating --}}
-                    <div>
+                    <div class="flex-shrink-0">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rating (Optional)</label>
                         <div class="flex space-x-1" id="ratingStars">
                           <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="1">★</button>
@@ -158,17 +158,17 @@
                       </div>
 
                     {{-- Comment Text --}}
-                    <div>
+                    <div class="flex-1 flex flex-col">
                         <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Your Comment</label>
                         <textarea id="comment" name="comment" rows="3" 
                                   placeholder="Share your experience with this service..."
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none min-h-[80px] max-h-[120px] overflow-y-auto"
                                   required></textarea>
                         <p class="text-xs text-gray-500 mt-1">Minimum 1 character, maximum 1000 characters</p>
                     </div>
 
                     {{-- Submit Button --}}
-                    <div class="flex justify-end">
+                    <div class="flex justify-end flex-shrink-0">
                         <button type="submit" id="submitCommentBtn"
                                 class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
                             <span id="submitText">Post Comment</span>
@@ -180,9 +180,14 @@
 
             {{-- Comments List --}}
             <div id="commentsList" class="space-y-4">
+                {{-- Loading Animation --}}
                 <div class="text-center py-8">
-                    <div class="text-gray-400 text-4xl mb-2">💬</div>
-                    <p class="text-gray-500">Loading comments...</p>
+                    <div class="flex justify-center items-center space-x-2 mb-4">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    </div>
+                    <p class="text-gray-500 text-sm">Loading comments...</p>
                 </div>
             </div>
         </div>
@@ -191,15 +196,15 @@
 
 {{-- Edit Comment Modal --}}
 <div id="editCommentModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display: none;">
-    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
-        <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Comment</h3>
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+        <div class="p-6 h-full flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex-shrink-0">Edit Comment</h3>
             
-            <form id="editCommentForm" class="space-y-4">
+            <form id="editCommentForm" class="space-y-4 flex-1 flex flex-col">
                 <input type="hidden" id="editCommentId">
                 
                 {{-- Rating --}}
-                <div>
+                <div class="flex-shrink-0">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
                     <div class="flex space-x-1" id="editRatingStars">
                         <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="1">★</button>
@@ -212,15 +217,15 @@
                 </div>
 
                 {{-- Comment Text --}}
-                <div>
+                <div class="flex-1 flex flex-col">
                     <label for="editComment" class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
                     <textarea id="editComment" name="comment" rows="3" 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none min-h-[80px] max-h-[200px] overflow-y-auto"
                               required></textarea>
                 </div>
 
                 {{-- Buttons --}}
-                <div class="flex space-x-3 justify-end">
+                <div class="flex space-x-3 justify-end flex-shrink-0">
                     <button type="button" 
                             onclick="closeEditCommentModal()"
                             class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer">
@@ -323,8 +328,14 @@ async function loadComments(serviceType) {
         console.error('Error loading comments:', error);
         document.getElementById('commentsList').innerHTML = `
             <div class="text-center py-8">
-                <div class="text-red-400 text-4xl mb-2">⚠️</div>
-                <p class="text-red-500">Failed to load comments. Please try again.</p>
+                <div class="flex justify-center items-center mb-4">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-red-500 text-sm">Failed to load comments. Please try again.</p>
             </div>
         `;
     }
@@ -339,8 +350,14 @@ function displayComments(comments) {
         console.log('No comments to display');
         commentsList.innerHTML = `
             <div class="text-center py-8">
-                <div class="text-gray-400 text-4xl mb-2">💬</div>
-                <p class="text-gray-500">No comments yet. Be the first to share your experience!</p>
+                <div class="flex justify-center items-center mb-4">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-gray-500 text-sm">No comments yet. Be the first to share your experience!</p>
             </div>
         `;
         return;
@@ -349,7 +366,7 @@ function displayComments(comments) {
     console.log('Rendering', comments.length, 'comments');
     
     commentsList.innerHTML = comments.map(comment => `
-        <div class="border border-gray-200 rounded-lg p-4">
+        <div class="border border-gray-200 rounded-lg p-4 fade-in-up">
             <div class="flex items-start justify-between mb-2">
                 <div class="flex items-center space-x-2">
                     <span class="font-semibold text-gray-900">${comment.customer_name}</span>
@@ -360,13 +377,33 @@ function displayComments(comments) {
                     ${comment.is_edited ? '<span class="text-xs text-gray-400">(edited)</span>' : ''}
                 </div>
             </div>
-            <p class="text-gray-700 mb-3">${comment.comment}</p>
-            ${comment.can_edit || comment.can_delete ? `
-                <div class="flex space-x-2">
-                    ${comment.can_edit ? `<button onclick="editComment(${comment.id}, '${comment.comment.replace(/'/g, "\\'")}', ${comment.rating || 0})" class="text-blue-600 hover:text-blue-800 text-sm cursor-pointer">Edit</button>` : ''}
-                    ${comment.can_delete ? `<button onclick="deleteComment(${comment.id})" class="text-red-600 hover:text-red-800 text-sm cursor-pointer">Delete</button>` : ''}
-                </div>
-            ` : ''}
+            <div class="flex justify-between items-end">
+                <p class="text-gray-700 flex-1 mr-4">${comment.comment}</p>
+                ${comment.can_edit || comment.can_delete ? `
+                    <div class="flex space-x-2 flex-shrink-0">
+                        ${comment.can_edit ? `
+                            <button onclick="editComment(${comment.id}, '${comment.comment.replace(/'/g, "\\'")}', ${comment.rating || 0})" 
+                                    class="group relative p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 cursor-pointer"
+                                    title="Edit comment">
+                                <i class="ri-edit-line text-lg"></i>
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                                    Edit
+                                </div>
+                            </button>
+                        ` : ''}
+                        ${comment.can_delete ? `
+                            <button onclick="deleteComment(${comment.id})" 
+                                    class="group relative p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 cursor-pointer"
+                                    title="Delete comment">
+                                <i class="ri-delete-bin-line text-xl"></i>
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                                    Delete
+                                </div>
+                            </button>
+                        ` : ''}
+                    </div>
+                ` : ''}
+            </div>
         </div>
     `).join('');
 }
@@ -521,6 +558,15 @@ function editComment(commentId, commentText, rating) {
         star.className = index < rating ? 'text-yellow-400 text-xl' : 'text-gray-300 hover:text-yellow-400 text-xl';
     });
     
+    // Auto-resize the textarea after setting content
+    const editTextarea = document.getElementById('editComment');
+    if (editTextarea) {
+        // Use setTimeout to ensure the modal is rendered before resizing
+        setTimeout(() => {
+            autoResizeTextarea(editTextarea);
+        }, 100);
+    }
+    
     const modal = document.getElementById('editCommentModal');
     modal.style.display = 'flex';
     modal.classList.remove('hidden');
@@ -631,10 +677,57 @@ function showNotification(message, type) {
     }, 3000);
 }
 
+// Auto-resize textarea function
+function autoResizeTextarea(textarea) {
+    // Reset height to auto to get the correct scrollHeight
+    textarea.style.height = 'auto';
+    
+    // Get the minimum and maximum heights from CSS classes
+    const minHeight = 80; // min-h-[80px]
+    const maxHeight = textarea.id === 'editComment' ? 200 : 120; // max-h-[200px] for edit, max-h-[120px] for main
+    
+    // Calculate new height based on content
+    const newHeight = Math.max(minHeight, Math.min(maxHeight, textarea.scrollHeight));
+    
+    // Set the new height
+    textarea.style.height = newHeight + 'px';
+    
+    // Show/hide scrollbar based on content
+    if (textarea.scrollHeight > maxHeight) {
+        textarea.style.overflowY = 'auto';
+    } else {
+        textarea.style.overflowY = 'hidden';
+    }
+}
+
 // Initialize rating functionality when modal opens
 document.addEventListener('DOMContentLoaded', function() {
     setupRating(document.getElementById('ratingStars'), document.getElementById('rating'));
     setupRating(document.getElementById('editRatingStars'), document.getElementById('editRating'));
+    
+    // Set up auto-resize for textareas
+    const commentTextarea = document.getElementById('comment');
+    const editCommentTextarea = document.getElementById('editComment');
+    
+    if (commentTextarea) {
+        // Auto-resize on input
+        commentTextarea.addEventListener('input', function() {
+            autoResizeTextarea(this);
+        });
+        
+        // Initial resize
+        autoResizeTextarea(commentTextarea);
+    }
+    
+    if (editCommentTextarea) {
+        // Auto-resize on input
+        editCommentTextarea.addEventListener('input', function() {
+            autoResizeTextarea(this);
+        });
+        
+        // Initial resize
+        autoResizeTextarea(editCommentTextarea);
+    }
     
     // Close modals when clicking outside
     document.getElementById('commentsModal').addEventListener('click', function(e) {

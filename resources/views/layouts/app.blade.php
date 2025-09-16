@@ -36,16 +36,63 @@
     <main class="py-8 flex-1">
         @yield('content')
     </main>
-    <footer class="bg-brand-green text-white">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-semibold">
-                <div class="flex items-center gap-2"><span>📘</span><span>@cleansavernaga</span></div>
-                <div class="flex items-center gap-2"><span>📸</span><span>@cleansavernaga_ph</span></div>
-                <div class="flex items-center gap-2"><span>📱</span><span>(+63) 995 112 0443</span></div>
+    <footer class="bg-brand-green text-white border-t rounded-t-3xl">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Main Footer Content -->
+            <div class="mb-6">
+                
+                <!-- Company Info -->
+                <div class="max-w-2xl mx-auto text-center">
+                    <h3 class="text-lg font-bold text-white mb-3">CleanSaver Naga</h3>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                        Professional cleaning services in Naga City. We provide comprehensive cleaning solutions for homes, offices, and commercial spaces.
+                    </p>
+                    <div class="flex items-center justify-center gap-2 text-sm opacity-90">
+                        <i class="ri-map-pin-fill text-green-300"></i>
+                        <span>0772 Maescoy Compound, San Felipe Naga City</span>
+                    </div>
+                </div>
+
+            <!-- Social Media & Contact -->
+            <div class="border-t border-white/20 pt-6 mb-6">
+                <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+                    <a href="https://www.facebook.com/cleansavernaga" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="group flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-105">
+                        <i class="ri-facebook-fill text-lg text-white"></i>
+                        <span class="text-sm font-medium">@cleansavernaga</span>
+                    </a>
+                    
+                    <a href="https://www.instagram.com/cleansavernaga_ph" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="group flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-105">
+                        <i class="ri-instagram-fill text-lg text-white"></i>
+                        <span class="text-sm font-medium">@cleansavernaga_ph</span>
+                    </a>
+                    
+                    <a href="mailto:cleansaverph.naga@gmail.com" 
+                       class="group flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-105">
+                        <i class="ri-mail-fill text-lg text-white"></i>
+                        <span class="text-sm font-medium">cleansaverph.naga@gmail.com</span>
+                    </a>
+                    
+                    <div class="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg">
+                        <i class="ri-phone-fill text-lg text-white"></i>
+                        <span class="text-sm font-medium">(+63) 995 112 0443</span>
+                    </div>
+                </div>
             </div>
-            <div class="mt-1 text-center text-xs opacity-90">
-                <span>📍</span>
-                <span>0772 Maescoy Compound, San Felipe Naga City</span>
+            
+            <!-- Copyright -->
+            <div class="text-center border-t border-white/20 pt-4">
+                <p class="text-sm opacity-75">
+                    &copy; {{ date('Y') }} CleanSaver Naga. All rights reserved. | 
+                    <a href="/privacy-policy" class="hover:text-white transition-colors duration-200">Privacy Policy</a> | 
+                    <a href="/terms-of-service" class="hover:text-white transition-colors duration-200">Terms of Service</a> |
+                    <a href="/sitemap.xml" class="hover:text-white transition-colors duration-200">Sitemap</a>
+                </p>
             </div>
         </div>
     </footer>

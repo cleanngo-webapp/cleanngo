@@ -3,7 +3,6 @@
 @import "tailwindcss";
 
 @theme {
-    
     --color-brand-green: #248639;
     --color-brand-gray: #d9d9d9;
     --color-brand-highlight: #42a457;
@@ -17,3 +16,48 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+
+/* Custom loading animation for comments */
+@keyframes loading-pulse {
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.loading-dots {
+    animation: loading-pulse 1.4s ease-in-out infinite;
+}
+
+.loading-dots:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.loading-dots:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.loading-dots:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* Smooth fade-in animation for content */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
