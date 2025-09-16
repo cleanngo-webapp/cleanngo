@@ -20,9 +20,9 @@
 		<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-sm font-medium text-gray-600">Jobs Assigned Today</p>
+					<p class="text-sm font-medium text-gray-600">Active Jobs</p>
 					<p class="text-3xl font-bold text-gray-900">{{ number_format($jobsAssignedToday) }}</p>
-					<p class="text-xs text-gray-500 mt-1">Scheduled for today</p>
+					<p class="text-xs text-gray-500 mt-1">Scheduled today or in progress</p>
 				</div>
 				<div class="bg-blue-100 p-3 rounded-lg">
 					<svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,8 +68,8 @@
 	{{-- Today's Job Assignments --}}
 	<div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
 		<div class="p-6 border-b border-gray-100">
-			<h2 class="text-xl font-semibold text-gray-900">Today's Job Assignments</h2>
-			<p class="text-sm text-gray-500 mt-1">Your scheduled jobs for today</p>
+			<h2 class="text-xl font-semibold text-gray-900">Active Job Assignments</h2>
+			<p class="text-sm text-gray-500 mt-1">Your jobs scheduled for today or currently in progress</p>
 		</div>
 		<div class="p-6">
 			@forelse($todayJobs as $job)
@@ -77,7 +77,7 @@
 				<div class="flex items-start justify-between">
 					<div class="flex-1">
 						<div class="flex items-center gap-3 mb-2">
-							<h3 class="text-lg font-semibold text-gray-900">{{ $job->service_name }}</h3>
+							<h3 class="text-lg font-semibold text-gray-900">{{ $serviceSummaries[$job->id] ?? ($job->service_name ?? 'General Service') }}</h3>
 							@php
 								$statusColors = [
 									'pending' => 'bg-yellow-100 text-yellow-800',
@@ -89,25 +89,19 @@
 								];
 							@endphp
 							<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$job->status] ?? 'bg-gray-100 text-gray-800' }}">
-								{{ ucfirst(str_replace('_', ' ', $job->status)) }}
+								{{ $job->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $job->status)) }}
 							</span>
 						</div>
 						
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-							<div>
-								<p><span class="font-medium">Customer:</span> {{ $job->first_name }} {{ $job->last_name }}</p>
-								<p><span class="font-medium">Phone:</span> {{ $job->phone }}</p>
-								<p><span class="font-medium">Address:</span> {{ $job->street_address }}, {{ $job->city }}</p>
-							</div>
-							<div>
-								<p><span class="font-medium">Scheduled:</span> {{ \Carbon\Carbon::parse($job->scheduled_start)->format('g:i A') }}</p>
+						<div class="text-sm text-gray-600 space-y-1">
+							<p><span class="font-medium">Customer:</span> {{ $job->first_name }} {{ $job->last_name }}</p>
+							<p><span class="font-medium">Phone:</span> {{ $job->phone }}</p>
+							<p><span class="font-medium">Address:</span> {{ $job->street_address }}, {{ $job->city }}</p>
+							<p><span class="font-medium">Scheduled:</span> {{ \Carbon\Carbon::parse($job->scheduled_start)->format('g:i A') }}
 								@if($job->scheduled_end)
-								<p><span class="font-medium">End Time:</span> {{ \Carbon\Carbon::parse($job->scheduled_end)->format('g:i A') }}</p>
+									- {{ \Carbon\Carbon::parse($job->scheduled_end)->format('g:i A') }}
 								@endif
-								@if($job->duration_minutes)
-								<p><span class="font-medium">Duration:</span> {{ $job->duration_minutes }} minutes</p>
-								@endif
-							</div>
+							</p>
 						</div>
 						
 						@if($job->notes)
@@ -127,14 +121,9 @@
 						</form>
 						@endif
 						
-						@if($job->status === 'in_progress')
-						<form method="POST" action="{{ route('employee.jobs.complete', $job->id) }}" class="inline">
-							@csrf
-							<button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-								Complete Job
-							</button>
-						</form>
-						@endif
+						<button onclick="openEmpLocation({{ json_encode(['id' => $job->id, 'lat' => $job->latitude, 'lng' => $job->longitude]) }})" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors cursor-pointer">
+							<i class="ri-map-pin-line"></i>
+						</button>
 						
 						<a href="{{ route('employee.jobs') }}" class="text-blue-600 text-sm font-medium hover:text-blue-800">
 							View Details
@@ -165,4 +154,86 @@
 		</div>
 	</div>
 </div>
+
+<!-- Location Map Modal -->
+<div id="job-map-modal" class="fixed inset-0 bg-black/50 z-50 items-center justify-center" style="display: none;">
+	<div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+		<div class="flex justify-between items-center mb-4">
+			<h3 class="text-lg font-semibold text-gray-900">Job Location</h3>
+			<button onclick="closeEmpLocation()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
+		
+		<div class="mb-4">
+			<p id="empLocationAddress" class="text-sm text-gray-600 mb-1"></p>
+			<p id="empLocationPhone" class="text-sm text-gray-500"></p>
+		</div>
+		
+		<div id="jobMap" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-200"></div>
+	</div>
+</div>
 @endsection
+
+@push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+let jobMap, jobMarker;
+
+function openEmpLocation(payload){
+    const lat = payload?.lat ?? 0, lng = payload?.lng ?? 0;
+    const modal = document.getElementById('job-map-modal');
+    modal.style.display = 'flex';
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+    const addr = document.getElementById('empLocationAddress');
+    const phone = document.getElementById('empLocationPhone');
+    
+    // Find address and phone from server-provided locationsData if available
+    try {
+        const data = (window.empLocations && (window.empLocations[payload.id] || window.empLocations[String(payload.id)])) || null;
+        if (data) {
+            addr.textContent = data.address || '';
+            phone.textContent = data.phone ? ('Contact: ' + data.phone) : '';
+        } else {
+            addr.textContent = '';
+            phone.textContent = '';
+        }
+    } catch(e){ 
+        addr.textContent=''; 
+        phone.textContent=''; 
+    }
+    
+    setTimeout(function(){
+        if(!jobMap){
+            jobMap = L.map('jobMap').setView([lat,lng], (lat&&lng)?15:5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+                maxZoom: 19, 
+                attribution: '&copy; OpenStreetMap' 
+            }).addTo(jobMap);
+        } else { 
+            jobMap.setView([lat,lng], (lat&&lng)?15:5); 
+        }
+        if(!jobMarker){ 
+            jobMarker = L.marker([lat,lng]).addTo(jobMap); 
+        } else { 
+            jobMarker.setLatLng([lat,lng]); 
+        }
+        setTimeout(()=>{ if(jobMap) jobMap.invalidateSize(true); }, 100);
+    }, 50);
+}
+
+function closeEmpLocation(){
+    const modal = document.getElementById('job-map-modal');
+    modal.style.display = 'none';
+    // Restore background scrolling
+    document.body.style.overflow = 'auto';
+}
+
+// Make locations available globally for address/phone rendering
+window.empLocations = @json($locationsData ?? []);
+</script>
+@endpush

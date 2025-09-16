@@ -68,9 +68,9 @@
 		<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-sm font-medium text-gray-600">Employees Assigned</p>
+					<p class="text-sm font-medium text-gray-600">Active Employees</p>
 					<p class="text-3xl font-bold text-gray-900">{{ number_format($employeesAssignedToday) }}</p>
-					<p class="text-xs text-gray-500 mt-1">Working today</p>
+					<p class="text-xs text-gray-500 mt-1">Scheduled today or working</p>
 				</div>
 				<div class="bg-purple-100 p-3 rounded-lg">
 					<svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
