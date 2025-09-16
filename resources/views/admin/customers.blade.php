@@ -233,7 +233,7 @@
                 custMap = L.map('customerMap').setView([14.5995,120.9842], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(custMap);
             }
-            var lat = data?.latitude ?? 14.5995, lng = data?.longitude ?? 120.9842;
+            var lat = data?.latitude ?? 13.6218, lng = data?.longitude ?? 123.1948;
             if(!custMarker){ custMarker = L.marker([lat,lng]).addTo(custMap); } else { custMarker.setLatLng([lat,lng]); }
             custMap.setView([lat,lng], 15);
             setTimeout(function(){ if (custMap) custMap.invalidateSize(true); }, 100);
