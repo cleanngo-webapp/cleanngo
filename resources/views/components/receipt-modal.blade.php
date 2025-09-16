@@ -8,14 +8,17 @@
     @include('components.receipt-modal', [
         'modalId' => 'receipt-modal',
         'receiptData' => $receiptData,
-        'bookingId' => $bookingId
+        'bookingId' => $bookingId,
+        'title' => 'Service Summary', // Optional: defaults to 'Service Summary'
+        'showPaymentMethod' => false, // Optional: defaults to false
+        'paymentMethod' => null // Optional: payment method to display
     ])
 --}}
 
 <div id="{{ $modalId }}" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
     <div class="bg-white rounded-xl w-full max-w-md p-4">
         <div class="flex items-center justify-between mb-2">
-            <div class="font-semibold">Service Summary</div>
+            <div class="font-semibold">{{ $title ?? 'Service Summary' }}</div>
             <button class="cursor-pointer" onclick="closeReceipt('{{ $modalId }}')">✕</button>
         </div>
         <div id="{{ $modalId }}-body" class="text-sm space-y-1"></div>
@@ -137,10 +140,12 @@ function peso(v) {
 }
 
 // Function to open receipt modal
-function openReceipt(modalId, bookingId, receiptData) {
+function openReceipt(modalId, bookingId, receiptData, options = {}) {
     const data = receiptData[String(bookingId)] || receiptData[bookingId];
     const modal = document.getElementById(modalId);
     const body = document.getElementById(modalId + '-body');
+    const showPaymentMethod = options.showPaymentMethod || false;
+    const paymentMethod = options.paymentMethod || null;
     
     if (!data || !data.lines || data.lines.length === 0) {
         body.innerHTML = '<div class="text-sm text-gray-500">No items recorded for this booking.</div>';
@@ -200,6 +205,17 @@ function openReceipt(modalId, bookingId, receiptData) {
         html += `<span>Total</span>`;
         html += `<span>${peso(data.total || 0)}</span>`;
         html += `</div>`;
+        
+        // Payment method (for customer receipts)
+        if (showPaymentMethod && paymentMethod) {
+            html += `<div class="mt-2 pt-2 border-t border-gray-100">`;
+            html += `<div class="flex justify-between text-sm text-gray-600">`;
+            html += `<span><i class="ri-bank-card-line mr-1"></i>Payment Method:</span>`;
+            html += `<span class="font-medium">${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}</span>`;
+            html += `</div>`;
+            html += `</div>`;
+        }
+        
         html += `</div>`;
         
         body.innerHTML = html;

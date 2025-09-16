@@ -319,7 +319,9 @@
 @include('components.receipt-modal', [
     'modalId' => 'customer-receipt-modal',
     'receiptData' => $receiptData ?? [],
-    'bookingId' => null
+    'bookingId' => null,
+    'title' => 'Receipt',
+    'showPaymentMethod' => true
 ])
 
 @endsection
@@ -518,7 +520,15 @@ document.addEventListener('keydown', function(e) {
 
 // Receipt modal function
 function openCustomerReceipt(bookingId) {
-    openReceipt('customer-receipt-modal', bookingId, @json($receiptData ?? []));
+    // Get payment method from the booking data
+    const booking = @json($bookings);
+    const currentBooking = booking.find(b => b.id == bookingId);
+    const paymentMethod = currentBooking ? currentBooking.payment_method : null;
+    
+    openReceipt('customer-receipt-modal', bookingId, @json($receiptData ?? []), {
+        showPaymentMethod: true,
+        paymentMethod: paymentMethod
+    });
 }
 
 // Address deletion validation functions
