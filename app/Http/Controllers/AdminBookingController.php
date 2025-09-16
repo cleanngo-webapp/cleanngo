@@ -18,6 +18,10 @@ class AdminBookingController extends Controller
             ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
             ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
             ->leftJoin('addresses as a', 'a.id', '=', 'b.address_id')
+            ->leftJoin('payment_proofs as pp', function($join) {
+                $join->on('pp.booking_id', '=', 'b.id')
+                     ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');
+            })
             ->select([
                 'b.id', 'b.code', 'b.scheduled_start', 'b.status', 'b.address_id',
                 's.name as service_name',
@@ -31,6 +35,9 @@ class AdminBookingController extends Controller
                 DB::raw("COALESCE(a.province,'') as address_province"),
                 DB::raw('a.latitude as address_latitude'),
                 DB::raw('a.longitude as address_longitude'),
+                DB::raw('pp.id as payment_proof_id'),
+                DB::raw('pp.status as payment_status'),
+                DB::raw("CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END as payment_approved"),
             ])
             ->orderByDesc('b.scheduled_start')
             ->paginate(15);

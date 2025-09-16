@@ -90,13 +90,31 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
                                 @if($b->status === 'in_progress')
-                                    <form method="POST" action="{{ route('employee.jobs.complete', $b->id) }}" class="inline">
-                                        @csrf
-                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                    @if($b->payment_approved)
+                                        <form method="POST" action="{{ route('employee.jobs.complete', $b->id) }}" class="inline">
+                                            @csrf
+                                            <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                                <i class="ri-check-line mr-1"></i>
+                                                Complete
+                                            </button>
+                                        </form>
+                                    @else
+                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof required" disabled>
                                             <i class="ri-check-line mr-1"></i>
                                             Complete
                                         </button>
-                                    </form>
+                                    @endif
+                                    @if($b->payment_status === 'declined' || !$b->payment_proof_id)
+                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors cursor-pointer" onclick="openPaymentModal({{ $b->id }})" title="Attach Payment Proof">
+                                            <i class="ri-attachment-line mr-1"></i>
+                                            Attach Payment
+                                        </button>
+                                    @else
+                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof already uploaded - waiting for admin review" disabled>
+                                            <i class="ri-attachment-line mr-1"></i>
+                                            Attach Payment
+                                        </button>
+                                    @endif
                                 @elseif($b->status === 'pending' || $b->status === 'confirmed')
                                     <form method="POST" action="{{ route('employee.jobs.start', $b->id) }}" class="inline">
                                         @csrf
@@ -136,6 +154,40 @@
             <div id="jobMap" class="h-80 rounded border"></div>
         </div>
     </div>
+    <!-- Payment Proof Modal -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-md p-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="font-semibold">Attach Payment Proof</div>
+                <button class="cursor-pointer" onclick="closePaymentModal()">✕</button>
+            </div>
+            <form id="payment-form" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Payment Amount</label>
+                    <input type="number" name="amount" step="0.01" min="0.01" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" placeholder="0.00" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                    <select name="payment_method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" required>
+                        <option value="">Select payment method</option>
+                        <option value="cash">Cash</option>
+                        <option value="gcash">GCash</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Payment Proof Image</label>
+                    <input type="file" name="proof_image" accept="image/*" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" required>
+                    <p class="text-xs text-gray-500 mt-1">Upload receipt or cash in hand image (max 2MB)</p>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closePaymentModal()">Cancel</button>
+                    <button type="submit" class="px-3 py-2 bg-purple-600 text-white rounded cursor-pointer hover:bg-purple-700">Attach Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Receipt Modal Component -->
     @include('components.receipt-modal', [
         'modalId' => 'emp-receipt-modal',
@@ -182,6 +234,26 @@ const empReceipts = @json($receiptData ?? []);
 // Receipt functions now handled by the component
 function openEmpReceipt(id){
     openReceipt('emp-receipt-modal', id, empReceipts);
+}
+
+// Payment modal functions
+let currentBookingId = null;
+function openPaymentModal(bookingId) {
+    currentBookingId = bookingId;
+    const modal = document.getElementById('payment-modal');
+    const form = document.getElementById('payment-form');
+    form.action = `/employee/payment-proof/${bookingId}/upload`;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closePaymentModal() {
+    const modal = document.getElementById('payment-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    currentBookingId = null;
+    // Reset form
+    document.getElementById('payment-form').reset();
 }
 
 // Global variables for search and sort

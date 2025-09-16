@@ -33,6 +33,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Employee</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proof of Payment</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -92,6 +93,26 @@
                                     @else bg-gray-100 text-gray-800 @endif">
                                     {{ ucfirst(str_replace('_', ' ', $b->status)) }}
                                 </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($b->status === 'in_progress' || $b->status === 'completed')
+                                @if($b->payment_proof_id)
+                                    <button class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full
+                                        @if($b->payment_status === 'approved') bg-green-100 text-green-800
+                                        @elseif($b->payment_status === 'declined') bg-red-100 text-red-800
+                                        @else bg-yellow-100 text-yellow-800 @endif
+                                        hover:opacity-80 transition-colors cursor-pointer"
+                                        onclick="openPaymentProofModal({{ $b->payment_proof_id }})" 
+                                        title="View payment proof">
+                                        <i class="ri-receipt-line mr-1"></i>
+                                        {{ ucfirst($b->payment_status ?? 'pending') }}
+                                    </button>
+                                @else
+                                    <span class="text-xs text-gray-500 italic">No proof uploaded</span>
+                                @endif
+                            @else
+                                <span class="text-xs text-gray-400">—</span>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -246,6 +267,40 @@
         </div>
     </div>
 
+    <!-- Payment Proof Modal -->
+    <div id="payment-proof-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-2xl p-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="font-semibold">Payment Proof Details</div>
+                <button class="cursor-pointer" onclick="closePaymentProofModal()">✕</button>
+            </div>
+            <div id="payment-proof-content" class="space-y-4">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Decline Payment Proof Modal -->
+    <div id="decline-payment-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-md p-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="font-semibold">Decline Payment Proof</div>
+                <button class="cursor-pointer" onclick="closeDeclineModal()">✕</button>
+            </div>
+            <p class="mb-4 text-sm text-gray-600">Please provide a reason for declining this payment proof:</p>
+            <form id="decline-form" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <textarea name="admin_notes" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-red-500 focus:ring-red-500" placeholder="Enter reason for declining..." required></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closeDeclineModal()">Cancel</button>
+                    <button type="submit" class="px-3 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700">Decline Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @push('scripts')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -395,6 +450,120 @@
         
         closeStatusChangeModal();
     });
+    
+    // Payment proof modal handlers
+    let currentPaymentProofId = null;
+    function openPaymentProofModal(proofId) {
+        currentPaymentProofId = proofId;
+        const modal = document.getElementById('payment-proof-modal');
+        const content = document.getElementById('payment-proof-content');
+        
+        // Show loading state
+        content.innerHTML = '<div class="text-center py-4">Loading payment proof details...</div>';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Fetch payment proof details
+        fetch(`/admin/payment-proof/${proofId}/details`)
+            .then(response => response.json())
+            .then(data => {
+                content.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="font-medium text-gray-900 mb-2">Payment Information</h3>
+                            <div class="space-y-2 text-sm">
+                                <div><span class="font-medium">Amount:</span> PHP ${parseFloat(data.amount).toLocaleString()}</div>
+                                <div><span class="font-medium">Method:</span> ${data.payment_method.toUpperCase()}</div>
+                                <div><span class="font-medium">Status:</span> 
+                                    <span class="px-2 py-1 text-xs rounded-full
+                                        ${data.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                                          data.status === 'declined' ? 'bg-red-100 text-red-800' : 
+                                          'bg-yellow-100 text-yellow-800'}">
+                                        ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}
+                                    </span>
+                                </div>
+                                <div><span class="font-medium">Employee:</span> ${data.employee_name}</div>
+                                <div><span class="font-medium">Uploaded:</span> ${data.created_at}</div>
+                                ${data.reviewed_by ? `<div><span class="font-medium">Reviewed by:</span> ${data.reviewed_by}</div>` : ''}
+                                ${data.reviewed_at ? `<div><span class="font-medium">Reviewed at:</span> ${data.reviewed_at}</div>` : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900 mb-2">Payment Proof Image</h3>
+                            <img src="${data.image_url}" alt="Payment Proof" class="w-full h-64 object-cover rounded-lg border">
+                        </div>
+                    </div>
+                    ${data.admin_notes ? `
+                        <div class="mt-4">
+                            <h3 class="font-medium text-gray-900 mb-2">Admin Notes</h3>
+                            <p class="text-sm text-gray-700 bg-gray-50 p-3 rounded">${data.admin_notes}</p>
+                        </div>
+                    ` : ''}
+                    ${data.status === 'pending' ? `
+                        <div class="mt-4 flex gap-2">
+                            <button onclick="approvePaymentProof(${proofId})" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                <i class="ri-check-line mr-1"></i> Approve
+                            </button>
+                            <button onclick="declinePaymentProof(${proofId})" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                <i class="ri-close-line mr-1"></i> Decline
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading payment proof:', error);
+                content.innerHTML = '<div class="text-center py-4 text-red-500">Error loading payment proof details.</div>';
+            });
+    }
+    
+    function closePaymentProofModal() {
+        const modal = document.getElementById('payment-proof-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        currentPaymentProofId = null;
+    }
+    
+    function approvePaymentProof(proofId) {
+        if (confirm('Are you sure you want to approve this payment proof?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/payment-proof/${proofId}/approve`;
+            
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+            
+            form.appendChild(csrf);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    function declinePaymentProof(proofId) {
+        // Close the payment proof modal
+        closePaymentProofModal();
+        
+        // Open the decline modal
+        const declineModal = document.getElementById('decline-payment-modal');
+        const declineForm = document.getElementById('decline-form');
+        
+        // Set the form action
+        declineForm.action = `/admin/payment-proof/${proofId}/decline`;
+        
+        // Clear any previous notes
+        declineForm.querySelector('textarea[name="admin_notes"]').value = '';
+        
+        declineModal.classList.remove('hidden');
+        declineModal.classList.add('flex');
+    }
+    
+    function closeDeclineModal() {
+        const declineModal = document.getElementById('decline-payment-modal');
+        declineModal.classList.add('hidden');
+        declineModal.classList.remove('flex');
+    }
     
     // Status modal handlers
     let pendingStatus = null;

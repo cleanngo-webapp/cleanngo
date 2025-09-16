@@ -34,6 +34,10 @@ class EmployeeJobsController extends Controller
             ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
             ->leftJoin('booking_staff_assignments as a', 'a.booking_id', '=', 'b.id')
             ->leftJoin('addresses as primary_addr', 'primary_addr.id', '=', 'c.default_address_id')
+            ->leftJoin('payment_proofs as pp', function($join) {
+                $join->on('pp.booking_id', '=', 'b.id')
+                     ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');
+            })
             ->where('a.employee_id', $employeeId)
             ->select([
                 'b.id', 'b.code', 'b.status', 'b.scheduled_start',
@@ -44,6 +48,9 @@ class EmployeeJobsController extends Controller
                 DB::raw("COALESCE(primary_addr.city,'') as address_city"),
                 DB::raw("COALESCE(primary_addr.province,'') as address_province"),
                 'primary_addr.latitude', 'primary_addr.longitude',
+                DB::raw("CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END as payment_approved"),
+                DB::raw('pp.id as payment_proof_id'),
+                DB::raw('pp.status as payment_status'),
             ]);
 
         // Apply search logic - search across relevant fields
@@ -139,11 +146,24 @@ class EmployeeJobsController extends Controller
     {
         $employeeId = Auth::user()?->employee?->id;
         if (!$employeeId) { return back(); }
+        
+        // Ensure this employee is assigned to the booking
         $assigned = DB::table('booking_staff_assignments')
             ->where('booking_id', $bookingId)
             ->where('employee_id', $employeeId)
             ->exists();
         if (!$assigned) { return back(); }
+        
+        // Check if payment proof is approved
+        $paymentApproved = DB::table('payment_proofs')
+            ->where('booking_id', $bookingId)
+            ->where('status', 'approved')
+            ->exists();
+            
+        if (!$paymentApproved) {
+            return back()->withErrors(['error' => 'Payment proof must be approved before completing the job.']);
+        }
+        
         DB::table('bookings')->where('id', $bookingId)->update([
             'status' => 'completed',
             'completed_at' => now(),

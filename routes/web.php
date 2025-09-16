@@ -65,6 +65,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::get('/jobs', [EmployeeJobsController::class, 'index'])->name('jobs');
     Route::post('/jobs/{bookingId}/start', [EmployeeJobsController::class, 'start'])->name('jobs.start');
     Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
+    Route::post('/payment-proof/{bookingId}/upload', [App\Http\Controllers\PaymentProofController::class, 'upload'])->name('payment-proof.upload');
     Route::view('/payroll', 'employee.payroll')->name('payroll');
     Route::view('/notifications', 'employee.notifications')->name('notifications');
     Route::get('/profile', [EmployeeProfileController::class, 'show'])->name('profile.show');
@@ -122,6 +123,9 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/bookings/{bookingId}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{bookingId}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::match(['post','get'], '/bookings/{bookingId}/assign', [AdminBookingController::class, 'assignEmployee'])->name('bookings.assign');
+    Route::get('/payment-proof/{proofId}/details', [App\Http\Controllers\PaymentProofController::class, 'getDetails'])->name('payment-proof.details');
+    Route::post('/payment-proof/{proofId}/approve', [App\Http\Controllers\PaymentProofController::class, 'approve'])->name('payment-proof.approve');
+    Route::post('/payment-proof/{proofId}/decline', [App\Http\Controllers\PaymentProofController::class, 'decline'])->name('payment-proof.decline');
     Route::get('/employees', [AdminEmployeeController::class, 'index'])->name('employees');
     Route::get('/employee/{userId}', [AdminEmployeeController::class, 'show'])->name('employee.show');
     Route::put('/employee/{userId}', [AdminEmployeeController::class, 'update'])->name('employee.update');
