@@ -15,8 +15,8 @@
     ])
 --}}
 
-<div id="{{ $modalId }}" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-    <div class="bg-white rounded-xl w-full max-w-md p-4">
+<div id="{{ $modalId }}" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]" onclick="closeReceiptOnBackdrop('{{ $modalId }}', event)">
+    <div class="bg-white w-full max-w-md px-4 py-6 {{ ($title ?? 'Service Summary') === 'Receipt' ? 'receipt-border' : 'rounded-xl' }}" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-2">
             <div class="font-semibold">{{ $title ?? 'Service Summary' }}</div>
             <button class="cursor-pointer" onclick="closeReceipt('{{ $modalId }}')">✕</button>
@@ -147,6 +147,16 @@ function openReceipt(modalId, bookingId, receiptData, options = {}) {
     const showPaymentMethod = options.showPaymentMethod || false;
     const paymentMethod = options.paymentMethod || null;
     
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+    
+    // Add escape key listener
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeReceipt(modalId);
+        }
+    });
+    
     if (!data || !data.lines || data.lines.length === 0) {
         body.innerHTML = '<div class="text-sm text-gray-500">No items recorded for this booking.</div>';
     } else {
@@ -230,5 +240,16 @@ function closeReceipt(modalId) {
     const modal = document.getElementById(modalId);
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+    
+    // Restore body scrolling when modal is closed
+    document.body.style.overflow = '';
+}
+
+// Function to close modal when clicking on backdrop
+function closeReceiptOnBackdrop(modalId, event) {
+    // Only close if clicking on the backdrop (not the modal content)
+    if (event.target === event.currentTarget) {
+        closeReceipt(modalId);
+    }
 }
 </script>
