@@ -23,6 +23,11 @@
                 <a href="{{ route('customer.gallery') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.gallery' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Gallery</a>
                 <a href="{{ route('preview.customer') }}#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">About Us</a>
                 <a href="{{ route('customer.profile') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.profile' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Profile</a>
+                
+                <!-- Notification Icon -->
+                <a href="{{ route('customer.notifications') }}" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
+                    <i class="ri-notification-3-line"></i>
+                </a>
     
                 <form method="POST" action="{{ route('logout') }}" class="ml-2">
                     @csrf  

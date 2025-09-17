@@ -86,6 +86,7 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer/gallery', [CustomerGalleryController::class, 'index'])->name('customer.gallery');
     Route::get('/customer/gallery/{serviceType}', [CustomerGalleryController::class, 'showService'])->name('customer.gallery.service');
     Route::view('/customer/services', 'customer.services')->name('customer.services');
+    Route::view('/customer/notifications', 'customer.notifications')->name('customer.notifications');
     Route::post('/customer/bookings', [CustomerBookingController::class, 'create'])->name('customer.bookings.create');
     Route::post('/customer/bookings/{bookingId}/cancel', [CustomerBookingController::class, 'cancel'])->name('customer.bookings.cancel');
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');
@@ -146,6 +147,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::put('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
     Route::put('/settings/payment', [AdminSettingsController::class, 'updatePaymentSettings'])->name('settings.payment.update');
     Route::get('/payroll', [AdminPayrollController::class, 'index'])->name('payroll');
+    Route::view('/notifications', 'admin.notifications')->name('notifications');
     // Calendar events feed for admin
     Route::get('/calendar/events', [CalendarController::class, 'adminEvents'])->name('calendar.events');
 });

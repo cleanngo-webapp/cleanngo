@@ -15,7 +15,7 @@
             <span class="font-semibold justify-center">CLEANSAVER NAGA</span>
         </div>
         <div class="flex items-center gap-4 text-white">
-             <a class="hover:text-emerald-700 cursor-pointer"><i class="ri-notification-3-line"></i></a>
+             <a href="{{ route('admin.notifications') }}" class="hover:text-emerald-700 cursor-pointer"><i class="ri-notification-3-line"></i></a>
         </div>
     </header>
     <div class="flex">
@@ -32,6 +32,7 @@
                 <a href="{{ route('admin.inventory') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.inventory') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-archive-2-line"></i> <span>Inventory</span></a>
                 <a href="{{ route('admin.customers') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.customers') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-user-star-line"></i> <span>Customers</span></a>
                 <a href="{{ route('admin.gallery') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.gallery') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-image-2-line"></i> <span>Gallery</span></a>
+                <a href="{{ route('admin.notifications') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.notifications') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-notification-3-line"></i> <span>Notifications</span></a>
                 <a href="{{ route('admin.settings') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-emerald-800/50 cursor-pointer transition-colors {{ request()->routeIs('admin.settings') ? 'bg-white/10 font-semibold' : '' }}"><i class="ri-settings-3-line"></i> <span>Settings</span></a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
