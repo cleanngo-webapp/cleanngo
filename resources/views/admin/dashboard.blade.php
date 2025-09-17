@@ -113,6 +113,17 @@
 		</div>
 	</div>
 
+	{{-- Calendar Section --}}
+	<div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+		<div class="p-4 border-b border-gray-100">
+			<h2 class="text-lg font-semibold text-gray-900">Booking Calendar</h2>
+			<p class="text-sm text-gray-500 mt-1">View all bookings and their schedules</p>
+		</div>
+		<div class="p-4">
+			<div id="admin-calendar" class="w-full" style="height: 350px;" data-events-url="{{ route('admin.calendar.events') }}"></div>
+		</div>
+	</div>
+
 	{{-- Recent Bookings Section --}}
 	<div class="bg-white rounded-xl shadow-sm border border-gray-100">
 		<div class="p-6 border-b border-gray-100">

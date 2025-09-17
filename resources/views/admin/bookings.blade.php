@@ -6,18 +6,8 @@
 <div class="max-w-6xl mx-auto">
     <h1 class="text-2xl font-bold text-center">Bookings and Scheduling</h1>
 
-    {{-- Calendar and Stats Layout --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        {{-- Calendar Section - Takes 2 columns on large screens --}}
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-xl p-4">
-                <div id="admin-calendar" class="w-full" data-events-url="{{ route('admin.calendar.events') }}"></div>
-            </div>
-        </div>
-
-        {{-- Stats Cards Section - Takes 1 column on large screens --}}
-        <div class="lg:col-span-1">
-            <div class="space-y-9">
+    {{-- Stats Cards Section --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 {{-- Total Bookings Card --}}
                 <div class="bg-white rounded-xl p-7 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
@@ -81,8 +71,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
     </div>
 
     {{-- Search and Sort Section --}}
