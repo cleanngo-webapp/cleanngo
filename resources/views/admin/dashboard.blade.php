@@ -169,7 +169,11 @@
 								];
 							@endphp
 							<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
-								{{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+								@if($booking->status === 'in_progress')
+									In Progress
+								@else
+									{{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+								@endif
 							</span>
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap">
