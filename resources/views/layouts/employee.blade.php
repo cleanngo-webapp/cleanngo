@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="min-h-screen bg-emerald-100 font-sans">
-    <header class="h-12 md:h-14 bg-emerald-900 text-white flex items-center justify-between px-4">
+    <header class="h-12 md:h-14 bg-emerald-900 text-white flex items-center justify-between px-4 fixed top-0 left-0 right-0 z-20">
         <div class="flex items-center gap-4">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
                 <span class="font-semibold">CLEANSAVER NAGA</span>
@@ -19,7 +19,7 @@
         </div>
     </header>
     <div class="flex">
-        <aside class="w-56 bg-emerald-700 text-white min-h-[calc(100vh-3.5rem)]">
+        <aside class="w-56 bg-emerald-700 text-white fixed left-0 top-14 h-[calc(100vh-3.5rem)] overflow-y-auto z-10">
             <div class="bg-brand-green flex items-center gap-2 px-4 py-4 w-full">
                 <i class="ri-user-line"></i>
                 <span class=" text-white font-semibold">Hi, {{ auth()->user()->first_name }}!</span>
@@ -37,7 +37,7 @@
                 </form>
             </nav>
         </aside>
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 ml-56 mt-14">
             @yield('content')
         </main>
     </div>

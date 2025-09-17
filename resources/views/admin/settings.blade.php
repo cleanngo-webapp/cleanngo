@@ -243,7 +243,12 @@
                     <label for="qr_code" class="block text-sm font-medium text-gray-700 mb-2">
                         GCash QR Code
                     </label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-emerald-400 transition-colors">
+                    <div id="qr-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-emerald-400 transition-colors cursor-pointer" 
+                         onclick="document.getElementById('qr_code').click()"
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)" 
+                         ondragenter="handleDragEnter(event)" 
+                         ondragleave="handleDragLeave(event)">
                         <div class="space-y-1 text-center">
                             <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
                             <div class="flex text-sm text-gray-600">
@@ -257,7 +262,12 @@
                         </div>
                     </div>
                     <div id="qr-preview" class="mt-3 hidden">
-                        <img id="qr-preview-img" src="" alt="QR Code Preview" class="w-32 h-32 object-contain border border-gray-200 rounded-lg mx-auto">
+                        <div class="relative inline-block">
+                            <img id="qr-preview-img" src="" alt="QR Code Preview" class="w-32 h-32 object-contain border border-gray-200 rounded-lg mx-auto">
+                            <button type="button" onclick="removeQRPreview()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer">
+                                <i class="ri-close-line text-sm"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -556,6 +566,97 @@ function previewQRCode(input) {
     // Check for changes when QR code is selected
     checkPaymentChanges();
 }
+
+// Remove QR preview
+function removeQRPreview() {
+    document.getElementById('qr-preview').classList.add('hidden');
+    document.getElementById('qr_code').value = '';
+    checkPaymentChanges();
+}
+
+// Drag and Drop Functions
+function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function handleDragEnter(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('qr-upload-area').classList.add('border-emerald-500', 'bg-emerald-50');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('qr-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('qr-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+            // Create a new FileList with the dropped file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            document.getElementById('qr_code').files = dataTransfer.files;
+            previewQRCode(document.getElementById('qr_code'));
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Please drop an image file (PNG, JPG, GIF).',
+                confirmButtonColor: '#10b981'
+            });
+        }
+    }
+}
+
+// Paste functionality
+document.addEventListener('paste', function(e) {
+    // Check if the paste event is happening in the payment settings area
+    const activeElement = document.activeElement;
+    const isInPaymentArea = activeElement && (
+        activeElement.id === 'gcash_name' || 
+        activeElement.id === 'gcash_number' || 
+        activeElement.id === 'qr-upload-area' ||
+        activeElement.closest('#qr-upload-area')
+    );
+    
+    if (isInPaymentArea && e.clipboardData && e.clipboardData.items) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const file = item.getAsFile();
+                if (file) {
+                    // Create a new FileList with the pasted file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById('qr_code').files = dataTransfer.files;
+                    previewQRCode(document.getElementById('qr_code'));
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Image Pasted',
+                        text: 'QR code image has been pasted successfully.',
+                        confirmButtonColor: '#10b981',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+                break;
+            }
+        }
+    }
+});
 
 function showPaymentConfirmation() {
     // Validate required fields
