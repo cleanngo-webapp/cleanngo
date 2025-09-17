@@ -198,7 +198,10 @@ class AdminBookingController extends Controller
 
     public function updateStatus(Request $request, $bookingId)
     {
-        $request->validate(['status' => 'required|in:pending,in_progress,confirmed,cancelled,completed']);
+        $request->validate([
+            'status' => 'required|in:pending,in_progress,confirmed,cancelled,completed',
+            'bypass_payment_proof' => 'sometimes|boolean'
+        ]);
         
         $booking = DB::table('bookings')->where('id', $bookingId)->first();
         if (!$booking) {
@@ -223,11 +226,46 @@ class AdminBookingController extends Controller
             return back()->with('status','Booking cancelled and removed');
         }
         
-        DB::table('bookings')->where('id', $bookingId)->update([
+        // Prepare update data
+        $updateData = [
             'status' => $request->status,
             'updated_at' => now(),
-        ]);
-        return back();
+        ];
+        
+        // If status is completed and bypass_payment_proof is set, handle payment proof
+        if ($request->status === 'completed' && $request->has('bypass_payment_proof')) {
+            // Check if there's already a payment proof for this booking
+            $existingProof = DB::table('payment_proofs')
+                ->where('booking_id', $bookingId)
+                ->where('status', 'approved')
+                ->first();
+            
+            if (!$existingProof) {
+                // Create an approved payment proof to bypass the requirement
+                DB::table('payment_proofs')->insert([
+                    'booking_id' => $bookingId,
+                    'amount' => $booking->total_due_cents / 100, // Convert cents to dollars
+                    'payment_method' => 'admin_bypass',
+                    'status' => 'approved',
+                    'admin_notes' => 'Payment proof bypassed by admin - status changed to completed',
+                    'reviewed_by' => Auth::id(),
+                    'reviewed_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            
+            // Set completed_at timestamp
+            $updateData['completed_at'] = now();
+        }
+        
+        DB::table('bookings')->where('id', $bookingId)->update($updateData);
+        
+        $statusMessage = $request->status === 'completed' && $request->has('bypass_payment_proof') 
+            ? 'Booking marked as completed with payment proof bypassed'
+            : 'Booking status updated successfully';
+            
+        return back()->with('status', $statusMessage);
     }
 
     /**

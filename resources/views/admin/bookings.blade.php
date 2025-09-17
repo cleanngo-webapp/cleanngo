@@ -2,6 +2,10 @@
 
 @section('title','Bookings and Scheduling')
 
+@push('head')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endpush
+
 @section('content')
 <div class="max-w-6xl mx-auto">
     <h1 class="text-2xl font-bold text-center">Bookings and Scheduling</h1>
@@ -140,7 +144,7 @@
                 </thead>
                 <tbody id="bookings-table-body" class="bg-white divide-y divide-gray-200">
                     @foreach($bookings as $b)
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-gray-50 transition-colors" data-booking-id="{{ $b->id }}">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</div>
                         </td>
@@ -372,9 +376,7 @@
             <p id="statusChangeModalText" class="mb-4 text-sm">Select new status for this booking:</p>
             <div class="mb-4">
                 <select id="statusChangeSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500">
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <!-- Options will be populated dynamically based on booking date -->
                 </select>
             </div>
             <div class="flex justify-end gap-2">
@@ -667,7 +669,46 @@
         pendingStatusChange = { bookingId, bookingCode };
         const modal = document.getElementById('status-change-modal');
         const text = document.getElementById('statusChangeModalText');
-        text.textContent = `Select new status for booking ${bookingCode}:`;
+        const select = document.getElementById('statusChangeSelect');
+        
+        // Get booking date from the table row
+        const bookingRow = document.querySelector(`tr[data-booking-id="${bookingId}"]`);
+        let bookingDate = null;
+        if (bookingRow) {
+            const dateCell = bookingRow.querySelector('td:nth-child(2) .text-sm');
+            if (dateCell) {
+                const dateText = dateCell.textContent.trim();
+                if (dateText !== '—') {
+                    bookingDate = new Date(dateText);
+                }
+            }
+        }
+        
+        // Determine available status options based on booking date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const isBookingToday = bookingDate && bookingDate.toDateString() === today.toDateString();
+        
+        // Clear existing options
+        select.innerHTML = '';
+        
+        if (isBookingToday) {
+            // If booking is today, show all status options
+            text.textContent = `Select new status for booking ${bookingCode} (scheduled today):`;
+            select.innerHTML = `
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            `;
+        } else {
+            // If booking is in the future, only show cancelled option
+            text.textContent = `Select new status for booking ${bookingCode} (scheduled for future):`;
+            select.innerHTML = `
+                <option value="cancelled">Cancelled</option>
+            `;
+        }
+        
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -679,32 +720,58 @@
         pendingStatusChange = null;
     }
     
-    // Handle status change confirmation
+    // Handle status change confirmation with SweetAlert
     document.getElementById('statusChangeConfirm').addEventListener('click', function() {
         if (!pendingStatusChange) return;
         
         const newStatus = document.getElementById('statusChangeSelect').value;
+        const statusText = newStatus.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
         
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/bookings/${pendingStatusChange.bookingId}/status`;
-        
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-        
-        const status = document.createElement('input');
-        status.type = 'hidden';
-        status.name = 'status';
-        status.value = newStatus;
-        
-        form.appendChild(csrf);
-        form.appendChild(status);
-        document.body.appendChild(form);
-        form.submit();
-        
-        closeStatusChangeModal();
+        // Show SweetAlert confirmation
+        Swal.fire({
+            title: 'Confirm Status Change?',
+            text: `Are you sure you want to change the status to "${statusText}"?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, Change Status',
+            cancelButtonText: 'Cancel',
+            focusCancel: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Create form and submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/bookings/${pendingStatusChange.bookingId}/status`;
+                
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+                
+                const status = document.createElement('input');
+                status.type = 'hidden';
+                status.name = 'status';
+                status.value = newStatus;
+                
+                // If status is completed, add bypass payment proof flag
+                if (newStatus === 'completed') {
+                    const bypassPayment = document.createElement('input');
+                    bypassPayment.type = 'hidden';
+                    bypassPayment.name = 'bypass_payment_proof';
+                    bypassPayment.value = '1';
+                    form.appendChild(bypassPayment);
+                }
+                
+                form.appendChild(csrf);
+                form.appendChild(status);
+                document.body.appendChild(form);
+                form.submit();
+                
+                closeStatusChangeModal();
+            }
+        });
     });
     
     // Payment proof modal handlers
