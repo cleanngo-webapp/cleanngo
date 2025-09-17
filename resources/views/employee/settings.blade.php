@@ -37,6 +37,25 @@
                 @csrf
                 @method('PUT')
                 
+                <!-- Current Password -->
+                <div>
+                    <label for="current_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Current Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" 
+                               id="current_password" 
+                               name="current_password" 
+                               required
+                               class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
+                        <button type="button" 
+                                onclick="togglePasswordVisibility('current_password')"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer">
+                            <i class="ri-eye-line" id="current_password_icon"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- New Password -->
                 <div>
                     <label for="new_password" class="block text-sm font-medium text-gray-700 mb-2">
@@ -127,8 +146,8 @@
 </div>
 
 <!-- Password Update Confirmation Modal -->
-<div id="passwordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+<div id="passwordModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative mx-auto p-5 w-96 shadow-lg rounded-md bg-white mt-20">
         <div class="mt-3 text-center">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
                 <i class="ri-question-line text-emerald-600 text-xl"></i>
@@ -141,11 +160,11 @@
             </div>
             <div class="items-center px-4 py-3">
                 <button id="confirmPasswordUpdate" 
-                        class="px-4 py-2 bg-emerald-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+                        class="px-4 py-2 bg-emerald-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 cursor-pointer">
                     Yes
                 </button>
                 <button onclick="hidePasswordConfirmation()" 
-                        class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer">
                     Cancel
                 </button>
             </div>
@@ -171,13 +190,44 @@ function togglePasswordVisibility(fieldId) {
 // Show password confirmation modal
 function showPasswordConfirmation() {
     // Validate passwords match before showing modal
+    const currentPassword = document.getElementById('current_password').value;
     const newPassword = document.getElementById('new_password').value;
     const confirmPassword = document.getElementById('new_password_confirmation').value;
+    
+    if (!currentPassword) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Current Password',
+            text: 'Please enter your current password.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+    
+    if (!newPassword) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing New Password',
+            text: 'Please enter your new password.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    if (currentPassword === newPassword) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Same Password',
+            text: 'New password cannot be the same as your current password. Please choose a different password.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
     
     if (newPassword !== confirmPassword) {
         Swal.fire({
             icon: 'error',
-            title: 'Password Mismatch',
+            title: 'New Password Mismatch',
             text: 'Passwords do not match. Please check and try again.',
             confirmButtonColor: '#10b981'
         });
@@ -187,19 +237,27 @@ function showPasswordConfirmation() {
     if (newPassword.length < 8) {
         Swal.fire({
             icon: 'warning',
-            title: 'Password Too Short',
+            title: 'New Password Too Short',
             text: 'Password must be at least 8 characters long.',
             confirmButtonColor: '#10b981'
         });
         return;
     }
     
-    document.getElementById('passwordModal').classList.remove('hidden');
+    const modal = document.getElementById('passwordModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex', 'items-center', 'justify-center');
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 // Hide password confirmation modal
 function hidePasswordConfirmation() {
-    document.getElementById('passwordModal').classList.add('hidden');
+    const modal = document.getElementById('passwordModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex', 'items-center', 'justify-center');
+    // Restore background scrolling
+    document.body.style.overflow = 'auto';
 }
 
 // Confirm password update
