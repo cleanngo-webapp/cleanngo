@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class EmployeeJobsController extends Controller
 {
@@ -19,7 +20,10 @@ class EmployeeJobsController extends Controller
                 'receiptData' => [],
                 'search' => '',
                 'sort' => 'date',
-                'sortOrder' => 'desc'
+                'sortOrder' => 'desc',
+                'jobsAssignedToday' => 0,
+                'jobsCompletedOverall' => 0,
+                'pendingJobs' => 0
             ]);
         }
 
@@ -115,13 +119,44 @@ class EmployeeJobsController extends Controller
             }
         }
 
+        // Calculate job statistics for the cards
+        $today = Carbon::today();
+        
+        // Get jobs assigned to this employee today or currently in progress (excluding completed jobs)
+        $jobsAssignedToday = DB::table('booking_staff_assignments')
+            ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+            ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->where('bookings.status', '!=', 'completed') // Exclude completed jobs
+            ->where(function($query) use ($today) {
+                $query->whereDate('bookings.scheduled_start', $today)
+                      ->orWhere('bookings.status', 'in_progress');
+            })
+            ->count();
+        
+        // Get all completed jobs by this employee (overall, not just today)
+        $jobsCompletedOverall = DB::table('booking_staff_assignments')
+            ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+            ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->where('bookings.status', 'completed')
+            ->count();
+        
+        // Get pending jobs assigned to this employee
+        $pendingJobs = DB::table('booking_staff_assignments')
+            ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+            ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->whereIn('bookings.status', ['pending', 'confirmed'])
+            ->count();
+
         return view('employee.jobs', [
             'bookings' => $bookings,
             'locationsData' => $locationsData,
             'receiptData' => $receiptData,
             'search' => $search,
             'sort' => $sort,
-            'sortOrder' => $sortOrder
+            'sortOrder' => $sortOrder,
+            'jobsAssignedToday' => $jobsAssignedToday,
+            'jobsCompletedOverall' => $jobsCompletedOverall,
+            'pendingJobs' => $pendingJobs
         ]);
     }
 

@@ -2,9 +2,64 @@
 
 @section('title','My Jobs')
 
+@push('head')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endpush
+
 @section('content')
 <div class="max-w-6xl mx-auto">
     <h1 class="text-3xl font-extrabold text-center">My Jobs</h1>
+
+    {{-- Job Statistics Cards --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-6">
+        {{-- Active Jobs Card --}}
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Active Jobs</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($jobsAssignedToday) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Scheduled today or in progress</p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        {{-- Completed Jobs Card --}}
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Completed Jobs</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($jobsCompletedOverall) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">All time completed</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-lg">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        {{-- Pending Jobs Card --}}
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Pending Jobs</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ number_format($pendingJobs) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Awaiting start</p>
+                </div>
+                <div class="bg-yellow-100 p-3 rounded-lg">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {{-- Search and Sort Section --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
@@ -91,13 +146,10 @@
                             <div class="flex items-center gap-2">
                                 @if($b->status === 'in_progress')
                                     @if($b->payment_approved)
-                                        <form method="POST" action="{{ route('employee.jobs.complete', $b->id) }}" class="inline">
-                                            @csrf
-                                            <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
-                                                <i class="ri-check-line mr-1"></i>
-                                                Complete
-                                            </button>
-                                        </form>
+                                        <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ $b->code }}')" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                            <i class="ri-check-line mr-1"></i>
+                                            Complete
+                                        </button>
                                     @else
                                         <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof required" disabled>
                                             <i class="ri-check-line mr-1"></i>
@@ -116,13 +168,21 @@
                                         </button>
                                     @endif
                                 @elseif($b->status === 'pending' || $b->status === 'confirmed')
-                                    <form method="POST" action="{{ route('employee.jobs.start', $b->id) }}" class="inline">
-                                        @csrf
-                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
+                                    @php
+                                        $isScheduledToday = \Carbon\Carbon::parse($b->scheduled_start)->isToday();
+                                        $canStartJob = $isScheduledToday || $b->status === 'in_progress';
+                                    @endphp
+                                    @if($canStartJob)
+                                        <button type="button" onclick="confirmStartJob({{ $b->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
                                             <i class="ri-play-line mr-1"></i>
                                             Start Job
                                         </button>
-                                    </form>
+                                    @else
+                                        <button type="button" disabled class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y') }}">
+                                            <i class="ri-play-line mr-1"></i>
+                                            Start Job
+                                        </button>
+                                    @endif
                                 @endif
                                 <button type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-emerald-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Service Summary">
                                     <i class="ri-receipt-line mr-1"></i>
@@ -196,7 +256,7 @@
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closePaymentModal()">Cancel</button>
-                    <button type="submit" class="px-3 py-2 bg-purple-600 text-white rounded cursor-pointer hover:bg-purple-700">Attach Payment</button>
+                    <button type="button" onclick="confirmAttachPayment()" class="px-3 py-2 bg-purple-600 text-white rounded cursor-pointer hover:bg-purple-700">Attach Payment</button>
                 </div>
             </form>
         </div>
@@ -430,6 +490,134 @@ function performSearch() {
             console.error('Search error:', error);
             tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
         });
+}
+
+// Start Job confirmation function
+function confirmStartJob(jobId) {
+    Swal.fire({
+        title: 'Start Job?',
+        text: "Are you really sure you want to start this job?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Start',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Create and submit the form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/employee/jobs/${jobId}/start`;
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            
+            form.appendChild(csrfToken);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+
+// Attach Payment confirmation function
+function confirmAttachPayment() {
+    // Get form data for validation
+    const form = document.getElementById('payment-form');
+    const amount = form.querySelector('input[name="amount"]').value;
+    const paymentMethod = form.querySelector('select[name="payment_method"]').value;
+    const proofImage = form.querySelector('input[name="proof_image"]').files[0];
+    
+    // Validate required fields
+    if (!amount || !paymentMethod || !proofImage) {
+        Swal.fire({
+            title: 'Missing Information',
+            text: 'Please fill in all required fields: Amount, Payment Method, and Payment Proof Image.',
+            icon: 'warning',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+    
+    // Show confirmation modal with details
+    Swal.fire({
+        title: 'Attach Payment Proof?',
+        html: `
+            <div class="text-left">
+                <p class="mb-2"><strong>Are you sure you want to attach this payment proof?</strong></p>
+                <div class="bg-gray-50 p-3 rounded-lg text-sm">
+                    <p><strong>Amount:</strong> ₱${parseFloat(amount).toFixed(2)}</p>
+                    <p><strong>Payment Method:</strong> ${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}</p>
+                    <p><strong>Proof Image:</strong> ${proofImage.name}</p>
+                </div>
+                <p class="mt-2 text-sm text-gray-600">Please verify all details are correct before proceeding.</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#7c3aed',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Attach Payment',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Submit the form
+            form.submit();
+        }
+    });
+}
+
+// Complete Job confirmation function
+function confirmCompleteJob(jobId, jobCode) {
+    Swal.fire({
+        title: 'Complete Job?',
+        html: `
+            <div class="text-left">
+                <p class="mb-3"><strong>Are you sure you want to mark this job as complete?</strong></p>
+                <div class="bg-gray-50 p-3 rounded-lg text-sm mb-3">
+                    <p><strong>Job ID:</strong> ${jobCode}</p>
+                    <p><strong>Status:</strong> Payment Approved ✓</p>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg text-sm">
+                    <p class="text-yellow-800"><strong>⚠️ Important:</strong></p>
+                    <ul class="text-yellow-700 mt-1 space-y-1">
+                        <li>• Ensure all cleaning tasks are completed</li>
+                        <li>• Verify customer satisfaction</li>
+                        <li>• Confirm payment has been received</li>
+                        <li>• This action cannot be undone</li>
+                    </ul>
+                </div>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Mark Complete',
+        cancelButtonText: 'Cancel',
+        focusCancel: true,
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Create and submit the form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/employee/jobs/${jobId}/complete`;
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            
+            form.appendChild(csrfToken);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
 }
 </script>
 @endpush

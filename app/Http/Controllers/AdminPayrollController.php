@@ -133,10 +133,21 @@ class AdminPayrollController extends Controller
             }
         }
 
+        // Calculate monthly earnings summary for all employees
+        $monthlyEarnings = $payrollRecords
+            ->where('completed_at', '>=', now()->startOfMonth())
+            ->sum('total_due_cents') / 100;
+
+        $monthlyJobsCompleted = $payrollRecords
+            ->where('completed_at', '>=', now()->startOfMonth())
+            ->count();
+
         return view('admin.payroll', [
             'payrollRecords' => $payrollRecords,
             'serviceSummaries' => $serviceSummaries,
             'receiptData' => $receiptData,
+            'monthlyEarnings' => $monthlyEarnings,
+            'monthlyJobsCompleted' => $monthlyJobsCompleted,
         ]);
     }
 }

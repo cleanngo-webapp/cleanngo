@@ -32,11 +32,12 @@ class EmployeeDashboardController extends Controller
         
         $today = Carbon::today();
         
-        // Get jobs assigned to this employee today or currently in progress
-        // This includes jobs scheduled for today OR currently in progress
+        // Get jobs assigned to this employee today or currently in progress (excluding completed jobs)
+        // This includes jobs scheduled for today OR currently in progress, but excludes completed jobs
         $jobsAssignedToday = DB::table('booking_staff_assignments')
             ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
             ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->where('bookings.status', '!=', 'completed') // Exclude completed jobs
             ->where(function($query) use ($today) {
                 $query->whereDate('bookings.scheduled_start', $today)
                       ->orWhere('bookings.status', 'in_progress');
@@ -58,7 +59,8 @@ class EmployeeDashboardController extends Controller
             ->whereIn('bookings.status', ['pending', 'confirmed'])
             ->count();
         
-        // Get today's job details for the employee (scheduled today OR in progress, excluding completed)
+        // Get all future job details for the employee (scheduled today or future, excluding completed)
+        // This shows all upcoming jobs, not just today's jobs
         $todayJobs = DB::table('booking_staff_assignments')
             ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
             ->join('customers', 'bookings.customer_id', '=', 'customers.id')
@@ -84,10 +86,10 @@ class EmployeeDashboardController extends Controller
                 'services.duration_minutes'
             )
             ->where('booking_staff_assignments.employee_id', $employeeId)
-            ->where('bookings.status', '!=', 'completed') // Exclude completed jobs from active assignments
+            ->where('bookings.status', '!=', 'completed') // Exclude completed jobs
             ->where(function($query) use ($today) {
-                $query->whereDate('bookings.scheduled_start', $today)
-                      ->orWhere('bookings.status', 'in_progress');
+                $query->whereDate('bookings.scheduled_start', '>=', $today) // Show today and future jobs
+                      ->orWhere('bookings.status', 'in_progress'); // Also show in-progress jobs regardless of date
             })
             ->orderBy('bookings.scheduled_start')
             ->get();

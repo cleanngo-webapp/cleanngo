@@ -119,7 +119,7 @@ class AdminBookingController extends Controller
             ->whereDate('scheduled_start', today())
             ->count();
         $activeServices = DB::table('bookings')
-            ->whereIn('status', ['confirmed', 'in_progress'])
+            ->where('status', 'in_progress')
             ->count();
         $completedJobsToday = DB::table('bookings')
             ->where('status', 'completed')

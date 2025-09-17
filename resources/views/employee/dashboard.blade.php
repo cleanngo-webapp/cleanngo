@@ -2,6 +2,10 @@
 
 @section('title','Employee Dashboard')
 
+@push('head')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endpush
+
 @section('content')
 {{-- Employee Dashboard with job assignments and progress tracking --}}
 {{-- Purpose: Daily jobs for cleaners, with simple instructions and progress tracking --}}
@@ -68,8 +72,8 @@
 	{{-- Active Job Assignments - Compact Version --}}
 	<div class="bg-white rounded-lg shadow-sm border border-gray-100 mb-6">
 		<div class="p-4 border-b border-gray-100">
-			<h2 class="text-lg font-semibold text-gray-900">Active Job Assignments</h2>
-			<p class="text-xs text-gray-500 mt-1">Your jobs scheduled or currently in progress</p>
+			<h2 class="text-lg font-semibold text-gray-900">Job Assignments</h2>
+			<p class="text-xs text-gray-500 mt-1">Your upcoming jobs and current assignments</p>
 		</div>
 		<div class="p-4">
 			@forelse($todayJobs as $job)
@@ -97,7 +101,7 @@
 							<p><span class="font-medium">Customer:</span> {{ $job->first_name }} {{ $job->last_name }}</p>
 							<p><span class="font-medium">Phone:</span> {{ $job->phone }}</p>
 							<p><span class="font-medium">Address:</span> {{ $job->street_address }}, {{ $job->city }}</p>
-							<p><span class="font-medium">Scheduled:</span> {{ \Carbon\Carbon::parse($job->scheduled_start)->format('g:i A') }}
+							<p><span class="font-medium">Scheduled:</span> {{ \Carbon\Carbon::parse($job->scheduled_start)->format('M j, Y g:i A') }}
 								@if($job->scheduled_end)
 									- {{ \Carbon\Carbon::parse($job->scheduled_end)->format('g:i A') }}
 								@endif
@@ -113,12 +117,19 @@
 					
 					<div class="ml-3 flex flex-col gap-1">
 						@if($job->status === 'confirmed' || $job->status === 'pending')
-						<form method="POST" action="{{ route('employee.jobs.start', $job->id) }}" class="inline">
-							@csrf
-							<button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-blue-700 transition-colors">
-								Start Job
-							</button>
-						</form>
+							@php
+								$isScheduledToday = \Carbon\Carbon::parse($job->scheduled_start)->isToday();
+								$canStartJob = $isScheduledToday || $job->status === 'in_progress';
+							@endphp
+							@if($canStartJob)
+								<button type="button" onclick="confirmStartJob({{ $job->id }})" class="bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+									Start Job
+								</button>
+							@else
+								<button type="button" disabled class="bg-gray-400 text-white px-3 py-1.5 rounded text-xs font-medium cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($job->scheduled_start)->format('M j, Y') }}">
+									Start Job
+								</button>
+							@endif
 						@endif
 						
 						@if($paymentSettings && $paymentSettings->qr_code_path && ($job->status === 'pending' || $job->status === 'in_progress'))
@@ -142,8 +153,8 @@
 				<svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
 				</svg>
-				<h3 class="mt-2 text-sm font-medium text-gray-900">No active jobs</h3>
-				<p class="mt-1 text-xs text-gray-500">You don't have any active jobs scheduled for today.</p>
+				<h3 class="mt-2 text-sm font-medium text-gray-900">No upcoming jobs</h3>
+				<p class="mt-1 text-xs text-gray-500">You don't have any upcoming job assignments.</p>
 			</div>
 			@endforelse
 		</div>
@@ -326,5 +337,36 @@ document.getElementById('emp-payment-qr-modal').addEventListener('click', functi
         closeEmpPaymentQRModal();
     }
 });
+
+// Start Job confirmation function
+function confirmStartJob(jobId) {
+    Swal.fire({
+        title: 'Start Job?',
+        text: "Are you really sure you want to start this job?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Start',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Create and submit the form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/employee/jobs/${jobId}/start`;
+            
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            
+            form.appendChild(csrfToken);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
 </script>
 @endpush
