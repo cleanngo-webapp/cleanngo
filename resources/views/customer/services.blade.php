@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title','Request an Estimate')
+@section('title','Request a Booking')
 
 @section('content')
 <div class="max-w-6xl mx-auto pt-20">
-    <h1 class="text-3xl font-extrabold text-center">Request an Estimate</h1>
+    <h1 class="text-3xl font-extrabold text-center">Request a Booking</h1>
 
     <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Left: Services Nav -->

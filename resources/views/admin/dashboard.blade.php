@@ -136,7 +136,7 @@
 					<tr>
 						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
 						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Service</th>
 						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled</th>
 						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
 						<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
@@ -151,8 +151,8 @@
 						<td class="px-6 py-4 whitespace-nowrap">
 							<div class="text-sm text-gray-900">{{ $booking->first_name }} {{ $booking->last_name }}</div>
 						</td>
-						<td class="px-6 py-4 whitespace-nowrap">
-							<div class="text-sm text-gray-900">{{ $serviceSummaries[$booking->id] ?? ($booking->service_name ?? 'General Service') }}</div>
+						<td class="px-6 py-4 w-48">
+							<div class="text-sm text-gray-900 break-words">{{ $serviceSummaries[$booking->id] ?? ($booking->service_name ?? 'General Service') }}</div>
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap">
 							<div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($booking->scheduled_start)->format('M j, Y g:i A') }}</div>
