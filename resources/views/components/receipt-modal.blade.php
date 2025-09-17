@@ -55,19 +55,19 @@ const serviceCategories = {
             'mattress_california': 'California King Mattress'
         }
     },
+    'carpet': {
+        name: 'Carpet Deep Cleaning',
+        items: {
+            'carpet_sqm': 'Service Area'
+        }
+    },
     'car': {
-        name: 'Car Cleaning',
+        name: 'Car Interior Detailing',
         items: {
             'car_sedan': 'Sedan',
             'car_suv': 'SUV',
             'car_van': 'Van',
             'car_coaster': 'Coaster'
-        }
-    },
-    'carpet': {
-        name: 'Carpet Deep Cleaning',
-        items: {
-            'carpet_sqm': 'Service Area'
         }
     },
     'post_construction': {

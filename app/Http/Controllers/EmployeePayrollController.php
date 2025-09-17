@@ -92,10 +92,10 @@ class EmployeePayrollController extends Controller
                         $category = 'Sofa Cleaning';
                     } elseif (strpos($itemType, 'mattress') === 0) {
                         $category = 'Mattress Cleaning';
-                    } elseif (strpos($itemType, 'car') === 0) {
-                        $category = 'Car Cleaning';
                     } elseif (strpos($itemType, 'carpet') === 0) {
                         $category = 'Carpet Deep Cleaning';
+                    } elseif (strpos($itemType, 'car') === 0) {
+                        $category = 'Car Interior Detailing';
                     } elseif (strpos($itemType, 'post_construction') === 0) {
                         $category = 'Post Construction Cleaning';
                     } elseif (strpos($itemType, 'disinfect') === 0) {
