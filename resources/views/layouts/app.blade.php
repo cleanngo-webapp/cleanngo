@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css','resources/js/app.js'])
     <title>@yield('title','Dashboard')</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="min-h-screen bg-gray-100 font-sans flex flex-col">
     <nav class="bg-brand-green fixed top-0 left-0 right-0 z-9999">

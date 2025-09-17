@@ -32,7 +32,7 @@
 // Service categorization and naming mapping
 const serviceCategories = {
     'sofa': {
-        name: 'Sofa Cleaning',
+        name: 'Sofa Deep Cleaning',
         items: {
             'sofa_1_seater': '1-Seater Sofa',
             'sofa_2_seater': '2-Seater Sofa', 
@@ -47,7 +47,7 @@ const serviceCategories = {
         }
     },
     'mattress': {
-        name: 'Mattress Cleaning',
+        name: 'Mattress Deep Cleaning',
         items: {
             'mattress_single': 'Single Mattress',
             'mattress_double': 'Double Mattress',
@@ -62,7 +62,7 @@ const serviceCategories = {
         }
     },
     'car': {
-        name: 'Car Interior Detailing',
+        name: 'Home Service Car Interior Detailing',
         items: {
             'car_sedan': 'Sedan',
             'car_suv': 'SUV',

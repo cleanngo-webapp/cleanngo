@@ -373,6 +373,19 @@ function removeCarGroup() {
 
 function openBookingForm(){
   const total = calc();
+  
+  // Check if any services are selected
+  if (total <= 0) {
+    Swal.fire({
+      title: 'No Services Selected',
+      text: 'Please select at least one service before booking.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#10b981'
+    });
+    return;
+  }
+  
   // Build items payload to persist line items
   const items = [];
   const addItem = (type, qty, unitPrice, areaSqm) => {
@@ -411,14 +424,14 @@ function openBookingForm(){
   window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }
 </script>
-<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-  <div class="bg-white rounded-xl w-full max-w-lg p-4">
+<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000] overflow-y-auto">
+  <div class="bg-white rounded-xl w-full max-w-lg p-4 m-4">
     <div class="flex items-center justify-between mb-4">
       <div class="font-semibold text-lg">Confirm Booking</div>
       <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeBookingModal()">✕</button>
     </div>
     
-    <form method="POST" action="{{ route('customer.bookings.create') }}" class="space-y-4">
+    <form method="POST" action="{{ route('customer.bookings.create') }}" class="space-y-4" onsubmit="return confirmBookingSubmission(event)">
       @csrf
       
       <!-- Customer Information Section -->
@@ -503,6 +516,29 @@ function openBookingForm(){
       closeBookingModal();
     }
   });
+
+  // Function to handle form submission confirmation
+  function confirmBookingSubmission(event) {
+    event.preventDefault();
+    
+    Swal.fire({
+      title: 'Confirm Booking',
+      text: 'Are you sure you want to submit this booking?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Book Now!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#ef4444'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Submit the form
+        event.target.submit();
+      }
+    });
+    
+    return false; // Prevent default form submission
+  }
   </script>
 </div>
 @endpush

@@ -105,13 +105,13 @@ class AdminDashboardController extends Controller
                     $category = '';
                     
                     if (strpos($itemType, 'sofa') === 0) {
-                        $category = 'Sofa Cleaning';
+                        $category = 'Sofa Deep Cleaning';
                     } elseif (strpos($itemType, 'mattress') === 0) {
-                        $category = 'Mattress Cleaning';
+                        $category = 'Mattress Deep Cleaning';
                     } elseif (strpos($itemType, 'carpet') === 0) {
                         $category = 'Carpet Deep Cleaning';
                     } elseif (strpos($itemType, 'car') === 0) {
-                        $category = 'Car Interior Detailing';
+                        $category = 'Home Service Car Interior Detailing';
                     } elseif (strpos($itemType, 'post_construction') === 0) {
                         $category = 'Post Construction Cleaning';
                     } elseif (strpos($itemType, 'disinfect') === 0) {
