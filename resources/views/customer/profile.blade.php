@@ -31,8 +31,53 @@
 					</div>
 					
 					<div class="p-6">
-						@if($bookings->count() > 0)
-							<div class="space-y-4">
+						<!-- Search and Sort Section -->
+						<div class="mb-6 bg-gray-50 rounded-xl p-4 border border-gray-200">
+							<div class="flex flex-col lg:flex-row gap-4">
+								<!-- Search Input -->
+								<div class="flex-1">
+									<label class="block text-sm font-medium text-gray-700 mb-2">Search Bookings</label>
+									<div class="relative">
+										<input type="text" 
+											   id="booking-search" 
+											   placeholder="Search by service type, employee name, booking code, or address..."
+											   class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
+										<i class="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+									</div>
+								</div>
+								
+								<!-- Sort Dropdown -->
+								<div class="lg:w-48">
+									<label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+									<select id="booking-sort" 
+											class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors">
+										<option value="date_desc">Date (Newest First)</option>
+										<option value="date_asc">Date (Oldest First)</option>
+										<option value="amount_desc">Amount (Highest First)</option>
+										<option value="amount_asc">Amount (Lowest First)</option>
+										<option value="status">Status</option>
+										<option value="service">Service</option>
+										<option value="employee">Employee</option>
+									</select>
+								</div>
+								
+							</div>
+							
+							<!-- Loading Indicator -->
+							<div id="search-loading" class="hidden mt-4 text-center">
+								<div class="inline-flex items-center gap-2 text-emerald-600">
+									<div class="loading-dots w-2 h-2 bg-emerald-600 rounded-full"></div>
+									<div class="loading-dots w-2 h-2 bg-emerald-600 rounded-full"></div>
+									<div class="loading-dots w-2 h-2 bg-emerald-600 rounded-full"></div>
+									<span class="text-sm">Searching bookings...</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Bookings Container -->
+						<div id="bookings-container">
+							@if($bookings->count() > 0)
+								<div class="space-y-4" id="bookings-list">
 								@foreach($bookings as $booking)
 									<div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-gray-50/50">
 										<div class="flex items-start justify-between">
@@ -122,8 +167,8 @@
 										</div>
 									</div>
 								@endforeach
-							</div>
-						@else
+								</div>
+							@else
 							<div class="text-center py-12">
 								<div class="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
 									<i class="ri-calendar-line text-2xl text-gray-400"></i>
@@ -136,6 +181,7 @@
 								</a>
 							</div>
 						@endif
+						</div>
 					</div>
 				</div>
 			</div>
@@ -588,6 +634,244 @@ document.getElementById('payment-qr-modal').addEventListener('click', function(e
         closePaymentQRModal();
     }
 });
+
+// Search and Sort Functionality
+let searchTimeout;
+let currentSearchTerm = '';
+let currentSortBy = 'date_desc';
+
+// Initialize search and sort functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('booking-search');
+    const sortSelect = document.getElementById('booking-sort');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            currentSearchTerm = this.value.trim();
+            
+            // If search is cleared, reload the page to show all bookings
+            if (currentSearchTerm === '') {
+                window.location.reload();
+                return;
+            }
+            
+            // Show loading indicator
+            showSearchLoading();
+            
+            // Debounce search to avoid too many requests
+            searchTimeout = setTimeout(() => {
+                performSearch();
+            }, 300);
+        });
+    }
+    
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            currentSortBy = this.value;
+            showSearchLoading();
+            performSearch();
+        });
+    }
+});
+
+function showSearchLoading() {
+    const loadingElement = document.getElementById('search-loading');
+    if (loadingElement) {
+        loadingElement.classList.remove('hidden');
+    }
+}
+
+function hideSearchLoading() {
+    const loadingElement = document.getElementById('search-loading');
+    if (loadingElement) {
+        loadingElement.classList.add('hidden');
+    }
+}
+
+function performSearch() {
+    // Create form data for AJAX request
+    const formData = new FormData();
+    formData.append('search', currentSearchTerm);
+    formData.append('sort', currentSortBy);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+    
+    // Make AJAX request
+    fetch('{{ route("customer.bookings.search") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideSearchLoading();
+        console.log('Search response:', data); // Debug logging
+        if (data.success) {
+            updateBookingsList(data.bookings, data.serviceSummaries);
+        } else {
+            console.error('Search failed:', data.message);
+            showSearchError();
+        }
+    })
+    .catch(error => {
+        hideSearchLoading();
+        console.error('Search error:', error);
+        showSearchError();
+    });
+}
+
+function updateBookingsList(bookings, serviceSummaries) {
+    const bookingsList = document.getElementById('bookings-list');
+    const bookingsContainer = document.getElementById('bookings-container');
+    
+    if (!bookingsList || !bookingsContainer) return;
+    
+    if (bookings.length === 0) {
+        // Show no results message
+        bookingsContainer.innerHTML = `
+            <div class="text-center py-12">
+                <div class="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="ri-search-line text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No bookings found</h3>
+                <p class="text-gray-500 mb-4">Try adjusting your search criteria or clear the filters.</p>
+                <button onclick="window.location.reload()" class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+                    <i class="ri-refresh-line mr-2"></i>
+                    Reload Bookings
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Generate HTML for bookings
+    let bookingsHTML = '<div class="space-y-4" id="bookings-list">';
+    
+    bookings.forEach(booking => {
+        const statusClasses = {
+            'pending': 'bg-orange-100 text-orange-800',
+            'completed': 'bg-green-100 text-green-800',
+            'confirmed': 'bg-blue-100 text-blue-800',
+            'in_progress': 'bg-yellow-100 text-yellow-800',
+            'cancelled': 'bg-red-100 text-red-800'
+        };
+        const statusClass = statusClasses[booking.status] || 'bg-gray-100 text-gray-800';
+        
+        bookingsHTML += `
+            <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all duration-200 bg-gray-50/50">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                                ${booking.status === 'in_progress' ? 'In Progress' : booking.status.charAt(0).toUpperCase() + booking.status.slice(1).replace('_', ' ')}
+                            </span>
+                            <span class="text-sm font-mono text-gray-500">#${booking.code}</span>
+                        </div>
+                        
+                        <h3 class="font-semibold text-gray-900 mb-1">${serviceSummaries[booking.id] || (booking.service_name || 'General Service')}</h3>
+                        <p class="text-sm text-gray-600 mb-2">${booking.full_address || 'Address not specified'}</p>
+                        
+                        <div class="flex items-center gap-4 text-sm text-gray-500">
+                            <div class="flex items-center gap-1">
+                                <i class="ri-calendar-line"></i>
+                                <span>${new Date(booking.scheduled_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-time-line"></i>
+                                <span>${new Date(booking.scheduled_start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
+                            </div>
+                            ${booking.employee_name ? `
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-user-line"></i>
+                                    <span>${booking.employee_name}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <div class="text-lg font-semibold text-gray-900">
+                            ₱${(booking.total_due_cents / 100).toFixed(2)}
+                        </div>
+                        <div class="text-xs text-gray-500 capitalize">
+                            ${booking.status === 'completed' && booking.payment_proof_status === 'approved' ? 'Paid' : (booking.payment_proof_status || booking.payment_status || '').replace('_', ' ')}
+                        </div>
+                        ${booking.status === 'completed' && booking.payment_proof_status === 'approved' && booking.payment_method ? `
+                            <div class="text-xs text-gray-400 mt-1">
+                                <i class="ri-bank-card-line mr-1"></i>
+                                ${booking.payment_method.charAt(0).toUpperCase() + booking.payment_method.slice(1)}
+                            </div>
+                        ` : ''}
+                        ${getBookingActions(booking)}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    bookingsHTML += '</div>';
+    bookingsContainer.innerHTML = bookingsHTML;
+}
+
+function getBookingActions(booking) {
+    let actions = '';
+    
+    if (booking.status === 'pending') {
+        actions = `
+            <div class="mt-2 flex gap-2">
+                <button onclick="openCancelModal(${booking.id}, '${booking.code}')" 
+                        class="px-3 py-1 bg-red-500 text-white text-xs rounded cursor-pointer hover:bg-red-600 transition-colors duration-200">
+                    Cancel Booking
+                </button>
+            </div>
+        `;
+    } else if (booking.status === 'in_progress') {
+        actions = `
+            <div class="mt-2">
+                <button onclick="openPaymentQRModal(${booking.id}, '${booking.code}', ${booking.total_due_cents})" 
+                        class="px-3 py-1 bg-blue-500 text-white text-xs rounded cursor-pointer hover:bg-blue-600 transition-colors duration-200">
+                    <i class="ri-qr-code-line mr-1"></i>
+                    View QR Code
+                </button>
+            </div>
+        `;
+    } else if (booking.status === 'completed' && booking.payment_proof_status === 'approved') {
+        actions = `
+            <div class="mt-2">
+                <button onclick="openCustomerReceipt(${booking.id})" 
+                        class="px-3 py-1 bg-emerald-600 text-white text-xs rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200">
+                    <i class="ri-receipt-line mr-1"></i>
+                    View Receipt
+                </button>
+            </div>
+        `;
+    }
+    
+    return actions;
+}
+
+
+function showSearchError() {
+    const bookingsContainer = document.getElementById('bookings-container');
+    if (bookingsContainer) {
+        bookingsContainer.innerHTML = `
+            <div class="text-center py-12">
+                <div class="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="ri-error-warning-line text-2xl text-red-400"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Search Error</h3>
+                <p class="text-gray-500 mb-4">There was an error searching your bookings. Please try again.</p>
+                <button onclick="window.location.reload()" class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors">
+                    <i class="ri-refresh-line mr-2"></i>
+                    Reload Bookings
+                </button>
+            </div>
+        `;
+    }
+}
 </script>
 @endpush
 

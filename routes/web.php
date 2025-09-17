@@ -81,6 +81,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
 Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer', [CustomerHomeController::class, 'home'])->name('preview.customer');
     Route::get('/customer/profile', [CustomerDashboardController::class, 'show'])->name('customer.profile');
+    Route::post('/customer/bookings/search', [CustomerDashboardController::class, 'searchBookings'])->name('customer.bookings.search');
     Route::view('/customer/all-services', 'customer.allservices')->name('customer.allservices');
     Route::get('/customer/gallery', [CustomerGalleryController::class, 'index'])->name('customer.gallery');
     Route::get('/customer/gallery/{serviceType}', [CustomerGalleryController::class, 'showService'])->name('customer.gallery.service');
