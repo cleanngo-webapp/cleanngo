@@ -57,7 +57,7 @@ class EmployeeDashboardController extends Controller
             ->whereIn('bookings.status', ['pending', 'confirmed'])
             ->count();
         
-        // Get today's job details for the employee (scheduled today OR in progress)
+        // Get today's job details for the employee (scheduled today OR in progress, excluding completed)
         $todayJobs = DB::table('booking_staff_assignments')
             ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
             ->join('customers', 'bookings.customer_id', '=', 'customers.id')
@@ -82,6 +82,7 @@ class EmployeeDashboardController extends Controller
                 'services.duration_minutes'
             )
             ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->where('bookings.status', '!=', 'completed') // Exclude completed jobs from active assignments
             ->where(function($query) use ($today) {
                 $query->whereDate('bookings.scheduled_start', $today)
                       ->orWhere('bookings.status', 'in_progress');

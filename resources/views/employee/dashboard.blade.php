@@ -65,19 +65,19 @@
 		</div>
 	</div>
 
-	{{-- Today's Job Assignments --}}
-	<div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
-		<div class="p-6 border-b border-gray-100">
-			<h2 class="text-xl font-semibold text-gray-900">Active Job Assignments</h2>
-			<p class="text-sm text-gray-500 mt-1">Your jobs scheduled for today or currently in progress</p>
+	{{-- Active Job Assignments - Compact Version --}}
+	<div class="bg-white rounded-lg shadow-sm border border-gray-100 mb-6">
+		<div class="p-4 border-b border-gray-100">
+			<h2 class="text-lg font-semibold text-gray-900">Active Job Assignments</h2>
+			<p class="text-xs text-gray-500 mt-1">Your jobs scheduled or currently in progress</p>
 		</div>
-		<div class="p-6">
+		<div class="p-4">
 			@forelse($todayJobs as $job)
-			<div class="border border-gray-200 rounded-lg p-4 mb-4 last:mb-0 hover:bg-gray-50 transition-colors">
+			<div class="border border-gray-200 rounded-lg p-3 mb-3 last:mb-0 hover:bg-gray-50 transition-colors">
 				<div class="flex items-start justify-between">
 					<div class="flex-1">
-						<div class="flex items-center gap-3 mb-2">
-							<h3 class="text-lg font-semibold text-gray-900">{{ $serviceSummaries[$job->id] ?? ($job->service_name ?? 'General Service') }}</h3>
+						<div class="flex items-center gap-2 mb-2">
+							<h3 class="text-base font-semibold text-gray-900">{{ $serviceSummaries[$job->id] ?? ($job->service_name ?? 'General Service') }}</h3>
 							@php
 								$statusColors = [
 									'pending' => 'bg-yellow-100 text-yellow-800',
@@ -93,7 +93,7 @@
 							</span>
 						</div>
 						
-						<div class="text-sm text-gray-600 space-y-1">
+						<div class="text-xs text-gray-600 space-y-1">
 							<p><span class="font-medium">Customer:</span> {{ $job->first_name }} {{ $job->last_name }}</p>
 							<p><span class="font-medium">Phone:</span> {{ $job->phone }}</p>
 							<p><span class="font-medium">Address:</span> {{ $job->street_address }}, {{ $job->city }}</p>
@@ -105,39 +105,39 @@
 						</div>
 						
 						@if($job->notes)
-						<div class="mt-3 p-3 bg-gray-50 rounded-lg">
-							<p class="text-sm text-gray-700"><span class="font-medium">Notes:</span> {{ $job->notes }}</p>
+						<div class="mt-2 p-2 bg-gray-50 rounded">
+							<p class="text-xs text-gray-700"><span class="font-medium">Notes:</span> {{ $job->notes }}</p>
 						</div>
 						@endif
 					</div>
 					
-					<div class="ml-4 flex flex-col gap-2">
+					<div class="ml-3 flex flex-col gap-1">
 						@if($job->status === 'confirmed' || $job->status === 'pending')
 						<form method="POST" action="{{ route('employee.jobs.start', $job->id) }}" class="inline">
 							@csrf
-							<button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+							<button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-blue-700 transition-colors">
 								Start Job
 							</button>
 						</form>
 						@endif
 						
-						<button onclick="openEmpLocation({{ json_encode(['id' => $job->id, 'lat' => $job->latitude, 'lng' => $job->longitude]) }})" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors cursor-pointer">
+						<button onclick="openEmpLocation({{ json_encode(['id' => $job->id, 'lat' => $job->latitude, 'lng' => $job->longitude]) }})" class="bg-green-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-green-700 transition-colors cursor-pointer">
 							<i class="ri-map-pin-line"></i>
 						</button>
 						
-						<a href="{{ route('employee.jobs') }}" class="text-blue-600 text-sm font-medium hover:text-blue-800">
+						<a href="{{ route('employee.jobs') }}" class="text-blue-600 text-xs font-medium hover:text-blue-800">
 							View Details
 						</a>
 					</div>
 				</div>
 			</div>
 			@empty
-			<div class="text-center py-8">
-				<svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<div class="text-center py-6">
+				<svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
 				</svg>
-				<h3 class="mt-2 text-sm font-medium text-gray-900">No jobs assigned</h3>
-				<p class="mt-1 text-sm text-gray-500">You don't have any jobs scheduled for today.</p>
+				<h3 class="mt-2 text-sm font-medium text-gray-900">No active jobs</h3>
+				<p class="mt-1 text-xs text-gray-500">You don't have any active jobs scheduled for today.</p>
 			</div>
 			@endforelse
 		</div>
