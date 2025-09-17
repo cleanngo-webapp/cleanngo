@@ -288,8 +288,8 @@
 </div>
 
 <!-- Password Update Confirmation Modal -->
-<div id="passwordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+<div id="passwordModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative mx-auto p-5 w-96 shadow-lg rounded-md bg-white mt-20">
         <div class="mt-3 text-center">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
                 <i class="ri-question-line text-emerald-600 text-xl"></i>
@@ -302,11 +302,11 @@
             </div>
             <div class="items-center px-4 py-3">
                 <button id="confirmPasswordUpdate" 
-                        class="px-4 py-2 bg-emerald-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+                        class="px-4 py-2 bg-emerald-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 cursor-pointer">
                     Yes
                 </button>
                 <button onclick="hidePasswordConfirmation()" 
-                        class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer">
                     Cancel
                 </button>
             </div>
@@ -315,7 +315,7 @@
 </div>
 
 <!-- Profile Update Confirmation Modal -->
-<div id="profileModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center">
+<div id="profileModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative p-5 w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
@@ -342,7 +342,7 @@
 </div>
 
 <!-- Payment Settings Update Confirmation Modal -->
-<div id="paymentModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center">
+<div id="paymentModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative p-5 w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
@@ -400,10 +400,30 @@ function showPasswordConfirmation() {
         return;
     }
     
+    if (!newPassword) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing New Password',
+            text: 'Please enter your new password.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    if (currentPassword === newPassword) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Same Password',
+            text: 'New password cannot be the same as your current password. Please choose a different password.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+    
     if (newPassword !== confirmPassword) {
         Swal.fire({
             icon: 'error',
-            title: 'Password Mismatch',
+            title: 'New Password Mismatch',
             text: 'Passwords do not match. Please check and try again.',
             confirmButtonColor: '#10b981'
         });
@@ -413,19 +433,27 @@ function showPasswordConfirmation() {
     if (newPassword.length < 8) {
         Swal.fire({
             icon: 'warning',
-            title: 'Password Too Short',
+            title: 'New Password Too Short',
             text: 'Password must be at least 8 characters long.',
             confirmButtonColor: '#10b981'
         });
         return;
     }
     
-    document.getElementById('passwordModal').classList.remove('hidden');
+    const modal = document.getElementById('passwordModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex', 'items-center', 'justify-center');
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 // Hide password confirmation modal
 function hidePasswordConfirmation() {
-    document.getElementById('passwordModal').classList.add('hidden');
+    const modal = document.getElementById('passwordModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex', 'items-center', 'justify-center');
+    // Restore background scrolling
+    document.body.style.overflow = 'auto';
 }
 
 // Confirm password update
@@ -464,12 +492,14 @@ function showProfileConfirmation() {
     
     const modal = document.getElementById('profileModal');
     modal.classList.remove('hidden');
+    modal.classList.add('flex', 'items-center', 'justify-center');
 }
 
 // Hide profile confirmation modal
 function hideProfileConfirmation() {
     const modal = document.getElementById('profileModal');
     modal.classList.add('hidden');
+    modal.classList.remove('flex', 'items-center', 'justify-center');
 }
 
 // Confirm profile update
@@ -673,13 +703,17 @@ function showPaymentConfirmation() {
         return;
     }
     
-    document.getElementById('paymentModal').classList.remove('hidden');
+    const modal = document.getElementById('paymentModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex', 'items-center', 'justify-center');
     // Prevent background scrolling
     document.body.style.overflow = 'hidden';
 }
 
 function hidePaymentConfirmation() {
-    document.getElementById('paymentModal').classList.add('hidden');
+    const modal = document.getElementById('paymentModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex', 'items-center', 'justify-center');
     // Restore background scrolling
     document.body.style.overflow = 'auto';
 }
