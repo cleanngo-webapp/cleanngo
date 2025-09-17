@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 use App\Models\PaymentSettings;
 
@@ -153,13 +154,16 @@ class AdminSettingsController extends Controller
                 $data['qr_code_path'] = $currentSettings->qr_code_path;
             }
 
-            // Deactivate current settings if they exist
             if ($currentSettings) {
-                $currentSettings->update(['is_active' => false]);
+                // Update existing payment settings instead of creating new ones
+                $currentSettings->update($data);
+            } else {
+                // Only create new record if no existing settings found
+                PaymentSettings::create($data);
             }
 
-            // Create new payment settings
-            PaymentSettings::create($data);
+            // Clean up old inactive payment settings records (keep only the last 3 inactive ones)
+            $this->cleanupOldPaymentSettings();
 
             // Return success response
             return redirect()->route('admin.settings')
@@ -169,6 +173,37 @@ class AdminSettingsController extends Controller
             // Return error response if something goes wrong
             return redirect()->route('admin.settings')
                 ->with('error', 'An error occurred while updating payment settings. Please try again.');
+        }
+    }
+
+    /**
+     * Clean up old inactive payment settings records
+     * Keeps only the most recent 3 inactive records for audit purposes
+     */
+    private function cleanupOldPaymentSettings()
+    {
+        try {
+            // Get all inactive payment settings ordered by created_at desc
+            $inactiveSettings = PaymentSettings::where('is_active', false)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // If we have more than 3 inactive records, delete the older ones
+            if ($inactiveSettings->count() > 3) {
+                $settingsToDelete = $inactiveSettings->skip(3);
+                
+                foreach ($settingsToDelete as $setting) {
+                    // Delete associated QR code file if it exists
+                    if ($setting->qr_code_path) {
+                        Storage::disk('public')->delete($setting->qr_code_path);
+                    }
+                    // Delete the record
+                    $setting->delete();
+                }
+            }
+        } catch (\Exception $e) {
+            // Log error but don't throw it to avoid breaking the main update process
+            Log::error('Error cleaning up old payment settings: ' . $e->getMessage());
         }
     }
 }
