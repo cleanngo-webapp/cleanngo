@@ -23,14 +23,14 @@
                             onclick="toggleSort('customer_id')">
                         <i class="ri-customer-line mr-2"></i>
                         Sort by Customer ID
-                        <i class="ri-arrow-{{ ($sort ?? 'customer_id') === 'customer_id' && ($sortOrder ?? 'asc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
+                        <i class="ri-arrow-{{ ($sort ?? 'customer_id') === 'customer_id' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'customer_id') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('name')">
                         <i class="ri-user-line mr-2"></i>
                         Sort by Name
-                        <i class="ri-arrow-{{ ($sort ?? 'customer_id') === 'name' && ($sortOrder ?? 'asc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
+                        <i class="ri-arrow-{{ ($sort ?? 'customer_id') === 'name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                 </div>
             </div>
@@ -117,7 +117,7 @@
     
     // Global variables for search and sort
     let currentSort = '{{ $sort ?? "customer_id" }}';
-    let currentSortOrder = '{{ $sortOrder ?? "asc" }}';
+    let currentSortOrder = '{{ $sortOrder ?? "desc" }}';
     let searchTimeout;
     
     // Search and sort functionality
@@ -126,9 +126,9 @@
             // Toggle sort order if same sort type
             currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
         } else {
-            // Set new sort type with default ascending order
+            // Set new sort type with default descending order (like payroll tables)
             currentSort = sortType;
-            currentSortOrder = 'asc';
+            currentSortOrder = 'desc';
         }
         
         // Update button styles and icons
@@ -151,7 +151,7 @@
                 btn.classList.add('bg-emerald-600', 'text-white');
                 icon.className = `ri-arrow-${currentSortOrder === 'desc' ? 'down' : 'up'}-line ml-2`;
             } else {
-                icon.className = 'ri-arrow-up-line ml-2';
+                icon.className = 'ri-arrow-down-line ml-2';
             }
         });
     }
@@ -175,10 +175,21 @@
         url.searchParams.set('sort', currentSort);
         url.searchParams.set('sort_order', currentSortOrder);
         
-        // Show loading state
+        // Show loading state with animated preloader
         const tableBody = document.getElementById('customers-table-body');
         const paginationContainer = document.getElementById('pagination-container');
-        tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Searching...</td></tr>';
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-6 py-8 text-center">
+                    <div class="flex justify-center items-center space-x-2 mb-4">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    </div>
+                    <p class="text-gray-500 text-sm">Searching...</p>
+                </td>
+            </tr>
+        `;
         paginationContainer.innerHTML = '';
         
         fetch(url)
@@ -194,6 +205,9 @@
                 
                 if (newTableBody) {
                     tableBody.innerHTML = newTableBody.innerHTML;
+                    // Add fade-in animation to new content
+                    tableBody.classList.add('fade-in-up');
+                    setTimeout(() => tableBody.classList.remove('fade-in-up'), 500);
                 }
                 if (newPagination) {
                     paginationContainer.innerHTML = newPagination.innerHTML;

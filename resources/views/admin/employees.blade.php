@@ -1,10 +1,10 @@
 @extends('layouts.admin')
 
-@section('title','Manage Employees & Payroll')
+@section('title','Manage Employees')
 
 @section('content')
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-extrabold text-center">Manage Employees & Payroll</h1>
+    <h1 class="text-3xl font-extrabold text-center">Manage Employees</h1>
 
     {{-- Employee Statistics Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -234,7 +234,18 @@ function performSearch() {
     // Show loading state
     const tableBody = document.getElementById('employees-table-body');
     const paginationContainer = document.getElementById('pagination-container');
-    tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">Searching...</td></tr>';
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="px-6 py-8 text-center">
+                <div class="flex justify-center items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                </div>
+                <p class="text-gray-500 text-sm">Searching...</p>
+            </td>
+        </tr>
+    `;
     paginationContainer.innerHTML = '';
     
     fetch(url)

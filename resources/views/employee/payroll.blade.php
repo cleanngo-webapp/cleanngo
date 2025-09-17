@@ -6,8 +6,39 @@
 <div class="max-w-7xl mx-auto">
     <h1 class="text-3xl font-extrabold text-center">Payroll</h1>
 
-    {{-- Payroll Records Section --}}
+    {{-- Search and Sort Section --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <input type="text" 
+                           id="search-payroll" 
+                           value="{{ $search ?? '' }}"
+                           placeholder="Search payroll by Booking ID or Customer" 
+                           class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'completed_at') === 'completed_at' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('completed_at')">
+                        <i class="ri-calendar-line mr-2"></i>
+                        Sort by Date
+                        <i class="ri-arrow-{{ ($sort ?? 'completed_at') === 'completed_at' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'completed_at') === 'total_due_cents' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('total_due_cents')">
+                        <i class="ri-money-dollar-circle-line mr-2"></i>
+                        Sort by Amount
+                        <i class="ri-arrow-{{ ($sort ?? 'completed_at') === 'total_due_cents' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Payroll Records Section --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
         <div class="p-6 border-b border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -22,7 +53,6 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Booking ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-48">Service</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Customer</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Pay Amount</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payment Method</th>
@@ -30,7 +60,7 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody id="payroll-table-body" class="bg-white divide-y divide-gray-200">
                     @forelse($payrollRecords as $record)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-4 py-4 whitespace-nowrap">
@@ -40,9 +70,6 @@
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $record->booking_code }}</div>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="text-sm text-gray-900 max-w-xs">{{ $serviceSummaries[$record->booking_id] ?? ($record->service_name ?? 'General Service') }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $record->customer_name }}</div>
@@ -69,7 +96,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-4 text-center text-sm text-gray-500">
+                        <td colspan="7" class="px-4 py-4 text-center text-sm text-gray-500">
                             No payroll records found
                         </td>
                     </tr>
@@ -126,6 +153,102 @@
 
 @push('scripts')
 <script>
+// Search and Sort functionality
+let currentSort = '{{ $sort ?? "completed_at" }}';
+let currentSortOrder = '{{ $sortOrder ?? "desc" }}';
+let searchTimeout;
+
+// Search functionality with AJAX
+document.getElementById('search-payroll').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        performSearch();
+    }, 300);
+});
+
+// Sort functionality
+function toggleSort(sortField) {
+    if (currentSort === sortField) {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort = sortField;
+        currentSortOrder = 'desc';
+    }
+    
+    // Update button styles and icons
+    updateSortButtons();
+    
+    // Perform search/sort
+    performSearch();
+}
+
+function updateSortButtons() {
+    const buttons = document.querySelectorAll('[onclick^="toggleSort"]');
+    buttons.forEach(btn => {
+        btn.classList.remove('bg-emerald-600', 'text-white');
+        btn.classList.add('bg-gray-100', 'text-gray-700');
+        
+        // Update arrow icons
+        const icon = btn.querySelector('i:last-child');
+        if (btn.onclick.toString().includes(currentSort)) {
+            btn.classList.remove('bg-gray-100', 'text-gray-700');
+            btn.classList.add('bg-emerald-600', 'text-white');
+            icon.className = `ri-arrow-${currentSortOrder === 'desc' ? 'down' : 'up'}-line ml-2`;
+        } else {
+            icon.className = 'ri-arrow-up-line ml-2';
+        }
+    });
+}
+
+// AJAX search function
+function performSearch() {
+    const searchTerm = document.getElementById('search-payroll').value;
+    const url = new URL('{{ route("employee.payroll") }}', window.location.origin);
+    
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    }
+    url.searchParams.set('sort', currentSort);
+    url.searchParams.set('sortOrder', currentSortOrder);
+    
+    // Show loading state
+    const tableBody = document.getElementById('payroll-table-body');
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="px-4 py-8 text-center">
+                <div class="flex justify-center items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                </div>
+                <p class="text-gray-500 text-sm">Searching...</p>
+            </td>
+        </tr>
+    `;
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract table body content
+            const newTableBody = doc.getElementById('payroll-table-body');
+            
+            if (newTableBody) {
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+            
+            // Update URL without page refresh
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            tableBody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+        });
+}
+
 // Receipt modal function for employee
 function openEmployeeReceipt(bookingId) {
     // Get payment method from the payroll records data

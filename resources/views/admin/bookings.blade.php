@@ -6,8 +6,121 @@
 <div class="max-w-6xl mx-auto">
     <h1 class="text-2xl font-bold text-center">Bookings and Scheduling</h1>
 
-    <div class="max-w-3xl mx-auto mt-6 bg-white rounded-xl p-4">
-        <div id="admin-calendar" class="max-w-3xl mx-auto" data-events-url="{{ route('admin.calendar.events') }}"></div>
+    {{-- Calendar and Stats Layout --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        {{-- Calendar Section - Takes 2 columns on large screens --}}
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl p-4">
+                <div id="admin-calendar" class="w-full" data-events-url="{{ route('admin.calendar.events') }}"></div>
+            </div>
+        </div>
+
+        {{-- Stats Cards Section - Takes 1 column on large screens --}}
+        <div class="lg:col-span-1">
+            <div class="space-y-9">
+                {{-- Total Bookings Card --}}
+                <div class="bg-white rounded-xl p-7 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Bookings</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalBookings ?? 0) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">All time bookings</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Today's Bookings Card --}}
+                <div class="bg-white rounded-xl p-7 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Today's Bookings</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($todayBookings ?? 0) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Scheduled for today</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-lg">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Active Services Card --}}
+                <div class="bg-white rounded-xl p-7 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Active Services</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($activeServices ?? 0) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Currently in progress</p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-lg">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Completed Jobs Today Card --}}
+                <div class="bg-white rounded-xl p-7 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Completed Today</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($completedJobsToday ?? 0) }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Jobs finished today</p>
+                        </div>
+                        <div class="bg-emerald-100 p-3 rounded-lg">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Search and Sort Section --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <input type="text" 
+                           id="search-bookings" 
+                           value="{{ $search ?? '' }}"
+                           placeholder="Search bookings by ID, Customer Name, or Employee" 
+                           class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'scheduled_start' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('scheduled_start')">
+                        <i class="ri-calendar-line mr-2"></i>
+                        Sort by Date
+                        <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'scheduled_start' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'customer_name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('customer_name')">
+                        <i class="ri-user-line mr-2"></i>
+                        Sort by Customer
+                        <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'customer_name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'status' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('status')">
+                        <i class="ri-flag-line mr-2"></i>
+                        Sort by Status
+                        <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'status' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- Booking Records Section --}}
@@ -37,7 +150,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody id="bookings-table-body" class="bg-white divide-y divide-gray-200">
                     @foreach($bookings as $b)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -151,7 +264,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-6 py-4 border-t border-gray-100">
+        <div id="pagination-container" class="px-6 py-4 border-t border-gray-100">
             {{ $bookings->links() }}
         </div>
     </div>
@@ -356,6 +469,109 @@
     @push('scripts')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+    // Search and Sort functionality
+    let currentSort = '{{ $sort ?? "scheduled_start" }}';
+    let currentSortOrder = '{{ $sortOrder ?? "desc" }}';
+    let searchTimeout;
+
+    // Search functionality with AJAX
+    document.getElementById('search-bookings').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            performSearch();
+        }, 300);
+    });
+
+    // Sort functionality
+    function toggleSort(sortField) {
+        if (currentSort === sortField) {
+            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort = sortField;
+            currentSortOrder = 'desc';
+        }
+        
+        // Update button styles and icons
+        updateSortButtons();
+        
+        // Perform search/sort
+        performSearch();
+    }
+
+    function updateSortButtons() {
+        const buttons = document.querySelectorAll('[onclick^="toggleSort"]');
+        buttons.forEach(btn => {
+            btn.classList.remove('bg-emerald-600', 'text-white');
+            btn.classList.add('bg-gray-100', 'text-gray-700');
+            
+            // Update arrow icons
+            const icon = btn.querySelector('i:last-child');
+            if (btn.onclick.toString().includes(currentSort)) {
+                btn.classList.remove('bg-gray-100', 'text-gray-700');
+                btn.classList.add('bg-emerald-600', 'text-white');
+                icon.className = `ri-arrow-${currentSortOrder === 'desc' ? 'down' : 'up'}-line ml-2`;
+            } else {
+                icon.className = 'ri-arrow-up-line ml-2';
+            }
+        });
+    }
+
+    // AJAX search function
+    function performSearch() {
+        const searchTerm = document.getElementById('search-bookings').value;
+        const url = new URL('{{ route("admin.bookings") }}', window.location.origin);
+        
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        }
+        url.searchParams.set('sort', currentSort);
+        url.searchParams.set('sortOrder', currentSortOrder);
+        
+        // Show loading state
+        const tableBody = document.getElementById('bookings-table-body');
+        const paginationContainer = document.getElementById('pagination-container');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-8 text-center">
+                    <div class="flex justify-center items-center space-x-2 mb-4">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    </div>
+                    <p class="text-gray-500 text-sm">Searching...</p>
+                </td>
+            </tr>
+        `;
+        paginationContainer.innerHTML = '';
+        
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                // Parse the response HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Extract table body content
+                const newTableBody = doc.getElementById('bookings-table-body');
+                const newPagination = doc.getElementById('pagination-container');
+                
+                if (newTableBody) {
+                    tableBody.innerHTML = newTableBody.innerHTML;
+                }
+                if (newPagination) {
+                    paginationContainer.innerHTML = newPagination.innerHTML;
+                }
+                
+                // Update URL without page refresh
+                window.history.pushState({}, '', url);
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+            });
+    }
+    </script>
     <script>
     const receiptData = @json($receiptData ?? []);
     const locationsData = @json($locationsData ?? []);

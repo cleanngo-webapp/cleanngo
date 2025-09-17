@@ -8,9 +8,13 @@ use Illuminate\Support\Facades\DB;
 
 class AdminBookingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = DB::table('bookings as b')
+        $search = $request->get('search');
+        $sort = $request->get('sort', 'scheduled_start');
+        $sortOrder = $request->get('sortOrder', 'desc');
+
+        $query = DB::table('bookings as b')
             ->leftJoin('customers as c', 'c.id', '=', 'b.customer_id')
             ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
             ->leftJoin('services as s', 's.id', '=', 'b.service_id')
@@ -38,9 +42,27 @@ class AdminBookingController extends Controller
                 DB::raw('pp.id as payment_proof_id'),
                 DB::raw('pp.status as payment_status'),
                 DB::raw("CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END as payment_approved"),
-            ])
-            ->orderByDesc('b.scheduled_start')
-            ->paginate(15);
+            ]);
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('b.code', 'like', "%{$search}%")
+                  ->orWhere(DB::raw("CONCAT(u.first_name,' ',u.last_name)"), 'like', "%{$search}%")
+                  ->orWhere(DB::raw("CONCAT(eu.first_name,' ',eu.last_name)"), 'like', "%{$search}%");
+            });
+        }
+
+        // Apply sorting
+        $allowedSorts = ['scheduled_start', 'customer_name', 'status'];
+        if (in_array($sort, $allowedSorts)) {
+            $sortColumn = $sort === 'customer_name' ? DB::raw("CONCAT(u.first_name,' ',u.last_name)") : "b.{$sort}";
+            $query->orderBy($sortColumn, $sortOrder);
+        } else {
+            $query->orderByDesc('b.scheduled_start');
+        }
+
+        $bookings = $query->paginate(15)->appends($request->query());
 
         // For modal dropdowns
         $customers = DB::table('users')->where('role','customer')->orderBy('first_name')->orderBy('last_name')->get(['id','first_name','last_name']);
@@ -91,6 +113,19 @@ class AdminBookingController extends Controller
             ];
         })->all();
 
+        // Dashboard statistics for the cards
+        $totalBookings = DB::table('bookings')->count();
+        $todayBookings = DB::table('bookings')
+            ->whereDate('scheduled_start', today())
+            ->count();
+        $activeServices = DB::table('bookings')
+            ->whereIn('status', ['confirmed', 'in_progress'])
+            ->count();
+        $completedJobsToday = DB::table('bookings')
+            ->where('status', 'completed')
+            ->whereDate('updated_at', today())
+            ->count();
+
         return view('admin.bookings', [
             'bookings' => $bookings,
             'customers' => $customers,
@@ -98,6 +133,13 @@ class AdminBookingController extends Controller
             'itemSummaries' => $itemsByBooking,
             'locationsData' => $locationsData,
             'receiptData' => $receiptData,
+            'totalBookings' => $totalBookings,
+            'todayBookings' => $todayBookings,
+            'activeServices' => $activeServices,
+            'completedJobsToday' => $completedJobsToday,
+            'search' => $search,
+            'sort' => $sort,
+            'sortOrder' => $sortOrder,
         ]);
     }
 
