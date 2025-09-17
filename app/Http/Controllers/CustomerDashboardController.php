@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\PaymentSettings;
 
 class CustomerDashboardController extends Controller
 {
@@ -104,11 +105,15 @@ class CustomerDashboardController extends Controller
             }
         }
 
+        // Get payment settings for displaying QR code
+        $paymentSettings = PaymentSettings::getActive();
+
         return view('customer.profile', [
             'addresses' => $addresses,
             'bookings' => $bookings,
             'receiptData' => $receiptData,
             'serviceSummaries' => $serviceSummaries,
+            'paymentSettings' => $paymentSettings,
         ]);
     }
 }

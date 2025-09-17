@@ -121,6 +121,12 @@
 						</form>
 						@endif
 						
+						@if($paymentSettings && $paymentSettings->qr_code_path && ($job->status === 'pending' || $job->status === 'in_progress'))
+						<button onclick="openEmpPaymentQRModal({{ $job->id }}, '{{ $job->code }}', {{ $job->total_due_cents ?? 0 }}, '{{ $job->status }}')" class="bg-purple-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-purple-700 transition-colors cursor-pointer">
+							<i class="ri-qr-code-line"></i>
+						</button>
+						@endif
+						
 						<button onclick="openEmpLocation({{ json_encode(['id' => $job->id, 'lat' => $job->latitude, 'lng' => $job->longitude]) }})" class="bg-green-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-green-700 transition-colors cursor-pointer">
 							<i class="ri-map-pin-line"></i>
 						</button>
@@ -173,6 +179,68 @@
 		</div>
 		
 		<div id="jobMap" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-200"></div>
+	</div>
+</div>
+
+<!-- Employee Payment QR Code Modal -->
+<div id="emp-payment-qr-modal" class="fixed inset-0 bg-black/50 z-50 items-center justify-center" style="display: none;">
+	<div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+		<div class="flex justify-between items-center mb-4">
+			<h3 class="text-lg font-semibold text-gray-900">Payment Information</h3>
+			<button onclick="closeEmpPaymentQRModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+				</svg>
+			</button>
+		</div>
+		
+		<div class="text-center">
+			<div class="mb-4">
+				<h4 class="text-lg font-semibold text-gray-900 mb-2">Job #<span id="emp-payment-booking-code"></span></h4>
+				<p class="text-2xl font-bold text-emerald-600">₱<span id="emp-payment-amount"></span></p>
+				<p class="text-sm text-gray-500 mt-1">Status: <span id="emp-payment-status" class="font-medium"></span></p>
+			</div>
+			
+			@if($paymentSettings && $paymentSettings->qr_code_path)
+			<div class="mb-4">
+				<img src="{{ Storage::url($paymentSettings->qr_code_path) }}" 
+					 alt="GCash QR Code" 
+					 class="w-48 h-48 object-contain border border-gray-200 rounded-lg mx-auto">
+			</div>
+			
+			<div class="bg-gray-50 rounded-lg p-4 mb-4">
+				<h5 class="font-semibold text-gray-900 mb-2">Payment Details</h5>
+				<div class="text-sm text-gray-600 space-y-1">
+					<p><span class="font-medium">GCash Name:</span> {{ $paymentSettings->gcash_name }}</p>
+					<p><span class="font-medium">GCash Number:</span> {{ $paymentSettings->gcash_number }}</p>
+				</div>
+			</div>
+			
+			<div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+				<div class="flex items-start gap-2">
+					<i class="ri-information-line text-blue-500 text-lg mt-0.5"></i>
+					<div class="text-sm text-blue-700">
+						<div class="font-medium mb-1">Payment Instructions for Customer</div>
+						<div>1. Open GCash app</div>
+						<div>2. Scan the QR code above</div>
+						<div>3. Enter the exact amount shown</div>
+						<div>4. Complete the payment</div>
+						<div>5. Show payment confirmation</div>
+					</div>
+				</div>
+			</div>
+			@else
+			<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+				<div class="flex items-center gap-2">
+					<i class="ri-error-warning-line text-yellow-500 text-lg"></i>
+					<div class="text-sm text-yellow-700">
+						<div class="font-medium">Payment information not available</div>
+						<div>Please contact admin for payment details.</div>
+					</div>
+				</div>
+			</div>
+			@endif
+		</div>
 	</div>
 </div>
 @endsection
@@ -235,5 +303,28 @@ function closeEmpLocation(){
 
 // Make locations available globally for address/phone rendering
 window.empLocations = @json($locationsData ?? []);
+
+// Employee Payment QR Modal Functions
+function openEmpPaymentQRModal(jobId, jobCode, totalAmount, status) {
+    document.getElementById('emp-payment-booking-code').textContent = jobCode;
+    document.getElementById('emp-payment-amount').textContent = (totalAmount / 100).toFixed(2);
+    document.getElementById('emp-payment-status').textContent = status === 'in_progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1);
+    document.getElementById('emp-payment-qr-modal').style.display = 'flex';
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEmpPaymentQRModal() {
+    document.getElementById('emp-payment-qr-modal').style.display = 'none';
+    // Restore background scrolling
+    document.body.style.overflow = 'auto';
+}
+
+// Close employee payment QR modal when clicking outside
+document.getElementById('emp-payment-qr-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeEmpPaymentQRModal();
+    }
+});
 </script>
 @endpush

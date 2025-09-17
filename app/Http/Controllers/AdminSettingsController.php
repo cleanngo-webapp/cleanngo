@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
+use App\Models\PaymentSettings;
 
 class AdminSettingsController extends Controller
 {
@@ -14,7 +17,10 @@ class AdminSettingsController extends Controller
      */
     public function index()
     {
-        return view('admin.settings');
+        // Get current payment settings
+        $paymentSettings = PaymentSettings::getActive();
+        
+        return view('admin.settings', compact('paymentSettings'));
     }
 
     /**
@@ -38,10 +44,10 @@ class AdminSettingsController extends Controller
             // Get the authenticated admin user
             $user = Auth::guard('admin')->user();
             
-            // Update the password
-            $user->update([
-                'password_hash' => Hash::make($request->new_password)
-            ]);
+            // Update the password using DB facade for more explicit control
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update(['password_hash' => Hash::make($request->new_password)]);
 
             // Return success response
             return redirect()->route('admin.settings')
@@ -80,12 +86,14 @@ class AdminSettingsController extends Controller
             // Get the authenticated admin user
             $user = Auth::guard('admin')->user();
             
-            // Update the profile information
-            $user->update([
-                'email' => $request->email,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-            ]);
+            // Update the profile information using DB facade for more explicit control
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'email' => $request->email,
+                    'first_name' => $request->first_name,
+                    'last_name' => $request->last_name,
+                ]);
 
             // Return success response
             return redirect()->route('admin.settings')
@@ -95,6 +103,72 @@ class AdminSettingsController extends Controller
             // Return error response if something goes wrong
             return redirect()->route('admin.settings')
                 ->with('error', 'An error occurred while updating your profile. Please try again.');
+        }
+    }
+
+    /**
+     * Update payment settings (GCash QR code and details)
+     */
+    public function updatePaymentSettings(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'gcash_name' => ['required', 'string', 'max:255'],
+            'gcash_number' => ['required', 'string', 'max:20'],
+            'qr_code' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Max 2MB
+        ], [
+            'gcash_name.required' => 'GCash name is required.',
+            'gcash_name.string' => 'GCash name must be a string.',
+            'gcash_name.max' => 'GCash name must not exceed 255 characters.',
+            'gcash_number.required' => 'GCash number is required.',
+            'gcash_number.string' => 'GCash number must be a string.',
+            'gcash_number.max' => 'GCash number must not exceed 20 characters.',
+            'qr_code.image' => 'QR code must be an image file.',
+            'qr_code.mimes' => 'QR code must be a JPEG, PNG, JPG, or GIF file.',
+            'qr_code.max' => 'QR code file size must not exceed 2MB.',
+        ]);
+
+        try {
+            // Get current active payment settings
+            $currentSettings = PaymentSettings::getActive();
+            
+            $data = [
+                'gcash_name' => $request->gcash_name,
+                'gcash_number' => $request->gcash_number,
+                'is_active' => true,
+            ];
+
+            // Handle QR code upload
+            if ($request->hasFile('qr_code')) {
+                // Delete old QR code if exists
+                if ($currentSettings && $currentSettings->qr_code_path) {
+                    Storage::disk('public')->delete($currentSettings->qr_code_path);
+                }
+                
+                // Store new QR code
+                $qrCodePath = $request->file('qr_code')->store('payment-qr-codes', 'public');
+                $data['qr_code_path'] = $qrCodePath;
+            } elseif ($currentSettings) {
+                // Keep existing QR code if no new one uploaded
+                $data['qr_code_path'] = $currentSettings->qr_code_path;
+            }
+
+            // Deactivate current settings if they exist
+            if ($currentSettings) {
+                $currentSettings->update(['is_active' => false]);
+            }
+
+            // Create new payment settings
+            PaymentSettings::create($data);
+
+            // Return success response
+            return redirect()->route('admin.settings')
+                ->with('success', 'Payment settings updated successfully!');
+
+        } catch (\Exception $e) {
+            // Return error response if something goes wrong
+            return redirect()->route('admin.settings')
+                ->with('error', 'An error occurred while updating payment settings. Please try again.');
         }
     }
 }

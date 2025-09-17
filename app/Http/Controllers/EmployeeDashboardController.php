@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\PaymentSettings;
 
 class EmployeeDashboardController extends Controller
 {
@@ -71,6 +72,7 @@ class EmployeeDashboardController extends Controller
                 'bookings.scheduled_start',
                 'bookings.scheduled_end',
                 'bookings.notes',
+                'bookings.total_due_cents',
                 'users.first_name',
                 'users.last_name',
                 'users.phone',
@@ -157,13 +159,17 @@ class EmployeeDashboardController extends Controller
             }
         }
         
+        // Get payment settings for displaying QR code
+        $paymentSettings = PaymentSettings::getActive();
+
         return view('employee.dashboard', compact(
             'jobsAssignedToday',
             'jobsCompletedToday', 
             'pendingJobs',
             'todayJobs',
             'locationsData',
-            'serviceSummaries'
+            'serviceSummaries',
+            'paymentSettings'
         ));
     }
 }

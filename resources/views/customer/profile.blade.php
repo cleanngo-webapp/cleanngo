@@ -93,11 +93,21 @@
 													</div>
 												@endif
 												@if($booking->status === 'pending')
-													<div class="mt-2">
+													<div class="mt-2 flex gap-2">
 														<button onclick="openCancelModal({{ $booking->id }}, '{{ $booking->code }}')" 
 																class="px-3 py-1 bg-red-500 text-white text-xs rounded cursor-pointer hover:bg-red-600 transition-colors duration-200">
 															Cancel Booking
 														</button>
+													</div>
+												@elseif($booking->status === 'in_progress')
+													<div class="mt-2">
+														@if($paymentSettings && $paymentSettings->qr_code_path)
+														<button onclick="openPaymentQRModal({{ $booking->id }}, '{{ $booking->code }}', {{ $booking->total_due_cents }})" 
+																class="px-3 py-1 bg-blue-500 text-white text-xs rounded cursor-pointer hover:bg-blue-600 transition-colors duration-200">
+															<i class="ri-qr-code-line mr-1"></i>
+															View QR Code
+														</button>
+														@endif
 													</div>
 												@elseif($booking->status === 'completed' && $booking->payment_proof_status === 'approved')
 													<div class="mt-2">
@@ -558,8 +568,89 @@ document.getElementById('cannot-delete-address-modal').addEventListener('click',
         closeCannotDeleteModal();
     }
 });
+
+// Payment QR Modal Functions
+function openPaymentQRModal(bookingId, bookingCode, totalAmount) {
+    document.getElementById('payment-booking-code').textContent = bookingCode;
+    document.getElementById('payment-amount').textContent = (totalAmount / 100).toFixed(2);
+    document.getElementById('payment-qr-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closePaymentQRModal() {
+    document.getElementById('payment-qr-modal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close payment QR modal when clicking outside
+document.getElementById('payment-qr-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePaymentQRModal();
+    }
+});
 </script>
 @endpush
+
+<!-- Payment QR Code Modal -->
+<div id="payment-qr-modal" class="fixed inset-0 bg-black/50 z-9999 items-center justify-center" style="display: none;">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto mt-16">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Payment Information</h3>
+            <button onclick="closePaymentQRModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="text-center">
+            <div class="mb-4">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Booking #<span id="payment-booking-code"></span></h4>
+                <p class="text-2xl font-bold text-emerald-600">₱<span id="payment-amount"></span></p>
+            </div>
+            
+            @if($paymentSettings && $paymentSettings->qr_code_path)
+            <div class="mb-4">
+                <img src="{{ Storage::url($paymentSettings->qr_code_path) }}" 
+                     alt="GCash QR Code" 
+                     class="w-48 h-48 object-contain border border-gray-200 rounded-lg mx-auto">
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h5 class="font-semibold text-gray-900 mb-2">Payment Details</h5>
+                <div class="text-sm text-gray-600 space-y-1">
+                    <p><span class="font-medium">GCash Name:</span> {{ $paymentSettings->gcash_name }}</p>
+                    <p><span class="font-medium">GCash Number:</span> {{ $paymentSettings->gcash_number }}</p>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div class="flex items-start gap-2">
+                    <i class="ri-information-line text-blue-500 text-lg mt-0.5"></i>
+                    <div class="text-sm text-blue-700">
+                        <div class="font-medium mb-1">Payment Instructions</div>
+                        <div>1. Open your GCash app</div>
+                        <div>2. Scan the QR code above</div>
+                        <div>3. Enter the exact amount shown</div>
+                        <div>4. Complete the payment</div>
+                        <div>5. Upload payment proof when done</div>
+                    </div>
+                </div>
+            </div>
+            @else
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex items-center gap-2">
+                    <i class="ri-error-warning-line text-yellow-500 text-lg"></i>
+                    <div class="text-sm text-yellow-700">
+                        <div class="font-medium">Payment information not available</div>
+                        <div>Please contact support for payment details.</div>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
 
 <!-- Confirm Make Primary Modal -->
 <div id="confirm-primary-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]">

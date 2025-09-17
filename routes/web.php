@@ -143,6 +143,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
     Route::put('/settings/password', [AdminSettingsController::class, 'updatePassword'])->name('settings.password.update');
     Route::put('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::put('/settings/payment', [AdminSettingsController::class, 'updatePaymentSettings'])->name('settings.payment.update');
     Route::get('/payroll', [AdminPayrollController::class, 'index'])->name('payroll');
     // Calendar events feed for admin
     Route::get('/calendar/events', [CalendarController::class, 'adminEvents'])->name('calendar.events');
