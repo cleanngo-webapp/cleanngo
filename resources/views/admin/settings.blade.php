@@ -258,7 +258,7 @@
                                 </label>
                                 <p class="pl-1">or drag and drop</p>
                             </div>
-                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+                            <p class="text-xs text-gray-500">JPEG, PNG, JPG, GIF, WebP up to 10MB</p>
                         </div>
                     </div>
                     <div id="qr-preview" class="mt-3 hidden">
@@ -640,7 +640,7 @@ function handleDrop(e) {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid File Type',
-                text: 'Please drop an image file (PNG, JPG, GIF).',
+                text: 'Please drop an image file (JPEG, PNG, JPG, GIF, WebP).',
                 confirmButtonColor: '#10b981'
             });
         }

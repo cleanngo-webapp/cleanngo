@@ -8,7 +8,7 @@
 
 <div class="max-w-6xl mx-auto">
 	<div class="flex items-center justify-between mb-8">
-		<h1 class="text-3xl font-extrabold text-gray-900">Dashboard</h1>
+		<h1 class="text-3xl font-extrabold text-gray-900 text-center">Dashboard</h1>
 		<div class="text-sm text-gray-500">
 			{{ now()->format('l, F j, Y') }}
 		</div>

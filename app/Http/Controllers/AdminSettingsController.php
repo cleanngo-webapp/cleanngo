@@ -116,7 +116,7 @@ class AdminSettingsController extends Controller
         $request->validate([
             'gcash_name' => ['required', 'string', 'max:255'],
             'gcash_number' => ['required', 'string', 'max:20'],
-            'qr_code' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // Max 2MB
+            'qr_code' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:10240'], // Max 10MB
         ], [
             'gcash_name.required' => 'GCash name is required.',
             'gcash_name.string' => 'GCash name must be a string.',
@@ -125,8 +125,8 @@ class AdminSettingsController extends Controller
             'gcash_number.string' => 'GCash number must be a string.',
             'gcash_number.max' => 'GCash number must not exceed 20 characters.',
             'qr_code.image' => 'QR code must be an image file.',
-            'qr_code.mimes' => 'QR code must be a JPEG, PNG, JPG, or GIF file.',
-            'qr_code.max' => 'QR code file size must not exceed 2MB.',
+            'qr_code.mimes' => 'QR code must be a JPEG, PNG, JPG, GIF, or WebP file.',
+            'qr_code.max' => 'QR code file size must not exceed 10MB.',
         ]);
 
         try {

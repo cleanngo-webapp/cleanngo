@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-extrabold text-emerald-900">Gallery Management</h1>
-        <p class="text-gray-600">Manage gallery images for each service</p>
+        <p class="text-gray-600">Manage Gallery Images for each service</p>
     </div>
 
     {{-- Display success/error messages --}}

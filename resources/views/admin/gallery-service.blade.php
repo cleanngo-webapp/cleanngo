@@ -13,7 +13,7 @@
             </a>
             <div>
                 <h1 class="text-3xl font-extrabold text-emerald-900">{{ $serviceName }}</h1>
-                <p class="text-gray-600">Manage gallery images for this service</p>
+                <p class="text-gray-600">Manage Gallery Images for this service</p>
             </div>
         </div>
     </div>
@@ -39,37 +39,55 @@
             @csrf
             <input type="hidden" name="service_type" value="{{ $serviceType }}">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {{-- Image Upload --}}
-                <div>
-                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
-                        Select Image <span class="text-red-500">*</span>
-                    </label>
-                    <input type="file" 
-                           id="image" 
-                           name="image" 
-                           accept="image/*" 
-                           required
-                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
-                    <p class="text-xs text-gray-500 mt-1">Supported formats: JPEG, PNG, JPG, GIF, WebP (Max: 10MB)</p>
+            {{-- Image Upload --}}
+            <div>
+                <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
+                    Select Image <span class="text-red-500">*</span>
+                </label>
+                <div id="image-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-emerald-400 transition-colors cursor-pointer" 
+                     onclick="document.getElementById('image').click()"
+                     ondrop="handleImageDrop(event)" 
+                     ondragover="handleImageDragOver(event)" 
+                     ondragenter="handleImageDragEnter(event)" 
+                     ondragleave="handleImageDragLeave(event)">
+                    <div class="space-y-1 text-center">
+                        <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500">
+                                <span>Upload Image</span>
+                                <input id="image" name="image" type="file" class="sr-only" accept="image/*" onchange="previewImage(this)" required>
+                            </label>
+                            <p class="pl-1">or drag and drop</p>
+                        </div>
+                        <p class="text-xs text-gray-500">JPEG, PNG, JPG, GIF, WebP up to 10MB</p>
+                    </div>
                 </div>
+                <div id="image-preview" class="mt-3 hidden">
+                    <div class="relative inline-block">
+                        <img id="image-preview-img" src="" alt="Image Preview" class="w-32 h-32 object-contain border border-gray-200 rounded-lg mx-auto">
+                        <button type="button" onclick="removeImagePreview()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer">
+                            <i class="ri-close-line text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                {{-- Alt Text --}}
-                <div>
-                    <label for="alt_text" class="block text-sm font-medium text-gray-700 mb-2">
-                        Alt Text (Optional)
-                    </label>
-                    <input type="text" 
-                           id="alt_text" 
-                           name="alt_text" 
-                           placeholder="Describe the image for accessibility"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                </div>
+            {{-- Alt Text --}}
+            <div>
+                <label for="alt_text" class="block text-sm font-medium text-gray-700 mb-2">
+                    Alt Text (Optional)
+                </label>
+                <input type="text" 
+                       id="alt_text" 
+                       name="alt_text" 
+                       placeholder="Describe the image for accessibility"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
             </div>
 
             {{-- Upload Button --}}
             <div class="flex justify-end">
-                <button type="submit" 
+                <button type="button" 
+                        onclick="showUploadConfirmation()"
                         class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
                     Upload Image
                 </button>
@@ -244,6 +262,195 @@
  <script>
  let currentImageId = null;
  let currentForm = null;
+
+ // Image Upload Functions
+ function previewImage(input) {
+     if (input.files && input.files[0]) {
+         const reader = new FileReader();
+         reader.onload = function(e) {
+             document.getElementById('image-preview-img').src = e.target.result;
+             document.getElementById('image-preview').classList.remove('hidden');
+         };
+         reader.readAsDataURL(input.files[0]);
+     }
+ }
+
+ // Remove image preview
+ function removeImagePreview() {
+     document.getElementById('image-preview').classList.add('hidden');
+     document.getElementById('image').value = '';
+ }
+
+ // Drag and Drop Functions for Image Upload
+ function handleImageDragOver(e) {
+     e.preventDefault();
+     e.stopPropagation();
+ }
+
+ function handleImageDragEnter(e) {
+     e.preventDefault();
+     e.stopPropagation();
+     document.getElementById('image-upload-area').classList.add('border-emerald-500', 'bg-emerald-50');
+ }
+
+ function handleImageDragLeave(e) {
+     e.preventDefault();
+     e.stopPropagation();
+     document.getElementById('image-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+ }
+
+ function handleImageDrop(e) {
+     e.preventDefault();
+     e.stopPropagation();
+     document.getElementById('image-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+     
+     const files = e.dataTransfer.files;
+     if (files.length > 0) {
+         const file = files[0];
+         if (file.type.startsWith('image/')) {
+             // Validate file size (10MB max)
+             if (file.size > 10 * 1024 * 1024) {
+                 Swal.fire({
+                     icon: 'error',
+                     title: 'File Too Large',
+                     text: 'Image file size must not exceed 10MB.',
+                     confirmButtonColor: '#10b981'
+                 });
+                 return;
+             }
+             
+             // Create a new FileList with the dropped file
+             const dataTransfer = new DataTransfer();
+             dataTransfer.items.add(file);
+             document.getElementById('image').files = dataTransfer.files;
+             previewImage(document.getElementById('image'));
+         } else {
+             Swal.fire({
+                 icon: 'error',
+                 title: 'Invalid File Type',
+                 text: 'Please drop an image file (JPEG, PNG, JPG, GIF, WebP).',
+                 confirmButtonColor: '#10b981'
+             });
+         }
+     }
+ }
+
+ // Paste functionality for image upload
+ document.addEventListener('paste', function(e) {
+     // Check if the paste event is happening in the image upload area
+     const activeElement = document.activeElement;
+     const isInImageArea = activeElement && (
+         activeElement.id === 'image-upload-area' ||
+         activeElement.closest('#image-upload-area')
+     );
+     
+     if (isInImageArea && e.clipboardData && e.clipboardData.items) {
+         const items = e.clipboardData.items;
+         for (let i = 0; i < items.length; i++) {
+             const item = items[i];
+             if (item.type.indexOf('image') !== -1) {
+                 e.preventDefault();
+                 const file = item.getAsFile();
+                 if (file) {
+                     // Validate file size (10MB max)
+                     if (file.size > 10 * 1024 * 1024) {
+                         Swal.fire({
+                             icon: 'error',
+                             title: 'File Too Large',
+                             text: 'Image file size must not exceed 10MB.',
+                             confirmButtonColor: '#10b981'
+                         });
+                         return;
+                     }
+                     
+                     // Create a new FileList with the pasted file
+                     const dataTransfer = new DataTransfer();
+                     dataTransfer.items.add(file);
+                     document.getElementById('image').files = dataTransfer.files;
+                     previewImage(document.getElementById('image'));
+                     
+                     // Show success message
+                     Swal.fire({
+                         icon: 'success',
+                         title: 'Image Pasted',
+                         text: 'Image has been pasted successfully.',
+                         confirmButtonColor: '#10b981',
+                         timer: 2000,
+                         showConfirmButton: false
+                     });
+                 }
+                 break;
+             }
+         }
+     }
+ });
+
+ // Upload Confirmation Function
+ function showUploadConfirmation() {
+     // Validate required fields
+     const imageInput = document.getElementById('image');
+     const serviceType = document.querySelector('input[name="service_type"]').value;
+     
+     if (!imageInput.files || imageInput.files.length === 0) {
+         Swal.fire({
+             icon: 'warning',
+             title: 'No Image Selected',
+             text: 'Please select an image to upload.',
+             confirmButtonColor: '#10b981'
+         });
+         return;
+     }
+     
+     // Validate file size (10MB max)
+     const file = imageInput.files[0];
+     if (file.size > 10 * 1024 * 1024) {
+         Swal.fire({
+             icon: 'error',
+             title: 'File Too Large',
+             text: 'Image file size must not exceed 10MB.',
+             confirmButtonColor: '#10b981'
+         });
+         return;
+     }
+     
+     // Validate file type
+     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+     if (!allowedTypes.includes(file.type)) {
+         Swal.fire({
+             icon: 'error',
+             title: 'Invalid File Type',
+             text: 'Please select a valid image file (JPEG, PNG, JPG, GIF, WebP).',
+             confirmButtonColor: '#10b981'
+         });
+         return;
+     }
+     
+     // Show confirmation modal
+     Swal.fire({
+         title: 'Confirm Image Upload',
+         html: `
+             <div class="text-left">
+                 <p class="mb-2"><strong>File:</strong> ${file.name}</p>
+                 <p class="mb-2"><strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                 <p class="mb-2"><strong>Type:</strong> ${file.type}</p>
+                 <p class="mb-2"><strong>Service:</strong> ${serviceType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+                 <p class="text-sm text-gray-600 mt-3">Are you sure you want to upload this image to the gallery?</p>
+             </div>
+         `,
+         icon: 'question',
+         showCancelButton: true,
+         confirmButtonColor: '#10b981',
+         cancelButtonColor: '#6b7280',
+         confirmButtonText: 'Yes, Upload Image',
+         cancelButtonText: 'Cancel',
+         reverseButtons: true
+     }).then((result) => {
+         if (result.isConfirmed) {
+             // Submit the form
+             document.querySelector('form[action*="/gallery/store"]').submit();
+         }
+     });
+ }
 
  // Delete Modal Functions
  function showDeleteModal(imageId, imageName) {

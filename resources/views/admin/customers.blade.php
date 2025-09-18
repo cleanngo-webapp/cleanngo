@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-extrabold text-center">Customers</h1>
+    <h1 class="text-3xl font-extrabold text-center">Manage Customers</h1>
 
     {{-- Search and Sort Section --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">

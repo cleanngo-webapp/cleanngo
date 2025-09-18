@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title','Bookings and Scheduling')
+@section('title','Bookings')
 
 @push('head')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -8,7 +8,7 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-2xl font-bold text-center">Bookings and Scheduling</h1>
+    <h1 class="text-3xl font-bold text-center">Manage Bookings</h1>
 
     {{-- Stats Cards Section --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
