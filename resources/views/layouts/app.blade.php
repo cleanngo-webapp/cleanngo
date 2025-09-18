@@ -29,6 +29,10 @@
                 <a href="{{ route('customer.notifications') }}" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
                     <i class="ri-notification-3-line"></i>
                 </a>
+
+                <a href="{{ route('customer.settings') }}" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
+                    <i class="ri-settings-3-line"></i>
+                </a>
     
                 <form method="POST" action="{{ route('logout') }}" class="ml-2">
                     @csrf  

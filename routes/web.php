@@ -28,6 +28,7 @@ use App\Http\Controllers\CustomerAddressController;
 use App\Http\Controllers\CustomerHomeController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerGalleryController;
+use App\Http\Controllers\CustomerSettingsController;
 use App\Http\Controllers\ServiceCommentController;
 use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\EmployeeSettingsController;
@@ -87,6 +88,9 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer/gallery/{serviceType}', [CustomerGalleryController::class, 'showService'])->name('customer.gallery.service');
     Route::view('/customer/services', 'customer.services')->name('customer.services');
     Route::view('/customer/notifications', 'customer.notifications')->name('customer.notifications');
+    Route::get('/customer/settings', [CustomerSettingsController::class, 'index'])->name('customer.settings');
+    Route::put('/customer/settings/password', [CustomerSettingsController::class, 'updatePassword'])->name('customer.settings.password.update');
+    Route::put('/customer/settings/profile', [CustomerSettingsController::class, 'updateProfile'])->name('customer.settings.profile.update');
     Route::post('/customer/bookings', [CustomerBookingController::class, 'create'])->name('customer.bookings.create');
     Route::post('/customer/bookings/{bookingId}/cancel', [CustomerBookingController::class, 'cancel'])->name('customer.bookings.cancel');
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');

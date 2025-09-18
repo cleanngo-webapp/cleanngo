@@ -43,7 +43,7 @@
 				<input type="email" name="email" value="{{ old('email') }}" class="mt-1 w-full border border-gray-200 rounded px-3 py-2" placeholder="Enter your email" required />
 			</div>
 			<div>
-				<label class="block text-sm font-medium">Contact</label>
+				<label class="block text-sm font-medium">Contact Number</label>
 				<input type="text" name="contact" value="{{ old('contact') }}" class="mt-1 w-full border border-gray-200 rounded px-3 py-2" placeholder="Enter your contact number" />
 			</div>
 			<div>
