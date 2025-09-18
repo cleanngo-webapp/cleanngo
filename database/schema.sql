@@ -187,47 +187,23 @@ CREATE TABLE IF NOT EXISTS employee_time_off (
 
 -- INVENTORY
 CREATE TABLE IF NOT EXISTS inventory_items (
-  id           INTEGER PRIMARY KEY,
-  sku          TEXT UNIQUE,
-  name         TEXT NOT NULL,
-  unit         TEXT NOT NULL,
-  min_stock    REAL NOT NULL DEFAULT 0 CHECK (min_stock >= 0),
-  is_active    INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0,1)),
-  notes        TEXT
+  id            INTEGER PRIMARY KEY,
+  item_code     TEXT UNIQUE NOT NULL,
+  name          TEXT NOT NULL,
+  category      TEXT NOT NULL CHECK (category IN ('Tools', 'Machine', 'Cleaning Agent', 'Consumables')),
+  quantity      REAL NOT NULL DEFAULT 0 CHECK (quantity >= 0),
+  unit_price    REAL NOT NULL DEFAULT 0 CHECK (unit_price >= 0),
+  reorder_level REAL NOT NULL DEFAULT 0 CHECK (reorder_level >= 0),
+  status        TEXT NOT NULL DEFAULT 'In Stock' CHECK (status IN ('In Stock', 'Low Stock', 'Out of Stock')),
+  is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0,1)),
+  notes         TEXT,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS inventory_transactions (
-  id               INTEGER PRIMARY KEY,
-  item_id          INTEGER NOT NULL REFERENCES inventory_items(id) ON DELETE CASCADE,
-  booking_id       INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
-  employee_id      INTEGER REFERENCES employees(id) ON DELETE SET NULL,
-  type             TEXT NOT NULL CHECK (type IN ('purchase','adjustment_in','adjustment_out','usage')),
-  quantity         REAL NOT NULL CHECK (quantity > 0),
-  unit_cost_cents  INTEGER,
-  reason           TEXT,
-  created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+-- inventory_transactions table removed - now using simplified inventory_items table with direct quantity tracking
 
-CREATE INDEX IF NOT EXISTS idx_inv_tx_item ON inventory_transactions(item_id, created_at);
-CREATE INDEX IF NOT EXISTS idx_inv_tx_booking ON inventory_transactions(booking_id);
-
-CREATE VIEW IF NOT EXISTS inventory_stock_levels AS
-SELECT
-  ii.id          AS item_id,
-  ii.sku,
-  ii.name,
-  COALESCE(SUM(
-    CASE itt.type
-      WHEN 'purchase'       THEN itt.quantity
-      WHEN 'adjustment_in'  THEN itt.quantity
-      WHEN 'adjustment_out' THEN -itt.quantity
-      WHEN 'usage'          THEN -itt.quantity
-      ELSE 0
-    END
-  ), 0) AS qty_on_hand
-FROM inventory_items ii
-LEFT JOIN inventory_transactions itt ON itt.item_id = ii.id
-GROUP BY ii.id, ii.sku, ii.name;
+-- Old inventory_stock_levels view removed - now using direct inventory_items table with automatic status calculation
 
 -- PAYROLL (BASIC)
 CREATE TABLE IF NOT EXISTS payroll_periods (

@@ -51,12 +51,11 @@ class AdminDashboardController extends Controller
             ->whereDate('completed_at', $today)
             ->count();
         
-        // Get low stock items using the inventory stock levels view
-        // This view calculates current stock based on transactions
-        $lowStockItems = DB::table('inventory_stock_levels')
-            ->join('inventory_items', 'inventory_stock_levels.item_id', '=', 'inventory_items.id')
-            ->whereRaw('inventory_stock_levels.qty_on_hand <= inventory_items.min_stock')
-            ->where('inventory_items.is_active', true)
+        // Get low stock items using the new inventory system
+        // Status is automatically calculated based on quantity vs reorder level
+        $lowStockItems = DB::table('inventory_items')
+            ->where('status', 'Low Stock')
+            ->where('is_active', true)
             ->count();
         
         // Get recent bookings for display

@@ -34,6 +34,7 @@ use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\EmployeeSettingsController;
 use App\Http\Controllers\AdminPayrollController;
 use App\Http\Controllers\EmployeePayrollController;
+use App\Http\Controllers\Admin\InventoryController;
 
 Route::redirect('/', '/login');
 
@@ -139,7 +140,12 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::put('/employee/{userId}', [AdminEmployeeController::class, 'update'])->name('employee.update');
     Route::post('/employee/{employeeId}/increment-jobs', [AdminEmployeeController::class, 'incrementJobsCompleted'])->name('employee.increment-jobs');
     Route::post('/employees/update-job-counts', [AdminEmployeeController::class, 'updateAllJobCounts'])->name('employees.update-job-counts');
-    Route::view('/inventory', 'admin.inventory')->name('inventory');
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
+    Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::get('/inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');
+    Route::put('/inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update');
+    Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    Route::get('/inventory-stats', [InventoryController::class, 'getStats'])->name('inventory.stats');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers');
     Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('gallery');
     Route::get('/gallery/{serviceType}', [AdminGalleryController::class, 'showService'])->name('gallery.service');

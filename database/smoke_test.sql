@@ -26,7 +26,7 @@ INSERT INTO inventory_transactions (item_id, booking_id, employee_id, type, quan
 SELECT * FROM users;
 
 -- Show quick results
-SELECT * FROM inventory_stock_levels;
+SELECT * FROM inventory_items;
 SELECT * FROM employee_job_stats;
 SELECT * FROM booking_counts_by_day;
 

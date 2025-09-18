@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 $db = new PDO('sqlite:' . __DIR__ . '/database.sqlite');
 
-echo "inventory_stock_levels:\n";
-$stmt = $db->query('SELECT sku, name, qty_on_hand FROM inventory_stock_levels');
+echo "inventory_items:\n";
+$stmt = $db->query('SELECT item_code, name, quantity, status FROM inventory_items');
 foreach ($stmt as $row) {
-	echo $row['sku'] . ' ' . $row['name'] . ' -> ' . $row['qty_on_hand'] . PHP_EOL;
+	echo $row['item_code'] . ' ' . $row['name'] . ' -> ' . $row['quantity'] . ' (' . $row['status'] . ')' . PHP_EOL;
 }
 
 echo "\nemployee_job_stats:\n";
