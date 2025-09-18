@@ -23,11 +23,11 @@ class CustomerServiceCommentController extends Controller
         }
 
         // Get approved comments for this service with customer information
-        $allComments = ServiceComment::forService($serviceType)->with('customer')->get();
+        $allComments = ServiceComment::forService($serviceType)->with('customer.user')->get();
         $approvedComments = ServiceComment::forService($serviceType)
             ->approved()
             ->latest()
-            ->with('customer')
+            ->with('customer.user')
             ->get();
             
         // Debug: Log comment counts
@@ -41,11 +41,18 @@ class CustomerServiceCommentController extends Controller
         ]);
         
         $comments = $approvedComments->map(function ($comment) {
+            // Get the customer avatar URL if it exists
+            $customerAvatar = null;
+            if ($comment->customer && $comment->customer->user && $comment->customer->user->avatar) {
+                $customerAvatar = asset('storage/' . $comment->customer->user->avatar);
+            }
+            
             return [
                 'id' => $comment->id,
                 'comment' => $comment->comment,
                 'rating' => $comment->rating,
                 'customer_name' => $comment->customer_display_name,
+                'customer_avatar' => $customerAvatar,
                 'formatted_date' => $comment->formatted_date,
                 'is_edited' => $comment->is_edited,
                 'can_edit' => $this->canEditComment($comment),
@@ -152,7 +159,13 @@ class CustomerServiceCommentController extends Controller
             ]);
 
             // Load the customer relationship for the response
-            $comment->load('customer');
+            $comment->load('customer.user');
+
+            // Get the customer avatar URL if it exists
+            $customerAvatar = null;
+            if ($comment->customer && $comment->customer->user && $comment->customer->user->avatar) {
+                $customerAvatar = asset('storage/' . $comment->customer->user->avatar);
+            }
 
             return response()->json([
                 'success' => true,
@@ -162,6 +175,7 @@ class CustomerServiceCommentController extends Controller
                     'comment' => $comment->comment,
                     'rating' => $comment->rating,
                     'customer_name' => $comment->customer_display_name,
+                    'customer_avatar' => $customerAvatar,
                     'formatted_date' => $comment->formatted_date,
                     'is_edited' => $comment->is_edited,
                     'can_edit' => true,
@@ -227,7 +241,13 @@ class CustomerServiceCommentController extends Controller
             ]);
 
             // Load the customer relationship for the response
-            $comment->load('customer');
+            $comment->load('customer.user');
+
+            // Get the customer avatar URL if it exists
+            $customerAvatar = null;
+            if ($comment->customer && $comment->customer->user && $comment->customer->user->avatar) {
+                $customerAvatar = asset('storage/' . $comment->customer->user->avatar);
+            }
 
             return response()->json([
                 'success' => true,
@@ -237,6 +257,7 @@ class CustomerServiceCommentController extends Controller
                     'comment' => $comment->comment,
                     'rating' => $comment->rating,
                     'customer_name' => $comment->customer_display_name,
+                    'customer_avatar' => $customerAvatar,
                     'formatted_date' => $comment->formatted_date,
                     'is_edited' => $comment->is_edited,
                     'can_edit' => true,

@@ -275,11 +275,14 @@ function displayComments(comments) {
         <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
             <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                        <span class="text-emerald-600 font-semibold text-sm">
-                            ${comment.customer_name ? comment.customer_name.charAt(0).toUpperCase() : 'A'}
-                        </span>
-                    </div>
+                    ${comment.customer_avatar ? 
+                        `<img src="${comment.customer_avatar}" alt="${comment.customer_name || 'Anonymous'}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-200">` :
+                        `<div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                            <span class="text-emerald-600 font-semibold text-sm">
+                                ${comment.customer_name ? comment.customer_name.charAt(0).toUpperCase() : 'A'}
+                            </span>
+                        </div>`
+                    }
                     <div>
                         <div class="font-semibold text-gray-900">${comment.customer_name || 'Anonymous'}</div>
                         ${comment.rating ? `

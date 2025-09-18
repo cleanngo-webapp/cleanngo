@@ -368,9 +368,19 @@ function displayComments(comments) {
     commentsList.innerHTML = comments.map(comment => `
         <div class="border border-gray-200 rounded-lg p-4 fade-in-up">
             <div class="flex items-start justify-between mb-2">
-                <div class="flex items-center space-x-2">
-                    <span class="font-semibold text-gray-900">${comment.customer_name}</span>
-                    ${comment.rating ? `<div class="flex text-yellow-400">${'★'.repeat(comment.rating)}${'☆'.repeat(5-comment.rating)}</div>` : ''}
+                <div class="flex items-center space-x-3">
+                    ${comment.customer_avatar ? 
+                        `<img src="${comment.customer_avatar}" alt="${comment.customer_name}" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-200">` :
+                        `<div class="w-10 h-10 rounded-full bg-emerald-100 border-2 border-emerald-200 flex items-center justify-center">
+                            <span class="text-sm font-semibold text-emerald-600">
+                                ${comment.customer_name ? comment.customer_name.charAt(0).toUpperCase() : 'A'}
+                            </span>
+                        </div>`
+                    }
+                    <div class="flex flex-col">
+                        <span class="font-semibold text-gray-900">${comment.customer_name}</span>
+                        ${comment.rating ? `<div class="flex text-yellow-400 text-sm">${'★'.repeat(comment.rating)}${'☆'.repeat(5-comment.rating)}</div>` : ''}
+                    </div>
                 </div>
                 <div class="flex items-center space-x-2">
                     <span class="text-sm text-gray-500">${comment.formatted_date}</span>

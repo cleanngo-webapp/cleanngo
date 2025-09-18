@@ -92,6 +92,8 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer/settings', [CustomerSettingsController::class, 'index'])->name('customer.settings');
     Route::put('/customer/settings/password', [CustomerSettingsController::class, 'updatePassword'])->name('customer.settings.password.update');
     Route::put('/customer/settings/profile', [CustomerSettingsController::class, 'updateProfile'])->name('customer.settings.profile.update');
+    Route::post('/customer/settings/avatar', [CustomerSettingsController::class, 'updateAvatar'])->name('customer.settings.avatar.update');
+    Route::delete('/customer/settings/avatar', [CustomerSettingsController::class, 'removeAvatar'])->name('customer.settings.avatar.remove');
     Route::post('/customer/bookings', [CustomerBookingController::class, 'create'])->name('customer.bookings.create');
     Route::post('/customer/bookings/{bookingId}/cancel', [CustomerBookingController::class, 'cancel'])->name('customer.bookings.cancel');
     Route::post('/customer/addresses', [CustomerAddressController::class, 'store'])->name('customer.address.store');

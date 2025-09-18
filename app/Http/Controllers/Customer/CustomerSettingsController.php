@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class CustomerSettingsController extends Controller
@@ -104,6 +105,79 @@ class CustomerSettingsController extends Controller
             // Return error response if something goes wrong
             return redirect()->route('customer.settings')
                 ->with('error', 'An error occurred while updating your profile. Please try again.');
+        }
+    }
+
+    /**
+     * Update the customer's avatar
+     */
+    public function updateAvatar(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'avatar' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:10240'], // Max 10MB
+        ], [
+            'avatar.required' => 'Please select an image to upload.',
+            'avatar.image' => 'The file must be an image.',
+            'avatar.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
+            'avatar.max' => 'The image may not be greater than 10MB.',
+        ]);
+
+        try {
+            // Get the authenticated customer user
+            $user = Auth::guard('customer')->user();
+            
+            // Delete old avatar if it exists
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            
+            // Store the new avatar
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            
+            // Update the avatar path in the database
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update(['avatar' => $avatarPath]);
+
+            // Return success response
+            return redirect()->route('customer.settings')
+                ->with('success', 'Avatar updated successfully!');
+
+        } catch (\Exception $e) {
+            // Return error response if something goes wrong
+            return redirect()->route('customer.settings')
+                ->with('error', 'An error occurred while updating your avatar. Please try again.');
+        }
+    }
+
+    /**
+     * Remove the customer's avatar
+     */
+    public function removeAvatar()
+    {
+        try {
+            // Get the authenticated customer user
+            $user = Auth::guard('customer')->user();
+            
+            // Delete the avatar file if it exists
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            
+            // Remove the avatar path from the database
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update(['avatar' => null]);
+
+            // Return success response
+            return redirect()->route('customer.settings')
+                ->with('success', 'Avatar removed successfully!');
+
+        } catch (\Exception $e) {
+            // Return error response if something goes wrong
+            return redirect()->route('customer.settings')
+                ->with('error', 'An error occurred while removing your avatar. Please try again.');
         }
     }
 }

@@ -196,6 +196,12 @@ class AdminGalleryController extends Controller
                 ->latest()
                 ->get()
                 ->map(function ($comment) {
+                    // Get the customer avatar URL if it exists
+                    $customerAvatar = null;
+                    if ($comment->customer && $comment->customer->user && $comment->customer->user->avatar) {
+                        $customerAvatar = asset('storage/' . $comment->customer->user->avatar);
+                    }
+                    
                     return [
                         'id' => $comment->id,
                         'comment' => $comment->comment,
@@ -205,6 +211,7 @@ class AdminGalleryController extends Controller
                         'formatted_date' => $comment->formatted_date,
                         'service_display_name' => $comment->service_display_name,
                         'customer_name' => $comment->customer_display_name,
+                        'customer_avatar' => $customerAvatar,
                         'created_at' => $comment->created_at->toISOString(),
                         'updated_at' => $comment->updated_at->toISOString()
                     ];

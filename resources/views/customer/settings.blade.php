@@ -7,8 +7,91 @@
     <h1 class="text-3xl font-extrabold text-center mb-8">Settings</h1>
 
     <div class="bg-white rounded-xl p-8 shadow-lg">
-        <!-- Password Change Section -->
+        <!-- Avatar Section -->
         <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Profile Picture</h2>
+            
+            <div class="flex items-center space-x-6 mb-6">
+                <!-- Current Avatar Display -->
+                <div class="flex-shrink-0">
+                    @if(auth()->user()->avatar)
+                        <img src="{{ Storage::url(auth()->user()->avatar) }}" 
+                             alt="Profile Picture" 
+                             class="w-20 h-20 rounded-full object-cover border-4 border-emerald-200">
+                    @else
+                        <div class="w-20 h-20 rounded-full bg-emerald-100 border-4 border-emerald-200 flex items-center justify-center">
+                            <span class="text-2xl font-semibold text-emerald-600">
+                                {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
+                            </span>
+                        </div>
+                    @endif
+                </div>
+                
+                <!-- Avatar Upload Form -->
+                <div class="flex-1">
+                    <form method="POST" action="{{ route('customer.settings.avatar.update') }}" 
+                          enctype="multipart/form-data" class="space-y-4" id="avatarForm">
+                        @csrf
+                        
+                        <div>
+                            <label for="avatar" class="block text-sm font-medium text-gray-700 mb-2">
+                                Upload New Profile Picture
+                            </label>
+                            <div id="avatar-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-emerald-400 transition-colors cursor-pointer" 
+                                 onclick="document.getElementById('avatar').click()"
+                                 ondrop="handleAvatarDrop(event)" 
+                                 ondragover="handleAvatarDragOver(event)" 
+                                 ondragenter="handleAvatarDragEnter(event)" 
+                                 ondragleave="handleAvatarDragLeave(event)">
+                                <div class="space-y-1 text-center">
+                                    <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="avatar" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500">
+                                            <span>Upload Profile Picture</span>
+                                            <input id="avatar" name="avatar" type="file" class="sr-only" accept="image/*" onchange="previewAvatar(this)">
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">JPEG, PNG, JPG, GIF up to 10MB</p>
+                                </div>
+                            </div>
+                            <div id="avatar-preview" class="mt-3 hidden">
+                                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <img id="avatar-preview-img" src="" alt="Preview" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-200">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-900">Selected Image</p>
+                                        <p class="text-xs text-gray-500">Ready to upload</p>
+                                    </div>
+                                    <button type="button" onclick="removeAvatarPreview()" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors">
+                                        <i class="ri-close-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button type="submit" 
+                                    id="uploadAvatarBtn"
+                                    disabled
+                                    class="bg-gray-400 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium cursor-not-allowed">
+                                Update Profile Picture
+                            </button>
+                            
+                            @if(auth()->user()->avatar)
+                                <button type="button" 
+                                        onclick="removeAvatar()"
+                                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors font-medium cursor-pointer">
+                                    Remove Picture
+                                </button>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Change Section -->
+        <div class="border-t pt-8">
             <h2 class="text-2xl font-semibold mb-6 text-gray-800">Change Password</h2>
             
             @if(session('success'))
@@ -418,5 +501,150 @@ document.getElementById('email').addEventListener('input', checkForChanges);
 document.getElementById('first_name').addEventListener('input', checkForChanges);
 document.getElementById('last_name').addEventListener('input', checkForChanges);
 document.getElementById('phone').addEventListener('input', checkForChanges);
+
+// Paste functionality for avatar upload
+document.addEventListener('paste', function(e) {
+    const activeElement = document.activeElement;
+    const isInAvatarArea = activeElement && (
+        activeElement.id === 'avatar-upload-area' ||
+        activeElement.closest('#avatar-upload-area')
+    );
+    
+    if (isInAvatarArea && e.clipboardData && e.clipboardData.items) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const file = item.getAsFile();
+                if (file) {
+                    // Create a new FileList with the pasted file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById('avatar').files = dataTransfer.files;
+                    previewAvatar(document.getElementById('avatar'));
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Image Pasted',
+                        text: 'Profile picture has been pasted successfully.',
+                        confirmButtonColor: '#10b981',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+                break;
+            }
+        }
+    }
+});
+
+// Avatar Upload Functions
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatar-preview-img').src = e.target.result;
+            document.getElementById('avatar-preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+        
+        // Enable upload button
+        enableUploadButton();
+    }
+}
+
+// Remove avatar preview
+function removeAvatarPreview() {
+    document.getElementById('avatar-preview').classList.add('hidden');
+    document.getElementById('avatar').value = '';
+    disableUploadButton();
+}
+
+// Enable upload button
+function enableUploadButton() {
+    const uploadBtn = document.getElementById('uploadAvatarBtn');
+    uploadBtn.disabled = false;
+    uploadBtn.className = 'bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors font-medium cursor-pointer';
+}
+
+// Disable upload button
+function disableUploadButton() {
+    const uploadBtn = document.getElementById('uploadAvatarBtn');
+    uploadBtn.disabled = true;
+    uploadBtn.className = 'bg-gray-400 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium cursor-not-allowed';
+}
+
+// Drag and Drop Functions for Avatar
+function handleAvatarDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function handleAvatarDragEnter(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('avatar-upload-area').classList.add('border-emerald-500', 'bg-emerald-50');
+}
+
+function handleAvatarDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('avatar-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+}
+
+function handleAvatarDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('avatar-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+            // Create a new FileList with the dropped file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            document.getElementById('avatar').files = dataTransfer.files;
+            previewAvatar(document.getElementById('avatar'));
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Please drop an image file (JPEG, PNG, JPG, GIF).',
+                confirmButtonColor: '#10b981'
+            });
+        }
+    }
+}
+
+// Remove avatar function
+function removeAvatar() {
+    if (confirm('Are you sure you want to remove your profile picture?')) {
+        // Create a form to submit DELETE request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("customer.settings.avatar.remove") }}';
+        
+        // Add CSRF token
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        form.appendChild(csrfToken);
+        
+        // Add method override for DELETE
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        form.appendChild(methodField);
+        
+        // Submit the form
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 @endsection
