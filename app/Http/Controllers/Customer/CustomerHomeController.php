@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 
 class CustomerHomeController extends Controller
 {

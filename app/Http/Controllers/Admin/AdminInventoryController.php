@@ -7,7 +7,7 @@ use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class InventoryController extends Controller
+class AdminInventoryController extends Controller
 {
     /**
      * Display the inventory management page
