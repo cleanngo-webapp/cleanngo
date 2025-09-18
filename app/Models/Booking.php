@@ -41,20 +41,9 @@ class Booking extends Model
         return $this->belongsTo(Service::class);
     }
 
-    public function addons()
-    {
-        return $this->belongsToMany(ServiceAddon::class, 'booking_addons', 'booking_id', 'addon_id')
-            ->withPivot(['quantity', 'unit_price_cents']);
-    }
-
     public function staffAssignments()
     {
         return $this->hasMany(BookingStaffAssignment::class);
-    }
-
-    public function rating()
-    {
-        return $this->hasOne(BookingRating::class);
     }
 }
 

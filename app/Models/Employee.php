@@ -31,16 +31,6 @@ class Employee extends Model
         return $this->hasMany(BookingStaffAssignment::class);
     }
 
-    public function availability()
-    {
-        return $this->hasMany(EmployeeAvailability::class);
-    }
-
-    public function timeOff()
-    {
-        return $this->hasMany(EmployeeTimeOff::class);
-    }
-
     /**
      * Get the count of completed jobs for this employee
      * This counts bookings where the employee was assigned and the booking is completed
