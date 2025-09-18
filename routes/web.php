@@ -29,7 +29,7 @@ use App\Http\Controllers\Customer\CustomerHomeController;
 use App\Http\Controllers\Customer\CustomerBookingController;
 use App\Http\Controllers\Customer\CustomerGalleryController;
 use App\Http\Controllers\Customer\CustomerSettingsController;
-use App\Http\Controllers\ServiceCommentController;
+use App\Http\Controllers\Customer\CustomerServiceCommentController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Employee\EmployeeSettingsController;
 use App\Http\Controllers\Admin\AdminPayrollController;
@@ -99,10 +99,10 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::post('/customer/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])->name('customer.address.primary');
     
     // Service Comments routes
-    Route::get('/service-comments/{serviceType}', [ServiceCommentController::class, 'getComments'])->name('service.comments.get');
-    Route::post('/service-comments', [ServiceCommentController::class, 'store'])->name('service.comments.store');
-    Route::put('/service-comments/{id}', [ServiceCommentController::class, 'update'])->name('service.comments.update');
-    Route::delete('/service-comments/{id}', [ServiceCommentController::class, 'destroy'])->name('service.comments.destroy');
+    Route::get('/service-comments/{serviceType}', [CustomerServiceCommentController::class, 'getComments'])->name('service.comments.get');
+    Route::post('/service-comments', [CustomerServiceCommentController::class, 'store'])->name('service.comments.store');
+    Route::put('/service-comments/{id}', [CustomerServiceCommentController::class, 'update'])->name('service.comments.update');
+    Route::delete('/service-comments/{id}', [CustomerServiceCommentController::class, 'destroy'])->name('service.comments.destroy');
     
     // Debug route to check comments
     Route::get('/debug-comments', function() {

@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
+use App\Http\Controllers\Controller;
 use App\Models\ServiceComment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
-class ServiceCommentController extends Controller
+class CustomerServiceCommentController extends Controller
 {
     /**
      * Get comments for a specific service type
@@ -29,7 +31,7 @@ class ServiceCommentController extends Controller
             ->get();
             
         // Debug: Log comment counts
-        \Log::info('Comments debug', [
+        Log::info('Comments debug', [
             'service_type' => $serviceType,
             'all_comments_count' => $allComments->count(),
             'approved_comments_count' => $approvedComments->count(),
@@ -64,7 +66,7 @@ class ServiceCommentController extends Controller
     public function store(Request $request)
     {
         // Debug: Log the incoming request
-        \Log::info('Comment store request received', [
+        Log::info('Comment store request received', [
             'all_data' => $request->all(),
             'headers' => $request->headers->all(),
             'method' => $request->method(),
@@ -79,7 +81,7 @@ class ServiceCommentController extends Controller
                 'rating' => 'nullable|integer|min:1|max:5'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed', [
+            Log::error('Validation failed', [
                 'errors' => $e->errors(),
                 'request_data' => $request->all()
             ]);
@@ -98,7 +100,7 @@ class ServiceCommentController extends Controller
         }
         
         // Debug: Log authentication status
-        \Log::info('User authentication check', [
+        Log::info('User authentication check', [
             'customer_guard' => Auth::guard('customer')->user() ? Auth::guard('customer')->user()->id : 'null',
             'default_auth' => Auth::user() ? Auth::user()->id : 'null',
             'final_user' => $user ? $user->id : 'null'
@@ -111,7 +113,7 @@ class ServiceCommentController extends Controller
         // Get the customer profile for this user
         $customer = $user->customer;
         
-        \Log::info('Customer profile check', [
+        Log::info('Customer profile check', [
             'user_id' => $user->id,
             'customer_exists' => $customer ? 'yes' : 'no',
             'customer_id' => $customer ? $customer->id : 'null'
@@ -123,7 +125,7 @@ class ServiceCommentController extends Controller
 
         try {
             // Debug: Log before creating comment
-            \Log::info('About to create comment', [
+            Log::info('About to create comment', [
                 'service_type' => $request->service_type,
                 'customer_id' => $customer->id,
                 'comment_length' => strlen($request->comment),
@@ -141,7 +143,7 @@ class ServiceCommentController extends Controller
             ]);
 
             // Debug: Log the created comment
-            \Log::info('Comment created successfully', [
+            Log::info('Comment created successfully', [
                 'comment_id' => $comment->id,
                 'service_type' => $comment->service_type,
                 'customer_id' => $comment->customer_id,
@@ -169,7 +171,7 @@ class ServiceCommentController extends Controller
 
         } catch (\Exception $e) {
             // Debug: Log the exception details
-            \Log::error('Comment creation failed', [
+            Log::error('Comment creation failed', [
                 'error_message' => $e->getMessage(),
                 'error_file' => $e->getFile(),
                 'error_line' => $e->getLine(),
