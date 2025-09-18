@@ -192,7 +192,7 @@
         </div>
 
         <!-- Profile Information Section -->
-        <div class="border-t pt-8">
+        <div class="border-t mt-5 pt-8">
             <h2 class="text-2xl font-semibold mb-6 text-gray-800">Profile Information</h2>
             
             <form method="POST" action="{{ route('customer.settings.profile.update') }}" class="space-y-6" id="profileForm">

@@ -180,15 +180,7 @@
 
             {{-- Comments List --}}
             <div id="commentsList" class="space-y-4">
-                {{-- Loading Animation --}}
-                <div class="text-center py-8">
-                    <div class="flex justify-center items-center space-x-2 mb-4">
-                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
-                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
-                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
-                    </div>
-                    <p class="text-gray-500 text-sm">Loading comments...</p>
-                </div>
+                {{-- Preloader will be shown here while loading --}}
             </div>
         </div>
     </div>
@@ -274,6 +266,36 @@
     </div>
 </div>
 
+{{-- Preloader Template --}}
+<div id="preloaderTemplate" class="hidden">
+    <div class="space-y-4">
+        <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+            <div class="w-10 h-10 bg-gray-200 rounded-full loading-dots"></div>
+            <div class="flex-1 space-y-2">
+                <div class="h-4 bg-gray-200 rounded loading-dots w-1/4"></div>
+                <div class="h-3 bg-gray-200 rounded loading-dots w-1/2"></div>
+                <div class="h-3 bg-gray-200 rounded loading-dots w-3/4"></div>
+            </div>
+        </div>
+        <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+            <div class="w-10 h-10 bg-gray-200 rounded-full loading-dots"></div>
+            <div class="flex-1 space-y-2">
+                <div class="h-4 bg-gray-200 rounded loading-dots w-1/3"></div>
+                <div class="h-3 bg-gray-200 rounded loading-dots w-2/3"></div>
+                <div class="h-3 bg-gray-200 rounded loading-dots w-1/2"></div>
+            </div>
+        </div>
+        <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+            <div class="w-10 h-10 bg-gray-200 rounded-full loading-dots"></div>
+            <div class="flex-1 space-y-2">
+                <div class="h-4 bg-gray-200 rounded loading-dots w-1/4"></div>
+                <div class="h-3 bg-gray-200 rounded loading-dots w-3/4"></div>
+                <div class="h-3 bg-gray-200 rounded loading-dots w-1/2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let currentServiceType = null;
 let currentServiceName = null;
@@ -292,7 +314,8 @@ function showCommentsModal(serviceType, serviceName) {
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     
-    // Load comments
+    // Show preloader and load comments
+    showPreloader();
     loadComments(serviceType);
 }
 
@@ -306,6 +329,20 @@ function closeCommentsModal() {
     // Reset form
     document.getElementById('commentForm').reset();
     resetRating();
+}
+
+// Show preloader animation
+function showPreloader() {
+    const commentsList = document.getElementById('commentsList');
+    const preloaderTemplate = document.getElementById('preloaderTemplate');
+    
+    // Clone the preloader template and show it
+    const preloaderClone = preloaderTemplate.cloneNode(true);
+    preloaderClone.classList.remove('hidden');
+    preloaderClone.id = 'activePreloader';
+    
+    commentsList.innerHTML = '';
+    commentsList.appendChild(preloaderClone);
 }
 
 // Load comments for a service
