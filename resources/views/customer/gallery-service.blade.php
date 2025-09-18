@@ -33,7 +33,7 @@
         </div>
     @else
         <div class="text-center py-16">
-            <div class="text-gray-400 text-8xl mb-6">📷</div>
+            <div class="text-gray-400 text-8xl mb-6"><i class="ri-image-2-line"></i></div>
             <h3 class="text-2xl font-semibold text-gray-900 mb-4">No Images Yet</h3>
             <p class="text-gray-600 max-w-md mx-auto">
                 We're working on adding photos for this service. Check back soon!

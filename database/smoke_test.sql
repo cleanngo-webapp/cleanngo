@@ -22,6 +22,13 @@ INSERT INTO inventory_items (sku, name, unit) VALUES ('SOAP-1L','All-purpose Soa
 INSERT INTO inventory_transactions (item_id, type, quantity) VALUES (1,'purchase',10);
 INSERT INTO inventory_transactions (item_id, booking_id, employee_id, type, quantity) VALUES (1,1,1,'usage',2);
 
+-- Add some test service comments for admin gallery testing
+INSERT INTO service_comments (service_type, customer_id, comment, rating, is_approved, is_edited, created_at, updated_at)
+VALUES 
+('carpet', 1, 'Excellent carpet cleaning service! The team was very professional and thorough.', 5, true, false, datetime('now', '-2 days'), datetime('now', '-2 days')),
+('sofa', 1, 'My sofa looks brand new after the deep cleaning. Highly recommended!', 5, true, false, datetime('now', '-1 day'), datetime('now', '-1 day')),
+('glass', 1, 'Great glass cleaning service. Very satisfied with the results.', 4, true, false, datetime('now', '-3 hours'), datetime('now', '-3 hours')),
+('carpet', 1, 'Good service but took longer than expected.', 3, false, false, datetime('now', '-1 hour'), datetime('now', '-1 hour'));
 
 SELECT * FROM users;
 

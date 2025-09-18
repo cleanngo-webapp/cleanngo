@@ -183,7 +183,7 @@
             </div>
         @else
             <div class="text-center py-8">
-                <div class="text-gray-400 text-6xl mb-4">📷</div>
+                <div class="text-gray-400 text-6xl mb-4"><i class="ri-image-2-line"></i></div>
                 <h3 class="text-lg font-medium text-gray-900 mb-2">No images yet</h3>
                 <p class="text-gray-500">Upload your first image using the form above.</p>
             </div>

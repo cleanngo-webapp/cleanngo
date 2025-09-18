@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\GalleryImage;
+use App\Models\ServiceComment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -173,6 +174,82 @@ class AdminGalleryController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to delete image: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get comments for a specific service type (Admin view)
+     * This allows admin to view all comments for a service, including pending ones
+     */
+    public function getServiceComments($serviceType)
+    {
+        // Validate service type
+        $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa'];
+        if (!in_array($serviceType, $validServices)) {
+            return response()->json(['error' => 'Invalid service type'], 400);
+        }
+
+        try {
+            // Get all comments for this service (including pending ones for admin)
+            $comments = ServiceComment::forService($serviceType)
+                ->with('customer.user') // Load customer and user relationships
+                ->latest()
+                ->get()
+                ->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'comment' => $comment->comment,
+                        'rating' => $comment->rating,
+                        'is_approved' => $comment->is_approved,
+                        'is_edited' => $comment->is_edited,
+                        'formatted_date' => $comment->formatted_date,
+                        'service_display_name' => $comment->service_display_name,
+                        'customer_name' => $comment->customer_display_name,
+                        'created_at' => $comment->created_at->toISOString(),
+                        'updated_at' => $comment->updated_at->toISOString()
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'comments' => $comments,
+                'total' => $comments->count()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to load comments: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a service comment (Admin only)
+     * This allows admin to remove inappropriate or unwanted comments
+     */
+    public function deleteServiceComment($id)
+    {
+        try {
+            // Find the comment
+            $comment = ServiceComment::findOrFail($id);
+            
+            // Delete the comment
+            $comment->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment deleted successfully'
+            ]);
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Comment not found'
+            ], 404);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to delete comment: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

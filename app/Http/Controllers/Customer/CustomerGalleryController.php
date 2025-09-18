@@ -54,9 +54,11 @@ class CustomerGalleryController extends Controller
             ]
         ];
 
-        // Get all active images grouped by service type
+        // Get image counts for each service and all active images grouped by service type
         $galleryImages = [];
-        foreach ($services as $service) {
+        foreach ($services as &$service) {
+            $service['image_count'] = GalleryImage::forService($service['type'])->active()->count();
+            
             $images = GalleryImage::forService($service['type'])
                 ->active()
                 ->ordered()

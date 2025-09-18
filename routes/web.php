@@ -152,6 +152,8 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('gallery.store');
     Route::put('/gallery/{id}', [AdminGalleryController::class, 'update'])->name('gallery.update');
     Route::delete('/gallery/{id}', [AdminGalleryController::class, 'destroy'])->name('gallery.destroy');
+    Route::get('/service-comments/{serviceType}', [AdminGalleryController::class, 'getServiceComments'])->name('service.comments.admin');
+    Route::delete('/service-comments/{id}', [AdminGalleryController::class, 'deleteServiceComment'])->name('service.comments.delete');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
     Route::put('/settings/password', [AdminSettingsController::class, 'updatePassword'])->name('settings.password.update');
     Route::put('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
