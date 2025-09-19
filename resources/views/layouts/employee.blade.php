@@ -18,7 +18,7 @@
                 <button onclick="toggleNotificationDropdown()" class="relative hover:text-emerald-700 cursor-pointer transition-colors">
                     <i class="ri-notification-3-line text-2xl"></i>
                     @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
-                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                        <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                             {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
                         </span>
                     @endif
@@ -85,10 +85,8 @@
             if (notificationDropdownOpen) {
                 closeNotificationDropdown();
             } else {
-                // Load notifications if not already loaded
-                if (!notificationsLoaded) {
-                    loadNotificationDropdown();
-                }
+                // Always load fresh notifications when opening dropdown
+                loadNotificationDropdown();
                 
                 dropdown.classList.remove('hidden');
                 notificationDropdownOpen = true;
@@ -213,10 +211,127 @@
                     notification_id: notificationId
                 })
             }).then(() => {
+                // Update notification count immediately
+                updateNotificationCount();
                 // Redirect to notifications page
                 window.location.href = '/employee/notifications';
             });
         }
+
+        // Real-time notification polling system
+        let notificationPollingInterval;
+        let lastNotificationCount = {{ $unreadNotificationCount ?? 0 }};
+
+        function startNotificationPolling() {
+            // Poll every 5 seconds for new notifications
+            notificationPollingInterval = setInterval(() => {
+                checkForNewNotifications();
+            }, 5000); // 5 seconds
+        }
+
+        function stopNotificationPolling() {
+            if (notificationPollingInterval) {
+                clearInterval(notificationPollingInterval);
+                notificationPollingInterval = null;
+            }
+        }
+
+        function checkForNewNotifications() {
+            fetch('/employee/notifications/unread-count')
+                .then(response => response.json())
+                .then(data => {
+                    const currentCount = data.unread_count || 0;
+                    
+                    // If count has changed, update the badge
+                    if (currentCount !== lastNotificationCount) {
+                        updateNotificationBadge(currentCount);
+                        lastNotificationCount = currentCount;
+                        
+                        // If count increased, show a subtle notification
+                        if (currentCount > lastNotificationCount) {
+                            showNewNotificationAlert(currentCount - lastNotificationCount);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking notification count:', error);
+                });
+        }
+
+        function updateNotificationBadge(count) {
+            const badge = document.querySelector('.notification-badge');
+            
+            if (count > 0) {
+                if (badge) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    // Create badge if it doesn't exist
+                    const button = document.querySelector('button[onclick="toggleNotificationDropdown()"]');
+                    if (button) {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium';
+                        newBadge.textContent = count > 99 ? '99+' : count;
+                        button.appendChild(newBadge);
+                    }
+                }
+            } else {
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        function showNewNotificationAlert(newCount) {
+            // Create a subtle notification alert
+            const alert = document.createElement('div');
+            alert.className = 'fixed top-20 right-4 bg-emerald-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300';
+            alert.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="ri-notification-3-line"></i>
+                    <span>${newCount} new notification${newCount > 1 ? 's' : ''}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.parentNode.removeChild(alert);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function updateNotificationCount() {
+            // Refresh the notification count immediately
+            checkForNewNotifications();
+        }
+
+        // Start polling when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            startNotificationPolling();
+        });
+
+        // Stop polling when page is hidden (tab switch, etc.)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopNotificationPolling();
+            } else {
+                startNotificationPolling();
+                // Check immediately when tab becomes visible again
+                checkForNewNotifications();
+            }
+        });
+
+        // Stop polling when page is about to unload
+        window.addEventListener('beforeunload', function() {
+            stopNotificationPolling();
+        });
     </script>
 </body>
 @stack('scripts')
