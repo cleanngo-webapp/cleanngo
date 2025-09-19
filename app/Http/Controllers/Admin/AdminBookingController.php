@@ -318,8 +318,8 @@ class AdminBookingController extends Controller
     {
         $request->validate(['employee_user_id' => 'required|exists:users,id']);
         
-        // Check if booking exists and is confirmed
-        $booking = DB::table('bookings')->where('id', $bookingId)->first();
+        // Use Eloquent model to check booking
+        $booking = \App\Models\Booking::find($bookingId);
         if (!$booking) {
             return back()->withErrors(['assign' => 'Booking not found.']);
         }
@@ -331,21 +331,31 @@ class AdminBookingController extends Controller
             return back()->withErrors(['assign' => 'Booking must be confirmed before assigning employees.']);
         }
         
-        $employeeId = DB::table('employees')->where('user_id', $request->employee_user_id)->value('id');
-        if ($employeeId) {
-            // Do not allow reassignment once any employee is assigned to this booking
-            $alreadyAssigned = DB::table('booking_staff_assignments')->where('booking_id', $bookingId)->exists();
-            if ($alreadyAssigned) {
-                return back()->withErrors(['assign' => 'An employee is already assigned to this booking and cannot be changed.']);
-            }
-            DB::table('booking_staff_assignments')->insert([
-                'booking_id'   => $bookingId,
-                'employee_id'  => $employeeId,
-                'role'         => 'cleaner',
-                'assigned_at'  => now(),
-                'assigned_by'  => Auth::id(),
-            ]);
+        // Get employee using Eloquent model
+        $employee = \App\Models\Employee::where('user_id', $request->employee_user_id)->first();
+        if (!$employee) {
+            return back()->withErrors(['assign' => 'Employee not found.']);
         }
+        
+        // Do not allow reassignment once any employee is assigned to this booking
+        $alreadyAssigned = $booking->staffAssignments()->exists();
+        if ($alreadyAssigned) {
+            return back()->withErrors(['assign' => 'An employee is already assigned to this booking and cannot be changed.']);
+        }
+        
+        // Create the assignment using Eloquent model
+        \App\Models\BookingStaffAssignment::create([
+            'booking_id'   => $bookingId,
+            'employee_id'  => $employee->id,
+            'role'         => 'cleaner',
+            'assigned_at'  => now(),
+            'assigned_by'  => Auth::id(),
+        ]);
+        
+        // Trigger notification for employee assignment
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->notifyEmployeeAssigned($booking, $employee);
+        
         return back()->with('status', 'Employee assigned.');
     }
 

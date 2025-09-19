@@ -11,8 +11,10 @@ class BookingStaffAssignment extends Model
     use HasFactory;
 
     public $timestamps = false;
+    public $incrementing = false; // Disable auto-incrementing primary key
 
     protected $table = 'booking_staff_assignments';
+    protected $primaryKey = ['booking_id', 'employee_id']; // Composite primary key
 
     protected $guarded = [];
 

@@ -166,6 +166,70 @@ class NotificationService
             'recipient_type' => 'admin',
             'recipient_id' => null,
         ]);
+
+        // Notify assigned employees about booking status changes
+        $assignedEmployees = $booking->staffAssignments()->with('employee.user')->get();
+        foreach ($assignedEmployees as $assignment) {
+            $employee = $assignment->employee;
+            $employeeName = $employee->user->first_name . ' ' . $employee->user->last_name;
+            
+            // Create employee-specific messages based on status change
+            $employeeMessages = [
+                'confirmed' => [
+                    'title' => 'Booking Confirmed',
+                    'message' => sprintf(
+                        'Booking %s for customer %s has been confirmed. You are assigned to this job scheduled for %s at %s',
+                        $booking->code,
+                        $customerName,
+                        $booking->scheduled_start->format('M d, Y'),
+                        $booking->scheduled_start->format('g:i A')
+                    ),
+                ],
+                'cancelled' => [
+                    'title' => 'Booking Cancelled',
+                    'message' => sprintf(
+                        'Booking %s for customer %s has been cancelled. This job assignment is no longer active',
+                        $booking->code,
+                        $customerName
+                    ),
+                ],
+                'in_progress' => [
+                    'title' => 'Booking In Progress',
+                    'message' => sprintf(
+                        'Booking %s for customer %s is now in progress. You can start working on this job',
+                        $booking->code,
+                        $customerName
+                    ),
+                ],
+                'completed' => [
+                    'title' => 'Booking Completed',
+                    'message' => sprintf(
+                        'Booking %s for customer %s has been completed. Great job!',
+                        $booking->code,
+                        $customerName
+                    ),
+                ],
+            ];
+
+            if (isset($employeeMessages[$newStatus])) {
+                $employeeData = $employeeMessages[$newStatus];
+                
+                $this->createNotification([
+                    'type' => 'booking_status_changed',
+                    'title' => $employeeData['title'],
+                    'message' => $employeeData['message'],
+                    'data' => [
+                        'booking_id' => $booking->id,
+                        'customer_id' => $customer->id,
+                        'old_status' => $oldStatus,
+                        'new_status' => $newStatus,
+                        'services' => $services,
+                    ],
+                    'recipient_type' => 'employee',
+                    'recipient_id' => $employee->id,
+                ]);
+            }
+        }
     }
 
     /**
