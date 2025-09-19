@@ -344,6 +344,7 @@ class AdminBookingController extends Controller
         }
         
         // Create the assignment using Eloquent model
+        // The notification will be triggered automatically by the model's boot() method
         \App\Models\BookingStaffAssignment::create([
             'booking_id'   => $bookingId,
             'employee_id'  => $employee->id,
@@ -351,10 +352,6 @@ class AdminBookingController extends Controller
             'assigned_at'  => now(),
             'assigned_by'  => Auth::id(),
         ]);
-        
-        // Trigger notification for employee assignment
-        $notificationService = app(\App\Services\NotificationService::class);
-        $notificationService->notifyEmployeeAssigned($booking, $employee);
         
         return back()->with('status', 'Employee assigned.');
     }

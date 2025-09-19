@@ -135,7 +135,7 @@ class NotificationService
             'recipient_id' => $customer->id,
         ]);
 
-        // Notify admin with specific title based on status change
+        // Notify admin with specific title and message based on status change
         $adminTitles = [
             'confirmed' => 'Booking Confirmed',
             'cancelled' => 'Booking Cancelled', 
@@ -144,7 +144,34 @@ class NotificationService
         ];
         
         $adminTitle = $adminTitles[$newStatus] ?? 'Booking Status Updated';
-        $adminMessage = sprintf(
+        
+        // Create specific admin messages for each status change
+        $adminMessages = [
+            'confirmed' => sprintf(
+                'Booking %s has been confirmed for customer %s',
+                $booking->code,
+                $customerName
+            ),
+            'cancelled' => sprintf(
+                'Booking %s has been cancelled for customer %s',
+                $booking->code,
+                $customerName
+            ),
+            'in_progress' => sprintf(
+                'Booking %s has now started by %s for customer %s',
+                $booking->code,
+                $this->getAssignedEmployeeName($booking),
+                $customerName
+            ),
+            'completed' => sprintf(
+                'Booking %s has been completed by %s for customer %s',
+                $booking->code,
+                $this->getAssignedEmployeeName($booking),
+                $customerName
+            )
+        ];
+        
+        $adminMessage = $adminMessages[$newStatus] ?? sprintf(
             'Booking %s status changed from %s to %s for customer %s',
             $booking->code,
             ucfirst(str_replace('_', ' ', $oldStatus)),
@@ -473,6 +500,21 @@ class NotificationService
             'text' => implode(', ', $serviceTexts),
             'services' => $services
         ];
+    }
+
+    /**
+     * Get the name of the assigned employee for a booking
+     * Helper method for admin notifications
+     */
+    private function getAssignedEmployeeName(Booking $booking): string
+    {
+        $assignment = $booking->staffAssignments()->with('employee.user')->first();
+        
+        if ($assignment && $assignment->employee && $assignment->employee->user) {
+            return $assignment->employee->user->first_name . ' ' . $assignment->employee->user->last_name;
+        }
+        
+        return 'assigned employee'; // Fallback if no employee is assigned
     }
 
     /**
