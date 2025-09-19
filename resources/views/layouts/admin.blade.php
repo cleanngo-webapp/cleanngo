@@ -15,7 +15,14 @@
             <span class="font-semibold justify-center">CLEANSAVER NAGA</span>
         </div>
         <div class="flex items-center gap-4 text-white">
-             <a href="{{ route('admin.notifications') }}" class="hover:text-emerald-700 cursor-pointer"><i class="ri-notification-3-line"></i></a>
+             <a href="{{ route('admin.notifications') }}" class="relative hover:text-emerald-700 cursor-pointer transition-colors">
+                <i class="ri-notification-3-line text-4xl"></i>
+                @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                        {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+                    </span>
+                @endif
+             </a>
         </div>
     </header>
     <div class="flex">

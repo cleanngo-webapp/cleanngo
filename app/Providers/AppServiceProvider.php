@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use App\Services\NotificationService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Share unread notification count across all views
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $user = Auth::user();
+                $unreadNotificationCount = 0;
+                
+                // Get unread count based on user type
+                if ($user->customer) {
+                    $notificationService = app(NotificationService::class);
+                    $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('customer', $user->customer->id);
+                } elseif ($user->employee) {
+                    $notificationService = app(NotificationService::class);
+                    $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('employee', $user->employee->id);
+                } elseif ($user->role === 'admin') {
+                    $notificationService = app(NotificationService::class);
+                    $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('admin', null);
+                }
+                
+                $view->with('unreadNotificationCount', $unreadNotificationCount);
+            }
+        });
     }
 }

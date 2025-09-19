@@ -25,9 +25,14 @@
                 <a href="{{ route('preview.customer') }}#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700">About Us</a>
                 <a href="{{ route('customer.profile') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.profile' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Profile</a>
                 
-                <!-- Notification Icon -->
-                <a href="{{ route('customer.notifications') }}" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
+                <!-- Notification Icon with Count -->
+                <a href="{{ route('customer.notifications') }}" class="relative text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700 transition-colors">
                     <i class="ri-notification-3-line"></i>
+                    @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                            {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+                        </span>
+                    @endif
                 </a>
 
                 <a href="{{ route('customer.settings') }}" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
