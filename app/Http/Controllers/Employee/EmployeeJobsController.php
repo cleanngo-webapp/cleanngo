@@ -165,16 +165,21 @@ class EmployeeJobsController extends Controller
     {
         $employeeId = Auth::user()?->employee?->id;
         if (!$employeeId) { return back(); }
+        
+        // Use Eloquent model to trigger notifications
+        $booking = \App\Models\Booking::find($bookingId);
+        if (!$booking) { return back(); }
+        
         // Ensure this employee is assigned to the booking
-        $assigned = DB::table('booking_staff_assignments')
-            ->where('booking_id', $bookingId)
+        $assigned = $booking->staffAssignments()
             ->where('employee_id', $employeeId)
             ->exists();
         if (!$assigned) { return back(); }
-        DB::table('bookings')->where('id', $bookingId)->update([
-            'status' => 'in_progress',
-            'updated_at' => now(),
-        ]);
+        
+        // Update booking status using Eloquent model to trigger notifications
+        $booking->status = 'in_progress';
+        $booking->save(); // This will trigger the boot() method and send notifications
+        
         return back()->with('status', 'Job started');
     }
 
@@ -183,16 +188,18 @@ class EmployeeJobsController extends Controller
         $employeeId = Auth::user()?->employee?->id;
         if (!$employeeId) { return back(); }
         
+        // Use Eloquent model to trigger notifications
+        $booking = \App\Models\Booking::find($bookingId);
+        if (!$booking) { return back(); }
+        
         // Ensure this employee is assigned to the booking
-        $assigned = DB::table('booking_staff_assignments')
-            ->where('booking_id', $bookingId)
+        $assigned = $booking->staffAssignments()
             ->where('employee_id', $employeeId)
             ->exists();
         if (!$assigned) { return back(); }
         
         // Check if payment proof is approved
-        $paymentApproved = DB::table('payment_proofs')
-            ->where('booking_id', $bookingId)
+        $paymentApproved = \App\Models\PaymentProof::where('booking_id', $bookingId)
             ->where('status', 'approved')
             ->exists();
             
@@ -200,11 +207,11 @@ class EmployeeJobsController extends Controller
             return back()->withErrors(['error' => 'Payment proof must be approved before completing the job.']);
         }
         
-        DB::table('bookings')->where('id', $bookingId)->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // Update booking status using Eloquent model to trigger notifications
+        $booking->status = 'completed';
+        $booking->completed_at = now();
+        $booking->save(); // This will trigger the boot() method and send notifications
+        
         return back()->with('status', 'Job marked as completed');
     }
 }

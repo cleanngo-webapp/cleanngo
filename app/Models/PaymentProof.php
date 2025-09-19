@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Services\NotificationService;
 
 class PaymentProof extends Model
 {
@@ -73,5 +74,28 @@ class PaymentProof extends Model
     public function isDeclined(): bool
     {
         return $this->status === 'declined';
+    }
+
+    /**
+     * Boot method to handle model events and trigger notifications
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Trigger notification when payment status changes
+        static::updated(function ($paymentProof) {
+            // Check if status has changed
+            if ($paymentProof->isDirty('status')) {
+                $oldStatus = $paymentProof->getOriginal('status');
+                $newStatus = $paymentProof->status;
+                
+                // Only notify for approved or declined status changes
+                if (in_array($newStatus, ['approved', 'declined'])) {
+                    $notificationService = app(NotificationService::class);
+                    $notificationService->notifyPaymentStatusChanged($paymentProof, $oldStatus, $newStatus);
+                }
+            }
+        });
     }
 }

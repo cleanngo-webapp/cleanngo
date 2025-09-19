@@ -204,7 +204,8 @@ class AdminBookingController extends Controller
             'bypass_payment_proof' => 'sometimes|boolean'
         ]);
         
-        $booking = DB::table('bookings')->where('id', $bookingId)->first();
+        // Use Eloquent model to trigger notifications
+        $booking = \App\Models\Booking::find($bookingId);
         if (!$booking) {
             return back()->withErrors(['status' => 'Booking not found.']);
         }
@@ -221,29 +222,33 @@ class AdminBookingController extends Controller
         
         if ($request->status === 'cancelled') {
             // Delete the booking when cancelled as requested
-            DB::table('booking_staff_assignments')->where('booking_id', $bookingId)->delete();
-            DB::table('booking_items')->where('booking_id', $bookingId)->delete();
-            DB::table('bookings')->where('id', $bookingId)->delete();
+            // Note: This will trigger the model's deleting event, but we need to manually trigger notification
+            // since the booking will be deleted before the updated event can fire
+            $oldStatus = $booking->status;
+            $newStatus = 'cancelled';
+            
+            // Manually trigger notification before deletion
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
+            
+            // Delete related records first
+            $booking->staffAssignments()->delete();
+            $booking->bookingItems()->delete();
+            $booking->delete();
+            
             return back()->with('status','Booking cancelled and removed');
         }
-        
-        // Prepare update data
-        $updateData = [
-            'status' => $request->status,
-            'updated_at' => now(),
-        ];
         
         // If status is completed and bypass_payment_proof is set, handle payment proof
         if ($request->status === 'completed' && $request->has('bypass_payment_proof')) {
             // Check if there's already a payment proof for this booking
-            $existingProof = DB::table('payment_proofs')
-                ->where('booking_id', $bookingId)
+            $existingProof = \App\Models\PaymentProof::where('booking_id', $bookingId)
                 ->where('status', 'approved')
                 ->first();
             
             if (!$existingProof) {
                 // Create an approved payment proof to bypass the requirement
-                DB::table('payment_proofs')->insert([
+                \App\Models\PaymentProof::create([
                     'booking_id' => $bookingId,
                     'amount' => $booking->total_due_cents / 100, // Convert cents to dollars
                     'payment_method' => 'admin_bypass',
@@ -251,16 +256,16 @@ class AdminBookingController extends Controller
                     'admin_notes' => 'Payment proof bypassed by admin - status changed to completed',
                     'reviewed_by' => Auth::id(),
                     'reviewed_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
             }
             
             // Set completed_at timestamp
-            $updateData['completed_at'] = now();
+            $booking->completed_at = now();
         }
         
-        DB::table('bookings')->where('id', $bookingId)->update($updateData);
+        // Update the booking status using Eloquent model to trigger notifications
+        $booking->status = $request->status;
+        $booking->save(); // This will trigger the boot() method and send notifications
         
         $statusMessage = $request->status === 'completed' && $request->has('bypass_payment_proof') 
             ? 'Booking marked as completed with payment proof bypassed'
@@ -277,23 +282,34 @@ class AdminBookingController extends Controller
     {
         $request->validate(['action' => 'required|in:confirm,cancel']);
         
-        $booking = DB::table('bookings')->where('id', $bookingId)->first();
+        // Use Eloquent model to trigger notifications
+        $booking = \App\Models\Booking::find($bookingId);
         if (!$booking || $booking->status !== 'pending') {
             return back()->withErrors(['confirm' => 'Booking not found or not in pending status.']);
         }
         
         if ($request->action === 'confirm') {
             // Confirm the booking - change status to confirmed
-            DB::table('bookings')->where('id', $bookingId)->update([
-                'status' => 'confirmed',
-                'updated_at' => now(),
-            ]);
+            // This will trigger the boot() method and send notifications
+            $booking->status = 'confirmed';
+            $booking->save();
+            
             return back()->with('status', 'Booking confirmed successfully. You can now assign employees and change status.');
         } else {
             // Cancel the booking - delete it completely
-            DB::table('booking_staff_assignments')->where('booking_id', $bookingId)->delete();
-            DB::table('booking_items')->where('booking_id', $bookingId)->delete();
-            DB::table('bookings')->where('id', $bookingId)->delete();
+            // Manually trigger notification before deletion since the booking will be deleted
+            $oldStatus = $booking->status;
+            $newStatus = 'cancelled';
+            
+            // Manually trigger notification before deletion
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
+            
+            // Delete related records first
+            $booking->staffAssignments()->delete();
+            $booking->bookingItems()->delete();
+            $booking->delete();
+            
             return back()->with('status', 'Booking cancelled and removed.');
         }
     }

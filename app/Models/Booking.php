@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\NotificationService;
 
 class Booking extends Model
 {
@@ -44,6 +45,41 @@ class Booking extends Model
     public function staffAssignments()
     {
         return $this->hasMany(BookingStaffAssignment::class);
+    }
+
+    public function bookingItems()
+    {
+        return $this->hasMany(BookingItem::class);
+    }
+
+    /**
+     * Boot method to handle model events and trigger notifications
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Trigger notification when booking status changes
+        static::updated(function ($booking) {
+            // Check if status has changed
+            if ($booking->isDirty('status')) {
+                $oldStatus = $booking->getOriginal('status');
+                $newStatus = $booking->status;
+                
+                $notificationService = app(NotificationService::class);
+                $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
+            }
+        });
+    }
+
+    /**
+     * Trigger notification for booking creation
+     * This should be called after all booking items are created
+     */
+    public function triggerBookingCreatedNotification()
+    {
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyBookingCreated($this);
     }
 }
 

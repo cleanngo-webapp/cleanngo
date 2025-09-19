@@ -35,6 +35,9 @@ use App\Http\Controllers\Employee\EmployeeSettingsController;
 use App\Http\Controllers\Admin\AdminPayrollController;
 use App\Http\Controllers\Employee\EmployeePayrollController;
 use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Customer\CustomerNotificationController;
+use App\Http\Controllers\Employee\EmployeeNotificationController;
 
 Route::redirect('/', '/login');
 
@@ -71,7 +74,11 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
     Route::post('/payment-proof/{bookingId}/upload', [App\Http\Controllers\Admin\PaymentProofController::class, 'upload'])->name('payment-proof.upload');
     Route::get('/payroll', [EmployeePayrollController::class, 'index'])->name('payroll');
-    Route::view('/notifications', 'employee.notifications')->name('notifications');
+    Route::get('/notifications', [EmployeeNotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifications/api', [EmployeeNotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::post('/notifications/mark-read', [EmployeeNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [EmployeeNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/notifications/unread-count', [EmployeeNotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
     Route::get('/profile', [EmployeeProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [EmployeeProfileController::class, 'update'])->name('profile.update');
     // Settings routes for employee
@@ -88,7 +95,11 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::get('/customer/gallery', [CustomerGalleryController::class, 'index'])->name('customer.gallery');
     Route::get('/customer/gallery/{serviceType}', [CustomerGalleryController::class, 'showService'])->name('customer.gallery.service');
     Route::view('/customer/services', 'customer.services')->name('customer.services');
-    Route::view('/customer/notifications', 'customer.notifications')->name('customer.notifications');
+    Route::get('/customer/notifications', [CustomerNotificationController::class, 'index'])->name('customer.notifications');
+    Route::get('/customer/notifications/api', [CustomerNotificationController::class, 'getNotifications'])->name('customer.notifications.api');
+    Route::post('/customer/notifications/mark-read', [CustomerNotificationController::class, 'markAsRead'])->name('customer.notifications.mark-read');
+    Route::post('/customer/notifications/mark-all-read', [CustomerNotificationController::class, 'markAllAsRead'])->name('customer.notifications.mark-all-read');
+    Route::get('/customer/notifications/unread-count', [CustomerNotificationController::class, 'getUnreadCount'])->name('customer.notifications.unread-count');
     Route::get('/customer/settings', [CustomerSettingsController::class, 'index'])->name('customer.settings');
     Route::put('/customer/settings/password', [CustomerSettingsController::class, 'updatePassword'])->name('customer.settings.password.update');
     Route::put('/customer/settings/profile', [CustomerSettingsController::class, 'updateProfile'])->name('customer.settings.profile.update');
@@ -161,7 +172,11 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::put('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
     Route::put('/settings/payment', [AdminSettingsController::class, 'updatePaymentSettings'])->name('settings.payment.update');
     Route::get('/payroll', [AdminPayrollController::class, 'index'])->name('payroll');
-    Route::view('/notifications', 'admin.notifications')->name('notifications');
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifications/api', [AdminNotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::post('/notifications/mark-read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/notifications/unread-count', [AdminNotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
     // Calendar events feed for admin
     Route::get('/calendar/events', [CalendarController::class, 'adminEvents'])->name('calendar.events');
 });
