@@ -335,6 +335,12 @@
 													@method('DELETE')
 												</form>
 
+												<!-- View Location button - always available -->
+												<button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap w-full" onclick="openAddressLocation({{ $addr->id }}, {{ $addr->latitude ?? 0 }}, {{ $addr->longitude ?? 0 }}, '{{ $addr->line1 }}{{ $addr->barangay ? ', '.$addr->barangay : '' }}{{ $addr->city ? ', '.$addr->city : '' }}{{ $addr->province ? ', '.$addr->province : '' }}')">
+													<i class="ri-map-pin-line mr-1"></i>
+													View Location
+												</button>
+
 												@if($addr->is_primary)
 													<button class="px-3 py-1.5 text-xs rounded-lg bg-gray-200 text-gray-500 cursor-not-allowed whitespace-nowrap w-full" disabled>
 														<i class="ri-star-fill mr-1"></i>
@@ -872,6 +878,61 @@ function showSearchError() {
         `;
     }
 }
+
+// Address Location Map functionality
+var addressMap, addressMarker;
+
+function hideAddressMap() {
+    const modal = document.getElementById('address-map-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function openAddressLocation(addressId, latitude, longitude, addressText) {
+    const modal = document.getElementById('address-map-modal');
+    const addressEl = document.getElementById('addressLocationAddress');
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Set address text
+    addressEl.textContent = addressText || 'Address location';
+    
+    // Initialize or update map after a short delay to ensure modal is visible
+    setTimeout(function() {
+        if (!addressMap) {
+            // Initialize map with default coordinates if no valid coordinates provided
+            const defaultLat = latitude && latitude !== 0 ? latitude : 13.6218;
+            const defaultLng = longitude && longitude !== 0 ? longitude : 123.1948;
+            
+            addressMap = L.map('addressMap').setView([defaultLat, defaultLng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+                maxZoom: 19, 
+                attribution: '&copy; OpenStreetMap contributors' 
+            }).addTo(addressMap);
+        }
+        
+        // Set coordinates - use provided coordinates or default to Philippines
+        const lat = latitude && latitude !== 0 ? latitude : 13.6218;
+        const lng = longitude && longitude !== 0 ? longitude : 123.1948;
+        
+        // Add or update marker
+        if (!addressMarker) {
+            addressMarker = L.marker([lat, lng]).addTo(addressMap);
+        } else {
+            addressMarker.setLatLng([lat, lng]);
+        }
+        
+        // Center map on the location
+        addressMap.setView([lat, lng], 15);
+        
+        // Invalidate size to ensure proper rendering in modal
+        setTimeout(function() { 
+            if (addressMap) addressMap.invalidateSize(true); 
+        }, 100);
+    }, 50);
+}
 </script>
 @endpush
 
@@ -1092,6 +1153,18 @@ function showSearchError() {
                 Add New Address
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Address Location Map Modal -->
+<div id="address-map-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-xl w-full max-w-xl p-4">
+        <div class="flex items-center justify-between mb-2">
+            <div class="font-semibold">Address Location</div>
+            <button class="cursor-pointer" onclick="hideAddressMap()">✕</button>
+        </div>
+        <div id="addressLocationAddress" class="text-sm mb-1 text-gray-700"></div>
+        <div id="addressMap" class="h-80 rounded border"></div>
     </div>
 </div>
 
