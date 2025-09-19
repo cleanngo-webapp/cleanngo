@@ -96,7 +96,7 @@ class NotificationService
                 ),
             ],
             'in_progress' => [
-                'title' => 'Service Started',
+                'title' => 'Booking In Progress',
                 'message' => sprintf(
                     'Your %s service (Code: %s) has started',
                     $servicesText,
@@ -104,7 +104,7 @@ class NotificationService
                 ),
             ],
             'completed' => [
-                'title' => 'Service Completed',
+                'title' => 'Booking Completed',
                 'message' => sprintf(
                     'Your %s service (Code: %s) has been completed. Please rate your experience',
                     $servicesText,
@@ -135,8 +135,15 @@ class NotificationService
             'recipient_id' => $customer->id,
         ]);
 
-        // Notify admin
-        $adminTitle = 'Booking Status Updated';
+        // Notify admin with specific title based on status change
+        $adminTitles = [
+            'confirmed' => 'Booking Confirmed',
+            'cancelled' => 'Booking Cancelled', 
+            'in_progress' => 'Booking In Progress',
+            'completed' => 'Booking Completed'
+        ];
+        
+        $adminTitle = $adminTitles[$newStatus] ?? 'Booking Status Updated';
         $adminMessage = sprintf(
             'Booking %s status changed from %s to %s for customer %s',
             $booking->code,
@@ -271,7 +278,7 @@ class NotificationService
         $services = $servicesData['services'];
 
         if ($newStatus === 'approved') {
-            $title = 'Payment Approved';
+            $title = 'Payment Accepted';
             $message = sprintf(
                 'Payment of ₱%s for your %s service (Code: %s) has been approved',
                 number_format($paymentProof->amount, 2),
@@ -305,8 +312,8 @@ class NotificationService
             'recipient_id' => $customer->id,
         ]);
 
-        // Notify admin
-        $adminTitle = 'Payment Status Updated';
+        // Notify admin with specific title based on payment status
+        $adminTitle = $newStatus === 'approved' ? 'Payment Accepted' : 'Payment Declined';
         $adminMessage = sprintf(
             'Payment of ₱%s for booking %s has been %s',
             number_format($paymentProof->amount, 2),
@@ -332,8 +339,8 @@ class NotificationService
             'recipient_id' => null,
         ]);
 
-        // Notify employee
-        $employeeTitle = 'Payment Status Updated';
+        // Notify employee with specific title based on payment status
+        $employeeTitle = $newStatus === 'approved' ? 'Payment Accepted' : 'Payment Declined';
         $employeeMessage = sprintf(
             'Payment of ₱%s for booking %s has been %s',
             number_format($paymentProof->amount, 2),
