@@ -17,10 +17,10 @@
                 </div>
             </div>
             @if($unreadCount > 0)
-                <button onclick="markAllAsRead()" 
+                <button id="mark-all-read-btn" onclick="markAllAsRead()" 
                         class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer flex items-center gap-2">
                     <i class="ri-check-double-line"></i>
-                    Mark All as Read ({{ $unreadCount }})
+                    <span id="mark-all-read-text">Mark All as Read ({{ $unreadCount }})</span>
                 </button>
             @endif
         </div>
@@ -122,13 +122,33 @@ function markAsRead(notificationId) {
                 }
             }
             
-            // Update unread count
-            updateUnreadCount();
+            // Update unread count in real-time
+            if (typeof updateNotificationCount === 'function') {
+                updateNotificationCount();
+            }
+            
+            // Update the "Mark All as Read" button count
+            updateMarkAllButtonCount();
         }
     })
     .catch(error => {
         console.error('Error marking notification as read:', error);
     });
+}
+
+// Function to update the "Mark All as Read" button count
+function updateMarkAllButtonCount() {
+    const unreadNotifications = document.querySelectorAll('.ring-2.ring-emerald-100');
+    const count = unreadNotifications.length;
+    const button = document.getElementById('mark-all-read-btn');
+    const textSpan = document.getElementById('mark-all-read-text');
+    
+    if (count > 0 && button && textSpan) {
+        textSpan.textContent = `Mark All as Read (${count})`;
+        button.style.display = 'flex';
+    } else if (button) {
+        button.style.display = 'none';
+    }
 }
 
 // Function to mark all notifications as read
@@ -143,8 +163,37 @@ function markAllAsRead() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Reload the page to show updated notifications
-            location.reload();
+            // Update all notifications to appear as read
+            const notifications = document.querySelectorAll('[data-notification-id]');
+            notifications.forEach(notification => {
+                // Remove unread styling
+                notification.classList.remove('ring-2', 'ring-emerald-100');
+                notification.classList.add('opacity-75');
+                
+                // Update icon background
+                const iconContainer = notification.querySelector('.w-10.h-10');
+                if (iconContainer) {
+                    iconContainer.classList.remove('bg-emerald-100');
+                    iconContainer.classList.add('bg-gray-100');
+                }
+                
+                // Remove the unread indicator
+                const unreadIndicator = notification.querySelector('.bg-emerald-500');
+                if (unreadIndicator) {
+                    unreadIndicator.remove();
+                }
+            });
+            
+            // Update unread count in real-time
+            if (typeof updateNotificationCount === 'function') {
+                updateNotificationCount();
+            }
+            
+            // Hide the "Mark All as Read" button
+            const markAllButton = document.getElementById('mark-all-read-btn');
+            if (markAllButton) {
+                markAllButton.style.display = 'none';
+            }
         }
     })
     .catch(error => {
@@ -152,7 +201,7 @@ function markAllAsRead() {
     });
 }
 
-// Function to update unread count (for future real-time updates)
+// Function to update unread count (for real-time updates)
 function updateUnreadCount() {
     fetch('/admin/notifications/unread-count')
     .then(response => response.json())
@@ -163,6 +212,48 @@ function updateUnreadCount() {
     .catch(error => {
         console.error('Error fetching unread count:', error);
     });
+}
+
+// Real-time notification functions for badge updates
+function updateNotificationCount() {
+    // Refresh the notification count immediately
+    checkForNewNotifications();
+}
+
+function checkForNewNotifications() {
+    fetch('/admin/notifications/unread-count')
+        .then(response => response.json())
+        .then(data => {
+            const currentCount = data.unread_count || 0;
+            updateNotificationBadge(currentCount);
+        })
+        .catch(error => {
+            console.error('Error checking notification count:', error);
+        });
+}
+
+function updateNotificationBadge(count) {
+    const badge = document.querySelector('.notification-badge');
+    
+    if (count > 0) {
+        if (badge) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'flex';
+        } else {
+            // Create badge if it doesn't exist
+            const button = document.querySelector('button[onclick="toggleNotificationDropdown()"]');
+            if (button) {
+                const newBadge = document.createElement('span');
+                newBadge.className = 'notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium';
+                newBadge.textContent = count > 99 ? '99+' : count;
+                button.appendChild(newBadge);
+            }
+        }
+    } else {
+        if (badge) {
+            badge.style.display = 'none';
+        }
+    }
 }
 </script>
 @endsection
