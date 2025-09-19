@@ -83,6 +83,12 @@ class PaymentProof extends Model
     {
         parent::boot();
 
+        // Trigger notification when a new payment proof is submitted
+        static::created(function ($paymentProof) {
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyPaymentProofSubmitted($paymentProof);
+        });
+
         // Trigger notification when payment status changes
         static::updated(function ($paymentProof) {
             // Check if status has changed

@@ -350,6 +350,54 @@ class NotificationService
     }
 
     /**
+     * Create notification when a payment proof is submitted
+     * Notifies admin that a new payment proof needs review
+     */
+    public function notifyPaymentProofSubmitted(PaymentProof $paymentProof): void
+    {
+        // Load the necessary relationships
+        $paymentProof->load(['booking.customer.user', 'booking.bookingItems.service', 'employee.user']);
+        
+        $booking = $paymentProof->booking;
+        $customer = $booking->customer;
+        $customerName = $customer->user->first_name . ' ' . $customer->user->last_name;
+        $employee = $paymentProof->employee;
+        $employeeName = $employee->user->first_name . ' ' . $employee->user->last_name;
+        
+        // Format services text to avoid duplication
+        $servicesData = $this->formatServicesText($booking);
+        $servicesText = $servicesData['text'];
+        $services = $servicesData['services'];
+
+        $title = 'Payment Proof Submitted';
+        $message = sprintf(
+            'Employee %s has submitted a payment proof of ₱%s for booking %s (Customer: %s). Please review.',
+            $employeeName,
+            number_format($paymentProof->amount, 2),
+            $booking->code,
+            $customerName
+        );
+
+        // Notify admin
+        $this->createNotification([
+            'type' => 'payment_proof_submitted',
+            'title' => $title,
+            'message' => $message,
+            'data' => [
+                'booking_id' => $booking->id,
+                'payment_proof_id' => $paymentProof->id,
+                'employee_id' => $employee->id,
+                'customer_id' => $customer->id,
+                'amount' => $paymentProof->amount,
+                'payment_method' => $paymentProof->payment_method,
+                'services' => $services,
+            ],
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+        ]);
+    }
+
+    /**
      * Create notifications for payment status changes
      * Notifies customer, admin, and employee when payment is approved or declined
      */
