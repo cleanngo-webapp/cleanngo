@@ -424,8 +424,8 @@ function openBookingForm(){
   window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }
 </script>
-<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000] overflow-y-auto">
-  <div class="bg-white rounded-xl w-full max-w-lg p-4 m-4">
+<div id="booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]" style="overscroll-behavior: contain;">
+  <div class="bg-white rounded-xl w-full max-w-lg p-4 m-4" style="max-height: 90vh; overflow-y: auto; overscroll-behavior: contain;">
     <div class="flex items-center justify-between mb-4">
       <div class="font-semibold text-lg">Confirm Booking</div>
       <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeBookingModal()">✕</button>
@@ -461,13 +461,68 @@ function openBookingForm(){
       
       <!-- Date and Time Selection -->
       <div class="grid grid-cols-2 gap-3">
-        <div>
+        <div class="relative">
           <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-          <input required type="date" name="date" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+          <input type="text" id="date-picker" name="date" readonly placeholder="Select date" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
+          <i class="ri-calendar-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
+          <!-- Custom Date Picker -->
+          <div id="date-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden" style="width: 240px;">
+            <div class="flex items-center justify-between mb-3">
+              <button type="button" id="prev-month" class="p-1 hover:bg-gray-100 rounded cursor-pointer">
+                <i class="ri-arrow-left-s-line text-gray-600"></i>
+              </button>
+              <h3 id="current-month" class="font-semibold text-gray-800"></h3>
+              <button type="button" id="next-month" class="p-1 hover:bg-gray-100 rounded cursor-pointer">
+                <i class="ri-arrow-right-s-line text-gray-600"></i>
+              </button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 mb-2">
+              <div class="text-center text-xs font-medium text-gray-500 py-1">Su</div>
+              <div class="text-center text-xs font-medium text-gray-500 py-1">Mo</div>
+              <div class="text-center text-xs font-medium text-gray-500 py-1">Tu</div>
+              <div class="text-center text-xs font-medium text-gray-500 py-1">We</div>
+              <div class="text-center text-xs font-medium text-gray-500 py-1">Th</div>
+              <div class="text-center text-xs font-medium text-gray-500 py-1">Fr</div>
+              <div class="text-center text-xs font-medium text-gray-500 py-1">Sa</div>
+            </div>
+            <div id="calendar-days" class="grid grid-cols-7 gap-1"></div>
+            <div class="flex justify-between mt-3 pt-3 border-t">
+              <button type="button" id="clear-date" class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">Clear</button>
+              <button type="button" id="today-btn" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium cursor-pointer">Today</button>
+            </div>
+          </div>
         </div>
-        <div>
+        <div class="relative">
           <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
-          <input required type="time" name="time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+          <input type="text" id="time-picker" name="time" readonly placeholder="Select time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
+          <i class="ri-time-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
+          <!-- Custom Time Picker -->
+          <div id="time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-4 hidden" style="width: 200px;">
+            <div class="flex items-center justify-center gap-2 mb-3">
+              <select id="hour-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+                <option value="">--</option>
+                @for($i = 1; $i <= 12; $i++)
+                  <option value="{{ $i }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                @endfor
+              </select>
+              <span class="text-gray-500">:</span>
+              <select id="minute-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+                <option value="">--</option>
+                @for($i = 0; $i < 60; $i += 15)
+                  <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                @endfor
+              </select>
+              <select id="ampm-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+                <option value="">--</option>
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+            <div class="flex justify-between pt-3 border-t">
+              <button type="button" id="clear-time" class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">Clear</button>
+              <button type="button" id="apply-time" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium cursor-pointer">Apply</button>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -487,11 +542,285 @@ function openBookingForm(){
     </form>
   </div>
   <script>
+  // Custom Date and Time Picker Functionality
+  let currentDate = new Date();
+  let selectedDate = null;
+  let selectedTime = null;
+
+  // Date Picker Functions
+  function initDatePicker() {
+    const dateInput = document.getElementById('date-picker');
+    const dateDropdown = document.getElementById('date-picker-dropdown');
+    const prevBtn = document.getElementById('prev-month');
+    const nextBtn = document.getElementById('next-month');
+    const todayBtn = document.getElementById('today-btn');
+    const clearBtn = document.getElementById('clear-date');
+
+    // Check if elements exist
+    if (!dateInput || !dateDropdown) {
+      console.log('Date picker elements not found');
+      return;
+    }
+
+    // Remove existing event listeners to prevent duplicates
+    dateInput.removeEventListener('click', dateInput._dateClickHandler);
+    
+    // Create new event handler
+    dateInput._dateClickHandler = (e) => {
+      e.stopPropagation();
+      dateDropdown.classList.toggle('hidden');
+      if (!dateDropdown.classList.contains('hidden')) {
+        // Position calendar directly below the input (like before) but with fixed positioning
+        const inputRect = dateInput.getBoundingClientRect();
+        const calendarWidth = 240;
+        const calendarHeight = 320;
+        
+        // Position directly below the input field
+        let top = inputRect.bottom + 4;
+        let left = inputRect.left;
+        
+        // Adjust if calendar would go off right edge
+        if (left + calendarWidth > window.innerWidth) {
+          left = window.innerWidth - calendarWidth - 10;
+        }
+        
+        // Adjust if calendar would go off left edge
+        if (left < 10) {
+          left = 10;
+        }
+        
+        // Apply fixed positioning - always below the input
+        dateDropdown.style.position = 'fixed';
+        dateDropdown.style.top = top + 'px';
+        dateDropdown.style.left = left + 'px';
+        dateDropdown.style.right = 'auto';
+        dateDropdown.style.bottom = 'auto';
+        dateDropdown.style.transform = 'none';
+        
+        renderCalendar();
+      }
+    };
+
+    // Add event listener
+    dateInput.addEventListener('click', dateInput._dateClickHandler);
+
+    // Navigation
+    prevBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    });
+
+    // Today button
+    todayBtn.addEventListener('click', () => {
+      const today = new Date();
+      selectDate(today);
+      dateDropdown.classList.add('hidden');
+    });
+
+    // Clear button
+    clearBtn.addEventListener('click', () => {
+      selectedDate = null;
+      dateInput.value = '';
+      dateInput.placeholder = 'Select date';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dateInput.contains(e.target) && !dateDropdown.contains(e.target)) {
+        dateDropdown.classList.add('hidden');
+      }
+    });
+  }
+
+  function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Update month display
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+    document.getElementById('current-month').textContent = `${monthNames[month]} ${year}`;
+
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const calendarDays = document.getElementById('calendar-days');
+    calendarDays.innerHTML = '';
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      const emptyDay = document.createElement('div');
+      emptyDay.className = 'h-7';
+      calendarDays.appendChild(emptyDay);
+    }
+
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayElement = document.createElement('button');
+      dayElement.type = 'button';
+      dayElement.className = 'h-7 w-7 text-xs rounded hover:bg-gray-100 transition-colors';
+      dayElement.textContent = day;
+
+      const currentDay = new Date(year, month, day);
+      currentDay.setHours(0, 0, 0, 0);
+
+      // Disable past dates
+      if (currentDay < today) {
+        dayElement.classList.add('text-gray-300', 'cursor-not-allowed');
+        dayElement.disabled = true;
+      } else {
+        dayElement.classList.add('text-gray-700', 'hover:bg-emerald-100');
+        
+        // Highlight selected date
+        if (selectedDate && currentDay.getTime() === selectedDate.getTime()) {
+          dayElement.classList.add('bg-emerald-600', 'text-white', 'hover:bg-emerald-700');
+        }
+
+        // Highlight today
+        if (currentDay.getTime() === today.getTime()) {
+          dayElement.classList.add('font-semibold', 'ring-2', 'ring-emerald-200');
+        }
+
+        dayElement.addEventListener('click', () => {
+          selectDate(currentDay);
+          document.getElementById('date-picker-dropdown').classList.add('hidden');
+        });
+      }
+
+      calendarDays.appendChild(dayElement);
+    }
+  }
+
+  function selectDate(date) {
+    selectedDate = date;
+    const dateInput = document.getElementById('date-picker');
+    const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    dateInput.value = formattedDate;
+    dateInput.placeholder = date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    renderCalendar(); // Re-render to update selection
+  }
+
+  // Time Picker Functions
+  function initTimePicker() {
+    const timeInput = document.getElementById('time-picker');
+    const timeDropdown = document.getElementById('time-picker-dropdown');
+    const hourSelect = document.getElementById('hour-select');
+    const minuteSelect = document.getElementById('minute-select');
+    const ampmSelect = document.getElementById('ampm-select');
+    const applyBtn = document.getElementById('apply-time');
+    const clearBtn = document.getElementById('clear-time');
+
+    // Check if elements exist
+    if (!timeInput || !timeDropdown) {
+      console.log('Time picker elements not found');
+      return;
+    }
+
+    // Remove existing event listeners to prevent duplicates
+    timeInput.removeEventListener('click', timeInput._timeClickHandler);
+    
+    // Create new event handler
+    timeInput._timeClickHandler = (e) => {
+      e.stopPropagation();
+      timeDropdown.classList.toggle('hidden');
+      if (!timeDropdown.classList.contains('hidden')) {
+        // Position time picker directly below the input with fixed positioning
+        const inputRect = timeInput.getBoundingClientRect();
+        const timePickerWidth = inputRect.width; // Use the same width as the input field
+        const timePickerHeight = 120;
+        
+        // Position directly below the input field
+        let top = inputRect.bottom + 4;
+        let left = inputRect.left;
+        
+        // Adjust if time picker would go off right edge
+        if (left + timePickerWidth > window.innerWidth) {
+          left = window.innerWidth - timePickerWidth - 10;
+        }
+        
+        // Adjust if time picker would go off left edge
+        if (left < 10) {
+          left = 10;
+        }
+        
+        // Apply fixed positioning - always below the input
+        timeDropdown.style.position = 'fixed';
+        timeDropdown.style.top = top + 'px';
+        timeDropdown.style.left = left + 'px';
+        timeDropdown.style.width = timePickerWidth + 'px';
+        timeDropdown.style.right = 'auto';
+        timeDropdown.style.bottom = 'auto';
+        timeDropdown.style.transform = 'none';
+      }
+    };
+
+    // Add event listener
+    timeInput.addEventListener('click', timeInput._timeClickHandler);
+
+    // Apply time selection
+    applyBtn.addEventListener('click', () => {
+      const hour = hourSelect.value;
+      const minute = minuteSelect.value;
+      const ampm = ampmSelect.value;
+
+      if (hour && minute && ampm) {
+        selectedTime = `${hour}:${minute} ${ampm}`;
+        timeInput.value = selectedTime;
+        timeInput.placeholder = selectedTime;
+        timeDropdown.classList.add('hidden');
+      }
+    });
+
+    // Clear time
+    clearBtn.addEventListener('click', () => {
+      selectedTime = null;
+      timeInput.value = '';
+      timeInput.placeholder = 'Select time';
+      hourSelect.value = '';
+      minuteSelect.value = '';
+      ampmSelect.value = '';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!timeInput.contains(e.target) && !timeDropdown.contains(e.target)) {
+        timeDropdown.classList.add('hidden');
+      }
+    });
+  }
+
   // Function to close the booking modal
   function closeBookingModal() {
     const modal = document.getElementById('booking-modal');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+    
+    // Re-enable body scroll
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    
+    // Reset pickers
+    selectedDate = null;
+    selectedTime = null;
+    document.getElementById('date-picker').value = '';
+    document.getElementById('time-picker').value = '';
+    document.getElementById('date-picker-dropdown').classList.add('hidden');
+    document.getElementById('time-picker-dropdown').classList.add('hidden');
   }
 
   // Event listener for opening the booking modal
@@ -501,6 +830,106 @@ function openBookingForm(){
     modal.classList.add('flex');
     document.getElementById('booking_total').value = e.detail.total;
     document.getElementById('items_json').value = JSON.stringify(e.detail.items||[]);
+    
+    // Prevent background scroll
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = '0px';
+    
+    // Initialize pickers when modal opens (with a small delay to ensure DOM is ready)
+    setTimeout(() => {
+      console.log('Initializing pickers...');
+      console.log('Date picker element:', document.getElementById('date-picker'));
+      console.log('Time picker element:', document.getElementById('time-picker'));
+      initDatePicker();
+      initTimePicker();
+    }, 100);
+  });
+
+  // Initialize pickers on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize if elements exist
+    if (document.getElementById('date-picker') && document.getElementById('time-picker')) {
+      initDatePicker();
+      initTimePicker();
+    }
+  });
+
+  // Fallback: Direct event delegation for date picker
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'date-picker') {
+      const dropdown = document.getElementById('date-picker-dropdown');
+      const input = e.target;
+      if (dropdown) {
+        dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) {
+          // Position calendar directly below the input (like before) but with fixed positioning
+          const inputRect = input.getBoundingClientRect();
+          const calendarWidth = 240;
+          const calendarHeight = 320;
+          
+          // Position directly below the input field
+          let top = inputRect.bottom + 4;
+          let left = inputRect.left;
+          
+          // Adjust if calendar would go off right edge
+          if (left + calendarWidth > window.innerWidth) {
+            left = window.innerWidth - calendarWidth - 10;
+          }
+          
+          // Adjust if calendar would go off left edge
+          if (left < 10) {
+            left = 10;
+          }
+          
+          // Apply fixed positioning - always below the input
+          dropdown.style.position = 'fixed';
+          dropdown.style.top = top + 'px';
+          dropdown.style.left = left + 'px';
+          dropdown.style.right = 'auto';
+          dropdown.style.bottom = 'auto';
+          dropdown.style.transform = 'none';
+          
+          renderCalendar();
+        }
+      }
+    }
+    
+    if (e.target && e.target.id === 'time-picker') {
+      const dropdown = document.getElementById('time-picker-dropdown');
+      const input = e.target;
+      if (dropdown) {
+        dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) {
+          // Position time picker directly below the input with fixed positioning
+          const inputRect = input.getBoundingClientRect();
+          const timePickerWidth = inputRect.width; // Use the same width as the input field
+          const timePickerHeight = 120;
+          
+          // Position directly below the input field
+          let top = inputRect.bottom + 4;
+          let left = inputRect.left;
+          
+          // Adjust if time picker would go off right edge
+          if (left + timePickerWidth > window.innerWidth) {
+            left = window.innerWidth - timePickerWidth - 10;
+          }
+          
+          // Adjust if time picker would go off left edge
+          if (left < 10) {
+            left = 10;
+          }
+          
+          // Apply fixed positioning - always below the input
+          dropdown.style.position = 'fixed';
+          dropdown.style.top = top + 'px';
+          dropdown.style.left = left + 'px';
+          dropdown.style.width = timePickerWidth + 'px';
+          dropdown.style.right = 'auto';
+          dropdown.style.bottom = 'auto';
+          dropdown.style.transform = 'none';
+        }
+      }
+    }
   });
 
   // Close modal when clicking outside the modal content
