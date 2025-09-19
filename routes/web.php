@@ -76,6 +76,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::get('/payroll', [EmployeePayrollController::class, 'index'])->name('payroll');
     Route::get('/notifications', [EmployeeNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/api', [EmployeeNotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::get('/notifications/dropdown', [EmployeeNotificationController::class, 'getDropdownNotifications'])->name('notifications.dropdown');
     Route::post('/notifications/mark-read', [EmployeeNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('/notifications/mark-all-read', [EmployeeNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::get('/notifications/unread-count', [EmployeeNotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
@@ -97,6 +98,7 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::view('/customer/services', 'customer.services')->name('customer.services');
     Route::get('/customer/notifications', [CustomerNotificationController::class, 'index'])->name('customer.notifications');
     Route::get('/customer/notifications/api', [CustomerNotificationController::class, 'getNotifications'])->name('customer.notifications.api');
+    Route::get('/customer/notifications/dropdown', [CustomerNotificationController::class, 'getDropdownNotifications'])->name('customer.notifications.dropdown');
     Route::post('/customer/notifications/mark-read', [CustomerNotificationController::class, 'markAsRead'])->name('customer.notifications.mark-read');
     Route::post('/customer/notifications/mark-all-read', [CustomerNotificationController::class, 'markAllAsRead'])->name('customer.notifications.mark-all-read');
     Route::get('/customer/notifications/unread-count', [CustomerNotificationController::class, 'getUnreadCount'])->name('customer.notifications.unread-count');
@@ -174,6 +176,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::get('/payroll', [AdminPayrollController::class, 'index'])->name('payroll');
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/api', [AdminNotificationController::class, 'getNotifications'])->name('notifications.api');
+    Route::get('/notifications/dropdown', [AdminNotificationController::class, 'getDropdownNotifications'])->name('notifications.dropdown');
     Route::post('/notifications/mark-read', [AdminNotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('/notifications/mark-all-read', [AdminNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::get('/notifications/unread-count', [AdminNotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');

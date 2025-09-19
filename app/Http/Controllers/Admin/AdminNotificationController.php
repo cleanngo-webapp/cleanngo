@@ -90,4 +90,20 @@ class AdminNotificationController extends Controller
 
         return response()->json(['unread_count' => $unreadCount]);
     }
+
+    /**
+     * Get unread notifications for dropdown display
+     */
+    public function getDropdownNotifications(): JsonResponse
+    {
+        // Get unread notifications only, limited to 4 for dropdown
+        $notifications = \App\Models\Notification::where('recipient_type', 'admin')
+            ->where('recipient_id', null)
+            ->where('is_read', false)
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get();
+
+        return response()->json(['notifications' => $notifications]);
+    }
 }

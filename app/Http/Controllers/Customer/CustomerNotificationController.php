@@ -121,4 +121,26 @@ class CustomerNotificationController extends Controller
 
         return response()->json(['unread_count' => $unreadCount]);
     }
+
+    /**
+     * Get unread notifications for dropdown display
+     */
+    public function getDropdownNotifications(): JsonResponse
+    {
+        $customer = Auth::user()->customer;
+        
+        if (!$customer) {
+            return response()->json(['error' => 'Customer profile not found'], 404);
+        }
+
+        // Get unread notifications only, limited to 4 for dropdown
+        $notifications = \App\Models\Notification::where('recipient_type', 'customer')
+            ->where('recipient_id', $customer->id)
+            ->where('is_read', false)
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get();
+
+        return response()->json(['notifications' => $notifications]);
+    }
 }

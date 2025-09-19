@@ -121,4 +121,26 @@ class EmployeeNotificationController extends Controller
 
         return response()->json(['unread_count' => $unreadCount]);
     }
+
+    /**
+     * Get unread notifications for dropdown display
+     */
+    public function getDropdownNotifications(): JsonResponse
+    {
+        $employee = Auth::user()->employee;
+        
+        if (!$employee) {
+            return response()->json(['error' => 'Employee profile not found'], 404);
+        }
+
+        // Get unread notifications only, limited to 4 for dropdown
+        $notifications = \App\Models\Notification::where('recipient_type', 'employee')
+            ->where('recipient_id', $employee->id)
+            ->where('is_read', false)
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get();
+
+        return response()->json(['notifications' => $notifications]);
+    }
 }
