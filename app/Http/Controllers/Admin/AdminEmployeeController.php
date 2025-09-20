@@ -8,6 +8,8 @@ use App\Models\Employee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AdminEmployeeController extends Controller
 {
@@ -98,6 +100,49 @@ class AdminEmployeeController extends Controller
             'sort',
             'sortOrder'
         ));
+    }
+
+    /**
+     * Store a newly created employee
+     * Admin can create new employees with all required information
+     */
+    public function store(Request $request)
+    {
+        // Validate employee registration data
+        $data = $request->validate([
+            'username' => ['required','string','alpha_dash','min:3','max:50','unique:users,username'],
+            'email' => ['required','email','max:255','unique:users,email'],
+            'first_name' => ['required','string','max:100'],
+            'last_name' => ['required','string','max:100'],
+            'contact' => ['nullable','string','max:50'],
+            'password' => ['required','string','min:6','confirmed'],
+        ]);
+
+        // Create the user with employee role
+        $user = User::create([
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'phone' => $data['contact'] ?? null,
+            'role' => 'employee', // Always set as employee for admin-created accounts
+            'password_hash' => Hash::make($data['password']),
+        ]);
+
+        // Create the employee profile record
+        Employee::create([
+            'user_id' => $user->id,
+            'is_cleaner' => true,
+            'is_active' => true,
+            'contact_number' => $user->phone,
+            'email_address' => $user->email,
+            'employment_status' => 'active',
+            'date_hired' => now()->toDateString(),
+            'employee_code' => 'E' . now()->format('Y') . str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT),
+        ]);
+
+        return redirect()->route('admin.employees')
+            ->with('status', 'Employee created successfully!');
     }
 
     /**

@@ -6,6 +6,16 @@
 <div class="max-w-6xl mx-auto">
     <h1 class="text-3xl font-extrabold text-center">Manage Employees</h1>
 
+    {{-- Success Message --}}
+    @if (session('status'))
+        <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            <div class="flex items-center">
+                <i class="ri-check-line mr-2"></i>
+                {{ session('status') }}
+            </div>
+        </div>
+    @endif
+
     {{-- Employee Statistics Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {{-- Employees Assigned Today Card --}}
@@ -95,6 +105,14 @@
                 <div>
                     <h2 class="text-xl font-semibold text-gray-900">Employee Records</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage employee information and job assignments</p>
+                </div>
+                <div>
+                    <button type="button" 
+                            onclick="openAddEmployeeModal()"
+                            class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
+                        <i class="ri-add-line mr-2"></i>
+                        Add Employee
+                    </button>
                 </div>
             </div>
         </div>
@@ -193,6 +211,169 @@
         </div>
         <div id="pagination-container" class="px-6 py-4 border-t border-gray-100">
             {{ $employees->links() }}
+        </div>
+    </div>
+
+    {{-- Add Employee Modal --}}
+    <div id="addEmployeeModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                {{-- Modal Header --}}
+                <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Add New Employee</h3>
+                    <button type="button" 
+                            onclick="closeAddEmployeeModal()"
+                            class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+                        <i class="ri-close-line text-xl"></i>
+                    </button>
+                </div>
+
+                {{-- Modal Body --}}
+                <div class="mt-6">
+                    @if ($errors->any())
+                        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form id="addEmployeeForm" method="POST" action="{{ route('admin.employees.store') }}" class="space-y-4">
+                        @csrf
+                        
+                        {{-- Name Fields --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                <input type="text" 
+                                       name="first_name" 
+                                       value="{{ old('first_name') }}" 
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                       placeholder="Enter first name" 
+                                       required />
+                                @error('first_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                <input type="text" 
+                                       name="last_name" 
+                                       value="{{ old('last_name') }}" 
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                       placeholder="Enter last name" 
+                                       required />
+                                @error('last_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Username --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" 
+                                   name="username" 
+                                   value="{{ old('username') }}" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                   placeholder="Choose a username" 
+                                   required />
+                            @error('username')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Email --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" 
+                                   name="email" 
+                                   value="{{ old('email') }}" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                   placeholder="Enter email address" 
+                                   required />
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Contact Number --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                            <input type="text" 
+                                   name="contact" 
+                                   value="{{ old('contact') }}" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                   placeholder="Enter contact number" />
+                            @error('contact')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Password Fields --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <div class="relative">
+                                    <input id="add_employee_password" 
+                                           type="password" 
+                                           name="password" 
+                                           class="w-full border border-gray-300 rounded-lg px-3 pr-10 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                           placeholder="Enter password" 
+                                           required />
+                                    <button type="button" 
+                                            class="absolute inset-y-0 right-2 my-auto text-gray-500 hover:text-gray-700" 
+                                            aria-label="Toggle password visibility" 
+                                            data-toggle-password 
+                                            data-target="#add_employee_password">
+                                        <i class="ri-eye-line text-xl cursor-pointer"></i>
+                                    </button>
+                                </div>
+                                @error('password')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                                <div class="relative">
+                                    <input id="add_employee_password_confirmation" 
+                                           type="password" 
+                                           name="password_confirmation" 
+                                           class="w-full border border-gray-300 rounded-lg px-3 pr-10 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                                           placeholder="Confirm password" 
+                                           required />
+                                    <button type="button" 
+                                            class="absolute inset-y-0 right-2 my-auto text-gray-500 hover:text-gray-700" 
+                                            aria-label="Toggle password visibility" 
+                                            data-toggle-password 
+                                            data-target="#add_employee_password_confirmation">
+                                        <i class="ri-eye-line text-xl cursor-pointer"></i>
+                                    </button>
+                                </div>
+                                @error('password_confirmation')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- Modal Footer --}}
+                <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-200 mt-6">
+                    <button type="button" 
+                            onclick="closeAddEmployeeModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="button" 
+                            onclick="submitAddEmployeeForm()"
+                            class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer">
+                        Add Employee
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -319,6 +500,142 @@ function clearFilters() {
     // Perform search to refresh results
     performSearch();
 }
+
+// Add Employee Modal Functions
+function openAddEmployeeModal() {
+    const modal = document.getElementById('addEmployeeModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        
+        // Attach password toggle event listeners when modal opens
+        const toggleButtons = modal.querySelectorAll('[data-toggle-password]');
+        toggleButtons.forEach(button => {
+            // Remove any existing listeners to prevent duplicates
+            button.removeEventListener('click', handlePasswordToggle);
+            // Add new listener
+            button.addEventListener('click', handlePasswordToggle);
+        });
+        
+        // Focus on first input
+        const firstInput = modal.querySelector('input[name="first_name"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+}
+
+// Handle password toggle click
+function handlePasswordToggle(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const button = e.currentTarget;
+    togglePasswordVisibility(button);
+}
+
+function closeAddEmployeeModal() {
+    const modal = document.getElementById('addEmployeeModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        // Clear form data
+        const form = document.getElementById('addEmployeeForm');
+        if (form) {
+            form.reset();
+        }
+    }
+}
+
+function submitAddEmployeeForm() {
+    const form = document.getElementById('addEmployeeForm');
+    if (!form) return;
+    
+    // Get form data for validation
+    const formData = new FormData(form);
+    const password = formData.get('password');
+    const passwordConfirmation = formData.get('password_confirmation');
+    const firstName = formData.get('first_name');
+    const lastName = formData.get('last_name');
+    const email = formData.get('email');
+    const contact = formData.get('contact');
+    const username = formData.get('username');
+    
+    // Validate password match first
+    if (password !== passwordConfirmation) {
+        Swal.fire({
+            title: 'Password Mismatch',
+            text: 'Password and Confirm Password do not match. Please check and try again.',
+            icon: 'error',
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Show confirmation dialog
+    Swal.fire({
+        title: 'Confirm Employee Creation',
+        html: `
+            <div class="text-left">
+                <p class="mb-2"><strong>Please confirm the employee details:</strong></p>
+                <p class="mb-1"><strong>Name:</strong> ${firstName} ${lastName}</p>
+                <p class="mb-1"><strong>Username:</strong> ${username}</p>
+                <p class="mb-1"><strong>Email:</strong> ${email}</p>
+                <p class="mb-1"><strong>Contact:</strong> ${contact || 'Not provided'}</p>
+                <p class="mt-3 text-sm text-gray-600">Are you sure these details are correct?</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#047857',
+        cancelButtonColor: '#dc2626',
+        confirmButtonText: 'Yes, Add Employee',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Submit the form
+            form.submit();
+        }
+    });
+}
+
+// Password visibility toggle functionality
+function togglePasswordVisibility(button) {
+    const targetId = button.getAttribute('data-target');
+    const targetInput = document.querySelector(targetId);
+    const icon = button.querySelector('i');
+    
+    if (targetInput && icon) {
+        if (targetInput.type === 'password') {
+            targetInput.type = 'text';
+            icon.className = 'ri-eye-off-line text-xl cursor-pointer';
+        } else {
+            targetInput.type = 'password';
+            icon.className = 'ri-eye-line text-xl cursor-pointer';
+        }
+    }
+}
+
+// Initialize modal functionality when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Close modal when clicking outside
+    document.getElementById('addEmployeeModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAddEmployeeModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('addEmployeeModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeAddEmployeeModal();
+            }
+        }
+    });
+    
+    // Password toggle event listeners are now attached when modal opens
+});
 </script>
 @endpush
 @endsection

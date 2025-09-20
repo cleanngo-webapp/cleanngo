@@ -151,6 +151,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/payment-proof/{proofId}/approve', [App\Http\Controllers\Admin\PaymentProofController::class, 'approve'])->name('payment-proof.approve');
     Route::post('/payment-proof/{proofId}/decline', [App\Http\Controllers\Admin\PaymentProofController::class, 'decline'])->name('payment-proof.decline');
     Route::get('/employees', [AdminEmployeeController::class, 'index'])->name('employees');
+    Route::post('/employees', [AdminEmployeeController::class, 'store'])->name('employees.store');
     Route::get('/employee/{userId}', [AdminEmployeeController::class, 'show'])->name('employee.show');
     Route::put('/employee/{userId}', [AdminEmployeeController::class, 'update'])->name('employee.update');
     Route::post('/employee/{employeeId}/increment-jobs', [AdminEmployeeController::class, 'incrementJobsCompleted'])->name('employee.increment-jobs');
