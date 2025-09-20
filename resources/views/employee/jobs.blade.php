@@ -114,7 +114,7 @@
                     </tr>
                 </thead>
                 <tbody id="jobs-table-body" class="bg-white divide-y divide-gray-200">
-                    @foreach($bookings as $b)
+                    @forelse($bookings as $b)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</div>
@@ -195,7 +195,41 @@
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <!-- Empty State Icon -->
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                                    <i class="ri-briefcase-3-line text-2xl text-gray-400"></i>
+                                </div>
+                                
+                                <!-- Empty State Content -->
+                                <div class="text-center">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Job Assignments Found</h3>
+                                    <p class="text-sm text-gray-500 mb-4">
+                                        @if(request()->has('search') || request()->has('sort'))
+                                            No job assignments match your current filters. Try adjusting your search criteria.
+                                        @else
+                                            You don't have any job assignments yet. Jobs will appear here once the admin assigns them to you.
+                                        @endif
+                                    </p>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center justify-center space-x-3">
+                                        @if(request()->has('search') || request()->has('sort'))
+                                            <button onclick="clearFilters()" 
+                                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                                <i class="ri-refresh-line mr-2"></i>
+                                                Clear Filters
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -490,6 +524,23 @@ function performSearch() {
             console.error('Search error:', error);
             tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
         });
+}
+
+// Clear all filters function
+function clearFilters() {
+    // Clear search input
+    const searchInput = document.getElementById('search-jobs');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Reset sort
+    currentSort = 'date';
+    currentSortOrder = 'desc';
+    updateSortButtons();
+    
+    // Perform search to refresh results
+    performSearch();
 }
 
 // Start Job confirmation function

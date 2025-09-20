@@ -253,6 +253,43 @@
                         </td>
                     </tr>
                     @endforeach
+                    
+                    {{-- Empty State --}}
+                    @if($bookings->isEmpty())
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <!-- Empty State Icon -->
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <i class="ri-calendar-line text-2xl text-gray-400"></i>
+                                </div>
+                                
+                                <!-- Empty State Content -->
+                                <div class="text-center">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Bookings Found</h3>
+                                    <p class="text-sm text-gray-500 mb-4">
+                                        @if(request()->has('search') || request()->has('status') || request()->has('date_from') || request()->has('date_to'))
+                                            No bookings match your current filters. Try adjusting your search criteria.
+                                        @else
+                                            Get started by creating your first booking or wait for customers to make bookings.
+                                        @endif
+                                    </p>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center justify-center space-x-3">
+                                        @if(request()->has('search') || request()->has('status') || request()->has('date_from') || request()->has('date_to'))
+                                            <button onclick="clearFilters()" 
+                                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                                <i class="ri-refresh-line mr-2"></i>
+                                                Clear Filters
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -560,6 +597,39 @@
                 console.error('Search error:', error);
                 tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
             });
+    }
+
+    // Clear all filters function
+    function clearFilters() {
+        // Clear search input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        // Clear status filter
+        const statusSelect = document.getElementById('status-filter');
+        if (statusSelect) {
+            statusSelect.value = '';
+        }
+        
+        // Clear date filters
+        const dateFromInput = document.getElementById('date-from');
+        const dateToInput = document.getElementById('date-to');
+        if (dateFromInput) {
+            dateFromInput.value = '';
+        }
+        if (dateToInput) {
+            dateToInput.value = '';
+        }
+        
+        // Reset sort
+        currentSort = 'scheduled_start';
+        currentSortOrder = 'desc';
+        updateSortButtons();
+        
+        // Perform search to refresh results
+        performSearch();
     }
     </script>
     <script>

@@ -182,8 +182,21 @@
 					</tr>
 					@empty
 					<tr>
-						<td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-							No recent bookings found
+						<td colspan="6" class="px-6 py-12 text-center">
+							<div class="flex flex-col items-center justify-center space-y-4">
+								<!-- Empty State Icon -->
+								<div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+									<i class="ri-calendar-line text-2xl text-gray-400"></i>
+								</div>
+								
+								<!-- Empty State Content -->
+								<div class="text-center">
+									<h3 class="text-lg font-medium text-gray-900 mb-2">No Recent Bookings Found</h3>
+									<p class="text-sm text-gray-500 mb-4">
+										No recent bookings have been made yet. Bookings will appear here once customers start making reservations.
+									</p>
+								</div>
+							</div>
 						</td>
 					</tr>
 					@endforelse

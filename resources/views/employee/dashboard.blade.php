@@ -150,10 +150,10 @@
 			</div>
 			@empty
 			<div class="text-center py-6">
-				<svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-				</svg>
-				<h3 class="mt-2 text-sm font-medium text-gray-900">No upcoming jobs</h3>
+				<div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+					<i class="ri-briefcase-3-line text-2xl text-gray-400"></i>
+				</div>
+				<h3 class="mt-2 text-sm font-medium text-gray-900">No Upcoming Jobs</h3>
 				<p class="mt-1 text-xs text-gray-500">You don't have any upcoming job assignments.</p>
 			</div>
 			@endforelse

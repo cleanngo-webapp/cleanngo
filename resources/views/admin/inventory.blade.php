@@ -153,8 +153,30 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500">
-                            No inventory items found. Click "Add Item" to get started.
+                        <td colspan="10" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <!-- Empty State Icon -->
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <i class="ri-box-3-line text-2xl text-gray-400"></i>
+                                </div>
+                                
+                                <!-- Empty State Content -->
+                                <div class="text-center">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Inventory Items Found</h3>
+                                    <p class="text-sm text-gray-500 mb-4">
+                                        No inventory items have been added yet. Click "Add Item" to start managing your inventory.
+                                    </p>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center justify-center space-x-3">
+                                        <button onclick="openAddModal()" 
+                                                class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+                                            <i class="ri-add-line mr-2"></i>
+                                            Add First Item
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     @endforelse

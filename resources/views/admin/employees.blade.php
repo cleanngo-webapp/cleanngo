@@ -155,8 +155,36 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
-                            No employees found
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <!-- Empty State Icon -->
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <i class="ri-user-settings-line text-2xl text-gray-400"></i>
+                                </div>
+                                
+                                <!-- Empty State Content -->
+                                <div class="text-center">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Employees Found</h3>
+                                    <p class="text-sm text-gray-500 mb-4">
+                                        @if(request()->has('search') || request()->has('sort'))
+                                            No employees match your current filters. Try adjusting your search criteria.
+                                        @else
+                                            No employees have been registered yet. Add employees to start managing your workforce.
+                                        @endif
+                                    </p>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center justify-center space-x-3">
+                                        @if(request()->has('search') || request()->has('sort'))
+                                            <button onclick="clearFilters()" 
+                                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                                <i class="ri-refresh-line mr-2"></i>
+                                                Clear Filters
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     @endforelse
@@ -273,6 +301,23 @@ function performSearch() {
             console.error('Search error:', error);
             tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
         });
+}
+
+// Clear all filters function
+function clearFilters() {
+    // Clear search input
+    const searchInput = document.getElementById('search-employees');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Reset sort
+    currentSort = 'employee_id';
+    currentSortOrder = 'asc';
+    updateSortButtons();
+    
+    // Perform search to refresh results
+    performSearch();
 }
 </script>
 @endpush
