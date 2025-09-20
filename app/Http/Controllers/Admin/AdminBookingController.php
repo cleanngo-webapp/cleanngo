@@ -297,6 +297,15 @@ class AdminBookingController extends Controller
             $booking->status = 'confirmed';
             $booking->save();
             
+            // Return JSON response for AJAX requests
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Booking confirmed successfully! You can now assign employees.',
+                    'booking_code' => $booking->code
+                ]);
+            }
+            
             return back()->with('status', 'Booking confirmed successfully. You can now assign employees and change status.');
         } else {
             // Cancel the booking - delete it completely
@@ -308,10 +317,21 @@ class AdminBookingController extends Controller
             $notificationService = app(\App\Services\NotificationService::class);
             $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
             
+            $bookingCode = $booking->code;
+            
             // Delete related records first
             $booking->staffAssignments()->delete();
             $booking->bookingItems()->delete();
             $booking->delete();
+            
+            // Return JSON response for AJAX requests
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Booking cancelled and removed successfully.',
+                    'booking_code' => $bookingCode
+                ]);
+            }
             
             return back()->with('status', 'Booking cancelled and removed.');
         }
@@ -355,6 +375,16 @@ class AdminBookingController extends Controller
             'assigned_at'  => now(),
             'assigned_by'  => Auth::id(),
         ]);
+        
+        // Return JSON response for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee assigned successfully!',
+                'booking_code' => $booking->code,
+                'employee_name' => $employee->user->first_name . ' ' . $employee->user->last_name
+            ]);
+        }
         
         return back()->with('status', 'Employee assigned.');
     }

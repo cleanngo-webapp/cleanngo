@@ -166,7 +166,7 @@
                             @else
                                 <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
                                     @csrf
-                                    <select name="employee_user_id" class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
+                                    <select id="assign-select-{{ $b->id }}" name="employee_user_id" class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
                                         <option class="cursor-pointer" value="">Assign Employee</option>
                                         @foreach($employees as $e)
                                             <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
@@ -179,11 +179,11 @@
                             @if($b->status === 'pending')
                                 {{-- Show confirmation buttons for pending bookings --}}
                                 <div class="flex gap-2">
-                                    <button class="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors cursor-pointer" 
+                                    <button id="confirm-btn-{{ $b->id }}" class="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors cursor-pointer" 
                                             onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'confirm')">
                                         Confirm
                                     </button>
-                                    <button class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer" 
+                                    <button id="cancel-btn-{{ $b->id }}" class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer" 
                                             onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'cancel')">
                                         Cancel
                                     </button>
@@ -716,24 +716,22 @@
     document.getElementById('confirmModalAction').addEventListener('click', function() {
         if (!pendingConfirmAction) return;
         
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/bookings/${pendingConfirmAction.bookingId}/confirm`;
+        const { bookingId, action } = pendingConfirmAction;
         
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+        // Show loading state on the table buttons
+        const confirmBtn = document.getElementById(`confirm-btn-${bookingId}`);
+        const cancelBtn = document.getElementById(`cancel-btn-${bookingId}`);
         
-        const action = document.createElement('input');
-        action.type = 'hidden';
-        action.name = 'action';
-        action.value = pendingConfirmAction.action;
+        if (action === 'confirm' && confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+        } else if (action === 'cancel' && cancelBtn) {
+            cancelBtn.disabled = true;
+            cancelBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+        }
         
-        form.appendChild(csrf);
-        form.appendChild(action);
-        document.body.appendChild(form);
-        form.submit();
+        // Submit via AJAX
+        submitBookingActionViaAjax(bookingId, action, { confirmBtn, cancelBtn });
         
         closeConfirmModal();
     });
@@ -1133,8 +1131,19 @@
         document.getElementById('assignModalClose').addEventListener('click', closeModal);
         document.getElementById('assignModalCancel').addEventListener('click', closeModal);
         document.getElementById('assignModalConfirm').addEventListener('click', function(){
-            if (pendingAssignForm) pendingAssignForm.submit();
-            closeModal();
+            if (pendingAssignForm) {
+                const bookingId = pendingAssignForm.getAttribute('data-booking-id');
+                const selectId = `assign-select-${bookingId}`;
+                const select = document.getElementById(selectId);
+                const confirmBtn = document.getElementById('assignModalConfirm');
+                
+                // Show loading state on the confirm button
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+                
+                // Submit via AJAX
+                submitEmployeeAssignmentViaAjax(pendingAssignForm, select, confirmBtn);
+            }
         });
         // Intercept change of assign selects (moved to Assigned Employee column)
         document.querySelectorAll('.assign-form .assign-select').forEach(function(sel){
@@ -1147,6 +1156,204 @@
         });
         // Status selectors are now handled by the status change button in actions column
     })();
+    
+    // AJAX submission functions for booking actions
+    function submitBookingActionViaAjax(bookingId, action, buttons = null) {
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+        formData.append('action', action);
+        
+        fetch(`/admin/bookings/${bookingId}/confirm`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success alert
+                showAdminSuccessAlert(data.message, data.booking_code);
+                
+                // Refresh the page to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                // Handle errors
+                showAdminErrorAlert(data.message || 'An error occurred.');
+                
+                // Reset buttons if provided
+                if (buttons) {
+                    if (buttons.confirmBtn) {
+                        buttons.confirmBtn.disabled = false;
+                        buttons.confirmBtn.innerHTML = 'Confirm';
+                    }
+                    if (buttons.cancelBtn) {
+                        buttons.cancelBtn.disabled = false;
+                        buttons.cancelBtn.innerHTML = 'Cancel';
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAdminErrorAlert('An error occurred. Please try again.');
+            
+            // Reset buttons if provided
+            if (buttons) {
+                if (buttons.confirmBtn) {
+                    buttons.confirmBtn.disabled = false;
+                    buttons.confirmBtn.innerHTML = 'Confirm';
+                }
+                if (buttons.cancelBtn) {
+                    buttons.cancelBtn.disabled = false;
+                    buttons.cancelBtn.innerHTML = 'Cancel';
+                }
+            }
+        });
+    }
+    
+    function submitEmployeeAssignmentViaAjax(form, select = null, confirmBtn = null) {
+        const formData = new FormData(form);
+        
+        // Debug: Log form data to console
+        console.log('Form action:', form.action);
+        console.log('Form data entries:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+        
+        // Show loading state on the select dropdown
+        if (select) {
+            select.disabled = true;
+            select.innerHTML = '<option>Assigning...</option>';
+        }
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success alert
+                showAdminSuccessAlert(data.message, data.booking_code, data.employee_name);
+                
+                // Close the modal
+                const modal = document.getElementById('assign-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                
+                // Refresh the page to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                // Handle errors
+                showAdminErrorAlert(data.message || 'An error occurred.');
+                
+                // Reset confirm button
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = 'Confirm';
+                }
+                
+                // Reset select if provided
+                if (select) {
+                    select.disabled = false;
+                    select.innerHTML = `
+                        <option value="">Assign Employee</option>
+                        @foreach($employees as $e)
+                            <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
+                        @endforeach
+                    `;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAdminErrorAlert('An error occurred. Please try again.');
+            
+            // Reset confirm button
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'Confirm';
+            }
+            
+            // Reset select if provided
+            if (select) {
+                select.disabled = false;
+                select.innerHTML = `
+                    <option value="">Assign Employee</option>
+                    @foreach($employees as $e)
+                        <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
+                    @endforeach
+                `;
+            }
+        });
+    }
+    
+    // Show admin success alert that auto-disappears
+    function showAdminSuccessAlert(message, bookingCode, employeeName = null) {
+        const alert = document.createElement('div');
+        alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+        alert.style.top = '80px'; // Position below the navigation bar
+        alert.style.transform = 'translateX(100%)';
+        
+        let alertContent = `
+            <div class="flex items-center space-x-3">
+                <i class="ri-check-line text-xl"></i>
+                <div>
+                    <div class="font-medium">${message}</div>
+                    <div class="text-sm opacity-90">Booking: ${bookingCode}</div>
+        `;
+        
+        if (employeeName) {
+            alertContent += `<div class="text-sm opacity-90">Employee: ${employeeName}</div>`;
+        }
+        
+        alertContent += `
+                </div>
+            </div>
+        `;
+        
+        alert.innerHTML = alertContent;
+        
+        document.body.appendChild(alert);
+        
+        // Animate in
+        setTimeout(() => {
+            alert.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            alert.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    // Show admin error alert
+    function showAdminErrorAlert(message) {
+        Swal.fire({
+            title: 'Error',
+            text: message,
+            icon: 'error',
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'OK'
+        });
+    }
     </script>
     @endpush
 </div>

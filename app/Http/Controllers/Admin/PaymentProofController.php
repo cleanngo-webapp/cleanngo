@@ -55,6 +55,16 @@ class PaymentProofController extends Controller
             'status' => 'pending',
         ]);
 
+        // Return JSON response for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment proof uploaded successfully! Waiting for admin approval.',
+                'booking_id' => $bookingId
+            ]);
+        }
+        
+        // Return redirect for regular form submissions
         return back()->with('status', 'Payment proof uploaded successfully. Waiting for admin approval.');
     }
 

@@ -621,9 +621,105 @@ function confirmAttachPayment() {
         focusCancel: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Submit the form
-            form.submit();
+            // Submit the form via AJAX
+            submitPaymentProofViaAjax(form);
         }
+    });
+}
+
+// Submit payment proof via AJAX and handle response
+function submitPaymentProofViaAjax(form) {
+    const formData = new FormData(form);
+    const submitButton = document.querySelector('button[onclick="confirmAttachPayment()"]');
+    
+    // Show loading state on the button
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Attaching Payment...';
+    }
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success alert that auto-disappears
+            showPaymentSuccessAlert(data.message);
+            
+            // Close modal and reset form
+            closePaymentModal();
+            
+            // Refresh the page after a short delay to show updated data
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // Handle validation errors
+            showPaymentErrorAlert(data.message || 'An error occurred while uploading the payment proof.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showPaymentErrorAlert('An error occurred while uploading the payment proof. Please try again.');
+    })
+    .finally(() => {
+        // Re-enable submit button
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Attach Payment';
+        }
+    });
+}
+
+// Show payment success alert that auto-disappears
+function showPaymentSuccessAlert(message) {
+    const alert = document.createElement('div');
+    alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+    alert.style.top = '80px'; // Position below the navigation bar
+    alert.style.transform = 'translateX(100%)';
+    
+    alert.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <i class="ri-check-line text-xl"></i>
+            <div>
+                <div class="font-medium">${message}</div>
+                <div class="text-sm opacity-90">Waiting for admin approval</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animate in
+    setTimeout(() => {
+        alert.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Show payment error alert
+function showPaymentErrorAlert(message) {
+    Swal.fire({
+        title: 'Upload Error',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'OK'
     });
 }
 

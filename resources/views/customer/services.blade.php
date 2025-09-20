@@ -943,24 +943,24 @@ function openBookingForm(){
   const addItem = (type, qty, unitPrice, areaSqm) => {
     qty = parseInt(qty||0); if(!qty && !areaSqm) return; items.push({ type, qty, unitPrice, areaSqm }); };
   // Sofa/Mattress
-  addItem('sofa_1_seater', document.getElementById('sofa_1').value, 4000);
-  addItem('sofa_2_seater', document.getElementById('sofa_2').value, 4000);
-  addItem('sofa_3_seater', document.getElementById('sofa_3').value, 4000);
-  addItem('sofa_4_seater', document.getElementById('sofa_4').value, 4000);
-  addItem('sofa_5_seater', document.getElementById('sofa_5').value, 4000);
-  addItem('sofa_6_seater', document.getElementById('sofa_6').value, 4000);
-  addItem('sofa_7_seater', document.getElementById('sofa_7').value, 4000);
-  addItem('sofa_8_seater', document.getElementById('sofa_8').value, 4000);
-  addItem('sofa_l_shape', document.getElementById('sofa_l').value, 4000);
-  addItem('sofa_cross', document.getElementById('sofa_cross').value, 4000);
-  addItem('mattress_single', document.getElementById('mattress_single').value, 4000);
-  addItem('mattress_double', document.getElementById('mattress_double').value, 4000);
-  addItem('mattress_king', document.getElementById('mattress_king').value, 4000);
-  addItem('mattress_california', document.getElementById('mattress_california').value, 4000);
+  addItem('sofa_1_seater', document.getElementById('sofa_1').textContent, 4000);
+  addItem('sofa_2_seater', document.getElementById('sofa_2').textContent, 4000);
+  addItem('sofa_3_seater', document.getElementById('sofa_3').textContent, 4000);
+  addItem('sofa_4_seater', document.getElementById('sofa_4').textContent, 4000);
+  addItem('sofa_5_seater', document.getElementById('sofa_5').textContent, 4000);
+  addItem('sofa_6_seater', document.getElementById('sofa_6').textContent, 4000);
+  addItem('sofa_7_seater', document.getElementById('sofa_7').textContent, 4000);
+  addItem('sofa_8_seater', document.getElementById('sofa_8').textContent, 4000);
+  addItem('sofa_l_shape', document.getElementById('sofa_l').textContent, 4000);
+  addItem('sofa_cross', document.getElementById('sofa_cross').textContent, 4000);
+  addItem('mattress_single', document.getElementById('mattress_single').textContent, 4000);
+  addItem('mattress_double', document.getElementById('mattress_double').textContent, 4000);
+  addItem('mattress_king', document.getElementById('mattress_king').textContent, 4000);
+  addItem('mattress_california', document.getElementById('mattress_california').textContent, 4000);
   // Carpet/Post/Disinfect/Glass (sqm * qty * 500)
   const addSqm = (label, sqmId, qtyId) => {
-    const sqm = parseFloat(document.getElementById(sqmId)?.value||0);
-    const qty = parseInt(document.getElementById(qtyId)?.value||0);
+    const sqm = parseFloat(document.getElementById(sqmId)?.textContent||0);
+    const qty = parseInt(document.getElementById(qtyId)?.textContent||0);
     if (sqm>0 && qty>0) items.push({ type: label, qty, unitPrice: 500, areaSqm: sqm });
   };
   addSqm('carpet_sqm', 'carpet_sqm', 'carpet_qty');
@@ -968,10 +968,10 @@ function openBookingForm(){
   addSqm('disinfect_sqm', 'disinfect_sqm', 'disinfect_qty');
   addSqm('glass_sqm', 'glass_sqm', 'glass_qty');
   // Car detailing
-  addItem('car_sedan', document.getElementById('car_sedan').value, 4000);
-  addItem('car_suv', document.getElementById('car_suv').value, 4000);
-  addItem('car_van', document.getElementById('car_van').value, 4000);
-  addItem('car_coaster', document.getElementById('car_coaster').value, 4000);
+  addItem('car_sedan', document.getElementById('car_sedan').textContent, 4000);
+  addItem('car_suv', document.getElementById('car_suv').textContent, 4000);
+  addItem('car_van', document.getElementById('car_van').textContent, 4000);
+  addItem('car_coaster', document.getElementById('car_coaster').textContent, 4000);
 
   window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }
@@ -1684,7 +1684,7 @@ function openBookingForm(){
     // Disable submit button and show loading state
     if (submitButton) {
       submitButton.disabled = true;
-      submitButton.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i>Creating Booking...';
+      submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Creating Booking...';
     }
     
     fetch(form.action, {

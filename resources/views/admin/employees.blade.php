@@ -606,7 +606,7 @@ function submitFormViaAjax(form) {
     // Disable submit button and show loading state
     if (submitButton) {
         submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i>Adding Employee...';
+        submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Adding Employee...';
     }
     
     fetch(form.action, {
