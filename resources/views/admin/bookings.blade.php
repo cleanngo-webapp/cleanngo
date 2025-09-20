@@ -895,7 +895,7 @@
                         </div>
                         <div>
                             <h3 class="font-medium text-gray-900 mb-2">Payment Proof Image</h3>
-                            <img src="${data.image_url}" alt="Payment Proof" class="w-full h-64 object-cover rounded-lg border">
+                            <img src="${data.image_url}" alt="Payment Proof" class="w-full h-64 object-cover rounded-lg">
                         </div>
                     </div>
                     ${data.admin_notes ? `

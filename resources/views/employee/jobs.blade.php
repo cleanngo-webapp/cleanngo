@@ -562,19 +562,8 @@ function confirmStartJob(jobId) {
         focusCancel: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Create and submit the form
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/employee/jobs/${jobId}/start`;
-            
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            
-            form.appendChild(csrfToken);
-            document.body.appendChild(form);
-            form.submit();
+            // Submit via AJAX
+            submitStartJobViaAjax(jobId);
         }
     });
 }
@@ -755,20 +744,167 @@ function confirmCompleteJob(jobId, jobCode) {
         allowOutsideClick: false
     }).then((result) => {
         if (result.isConfirmed) {
-            // Create and submit the form
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/employee/jobs/${jobId}/complete`;
-            
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            
-            form.appendChild(csrfToken);
-            document.body.appendChild(form);
-            form.submit();
+            // Submit via AJAX
+            submitCompleteJobViaAjax(jobId, jobCode);
         }
+    });
+}
+
+// AJAX submission functions for job actions
+function submitStartJobViaAjax(jobId) {
+    const formData = new FormData();
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+    
+    // Find and update the start job button to show loading state
+    const startButton = document.querySelector(`button[onclick="confirmStartJob(${jobId})"]`);
+    let originalButtonContent = '';
+    if (startButton) {
+        originalButtonContent = startButton.innerHTML;
+        startButton.disabled = true;
+        startButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1 inline-block"></div>Starting...';
+    }
+    
+    fetch(`/employee/jobs/${jobId}/start`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success alert
+            showJobActionSuccessAlert(data.message, 'started');
+            
+            // Refresh the page after a short delay to show updated data
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // Handle errors
+            showJobActionErrorAlert(data.message || 'An error occurred while starting the job.');
+            
+            // Reset button
+            if (startButton) {
+                startButton.disabled = false;
+                startButton.innerHTML = originalButtonContent;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showJobActionErrorAlert('An error occurred while starting the job. Please try again.');
+        
+        // Reset button
+        if (startButton) {
+            startButton.disabled = false;
+            startButton.innerHTML = originalButtonContent;
+        }
+    });
+}
+
+function submitCompleteJobViaAjax(jobId, jobCode) {
+    const formData = new FormData();
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+    
+    // Find and update the complete job button to show loading state
+    const completeButton = document.querySelector(`button[onclick="confirmCompleteJob(${jobId}, '${jobCode}')"]`);
+    let originalButtonContent = '';
+    if (completeButton) {
+        originalButtonContent = completeButton.innerHTML;
+        completeButton.disabled = true;
+        completeButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1 inline-block"></div>Completing...';
+    }
+    
+    fetch(`/employee/jobs/${jobId}/complete`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success alert
+            showJobActionSuccessAlert(data.message, 'completed');
+            
+            // Refresh the page after a short delay to show updated data
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // Handle errors
+            showJobActionErrorAlert(data.message || 'An error occurred while completing the job.');
+            
+            // Reset button
+            if (completeButton) {
+                completeButton.disabled = false;
+                completeButton.innerHTML = originalButtonContent;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showJobActionErrorAlert('An error occurred while completing the job. Please try again.');
+        
+        // Reset button
+        if (completeButton) {
+            completeButton.disabled = false;
+            completeButton.innerHTML = originalButtonContent;
+        }
+    });
+}
+
+// Show job action success alert that auto-disappears
+function showJobActionSuccessAlert(message, action) {
+    const alert = document.createElement('div');
+    alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+    alert.style.top = '80px'; // Position below the navigation bar
+    alert.style.transform = 'translateX(100%)';
+    
+    const iconClass = action === 'started' ? 'ri-play-line' : 'ri-check-line';
+    const actionText = action === 'started' ? 'Job Started' : 'Job Completed';
+    
+    alert.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <i class="${iconClass} text-xl"></i>
+            <div>
+                <div class="font-medium">${message}</div>
+                <div class="text-sm opacity-90">${actionText}</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animate in
+    setTimeout(() => {
+        alert.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Show job action error alert
+function showJobActionErrorAlert(message) {
+    Swal.fire({
+        title: 'Action Error',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'OK'
     });
 }
 </script>

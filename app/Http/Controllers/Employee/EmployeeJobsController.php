@@ -180,6 +180,15 @@ class EmployeeJobsController extends Controller
         $booking->status = 'in_progress';
         $booking->save(); // This will trigger the boot() method and send notifications
         
+        // Return JSON response for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Job started successfully!',
+                'booking_id' => $bookingId
+            ]);
+        }
+        
         return back()->with('status', 'Job started');
     }
 
@@ -211,6 +220,15 @@ class EmployeeJobsController extends Controller
         $booking->status = 'completed';
         $booking->completed_at = now();
         $booking->save(); // This will trigger the boot() method and send notifications
+        
+        // Return JSON response for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Job completed successfully!',
+                'booking_id' => $bookingId
+            ]);
+        }
         
         return back()->with('status', 'Job marked as completed');
     }
