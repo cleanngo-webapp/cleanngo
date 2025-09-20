@@ -268,23 +268,23 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-                    <select name="payment_method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" required>
-                        <option value="">Select payment method</option>
+                    <select name="payment_method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500 cursor-pointer" required>
+                        <option value="">Select Payment Method</option>
                         <option value="cash">Cash</option>
                         <option value="gcash">GCash</option>
                     </select>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Payment Proof Image</label>
-                    <input type="file" name="proof_image" accept="image/*" id="proof-image-input" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" required>
-                    <p class="text-xs text-gray-500 mt-1">Upload receipt or cash in hand image (max 2MB)</p>
+                    <input type="file" name="proof_image" accept="image/*" id="proof-image-input" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500 cursor-pointer" required>
+                    <p class="text-xs text-gray-500 mt-1 cursor-pointer">Upload Receipt or Cash in hand image (max 2MB)</p>
                     
                     <!-- Image Preview Container -->
                     <div id="image-preview-container" class="mt-3 hidden">
                         <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
                             <p class="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
                             <div class="relative">
-                                <img id="image-preview" src="" alt="Payment proof preview" class="w-full h-48 object-contain rounded border bg-white">
+                                <img id="image-preview" src="" alt="Payment proof preview" class="w-full h-48 object-contain rounded bg-white">
                                 <button type="button" id="remove-image-preview" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer" title="Remove image">
                                     ✕
                                 </button>
