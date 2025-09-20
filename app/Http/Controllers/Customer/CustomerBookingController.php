@@ -131,6 +131,16 @@ class CustomerBookingController extends Controller
         // Trigger notification after all booking items are created
         $booking->triggerBookingCreatedNotification();
 
+        // Return JSON response for AJAX requests (modal submissions)
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking created successfully!',
+                'booking_code' => $booking->code
+            ]);
+        }
+        
+        // Return redirect for regular form submissions
         return back()->with('status','Booking successful!');
     }
 
