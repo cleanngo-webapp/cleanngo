@@ -272,7 +272,8 @@
 									<input type="hidden" name="longitude" id="lng">
 								</div>
 								
-								<!-- Primary Address Checkbox -->
+								<!-- Primary Address Checkbox - Only show if user has existing addresses -->
+								@if(($addresses ?? collect())->count() > 0)
 								<div class="flex items-center">
 									<input type="checkbox" name="is_primary" value="1" id="is_primary" 
 										class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded cursor-pointer">
@@ -280,6 +281,18 @@
 										Set as primary address
 									</label>
 								</div>
+								@else
+								<!-- Hidden input to indicate this will be the first address (automatically primary) -->
+								<input type="hidden" name="is_primary" value="1">
+								<div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+									<div class="flex items-center gap-2">
+										<i class="ri-information-line text-blue-500"></i>
+										<p class="text-sm text-blue-700">
+											<strong>This will be your primary address</strong> since it's your first one. You can add more addresses later and change which one is primary.
+										</p>
+									</div>
+								</div>
+								@endif
 								
 								<!-- Save Button -->
 								<button type="button" onclick="openSaveAddressConfirm()" 

@@ -29,14 +29,26 @@ class CustomerAddressController extends Controller
         $data['user_id'] = $user->id;
 
         DB::transaction(function () use ($data, $user) {
-            if (!empty($data['is_primary'])) {
+            // Check if this is the user's first address
+            $existingAddressCount = DB::table('addresses')->where('user_id', $user->id)->count();
+            $isFirstAddress = $existingAddressCount === 0;
+            
+            // If this is the first address, automatically make it primary
+            // Otherwise, only make it primary if the checkbox was checked
+            $shouldBePrimary = $isFirstAddress || !empty($data['is_primary']);
+            
+            if ($shouldBePrimary) {
                 DB::table('addresses')->where('user_id', $user->id)->update(['is_primary' => false]);
             }
+            
+            // Set is_primary based on our logic
+            $data['is_primary'] = $shouldBePrimary;
+            
             try {
                 $address = Address::create($data);
                 
                 // If this is the primary address, update the customer's default_address_id
-                if (!empty($data['is_primary'])) {
+                if ($shouldBePrimary) {
                     DB::table('customers')
                         ->where('user_id', $user->id)
                         ->update(['default_address_id' => $address->id]);
@@ -51,7 +63,7 @@ class CustomerAddressController extends Controller
                     $address = Address::create($data);
                     
                     // If this is the primary address, update the customer's default_address_id
-                    if (!empty($data['is_primary'])) {
+                    if ($shouldBePrimary) {
                         DB::table('customers')
                             ->where('user_id', $user->id)
                             ->update(['default_address_id' => $address->id]);
