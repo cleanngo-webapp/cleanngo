@@ -238,14 +238,19 @@
         </div>
     </div>
     <div id="job-map-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-2xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Customer Location</div>
-                <button class="cursor-pointer" onclick="const m=document.getElementById('job-map-modal'); m.classList.add('hidden'); m.classList.remove('flex');">✕</button>
+        <div class="bg-white rounded-xl w-full max-w-xl p-4 m-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="font-semibold text-lg">Customer Location</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="const m=document.getElementById('job-map-modal'); m.classList.add('hidden'); m.classList.remove('flex');">✕</button>
             </div>
-            <div id="empLocationAddress" class="text-sm mb-1 text-gray-700"></div>
-            <div id="empLocationPhone" class="text-xs mb-2 text-gray-500"></div>
-            <div id="jobMap" class="h-80 rounded border"></div>
+            <div id="empLocationAddress" class="text-sm mb-3 text-gray-700 bg-gray-50 p-2 rounded border"></div>
+            <div id="empLocationPhone" class="text-xs mb-3 text-gray-500"></div>
+            <div id="jobMap" class="h-80 rounded border border-gray-300 bg-gray-100"></div>
+            <div class="flex justify-end gap-2 mt-3">
+                <button type="button" onclick="const m=document.getElementById('job-map-modal'); m.classList.add('hidden'); m.classList.remove('flex');" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer">
+                    Close
+                </button>
+            </div>
         </div>
     </div>
     <!-- Payment Proof Modal -->

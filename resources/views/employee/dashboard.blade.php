@@ -174,22 +174,23 @@
 
 <!-- Location Map Modal -->
 <div id="job-map-modal" class="fixed inset-0 bg-black/50 z-50 items-center justify-center" style="display: none;">
-	<div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-		<div class="flex justify-between items-center mb-4">
+	<div class="bg-white rounded-xl p-4 max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+		<div class="flex justify-between items-center mb-3">
 			<h3 class="text-lg font-semibold text-gray-900">Job Location</h3>
-			<button onclick="closeEmpLocation()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-				</svg>
+			<button onclick="closeEmpLocation()" class="text-gray-500 hover:text-gray-700 text-xl font-bold cursor-pointer">✕</button>
+		</div>
+		
+		<div class="mb-3">
+			<p id="empLocationAddress" class="text-sm text-gray-700 bg-gray-50 p-2 rounded border mb-2"></p>
+			<p id="empLocationPhone" class="text-xs text-gray-500"></p>
+		</div>
+		
+		<div id="jobMap" style="height: 400px; width: 100%;" class="rounded border border-gray-300 bg-gray-100"></div>
+		<div class="flex justify-end gap-2 mt-3">
+			<button type="button" onclick="closeEmpLocation()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer">
+				Close
 			</button>
 		</div>
-		
-		<div class="mb-4">
-			<p id="empLocationAddress" class="text-sm text-gray-600 mb-1"></p>
-			<p id="empLocationPhone" class="text-sm text-gray-500"></p>
-		</div>
-		
-		<div id="jobMap" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-200"></div>
 	</div>
 </div>
 
