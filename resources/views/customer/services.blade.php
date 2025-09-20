@@ -11,12 +11,12 @@
         <aside class="bg-emerald-700 flex flex-col rounded-xl border-none p-3 gap-2">
             <div class="font-semibold flex flex-col mb-2 text-center text-white">SERVICES</div>
             <div class="flex flex-col gap-2">
-                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="sofa">Sofa / Mattress Deep Cleaning</button>
-                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="carpet">Carpet Deep Cleaning</button>
-                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="carInterior">Home Service Car Interior Detailing</button>
-                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="postConstruction">Post Construction Cleaning</button>
-                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="disinfection">Enhanced Disinfection</button>
-                <button class="text-left text-white px-3 py-2 rounded hover:bg-gray-100 hover:text-black cursor-pointer" data-service="glass">Glass Cleaning</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="sofa">Sofa / Mattress Deep Cleaning</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="carpet">Carpet Deep Cleaning</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="carInterior">Home Service Car Interior Detailing</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="postConstruction">Post Construction Cleaning</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="disinfection">Enhanced Disinfection</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="glass">Glass Cleaning</button>
             </div>
         </aside>
 
@@ -381,7 +381,7 @@
         </section>
 
         <!-- Right: Receipt -->
-        <aside class="bg-white rounded-xl shadow-sm p-4">
+        <aside class="receipt-card bg-white rounded-xl shadow-sm p-4">
             <div class="font-bold text-lg uppercase mb-2">Total Estimation</div>
             <div class="text-xs text-gray-500 mb-3" id="receipt_title">Sofa / Mattress Deep Cleaning</div>
             
@@ -444,6 +444,46 @@
     @apply bg-white/15;
     border-color: rgba(255, 255, 255, 0.2);
 }
+
+/* Initial state - cards are hidden */
+#serviceForms {
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+#serviceForms.show {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Receipt card animation */
+.receipt-card {
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.receipt-card.show {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Active state for navigation buttons */
+.nav-button {
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-button.active {
+    background-color: white;
+    color: #059669; /* emerald-700 */
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 </style>
 <script>
 const peso = v => 'PHP ' + Number(v||0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -473,6 +513,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (newValue !== currentValue) {
                     display.textContent = newValue;
                     
+                    // Check and show/hide receipt card based on quantities
+                    checkAndShowReceiptCard();
+                    
                     // Trigger calculation update immediately
                     setTimeout(() => {
                         calc();
@@ -483,18 +526,30 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Service switching
+// Service switching with animations
 const forms = document.querySelectorAll('#serviceForms [data-form]');
 const navButtons = document.querySelectorAll('[data-service]');
-function showForm(name){
+const serviceFormsContainer = document.getElementById('serviceForms');
+const receiptCard = document.querySelector('.receipt-card');
+
+// State management
+let currentService = null;
+let hasQuantities = false;
+
+function showForm(name) {
+  // Update current service
+  currentService = name;
+  
+  // Show/hide forms
   forms.forEach(f => f.classList.toggle('hidden', f.getAttribute('data-form') !== name));
-  // Highlight active left nav item
+  
+  // Update navigation buttons
   navButtons.forEach(btn => {
     const isActive = btn.dataset.service === name;
-    btn.classList.toggle('bg-white', isActive);
-    btn.classList.toggle('text-black', isActive);
-    btn.classList.toggle('text-white', !isActive);
+    btn.classList.toggle('active', isActive);
   });
+  
+  // Update receipt title
   const titles = {
     sofa: 'Sofa / Mattress Deep Cleaning',
     carpet: 'Carpet Deep Cleaning',
@@ -504,16 +559,102 @@ function showForm(name){
     glass: 'Glass Cleaning'
   };
   document.getElementById('receipt_title').textContent = titles[name];
+  
+  // Show middle card with animation
+  showMiddleCard();
+  
+  // Check if we should show receipt card
+  checkAndShowReceiptCard();
+  
+  // Calculate totals
   calc();
 }
-navButtons.forEach(btn => btn.addEventListener('click', () => showForm(btn.dataset.service)));
+
+function showMiddleCard() {
+  if (serviceFormsContainer) {
+    serviceFormsContainer.classList.add('show');
+  }
+}
+
+function hideMiddleCard() {
+  if (serviceFormsContainer) {
+    serviceFormsContainer.classList.remove('show');
+  }
+}
+
+function showReceiptCard() {
+  if (receiptCard) {
+    receiptCard.classList.add('show');
+  }
+}
+
+function hideReceiptCard() {
+  if (receiptCard) {
+    receiptCard.classList.remove('show');
+  }
+}
+
+function checkAndShowReceiptCard() {
+  // Check if there are any quantities selected
+  const hasAnyQuantities = checkForQuantities();
+  
+  if (hasAnyQuantities && !hasQuantities) {
+    // First time showing quantities - show receipt card
+    showReceiptCard();
+    hasQuantities = true;
+  } else if (!hasAnyQuantities && hasQuantities) {
+    // No quantities left - hide receipt card
+    hideReceiptCard();
+    hasQuantities = false;
+  }
+}
+
+function checkForQuantities() {
+  // Check all quantity displays for values > 0
+  const quantityDisplays = document.querySelectorAll('.quantity-display');
+  for (let display of quantityDisplays) {
+    const value = parseInt(display.textContent) || 0;
+    if (value > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Add click event listeners to navigation buttons
+navButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    showForm(btn.dataset.service);
+  });
+});
+
+// Initialize page state
 document.addEventListener('DOMContentLoaded', () => {
-  // Default
-  let initial = 'sofa';
-  const hash = (window.location.hash||'').replace('#','');
-  const valid = ['sofa','carpet','carInterior','postConstruction','disinfection','glass'];
-  if (valid.includes(hash)) initial = hash;
-  showForm(initial);
+  // Check if user came from allservices page with hash
+  const hash = (window.location.hash || '').replace('#', '');
+  const validServices = ['sofa', 'carpet', 'carInterior', 'postConstruction', 'disinfection', 'glass'];
+  
+  if (validServices.includes(hash)) {
+    // User came from allservices page - show service immediately
+    // Set initial state first
+    currentService = hash;
+    hasQuantities = false;
+    
+    // Show the form without animation delay
+    showForm(hash);
+  } else {
+    // User came directly to services page - hide cards initially
+    currentService = null;
+    hasQuantities = false;
+    
+    // Ensure cards are hidden
+    if (serviceFormsContainer) {
+      serviceFormsContainer.classList.remove('show');
+    }
+    if (receiptCard) {
+      receiptCard.classList.remove('show');
+    }
+  }
 });
 
 function calc(){
@@ -706,7 +847,9 @@ function removeItem(inputId) {
     } else {
       element.textContent = 0;
     }
-  calc();
+    // Check and show/hide receipt card based on quantities
+    checkAndShowReceiptCard();
+    calc();
   }
 }
 
@@ -730,6 +873,8 @@ function removeSqmItem(sqmId, qtyId) {
     }
   }
   
+  // Check and show/hide receipt card based on quantities
+  checkAndShowReceiptCard();
   calc();
 }
 
@@ -756,6 +901,8 @@ function removeSofaMattressGroup() {
       }
     }
   });
+  // Check and show/hide receipt card based on quantities
+  checkAndShowReceiptCard();
   calc();
 }
 
@@ -771,6 +918,8 @@ function removeCarGroup() {
       }
     }
   });
+  // Check and show/hide receipt card based on quantities
+  checkAndShowReceiptCard();
   calc();
 }
 
