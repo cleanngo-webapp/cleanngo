@@ -24,9 +24,8 @@ class AdminInventoryController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request data
+        // Validate the request data (removed item_code validation since it will be auto-generated)
         $validator = Validator::make($request->all(), [
-            'item_code' => 'required|string|max:255|unique:inventory_items,item_code',
             'name' => 'required|string|max:255',
             'category' => 'required|in:Tools,Machine,Cleaning Agent,Consumables',
             'quantity' => 'required|numeric|min:0',
@@ -44,11 +43,18 @@ class AdminInventoryController extends Controller
         }
 
         try {
-            $item = InventoryItem::create($request->all());
+            // Auto-generate item code in format: I2025XXX (I + year + 3-digit unique number)
+            $itemCode = $this->generateItemCode();
+            
+            // Create the item with auto-generated code
+            $itemData = $request->all();
+            $itemData['item_code'] = $itemCode;
+            
+            $item = InventoryItem::create($itemData);
             
             return response()->json([
                 'success' => true,
-                'message' => 'Inventory item created successfully',
+                'message' => 'Inventory item created successfully!',
                 'item' => $item
             ]);
         } catch (\Exception $e) {
@@ -57,6 +63,32 @@ class AdminInventoryController extends Controller
                 'message' => 'Failed to create inventory item: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Generate a unique item code in format: I2025XXX
+     */
+    private function generateItemCode()
+    {
+        $year = now()->format('Y');
+        $prefix = 'I' . $year;
+        
+        // Get the highest existing code for this year
+        $lastItem = InventoryItem::where('item_code', 'like', $prefix . '%')
+            ->orderBy('item_code', 'desc')
+            ->first();
+        
+        if ($lastItem) {
+            // Extract the number part and increment
+            $lastNumber = (int) substr($lastItem->item_code, -3);
+            $newNumber = $lastNumber + 1;
+        } else {
+            // First item for this year
+            $newNumber = 1;
+        }
+        
+        // Ensure the number is 3 digits with leading zeros
+        return $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
     }
 
     /**

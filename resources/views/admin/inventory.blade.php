@@ -130,23 +130,19 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <button onclick="openEditModal({{ $item->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
-                                    <i class="ri-edit-line mr-1"></i>
-                                    Edit
+                                <button onclick="openEditModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" title="Edit">
+                                    <i class="ri-edit-line"></i>
                                 </button>
-                                <button onclick="openViewModal({{ $item->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
-                                    <i class="ri-eye-line mr-1"></i>
-                                    View
+                                <button onclick="openViewModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" title="View">
+                                    <i class="ri-eye-line"></i>
                                 </button>
                                 @if($item->notes)
-                                <button onclick="openNotesModal({{ $item->id }})" class="inline-flex items-center px-3 py-1.5 border border-blue-300 shadow-sm text-xs font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer">
-                                    <i class="ri-file-text-line mr-1"></i>
-                                    Notes
+                                <button onclick="openNotesModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-blue-300 shadow-sm text-xs font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" title="Notes">
+                                    <i class="ri-file-text-line"></i>
                                 </button>
                                 @endif
-                                <button onclick="deleteItem({{ $item->id }})" class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer">
-                                    <i class="ri-delete-bin-line mr-1"></i>
-                                    Delete
+                                <button onclick="deleteItem({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" title="Delete">
+                                    <i class="ri-delete-bin-line"></i>
                                 </button>
                             </div>
                         </td>
@@ -203,11 +199,7 @@
             </div>
             <form id="addForm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Code</label>
-                        <input type="text" name="item_code" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    </div>
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
                         <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
@@ -497,27 +489,106 @@ function closeNotesModal() {
 document.getElementById('addForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // Get form data for confirmation
     const formData = new FormData(this);
+    const name = formData.get('name');
+    const category = formData.get('category');
+    const quantity = formData.get('quantity');
+    const unitPrice = formData.get('unit_price');
+    const reorderLevel = formData.get('reorder_level');
+    const notes = formData.get('notes');
     
-    fetch('/admin/inventory', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire('Success', data.message, 'success').then(() => {
-                location.reload();
+    // Show confirmation dialog with item details
+    Swal.fire({
+        title: 'Confirm Add Item?',
+        html: `
+            <div class="text-left">
+                <p class="mb-3"><strong>Are you sure you want to add this inventory item?</strong></p>
+                <div class="bg-gray-50 p-4 rounded-lg text-sm space-y-2">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Item Name:</span>
+                        <span class="text-gray-900">${name}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Category:</span>
+                        <span class="text-gray-900">${category}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Quantity:</span>
+                        <span class="text-gray-900">${parseFloat(quantity).toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Unit Price:</span>
+                        <span class="text-gray-900">₱${parseFloat(unitPrice).toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Re-order Level:</span>
+                        <span class="text-gray-900">${parseFloat(reorderLevel).toFixed(2)}</span>
+                    </div>
+                    ${notes ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Notes:</span>
+                        <span class="text-gray-900 text-right max-w-xs">${notes}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                <p class="mt-3 text-sm text-gray-600">Please verify all details are correct before proceeding.</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Add Item',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading state on the submit button
+            const submitButton = document.querySelector('#addForm button[type="submit"]');
+            const originalButtonContent = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Adding Item...';
+            
+            fetch('/admin/inventory', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success alert that auto-disappears
+                    showInventorySuccessAlert(data.message);
+                    
+                    // Close modal and reset form
+                    closeAddModal();
+                    
+                    // Refresh the page after a short delay to show updated data
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    // Handle validation errors
+                    showInventoryErrorAlert(data.message || 'An error occurred while creating the inventory item.');
+                    
+                    // Reset button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonContent;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showInventoryErrorAlert('An error occurred while creating the inventory item. Please try again.');
+                
+                // Reset button
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonContent;
             });
-        } else {
-            Swal.fire('Error', data.message, 'error');
         }
-    })
-    .catch(error => {
-        Swal.fire('Error', 'Failed to create item', 'error');
     });
 });
 
@@ -582,6 +653,52 @@ function deleteItem(itemId) {
                 Swal.fire('Error', 'Failed to delete item', 'error');
             });
         }
+    });
+}
+
+// Show inventory success alert that auto-disappears
+function showInventorySuccessAlert(message) {
+    const alert = document.createElement('div');
+    alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+    alert.style.top = '80px'; // Position below the navigation bar
+    alert.style.transform = 'translateX(100%)';
+    
+    alert.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <i class="ri-check-line text-xl"></i>
+            <div>
+                <div class="font-medium">${message}</div>
+                <div class="text-sm opacity-90">Item Added Successfully</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animate in
+    setTimeout(() => {
+        alert.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Show inventory error alert
+function showInventoryErrorAlert(message) {
+    Swal.fire({
+        title: 'Error',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'OK'
     });
 }
 </script>
