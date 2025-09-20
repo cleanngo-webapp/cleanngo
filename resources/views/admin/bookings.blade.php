@@ -1033,44 +1033,31 @@
     document.getElementById('confirmApproveBtn').addEventListener('click', function() {
         if (!currentProofId) return;
         
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/payment-proof/${currentProofId}/approve`;
+        // Show loading state on the button
+        const button = this;
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Approving...';
         
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-        
-        form.appendChild(csrf);
-        document.body.appendChild(form);
-        form.submit();
+        // Submit via AJAX
+        submitPaymentApprovalViaAjax(currentProofId, button, originalText);
     });
     
     // Handle final decline
     document.getElementById('confirmDeclineBtn').addEventListener('click', function() {
         if (!currentProofId) return;
         
+        // Show loading state on the button
+        const button = this;
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Declining...';
+        
+        // Get decline reason
         const declineReason = document.querySelector('#decline-form textarea[name="admin_notes"]').value.trim();
         
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/payment-proof/${currentProofId}/decline`;
-        
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-        
-        const notesInput = document.createElement('input');
-        notesInput.type = 'hidden';
-        notesInput.name = 'admin_notes';
-        notesInput.value = declineReason;
-        
-        form.appendChild(csrf);
-        form.appendChild(notesInput);
-        document.body.appendChild(form);
-        form.submit();
+        // Submit via AJAX
+        submitPaymentDeclineViaAjax(currentProofId, declineReason, button, originalText);
     });
     
     // Status modal handlers
@@ -1353,6 +1340,134 @@
             confirmButtonColor: '#dc2626',
             confirmButtonText: 'OK'
         });
+    }
+    
+    // AJAX submission functions for payment proof actions
+    function submitPaymentApprovalViaAjax(proofId, button, originalText) {
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+        
+        fetch(`/admin/payment-proof/${proofId}/approve`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success alert
+                showPaymentActionSuccessAlert(data.message, 'approved');
+                
+                // Close the approval modal
+                closeApproveConfirmationModal();
+                
+                // Refresh the page to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                // Handle errors
+                showAdminErrorAlert(data.message || 'An error occurred while approving the payment proof.');
+                
+                // Reset button
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAdminErrorAlert('An error occurred while approving the payment proof. Please try again.');
+            
+            // Reset button
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+    }
+    
+    function submitPaymentDeclineViaAjax(proofId, declineReason, button, originalText) {
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+        formData.append('admin_notes', declineReason);
+        
+        fetch(`/admin/payment-proof/${proofId}/decline`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success alert
+                showPaymentActionSuccessAlert(data.message, 'declined');
+                
+                // Close the decline modal
+                closeDeclineConfirmationModal();
+                
+                // Refresh the page to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                // Handle errors
+                showAdminErrorAlert(data.message || 'An error occurred while declining the payment proof.');
+                
+                // Reset button
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAdminErrorAlert('An error occurred while declining the payment proof. Please try again.');
+            
+            // Reset button
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+    }
+    
+    // Show payment action success alert that auto-disappears
+    function showPaymentActionSuccessAlert(message, action) {
+        const alert = document.createElement('div');
+        alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+        alert.style.top = '80px'; // Position below the navigation bar
+        alert.style.transform = 'translateX(100%)';
+        
+        const iconClass = action === 'approved' ? 'ri-check-line' : 'ri-close-line';
+        const actionText = action === 'approved' ? 'Payment Approved' : 'Payment Declined';
+        
+        alert.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <i class="${iconClass} text-xl"></i>
+                <div>
+                    <div class="font-medium">${message}</div>
+                    <div class="text-sm opacity-90">${actionText}</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Animate in
+        setTimeout(() => {
+            alert.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            alert.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300);
+        }, 3000);
     }
     </script>
     @endpush

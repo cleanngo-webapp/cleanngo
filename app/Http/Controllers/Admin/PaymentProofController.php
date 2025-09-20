@@ -94,6 +94,16 @@ class PaymentProofController extends Controller
             'updated_at' => now(),
         ]);
 
+        // Return JSON response for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment proof approved successfully!',
+                'proof_id' => $proofId
+            ]);
+        }
+        
+        // Return redirect for regular form submissions
         return back()->with('status', 'Payment proof approved successfully.');
     }
 
@@ -115,6 +125,16 @@ class PaymentProofController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        // Return JSON response for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment proof declined successfully!',
+                'proof_id' => $proofId
+            ]);
+        }
+        
+        // Return redirect for regular form submissions
         return back()->with('status', 'Payment proof declined. Employee can upload a new one.');
     }
 
