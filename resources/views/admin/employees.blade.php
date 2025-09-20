@@ -592,9 +592,101 @@ function submitAddEmployeeForm() {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Submit the form
-            form.submit();
+            // Submit the form via AJAX
+            submitFormViaAjax(form);
         }
+    });
+}
+
+// Submit form via AJAX and handle response
+function submitFormViaAjax(form) {
+    const formData = new FormData(form);
+    const submitButton = document.querySelector('button[onclick="submitAddEmployeeForm()"]');
+    
+    // Disable submit button and show loading state
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i>Adding Employee...';
+    }
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success alert that auto-disappears
+            showSuccessAlert(data.message);
+            
+            // Close modal and reset form
+            closeAddEmployeeModal();
+            
+            // Refresh the page to show the new employee
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            // Handle validation errors
+            showErrorAlert(data.message || 'An error occurred while creating the employee.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorAlert('An error occurred while creating the employee. Please try again.');
+    })
+    .finally(() => {
+        // Re-enable submit button
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Add Employee';
+        }
+    });
+}
+
+// Show success alert that auto-disappears
+function showSuccessAlert(message) {
+    const alert = document.createElement('div');
+    alert.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+    alert.style.transform = 'translateX(100%)';
+    
+    alert.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <i class="ri-check-line text-xl"></i>
+            <span class="font-medium">${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animate in
+    setTimeout(() => {
+        alert.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Show error alert
+function showErrorAlert(message) {
+    Swal.fire({
+        title: 'Error',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'OK'
     });
 }
 

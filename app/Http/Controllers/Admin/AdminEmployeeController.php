@@ -141,6 +141,15 @@ class AdminEmployeeController extends Controller
             'employee_code' => 'E' . now()->format('Y') . str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT),
         ]);
 
+        // Return JSON response for AJAX requests (modal submissions)
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee created successfully!'
+            ]);
+        }
+        
+        // Return redirect for regular form submissions
         return redirect()->route('admin.employees')
             ->with('status', 'Employee created successfully!');
     }
