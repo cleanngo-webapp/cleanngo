@@ -284,10 +284,10 @@
 								@else
 								<!-- Hidden input to indicate this will be the first address (automatically primary) -->
 								<input type="hidden" name="is_primary" value="1">
-								<div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+								<div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
 									<div class="flex items-center gap-2">
-										<i class="ri-information-line text-blue-500"></i>
-										<p class="text-sm text-blue-700">
+										<i class="ri-information-line text-emerald-500"></i>
+										<p class="text-sm text-emerald-700">
 											<strong>This will be your primary address</strong> since it's your first one. You can add more addresses later and change which one is primary.
 										</p>
 									</div>

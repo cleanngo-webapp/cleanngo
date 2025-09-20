@@ -125,6 +125,8 @@
 @endsection
 
 @push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 const peso = v => 'PHP ' + Number(v||0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
@@ -445,7 +447,12 @@ function openBookingForm(){
           <span class="font-medium">{{ auth()->user()->phone ?? '—' }}</span>
         </div>
         
-        @php $primary = optional(DB::table('addresses')->where('user_id', auth()->id())->orderByDesc('is_primary')->orderBy('id')->first()); @endphp
+        @php 
+          // Use the Address model to ensure proper casting of coordinates
+          $primary = \App\Models\Address::where('user_id', auth()->id())->orderByDesc('is_primary')->orderBy('id')->first();
+          // Make this variable available globally for JavaScript
+          $GLOBALS['primaryAddress'] = $primary;
+        @endphp
         @if(!$primary)
           <div class="text-red-600 text-sm bg-red-50 p-2 rounded border border-red-200">
             Please set your address first before booking.
@@ -453,7 +460,7 @@ function openBookingForm(){
         @else
           <div class="text-sm">
             <span class="text-gray-600">Address:</span> 
-            <span class="font-medium">{{ $primary->line1 }} {{ $primary->city ? ', '.$primary->city : '' }} {{ $primary->province ? ', '.$primary->province : '' }}</span>
+            <span class="font-medium">{{ $primary->line1 }}{{ $primary->barangay ? ', '.$primary->barangay : '' }}{{ $primary->city ? ', '.$primary->city : '' }}{{ $primary->province ? ', '.$primary->province : '' }}{{ $primary->postal_code ? ', '.$primary->postal_code : '' }}</span>
           </div>
           <input type="hidden" name="address_id" value="{{ $primary->id }}">
         @endif
@@ -946,11 +953,23 @@ function openBookingForm(){
     }
   });
 
+  // Get the primary address data at the top level - use the global variable
+  const primaryAddressData = @json($GLOBALS['primaryAddress'] ?? null);
+  
+  // Debug: Check what the PHP $primary variable contains
+  console.log('PHP $primary variable value:', @json($GLOBALS['primaryAddress'] ?? null));
+  console.log('Full address object:', primaryAddressData);
+  if (primaryAddressData) {
+    console.log('Address ID:', primaryAddressData.id);
+    console.log('Address coordinates:', primaryAddressData.latitude, primaryAddressData.longitude);
+  }
+  
   // Function to handle form submission confirmation
   function confirmBookingSubmission(event) {
     event.preventDefault();
     
-    // Check if the address_id hidden input exists and has a value
+    // Check if customer has a primary address by looking for the address_id input field
+    // If the form shows an address, there will be a hidden input with address_id
     const addressInput = document.querySelector('input[name="address_id"]');
     const hasAddress = addressInput && addressInput.value && addressInput.value.trim() !== '';
     
@@ -981,27 +1000,260 @@ function openBookingForm(){
         }
       });
     } else {
-      // Show normal booking confirmation if address exists
+      // Get the address from the form's display - look for the span after "Address:"
+      let addressString = 'Address not found';
+      
+      // Always use the global address data for consistency
+      let addressData = primaryAddressData;
+      
+      // Find the div that contains "Address:" and get the span after it
+      const addressDivs = document.querySelectorAll('.text-sm');
+      for (let div of addressDivs) {
+        if (div.textContent.includes('Address:')) {
+          const addressSpan = div.querySelector('span.font-medium');
+          if (addressSpan) {
+            // Clean up the address string by removing extra spaces around commas
+            addressString = addressSpan.textContent.trim().replace(/\s*,\s*/g, ', ');
+            break;
+          }
+        }
+      }
+      
+      // If we still don't have the address from form display, build it from global data
+      if (addressString === 'Address not found' && addressData && addressData.line1) {
+        const parts = [];
+        if (addressData.line1) parts.push(addressData.line1);
+        if (addressData.barangay) parts.push(addressData.barangay);
+        if (addressData.city) parts.push(addressData.city);
+        if (addressData.province) parts.push(addressData.province);
+        if (addressData.postal_code) parts.push(addressData.postal_code);
+        addressString = parts.join(', ');
+      }
+      
+      // Debug logging
+      console.log('Address from form display:', addressString);
+      console.log('Primary address data:', primaryAddressData);
+      console.log('Address data for map:', addressData);
+      console.log('Has postal code:', addressData ? addressData.postal_code : 'no addressData');
+      console.log('Has coordinates:', addressData ? (addressData.latitude && addressData.longitude) : 'no addressData');
+      console.log('Latitude value:', addressData ? addressData.latitude : 'no addressData');
+      console.log('Longitude value:', addressData ? addressData.longitude : 'no addressData');
+      console.log('Coordinates check:', addressData ? (addressData.latitude != null && addressData.longitude != null && addressData.latitude != 0 && addressData.longitude != 0) : false);
+      
+      // Additional debugging for coordinate issues
+      if (addressData) {
+        console.log('Raw latitude:', addressData.latitude, 'Type:', typeof addressData.latitude);
+        console.log('Raw longitude:', addressData.longitude, 'Type:', typeof addressData.longitude);
+        console.log('Latitude is zero?', addressData.latitude === 0);
+        console.log('Longitude is zero?', addressData.longitude === 0);
+        console.log('Latitude is null?', addressData.latitude === null);
+        console.log('Longitude is null?', addressData.longitude === null);
+        console.log('Parsed latitude:', parseFloat(addressData.latitude));
+        console.log('Parsed longitude:', parseFloat(addressData.longitude));
+        console.log('Is latitude NaN?', isNaN(parseFloat(addressData.latitude)));
+        console.log('Is longitude NaN?', isNaN(parseFloat(addressData.longitude)));
+      }
+      
+      // Build full address with postal code (ensure it's included if not already present)
+      let fullAddressString = addressString;
+      if (addressData && addressData.postal_code && !addressString.includes(addressData.postal_code)) {
+        fullAddressString += `, ${addressData.postal_code}`;
+      }
+      
+      console.log('Final address string:', fullAddressString);
+      // Check if coordinates are valid (not null, not zero, and not empty)
+      const hasValidCoordinates = addressData && 
+        addressData.latitude != null && 
+        addressData.longitude != null && 
+        addressData.latitude !== 0 && 
+        addressData.longitude !== 0 &&
+        addressData.latitude !== '0' && 
+        addressData.longitude !== '0' &&
+        !isNaN(parseFloat(addressData.latitude)) && 
+        !isNaN(parseFloat(addressData.longitude)) &&
+        parseFloat(addressData.latitude) !== 0 &&
+        parseFloat(addressData.longitude) !== 0;
+      
+      console.log('Will show view location button:', hasValidCoordinates);
+      
+      // Show confirmation modal with primary address details
       Swal.fire({
         title: 'Confirm Booking',
-        text: 'Are you sure you want to submit this booking?',
+        html: `
+          <div class="text-left">
+            <p class="mb-3">Are you sure you want to submit this booking?</p>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4">
+              <div class="flex items-start gap-2">
+                <i class="ri-map-pin-line text-emerald-500 text-lg mt-0.5"></i>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-emerald-800 mb-1">Primary Address:</p>
+                  <p class="text-sm text-emerald-700 mb-2">${fullAddressString}</p>
+                  ${hasValidCoordinates ? `
+                    <button type="button" onclick="openBookingAddressMap(${addressData.latitude}, ${addressData.longitude}, '${fullAddressString}')" 
+                            class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white text-sm rounded-md hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer">
+                      <i class="ri-map-pin-line mr-1.5"></i>
+                      View Location on Map
+                    </button>
+                  ` : `
+                    <p class="text-xs text-blue-600 italic">Map location not available</p>
+                  `}
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">Is this your correct primary address for the service?</p>
+          </div>
+        `,
         icon: 'question',
         showCancelButton: true,
+        showDenyButton: true,
         confirmButtonText: 'Yes, Book Now!',
+        denyButtonText: 'Change Address',
         cancelButtonText: 'Cancel',
         confirmButtonColor: '#10b981',
+        denyButtonColor: '#3b82f6',
         cancelButtonColor: '#ef4444'
       }).then((result) => {
         if (result.isConfirmed) {
           // Submit the form
           event.target.submit();
+        } else if (result.isDenied) {
+          // Redirect to profile page to change address
+          window.location.href = '{{ route("customer.profile") }}#addresses';
         }
       });
     }
     
     return false; // Prevent default form submission
   }
+  
+  // Function to open address map modal for booking confirmation
+  function openBookingAddressMap(latitude, longitude, addressText) {
+    const modal = document.getElementById('booking-address-map-modal');
+    const addressEl = document.getElementById('bookingAddressLocationAddress');
+    const mapContainer = document.getElementById('bookingAddressMap');
+    
+    // Show modal first
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Set address text
+    addressEl.textContent = addressText || 'Address location';
+    
+    // Parse coordinates with better validation
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+    
+    // Validate coordinates - if invalid, use default Naga City coordinates
+    const validLat = !isNaN(lat) && lat !== 0 ? lat : 13.6218;
+    const validLng = !isNaN(lng) && lng !== 0 ? lng : 123.1948;
+    
+    console.log('Opening map modal with coordinates:', validLat, validLng);
+    console.log('Original coordinates:', latitude, longitude);
+    
+    // Clear any existing map content to ensure clean initialization
+    if (mapContainer) {
+      mapContainer.innerHTML = '';
+    }
+    
+    // Initialize map after modal is visible
+    setTimeout(() => {
+      try {
+        // Create new map instance
+        window.bookingAddressMap = L.map('bookingAddressMap', {
+          center: [validLat, validLng],
+          zoom: 15,
+          zoomControl: true
+        });
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(window.bookingAddressMap);
+        
+        // Add marker
+        window.bookingAddressMarker = L.marker([validLat, validLng], {
+          title: addressText || 'Service Location'
+        }).addTo(window.bookingAddressMap);
+        
+        // Add popup to marker
+        window.bookingAddressMarker.bindPopup(`
+          <div class="text-center">
+            <strong>Service Location</strong><br>
+            <small>${addressText || 'Address location'}</small>
+          </div>
+        `);
+        
+        // Ensure map renders properly after modal animation
+        setTimeout(() => {
+          if (window.bookingAddressMap) {
+            window.bookingAddressMap.invalidateSize();
+            console.log('Map initialized and size invalidated');
+          }
+        }, 200);
+        
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        // Show error message in map container
+        if (mapContainer) {
+          mapContainer.innerHTML = `
+            <div class="flex items-center justify-center h-full bg-gray-100 rounded border">
+              <div class="text-center text-gray-600">
+                <i class="ri-map-pin-line text-2xl mb-2"></i>
+                <p class="text-sm">Map could not be loaded</p>
+                <p class="text-xs text-gray-500">Location: ${addressText || 'Address location'}</p>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }, 100);
+  }
+  
+  // Function to close booking address map modal
+  function hideBookingAddressMap() {
+    const modal = document.getElementById('booking-address-map-modal');
+    const mapContainer = document.getElementById('bookingAddressMap');
+    
+    // Hide modal
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // Clean up map instance to prevent memory leaks
+    if (window.bookingAddressMap) {
+      try {
+        window.bookingAddressMap.remove();
+        window.bookingAddressMap = null;
+        window.bookingAddressMarker = null;
+        console.log('Map instance cleaned up');
+      } catch (error) {
+        console.error('Error cleaning up map:', error);
+      }
+    }
+    
+    // Clear map container content
+    if (mapContainer) {
+      mapContainer.innerHTML = '';
+    }
+  }
   </script>
 </div>
 @endpush
+
+<!-- Booking Address Location Map Modal -->
+<div id="booking-address-map-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999]" onclick="hideBookingAddressMap()">
+    <div class="bg-white rounded-xl w-full max-w-xl p-4 m-4" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between mb-3">
+            <div class="font-semibold text-lg">Service Address Location</div>
+            <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="hideBookingAddressMap()">✕</button>
+        </div>
+        <div id="bookingAddressLocationAddress" class="text-sm mb-3 text-gray-700 bg-gray-50 p-2 rounded border"></div>
+        <div id="bookingAddressMap" class="h-80 rounded border border-gray-300 bg-gray-100"></div>
+        <div class="flex justify-end gap-2 mt-3">
+            <button type="button" onclick="hideBookingAddressMap()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 
