@@ -22,7 +22,10 @@ class AdminBookingController extends Controller
             ->leftJoin('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
             ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
             ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
-            ->leftJoin('addresses as a', 'a.id', '=', 'b.address_id')
+            ->leftJoin('addresses as a', function($join) {
+                $join->on('a.user_id', '=', 'u.id')
+                     ->where('a.is_primary', '=', 1);
+            })
             ->leftJoin('payment_proofs as pp', function($join) {
                 $join->on('pp.booking_id', '=', 'b.id')
                      ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');

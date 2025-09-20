@@ -535,7 +535,7 @@ function openBookingForm(){
         <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 transition-colors duration-200" onclick="closeBookingModal()">
           Cancel
         </button>
-        <button type="submit" class="px-4 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-800 transition-colors duration-200" @if(!$primary) disabled @endif>
+        <button type="submit" class="px-4 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-800 transition-colors duration-200">
           Book Now
         </button>
       </div>
@@ -950,21 +950,54 @@ function openBookingForm(){
   function confirmBookingSubmission(event) {
     event.preventDefault();
     
-    Swal.fire({
-      title: 'Confirm Booking',
-      text: 'Are you sure you want to submit this booking?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Book Now!',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#10b981',
-      cancelButtonColor: '#ef4444'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Submit the form
-        event.target.submit();
-      }
-    });
+    // Check if the address_id hidden input exists and has a value
+    const addressInput = document.querySelector('input[name="address_id"]');
+    const hasAddress = addressInput && addressInput.value && addressInput.value.trim() !== '';
+    
+    if (!hasAddress) {
+      // Show address setup alert if no address exists
+      Swal.fire({
+        title: 'Address Required',
+        html: `
+          <div class="text-left">
+            <p class="mb-3">You don't have an address set up yet. Please add your address in your profile page before making a booking.</p>
+            <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm">
+              <p class="text-blue-800"><strong>📍 Why do we need your address?</strong></p>
+              <p class="text-blue-700 mt-1">We need your address to provide our cleaning services at your location.</p>
+            </div>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Go to Profile',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280',
+        focusCancel: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Redirect to profile page
+          window.location.href = '{{ route("customer.profile") }}';
+        }
+      });
+    } else {
+      // Show normal booking confirmation if address exists
+      Swal.fire({
+        title: 'Confirm Booking',
+        text: 'Are you sure you want to submit this booking?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Book Now!',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#ef4444'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Submit the form
+          event.target.submit();
+        }
+      });
+    }
     
     return false; // Prevent default form submission
   }
