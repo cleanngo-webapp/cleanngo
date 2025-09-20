@@ -78,6 +78,67 @@
 		</form>
 	</div>
 	</div>
+
+	<script>
+		// Handle form submission with SweetAlert confirmation
+		document.addEventListener('DOMContentLoaded', function() {
+			const form = document.querySelector('form[action="{{ route('register.post') }}"]');
+			
+			form.addEventListener('submit', function(e) {
+				e.preventDefault(); // Prevent default form submission
+				
+				// Get form data for validation and confirmation
+				const formData = new FormData(form);
+				const password = formData.get('password');
+				const passwordConfirmation = formData.get('password_confirmation');
+				const firstName = formData.get('first_name');
+				const lastName = formData.get('last_name');
+				const email = formData.get('email');
+				const contact = formData.get('contact');
+				const role = formData.get('role');
+				
+				// Validate password match first
+				if (password !== passwordConfirmation) {
+					Swal.fire({
+						title: 'Password Mismatch',
+						text: 'Password and Confirm Password do not match. Please check and try again.',
+						icon: 'error',
+						confirmButtonColor: '#dc2626', // red-600 color
+						confirmButtonText: 'OK'
+					});
+					return; // Stop execution if passwords don't match
+				}
+				
+				// Show SweetAlert confirmation dialog only if passwords match
+				Swal.fire({
+					title: 'Confirm Registration',
+					html: `
+						<div class="text-left">
+							<p class="mb-2"><strong>Please confirm your details:</strong></p>
+							<p class="mb-1"><strong>Name:</strong> ${firstName} ${lastName}</p>
+							<p class="mb-1"><strong>Email:</strong> ${email}</p>
+							<p class="mb-1"><strong>Contact:</strong> ${contact}</p>
+							<p class="mb-1"><strong>Role:</strong> ${role.charAt(0).toUpperCase() + role.slice(1)}</p>
+							<p class="mt-3 text-sm text-gray-600">Are you sure these credentials are correct?</p>
+						</div>
+					`,
+					icon: 'question',
+					showCancelButton: true,
+					confirmButtonColor: '#047857', // emerald-700 color
+					cancelButtonColor: '#dc2626', // red-600 color
+					confirmButtonText: 'Yes, Sign Up',
+					cancelButtonText: 'Cancel',
+					reverseButtons: true
+				}).then((result) => {
+					if (result.isConfirmed) {
+						// If confirmed, submit the form
+						form.submit();
+					}
+					// If cancelled, do nothing (form stays on page)
+				});
+			});
+		});
+	</script>
 @endsection
 
 

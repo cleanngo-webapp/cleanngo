@@ -24,72 +24,358 @@
         <section class="bg-brand-green rounded-xl text-white p-4 md:col-span-1" id="serviceForms">
             <!-- Sofa/Mattress -->
             <div data-form="sofa" class="hidden">
-                <h2 class="font-semibold text-center">Sofa Deep Cleaning</h2>
-                <div class="mt-3 flex flex-col gap-2 text-sm">
-                    <div class="flex items-center gap-2"><span class="flex-1">1 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_1" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">2 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_2" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">3 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_3" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">4 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_4" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">5 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_5" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">6 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_6" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">7 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_7" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">8 seater</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_8" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">L-shape</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_l" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Cross Sectional</span><span class="w-10 text-center text-white">Qty</span><input id="sofa_cross" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                <h2 class="font-semibold text-center mb-4">Sofa Deep Cleaning</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">1 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_1" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_1" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_1" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
                 </div>
-                <h2 class="font-semibold mt-6 text-center">Mattress Deep Cleaning</h2>
-                <div class="mt-3 flex flex-col gap-2 text-sm">
-                    <div class="flex items-center gap-2"><span class="flex-1">Single bed</span><span class="w-10 text-center text-white">Qty</span><input id="mattress_single" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Double bed</span><span class="w-10 text-center text-white">Qty</span><input id="mattress_double" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">King bed</span><span class="w-10 text-center text-white">Qty</span><input id="mattress_king" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">California bed</span><span class="w-10 text-center text-white">Qty</span><input id="mattress_california" type="number" min="0" value="0" class="border rounded px-1 py-1 w-20 text-right"></div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">2 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_2" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_2" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_2" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">3 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_3" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_3" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_3" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">4 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_4" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_4" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_4" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">5 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_5" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_5" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_5" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">6 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_6" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_6" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_6" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">7 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_7" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_7" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_7" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">8 seater</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_8" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_8" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_8" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">L-shape</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_l" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_l" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_l" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Cross Sectional</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_cross" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="sofa_cross" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_cross" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="font-semibold mt-8 mb-4 text-center">Mattress Deep Cleaning</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Single bed</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_single" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="mattress_single" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_single" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Double bed</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_double" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="mattress_double" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_double" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">King bed</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_king" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="mattress_king" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_king" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">California bed</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_california" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="mattress_california" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_california" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
             </div>
             </div>
 
             <!-- Carpet -->
             <div data-form="carpet" class="hidden">
-                <h2 class="font-semibold text-center">Carpet Deep Cleaning</h2>
-                <div class="mt-3 flex flex-col gap-2 text-sm">
-                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-white">Qty</span><input id="carpet_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-white">Qty</span><input id="carpet_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                <h2 class="font-semibold text-center mb-4">Carpet Deep Cleaning</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Square meters</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_sqm" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="carpet_sqm" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_sqm" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Quantity</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_qty" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="carpet_qty" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_qty" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Car Interior -->
             <div data-form="carInterior" class="hidden">
-                <h2 class="font-semibold text-center">Home Service Car Interior Detailing</h2>
-                <div class="mt-3 flex flex-col gap-2 text-sm">
-                    <div class="flex items-center gap-2"><span class="flex-1">Sedan</span><span class="w-10 text-center text-white">Qty</span><input id="car_sedan" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">SUV</span><span class="w-10 text-center text-white">Qty</span><input id="car_suv" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Van</span><span class="w-10 text-center text-white">Qty</span><input id="car_van" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Coaster</span><span class="w-10 text-center text-white">Qty</span><input id="car_coaster" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                <h2 class="font-semibold text-center mb-4">Home Service Car Interior Detailing</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Sedan</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_sedan" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="car_sedan" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_sedan" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">SUV</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_suv" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="car_suv" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_suv" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Van</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_van" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="car_van" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_van" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Coaster</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_coaster" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="car_coaster" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_coaster" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Post Construction -->
             <div data-form="postConstruction" class="hidden">
-                <h2 class="font-semibold text-center">Post Construction Cleaning</h2>
-                <div class="mt-3 flex flex-col gap-2 text-sm">
-                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-white">Qty</span><input id="pcc_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-white">Qty</span><input id="pcc_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                <h2 class="font-semibold text-center mb-4">Post Construction Cleaning</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Square meters</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_sqm" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="pcc_sqm" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_sqm" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Quantity</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_qty" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="pcc_qty" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_qty" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Enhanced Disinfection -->
             <div data-form="disinfection" class="hidden">
-                <h2 class="font-semibold text-center">Enhanced Disinfection</h2>
-                <div class="mt-3 flex flex-col gap-2 text-sm">
-                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-white">Qty</span><input id="disinfect_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-white">Qty</span><input id="disinfect_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                <h2 class="font-semibold text-center mb-4">Enhanced Disinfection</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Square meters</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_sqm" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="disinfect_sqm" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_sqm" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Quantity</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_qty" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="disinfect_qty" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_qty" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Glass -->
             <div data-form="glass" class="hidden">
-                <h2 class="font-semibold text-center">Glass Cleaning</h2>
-                <div class="mt-3 flex flex-col gap-2 text-sm">
-                    <div class="flex items-center gap-2"><span class="flex-1">How many square meters?</span><span class="w-10 text-center text-white">Qty</span><input id="glass_sqm" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
-                    <div class="flex items-center gap-2"><span class="flex-1">Quantity</span><span class="w-10 text-center text-white">Qty</span><input id="glass_qty" type="number" min="0" value="0" class="border rounded px-2 py-1 w-20 text-right"></div>
+                <h2 class="font-semibold text-center mb-4">Glass Cleaning</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Square meters</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_sqm" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="glass_sqm" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_sqm" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Quantity</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="glass_qty" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -127,8 +413,75 @@
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<style>
+/* Modern Quantity Control Styles */
+.quantity-btn {
+    @apply w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200 ease-in-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-95;
+}
+
+.quantity-btn:hover {
+    @apply transform scale-105;
+}
+
+.quantity-btn:active {
+    @apply transform scale-95;
+}
+
+.quantity-display {
+    @apply min-w-[2rem] text-center font-semibold text-white text-lg;
+    @apply bg-white/10 rounded-lg px-3 py-1;
+}
+
+/* Enhanced card styling for better visual hierarchy */
+.bg-white\/10 {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bg-white\/10:hover {
+    @apply bg-white/15;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+</style>
 <script>
 const peso = v => 'PHP ' + Number(v||0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+// Modern Quantity Control Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle quantity button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.quantity-btn')) {
+            e.preventDefault(); // Prevent any default behavior
+            const button = e.target.closest('.quantity-btn');
+            const targetId = button.getAttribute('data-target');
+            const action = button.getAttribute('data-action');
+            const display = document.getElementById(targetId);
+            
+            if (display) {
+                let currentValue = parseInt(display.textContent) || 0;
+                let newValue = currentValue;
+                
+                if (action === 'increase') {
+                    newValue = currentValue + 1;
+                } else if (action === 'decrease') {
+                    newValue = Math.max(0, currentValue - 1); // Ensure it doesn't go below 0
+                }
+                
+                // Only update if value actually changed
+                if (newValue !== currentValue) {
+                    display.textContent = newValue;
+                    
+                    // Trigger calculation update immediately
+                    setTimeout(() => {
+                        calc();
+                    }, 0);
+                }
+            }
+        }
+    });
+});
 
 // Service switching
 const forms = document.querySelectorAll('#serviceForms [data-form]');
@@ -168,8 +521,9 @@ function calc(){
   let subtotal = 0;
   let itemCounter = 1;
 
-  const u = id => parseInt(document.getElementById(id)?.value || 0);
-  const s = id => parseFloat(document.getElementById(id)?.value || 0);
+  // Updated to work with new quantity display elements instead of input values
+  const u = id => parseInt(document.getElementById(id)?.textContent || 0);
+  const s = id => parseFloat(document.getElementById(id)?.textContent || 0);
 
   // Group Sofa and Mattress services together
   const sofaItems = [];
@@ -339,36 +693,83 @@ function calc(){
   document.getElementById('estimate_total').textContent = peso(subtotal);
   return subtotal;
 }
+// Updated event listener to work with new quantity controls
 document.addEventListener('input', function(e){ if(e.target.closest('input')) calc(); });
 
-// Remove item functions
+// Remove item functions - updated for new quantity display elements
 function removeItem(inputId) {
-  document.getElementById(inputId).value = 0;
+  const element = document.getElementById(inputId);
+  if (element) {
+    // Check if it's an input or our new quantity display
+    if (element.tagName === 'INPUT') {
+      element.value = 0;
+    } else {
+      element.textContent = 0;
+    }
   calc();
+  }
 }
 
 function removeSqmItem(sqmId, qtyId) {
-  document.getElementById(sqmId).value = 0;
-  document.getElementById(qtyId).value = 0;
+  const sqmElement = document.getElementById(sqmId);
+  const qtyElement = document.getElementById(qtyId);
+  
+  if (sqmElement) {
+    if (sqmElement.tagName === 'INPUT') {
+      sqmElement.value = 0;
+    } else {
+      sqmElement.textContent = 0;
+    }
+  }
+  
+  if (qtyElement) {
+    if (qtyElement.tagName === 'INPUT') {
+      qtyElement.value = 0;
+    } else {
+      qtyElement.textContent = 0;
+    }
+  }
+  
   calc();
 }
 
 function removeSofaMattressGroup() {
-  // Clear all sofa inputs
+  // Clear all sofa quantity displays
   ['sofa_1', 'sofa_2', 'sofa_3', 'sofa_4', 'sofa_5', 'sofa_6', 'sofa_7', 'sofa_8', 'sofa_l', 'sofa_cross'].forEach(id => {
-    document.getElementById(id).value = 0;
+    const element = document.getElementById(id);
+    if (element) {
+      if (element.tagName === 'INPUT') {
+        element.value = 0;
+      } else {
+        element.textContent = 0;
+      }
+    }
   });
-  // Clear all mattress inputs
+  // Clear all mattress quantity displays
   ['mattress_single', 'mattress_double', 'mattress_king', 'mattress_california'].forEach(id => {
-    document.getElementById(id).value = 0;
+    const element = document.getElementById(id);
+    if (element) {
+      if (element.tagName === 'INPUT') {
+        element.value = 0;
+      } else {
+        element.textContent = 0;
+      }
+    }
   });
   calc();
 }
 
 function removeCarGroup() {
-  // Clear all car inputs
+  // Clear all car quantity displays
   ['car_sedan', 'car_suv', 'car_van', 'car_coaster'].forEach(id => {
-    document.getElementById(id).value = 0;
+    const element = document.getElementById(id);
+    if (element) {
+      if (element.tagName === 'INPUT') {
+        element.value = 0;
+      } else {
+        element.textContent = 0;
+      }
+    }
   });
   calc();
 }
