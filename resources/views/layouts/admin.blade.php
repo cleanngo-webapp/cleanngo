@@ -187,7 +187,11 @@
                 'booking_status_changed': 'ri-calendar-check-line',
                 'employee_assigned': 'ri-user-add-line',
                 'payment_status_changed': 'ri-money-dollar-circle-line',
-                'payment_proof_submitted': 'ri-file-upload-line'
+                'payment_proof_submitted': 'ri-file-upload-line',
+                'inventory_item_created': 'ri-add-box-line',
+                'inventory_item_updated': 'ri-edit-box-line',
+                'inventory_low_stock': 'ri-alert-line',
+                'inventory_out_of_stock': 'ri-error-warning-line'
             };
             return icons[type] || 'ri-notification-3-line';
         }

@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\PaymentProof;
 use App\Models\Customer;
 use App\Models\Employee;
+use App\Models\InventoryItem;
 use Carbon\Carbon;
 
 /**
@@ -597,5 +598,160 @@ class NotificationService
                 'is_read' => true,
                 'read_at' => now(),
             ]);
+    }
+
+    // ==================== INVENTORY NOTIFICATIONS ====================
+
+    /**
+     * Create a notification when a new inventory item is added
+     * Notifies admin when a new item is created
+     */
+    public function notifyInventoryItemCreated(InventoryItem $item): void
+    {
+        Notification::create([
+            'type' => 'inventory_item_created',
+            'recipient_type' => 'admin',
+            'recipient_id' => null, // Admin notifications don't need specific ID
+            'title' => 'New Inventory Item Added',
+            'message' => "New inventory item '{$item->name}' ({$item->item_code}) has been added to the inventory.",
+            'data' => [
+                'item_id' => $item->id,
+                'item_code' => $item->item_code,
+                'item_name' => $item->name,
+                'category' => $item->category,
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'reorder_level' => $item->reorder_level,
+                'status' => $item->status,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when an inventory item is updated
+     * Notifies admin when item attributes are modified
+     */
+    public function notifyInventoryItemUpdated(InventoryItem $item, array $originalData): void
+    {
+        $changes = $this->getInventoryChanges($item, $originalData);
+        
+        if (empty($changes)) {
+            return; // No significant changes to notify about
+        }
+
+        $changeText = implode(', ', $changes);
+        
+        Notification::create([
+            'type' => 'inventory_item_updated',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Inventory Item Updated',
+            'message' => "Inventory item '{$item->name}' ({$item->item_code}) has been updated: {$changeText}.",
+            'data' => [
+                'item_id' => $item->id,
+                'item_code' => $item->item_code,
+                'item_name' => $item->name,
+                'category' => $item->category,
+                'changes' => $changes,
+                'current_quantity' => $item->quantity,
+                'current_status' => $item->status,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when an item reaches low stock level
+     * Notifies admin when quantity falls below reorder level
+     */
+    public function notifyInventoryLowStock(InventoryItem $item): void
+    {
+        Notification::create([
+            'type' => 'inventory_low_stock',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Low Stock Alert',
+            'message' => "Inventory item '{$item->name}' ({$item->item_code}) is running low. Current quantity: {$item->quantity}, Reorder level: {$item->reorder_level}.",
+            'data' => [
+                'item_id' => $item->id,
+                'item_code' => $item->item_code,
+                'item_name' => $item->name,
+                'category' => $item->category,
+                'current_quantity' => $item->quantity,
+                'reorder_level' => $item->reorder_level,
+                'status' => $item->status,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when an item is out of stock
+     * Notifies admin when quantity reaches zero
+     */
+    public function notifyInventoryOutOfStock(InventoryItem $item): void
+    {
+        Notification::create([
+            'type' => 'inventory_out_of_stock',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Out of Stock Alert',
+            'message' => "Inventory item '{$item->name}' ({$item->item_code}) is now out of stock. Please restock immediately.",
+            'data' => [
+                'item_id' => $item->id,
+                'item_code' => $item->item_code,
+                'item_name' => $item->name,
+                'category' => $item->category,
+                'current_quantity' => $item->quantity,
+                'reorder_level' => $item->reorder_level,
+                'status' => $item->status,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Helper method to detect and format inventory changes
+     */
+    private function getInventoryChanges(InventoryItem $item, array $originalData): array
+    {
+        $changes = [];
+        
+        // Check for quantity changes
+        if (isset($originalData['quantity']) && $originalData['quantity'] != $item->quantity) {
+            $changes[] = "quantity from {$originalData['quantity']} to {$item->quantity}";
+        }
+        
+        // Check for unit price changes
+        if (isset($originalData['unit_price']) && $originalData['unit_price'] != $item->unit_price) {
+            $changes[] = "unit price from ₱{$originalData['unit_price']} to ₱{$item->unit_price}";
+        }
+        
+        // Check for reorder level changes
+        if (isset($originalData['reorder_level']) && $originalData['reorder_level'] != $item->reorder_level) {
+            $changes[] = "reorder level from {$originalData['reorder_level']} to {$item->reorder_level}";
+        }
+        
+        // Check for name changes
+        if (isset($originalData['name']) && $originalData['name'] != $item->name) {
+            $changes[] = "name from '{$originalData['name']}' to '{$item->name}'";
+        }
+        
+        // Check for category changes
+        if (isset($originalData['category']) && $originalData['category'] != $item->category) {
+            $changes[] = "category from '{$originalData['category']}' to '{$item->category}'";
+        }
+        
+        // Check for status changes
+        if (isset($originalData['status']) && $originalData['status'] != $item->status) {
+            $changes[] = "status from '{$originalData['status']}' to '{$item->status}'";
+        }
+        
+        return $changes;
     }
 }

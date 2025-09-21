@@ -28,9 +28,9 @@ class AdminInventoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'category' => 'required|in:Tools,Machine,Cleaning Agent,Consumables',
-            'quantity' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
             'unit_price' => 'required|numeric|min:0',
-            'reorder_level' => 'required|numeric|min:0',
+            'reorder_level' => 'required|integer|min:0',
             'notes' => 'nullable|string'
         ]);
 
@@ -111,14 +111,13 @@ class AdminInventoryController extends Controller
     {
         $item = InventoryItem::findOrFail($id);
 
-        // Validate the request data
+        // Validate the request data (item_code is not editable, so removed from validation)
         $validator = Validator::make($request->all(), [
-            'item_code' => 'required|string|max:255|unique:inventory_items,item_code,' . $id,
             'name' => 'required|string|max:255',
             'category' => 'required|in:Tools,Machine,Cleaning Agent,Consumables',
-            'quantity' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
             'unit_price' => 'required|numeric|min:0',
-            'reorder_level' => 'required|numeric|min:0',
+            'reorder_level' => 'required|integer|min:0',
             'notes' => 'nullable|string'
         ]);
 

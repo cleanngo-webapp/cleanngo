@@ -54,13 +54,47 @@ class InventoryItem extends Model
 
     /**
      * Boot method to automatically update status when quantity changes
+     * and trigger notifications for inventory events
      */
     protected static function boot()
     {
         parent::boot();
 
+        // Store original data before saving for comparison
         static::saving(function ($item) {
             $item->updateStatus();
+        });
+
+        // Trigger notification when a new item is created
+        static::created(function ($item) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyInventoryItemCreated($item);
+        });
+
+        // Trigger notifications when an item is updated
+        static::updated(function ($item) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            
+            // Get the original data from the model's original attributes
+            $originalData = $item->getOriginal();
+            
+            // Notify about general updates
+            $notificationService->notifyInventoryItemUpdated($item, $originalData);
+            
+            // Check for stock level changes and notify accordingly
+            $originalQuantity = $originalData['quantity'] ?? 0;
+            $currentQuantity = $item->quantity;
+            $reorderLevel = $item->reorder_level;
+            
+            // If quantity decreased and now below reorder level, notify low stock
+            if ($currentQuantity <= $reorderLevel && $currentQuantity > 0 && $originalQuantity > $reorderLevel) {
+                $notificationService->notifyInventoryLowStock($item);
+            }
+            
+            // If quantity reached zero, notify out of stock
+            if ($currentQuantity <= 0 && $originalQuantity > 0) {
+                $notificationService->notifyInventoryOutOfStock($item);
+            }
         });
     }
 

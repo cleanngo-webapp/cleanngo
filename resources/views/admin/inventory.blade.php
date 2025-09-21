@@ -99,16 +99,16 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ number_format($item->quantity, 2) }}</div>
+                            <div class="text-sm text-gray-900">{{ number_format($item->quantity, 0) }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">₱{{ number_format($item->unit_price, 2) }}</div>
+                            <div class="text-sm text-gray-900">₱{{ number_format($item->unit_price, 0) }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">₱{{ number_format($item->total_value, 2) }}</div>
+                            <div class="text-sm font-medium text-gray-900">₱{{ number_format($item->total_value, 0) }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ number_format($item->reorder_level, 2) }}</div>
+                            <div class="text-sm text-gray-900">{{ number_format($item->reorder_level, 0) }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($item->status === 'In Stock')
@@ -130,18 +130,13 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <button onclick="openEditModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" title="Edit">
+                                <button onclick="openEditModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" title="Update">
                                     <i class="ri-edit-line"></i>
                                 </button>
-                                <button onclick="openViewModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" title="View">
+                                <button onclick="openViewModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-700 bg-white hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" title="View">
                                     <i class="ri-eye-line"></i>
                                 </button>
-                                @if($item->notes)
-                                <button onclick="openNotesModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-blue-300 shadow-sm text-xs font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" title="Notes">
-                                    <i class="ri-file-text-line"></i>
-                                </button>
-                                @endif
-                                <button onclick="deleteItem({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" title="Delete">
+                                <button onclick="deleteItem({{ $item->id }}, this)" class="inline-flex items-center justify-center w-8 h-8 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" title="Delete">
                                     <i class="ri-delete-bin-line"></i>
                                 </button>
                             </div>
@@ -215,7 +210,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                        <input type="number" name="quantity" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="number" name="quantity" step="1" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price (₱)</label>
@@ -223,7 +218,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Re-order Level</label>
-                        <input type="number" name="reorder_level" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="number" name="reorder_level" step="1" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
                 </div>
                 <div class="mt-4">
@@ -248,7 +243,7 @@
     <div class="relative top-10 mx-auto p-0 border-0 w-full max-w-2xl shadow-2xl rounded-lg bg-white">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-semibold text-gray-900">Edit Inventory Item</h3>
+                <h3 class="text-xl font-semibold text-gray-900">Update Inventory Item</h3>
                 <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1">
                     <i class="ri-close-line text-2xl"></i>
                 </button>
@@ -256,11 +251,7 @@
             <form id="editForm">
                 <input type="hidden" name="item_id" id="edit_item_id">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Code</label>
-                        <input type="text" name="item_code" id="edit_item_code" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
-                    </div>
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
                         <input type="text" name="name" id="edit_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
@@ -276,7 +267,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                        <input type="number" name="quantity" id="edit_quantity" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+                        <input type="number" name="quantity" id="edit_quantity" step="1" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price (₱)</label>
@@ -284,7 +275,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Re-order Level</label>
-                        <input type="number" name="reorder_level" id="edit_reorder_level" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
+                        <input type="number" name="reorder_level" id="edit_reorder_level" step="1" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
                     </div>
                 </div>
                 <div class="mt-4">
@@ -326,30 +317,6 @@
     </div>
 </div>
 
-{{-- Notes Modal --}}
-<div id="notesModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-lg shadow-2xl rounded-lg bg-white">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-semibold text-gray-900">Item Notes</h3>
-                <button onclick="closeNotesModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1">
-                    <i class="ri-close-line text-2xl"></i>
-                </button>
-            </div>
-            <div class="mb-4">
-                <h4 class="text-sm font-medium text-gray-700 mb-2">Item: <span id="notesItemName" class="font-semibold text-gray-900"></span></h4>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-4 min-h-[200px] max-h-[400px] overflow-y-auto">
-                <p id="notesContent" class="text-gray-800 whitespace-pre-wrap leading-relaxed"></p>
-            </div>
-            <div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                <button onclick="closeNotesModal()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -371,13 +338,32 @@ function openEditModal(itemId) {
             if (data.success) {
                 const item = data.item;
                 document.getElementById('edit_item_id').value = item.id;
-                document.getElementById('edit_item_code').value = item.item_code;
                 document.getElementById('edit_name').value = item.name;
                 document.getElementById('edit_category').value = item.category;
-                document.getElementById('edit_quantity').value = item.quantity;
+                document.getElementById('edit_quantity').value = parseInt(item.quantity);
                 document.getElementById('edit_unit_price').value = item.unit_price;
-                document.getElementById('edit_reorder_level').value = item.reorder_level;
+                document.getElementById('edit_reorder_level').value = parseInt(item.reorder_level);
                 document.getElementById('edit_notes').value = item.notes || '';
+                
+                // Store original values for change detection
+                window.originalEditValues = {
+                    name: item.name,
+                    category: item.category,
+                    quantity: parseInt(item.quantity),
+                    unit_price: item.unit_price,
+                    reorder_level: parseInt(item.reorder_level),
+                    notes: item.notes || ''
+                };
+                
+                // Disable update button initially
+                const updateButton = document.querySelector('#editForm button[type="submit"]');
+                updateButton.disabled = true;
+                updateButton.classList.add('opacity-50', 'cursor-not-allowed');
+                updateButton.title = 'No changes detected. Please modify at least one field to enable update.';
+                
+                // Add change detection to all form inputs
+                setupEditFormChangeDetection();
+                
                 document.getElementById('editModal').classList.remove('hidden');
             }
         })
@@ -388,6 +374,62 @@ function openEditModal(itemId) {
 
 function closeEditModal() {
     document.getElementById('editModal').classList.add('hidden');
+    // Reset update button state
+    const updateButton = document.querySelector('#editForm button[type="submit"]');
+    if (updateButton) {
+        updateButton.disabled = false;
+        updateButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        updateButton.title = '';
+    }
+    // Clear original values
+    window.originalEditValues = null;
+}
+
+// Setup change detection for edit form
+function setupEditFormChangeDetection() {
+    const form = document.getElementById('editForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        // Remove any existing listeners to prevent duplicates
+        input.removeEventListener('input', checkForChanges);
+        input.removeEventListener('change', checkForChanges);
+        
+        // Add new listeners
+        input.addEventListener('input', checkForChanges);
+        input.addEventListener('change', checkForChanges);
+    });
+}
+
+// Check if any changes have been made to the edit form
+function checkForChanges() {
+    if (!window.originalEditValues) return;
+    
+    const currentValues = {
+        name: document.getElementById('edit_name').value,
+        category: document.getElementById('edit_category').value,
+        quantity: parseInt(document.getElementById('edit_quantity').value) || 0,
+        unit_price: parseFloat(document.getElementById('edit_unit_price').value) || 0,
+        reorder_level: parseInt(document.getElementById('edit_reorder_level').value) || 0,
+        notes: document.getElementById('edit_notes').value || ''
+    };
+    
+    const hasChanges = Object.keys(currentValues).some(key => {
+        return currentValues[key] !== window.originalEditValues[key];
+    });
+    
+    const updateButton = document.querySelector('#editForm button[type="submit"]');
+    if (hasChanges) {
+        // Enable button
+        updateButton.disabled = false;
+        updateButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        updateButton.title = 'Update item with current changes';
+    } else {
+        // Disable button
+        updateButton.disabled = true;
+        updateButton.classList.add('opacity-50', 'cursor-not-allowed');
+        updateButton.title = 'No changes detected. Please modify at least one field to enable update.';
+    }
 }
 
 function openViewModal(itemId) {
@@ -416,19 +458,19 @@ function openViewModal(itemId) {
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Quantity</label>
-                            <p class="text-sm text-gray-900">${parseFloat(item.quantity).toFixed(2)}</p>
+                            <p class="text-sm text-gray-900">${parseInt(item.quantity)}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Unit Price</label>
-                            <p class="text-sm text-gray-900">₱${parseFloat(item.unit_price).toFixed(2)}</p>
+                            <p class="text-sm text-gray-900">₱${parseFloat(item.unit_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Total Value</label>
-                            <p class="text-sm font-medium text-gray-900">₱${parseFloat(item.total_value).toFixed(2)}</p>
+                            <p class="text-sm font-medium text-gray-900">₱${(parseFloat(item.unit_price) * parseInt(item.quantity)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Re-order Level</label>
-                            <p class="text-sm text-gray-900">${parseFloat(item.reorder_level).toFixed(2)}</p>
+                            <p class="text-sm text-gray-900">${parseInt(item.reorder_level)}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Status</label>
@@ -446,10 +488,19 @@ function openViewModal(itemId) {
                         </div>
                         ${item.notes ? `
                         <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Notes</label>
-                            <p class="text-sm text-gray-900">${item.notes}</p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <p class="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">${item.notes}</p>
+                            </div>
                         </div>
-                        ` : ''}
+                        ` : `
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <p class="text-sm text-gray-500 italic">No notes available for this item.</p>
+                            </div>
+                        </div>
+                        `}
                     </div>
                 `;
                 document.getElementById('viewModal').classList.remove('hidden');
@@ -464,26 +515,6 @@ function closeViewModal() {
     document.getElementById('viewModal').classList.add('hidden');
 }
 
-function openNotesModal(itemId) {
-    // Fetch item data and display notes
-    fetch(`/admin/inventory/${itemId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const item = data.item;
-                document.getElementById('notesItemName').textContent = item.name;
-                document.getElementById('notesContent').textContent = item.notes || 'No notes available for this item.';
-                document.getElementById('notesModal').classList.remove('hidden');
-            }
-        })
-        .catch(error => {
-            Swal.fire('Error', 'Failed to load item notes', 'error');
-        });
-}
-
-function closeNotesModal() {
-    document.getElementById('notesModal').classList.add('hidden');
-}
 
 // Form submissions
 document.getElementById('addForm').addEventListener('submit', function(e) {
@@ -497,6 +528,12 @@ document.getElementById('addForm').addEventListener('submit', function(e) {
     const unitPrice = formData.get('unit_price');
     const reorderLevel = formData.get('reorder_level');
     const notes = formData.get('notes');
+    
+    // Show loading state on the submit button before confirmation
+    const submitButton = document.querySelector('#addForm button[type="submit"]');
+    const originalButtonContent = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Processing...';
     
     // Show confirmation dialog with item details
     Swal.fire({
@@ -515,7 +552,7 @@ document.getElementById('addForm').addEventListener('submit', function(e) {
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium text-gray-700">Quantity:</span>
-                        <span class="text-gray-900">${parseFloat(quantity).toFixed(2)}</span>
+                        <span class="text-gray-900">${parseInt(quantity)}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium text-gray-700">Unit Price:</span>
@@ -523,7 +560,7 @@ document.getElementById('addForm').addEventListener('submit', function(e) {
                     </div>
                     <div class="flex justify-between">
                         <span class="font-medium text-gray-700">Re-order Level:</span>
-                        <span class="text-gray-900">${parseFloat(reorderLevel).toFixed(2)}</span>
+                        <span class="text-gray-900">${parseInt(reorderLevel)}</span>
                     </div>
                     ${notes ? `
                     <div class="flex justify-between">
@@ -544,10 +581,7 @@ document.getElementById('addForm').addEventListener('submit', function(e) {
         focusCancel: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Show loading state on the submit button
-            const submitButton = document.querySelector('#addForm button[type="submit"]');
-            const originalButtonContent = submitButton.innerHTML;
-            submitButton.disabled = true;
+            // Update button text for actual submission
             submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Adding Item...';
             
             fetch('/admin/inventory', {
@@ -588,6 +622,10 @@ document.getElementById('addForm').addEventListener('submit', function(e) {
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonContent;
             });
+        } else {
+            // Reset button if user cancels
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonContent;
         }
     });
 });
@@ -597,32 +635,117 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
     
     const formData = new FormData(this);
     const itemId = document.getElementById('edit_item_id').value;
+    const name = formData.get('name');
+    const category = formData.get('category');
+    const quantity = formData.get('quantity');
+    const unitPrice = formData.get('unit_price');
+    const reorderLevel = formData.get('reorder_level');
+    const notes = formData.get('notes');
     
-    fetch(`/admin/inventory/${itemId}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'X-HTTP-Method-Override': 'PUT'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire('Success', data.message, 'success').then(() => {
-                location.reload();
+    // Show loading state on the submit button before confirmation
+    const submitButton = document.querySelector('#editForm button[type="submit"]');
+    const originalButtonContent = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Processing...';
+    
+    // Show confirmation dialog with item details
+    Swal.fire({
+        title: 'Confirm Edit Item?',
+        html: `
+            <div class="text-left">
+                <p class="mb-3"><strong>Are you sure you want to update this inventory item?</strong></p>
+                <div class="bg-gray-50 p-4 rounded-lg text-sm space-y-2">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Item Name:</span>
+                        <span class="text-gray-900">${name}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Category:</span>
+                        <span class="text-gray-900">${category}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Quantity:</span>
+                        <span class="text-gray-900">${parseInt(quantity)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Unit Price:</span>
+                        <span class="text-gray-900">₱${parseFloat(unitPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Re-order Level:</span>
+                        <span class="text-gray-900">${parseInt(reorderLevel)}</span>
+                    </div>
+                    ${notes ? `
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-700">Notes:</span>
+                        <span class="text-gray-900 text-right max-w-xs">${notes}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                <p class="mt-3 text-sm text-gray-600">Please verify all details are correct before proceeding.</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Update Item',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Update button text for actual submission
+            submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Updating Item...';
+            
+            fetch(`/admin/inventory/${itemId}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-HTTP-Method-Override': 'PUT',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success alert that auto-disappears
+                    showInventorySuccessAlert(data.message);
+                    
+                    // Close modal and reset form
+                    closeEditModal();
+                    
+                    // Refresh the page after a short delay to show updated data
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    // Handle validation errors
+                    showInventoryErrorAlert(data.message || 'An error occurred while updating the inventory item.');
+                    
+                    // Reset button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonContent;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showInventoryErrorAlert('An error occurred while updating the inventory item. Please try again.');
+                
+                // Reset button
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonContent;
             });
         } else {
-            Swal.fire('Error', data.message, 'error');
+            // Reset button if user cancels
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonContent;
         }
-    })
-    .catch(error => {
-        Swal.fire('Error', 'Failed to update item', 'error');
     });
 });
 
 // Delete function
-function deleteItem(itemId) {
+function deleteItem(itemId, buttonElement) {
     Swal.fire({
         title: 'Are you sure?',
         text: "You won't be able to revert this!",
@@ -633,6 +756,12 @@ function deleteItem(itemId) {
         confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
+            // Show loading state on the delete button
+            const deleteButton = buttonElement || document.querySelector(`button[onclick="deleteItem(${itemId})"]`);
+            const originalButtonContent = deleteButton.innerHTML;
+            deleteButton.disabled = true;
+            deleteButton.innerHTML = '<div class="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin"></div>';
+            
             fetch(`/admin/inventory/${itemId}`, {
                 method: 'DELETE',
                 headers: {
@@ -647,10 +776,16 @@ function deleteItem(itemId) {
                     });
                 } else {
                     Swal.fire('Error', data.message, 'error');
+                    // Reset button on error
+                    deleteButton.disabled = false;
+                    deleteButton.innerHTML = originalButtonContent;
                 }
             })
             .catch(error => {
                 Swal.fire('Error', 'Failed to delete item', 'error');
+                // Reset button on error
+                deleteButton.disabled = false;
+                deleteButton.innerHTML = originalButtonContent;
             });
         }
     });

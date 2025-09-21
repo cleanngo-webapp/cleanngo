@@ -45,6 +45,14 @@
                                 <i class="ri-money-dollar-circle-line text-emerald-600"></i>
                             @elseif($notification->type === 'payment_proof_submitted')
                                 <i class="ri-file-upload-line text-emerald-600"></i>
+                            @elseif($notification->type === 'inventory_item_created')
+                                <i class="ri-add-box-line text-blue-600"></i>
+                            @elseif($notification->type === 'inventory_item_updated')
+                                <i class="ri-edit-box-line text-orange-600"></i>
+                            @elseif($notification->type === 'inventory_low_stock')
+                                <i class="ri-alert-line text-yellow-600"></i>
+                            @elseif($notification->type === 'inventory_out_of_stock')
+                                <i class="ri-error-warning-line text-red-600"></i>
                             @else
                                 <i class="ri-notification-3-line text-emerald-600"></i>
                             @endif
