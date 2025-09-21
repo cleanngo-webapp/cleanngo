@@ -45,28 +45,32 @@
 
 @push('scripts')
 <script>
-// Login form preloader functionality
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    const submitButton = document.getElementById('loginButton');
-    
-    // Disable submit button and show loading state
-    if (submitButton) {
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Signing In...';
-        
-        // Add a small delay to ensure the preloader is visible before form submission
-        setTimeout(() => {
-            // Allow the form to submit naturally after the preloader is shown
-            this.submit();
-        }, 100);
-        
-        // Prevent immediate form submission
-        e.preventDefault();
-    }
-});
-
-// Password toggle functionality
+// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Login form preloader functionality
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const submitButton = document.getElementById('loginButton');
+            
+            // Disable submit button and show loading state
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<div class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>Signing In...';
+                
+                // Add a small delay to ensure the preloader is visible before form submission
+                setTimeout(() => {
+                    // Allow the form to submit naturally after the preloader is shown
+                    this.submit();
+                }, 100);
+                
+                // Prevent immediate form submission
+                e.preventDefault();
+            }
+        });
+    }
+
+    // Password toggle functionality
     const toggleButtons = document.querySelectorAll('[data-toggle-password]');
     
     toggleButtons.forEach(button => {
