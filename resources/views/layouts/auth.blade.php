@@ -9,6 +9,7 @@
 </head>
 <body class="min-h-screen bg-gradient-to-b from-emerald-300 to-green-900 font-sans">
     @yield('content')
+    @stack('scripts')
 </body>
 </html>
 

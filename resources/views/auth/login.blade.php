@@ -47,26 +47,55 @@
 <script>
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Login form preloader functionality
+    // Login form preloader functionality - using register form pattern
     const loginForm = document.getElementById('loginForm');
+    const submitButton = document.getElementById('loginButton');
+    
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
-            const submitButton = document.getElementById('loginButton');
+            e.preventDefault(); // Prevent default form submission
             
-            // Disable submit button and show loading state
+            // Get form data for validation
+            const formData = new FormData(loginForm);
+            const login = formData.get('login');
+            const password = formData.get('password');
+            
+            // Basic validation
+            if (!login || !password) {
+                // Show error if fields are empty
+                if (!login) {
+                    Swal.fire({
+                        title: 'Missing Information',
+                        text: 'Please enter your email or username',
+                        icon: 'warning',
+                        confirmButtonColor: '#dc2626',
+                        confirmButtonText: 'OK'
+                    });
+                } else if (!password) {
+                    Swal.fire({
+                        title: 'Missing Information',
+                        text: 'Please enter your password',
+                        icon: 'warning',
+                        confirmButtonColor: '#dc2626',
+                        confirmButtonText: 'OK'
+                    });
+                }
+                return;
+            }
+            
+            // Show preloader and submit the form immediately (no confirmation needed for login)
             if (submitButton) {
                 submitButton.disabled = true;
-                submitButton.innerHTML = '<div class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>Signing In...';
+                submitButton.innerHTML = '<div style="display: inline-block; width: 16px; height: 16px; border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px;"></div>Signing In...';
                 
-                // Add a small delay to ensure the preloader is visible before form submission
-                setTimeout(() => {
-                    // Allow the form to submit naturally after the preloader is shown
-                    this.submit();
-                }, 100);
-                
-                // Prevent immediate form submission
-                e.preventDefault();
+                // Force a reflow to ensure the DOM update is visible
+                submitButton.offsetHeight;
             }
+            
+            // Submit the form after a small delay to ensure spinner is visible
+            setTimeout(() => {
+                loginForm.submit();
+            }, 100);
         });
     }
 
