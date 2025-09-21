@@ -69,6 +69,13 @@ class Booking extends Model
                 $notificationService = app(NotificationService::class);
                 $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
             }
+            
+            // Check if this booking just became a payroll record (completed + paid)
+            if ($booking->isDirty('payment_status') && $booking->payment_status === 'paid' && $booking->status === 'completed') {
+                // This booking just became a payroll record, notify admin and employee
+                $notificationService = app(NotificationService::class);
+                $notificationService->notifyNewPayrollRecord($booking);
+            }
         });
     }
 

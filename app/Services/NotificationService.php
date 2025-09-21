@@ -134,7 +134,7 @@ class NotificationService
                 'services' => $services,
             ],
             'recipient_type' => 'customer',
-            'recipient_id' => $customer->id,
+            'recipient_id' => $customer->user_id,
         ]);
 
         // Notify admin with specific title and message based on status change
@@ -255,7 +255,7 @@ class NotificationService
                         'services' => $services,
                     ],
                     'recipient_type' => 'employee',
-                    'recipient_id' => $employee->id,
+                    'recipient_id' => $employee->user_id,
                 ]);
             }
         }
@@ -300,7 +300,7 @@ class NotificationService
                 'services' => $services,
             ],
             'recipient_type' => 'customer',
-            'recipient_id' => $customer->id,
+            'recipient_id' => $customer->user_id,
         ]);
 
         // Notify admin
@@ -347,7 +347,7 @@ class NotificationService
                 'services' => $services,
             ],
             'recipient_type' => 'employee',
-            'recipient_id' => $employee->id,
+            'recipient_id' => $employee->user_id,
         ]);
     }
 
@@ -450,7 +450,7 @@ class NotificationService
                 'services' => $services,
             ],
             'recipient_type' => 'customer',
-            'recipient_id' => $customer->id,
+            'recipient_id' => $customer->user_id,
         ]);
 
         // Notify admin with specific title based on payment status
@@ -503,7 +503,7 @@ class NotificationService
                 'services' => $services,
             ],
             'recipient_type' => 'employee',
-            'recipient_id' => $employee->id,
+            'recipient_id' => $employee->user_id,
         ]);
     }
 
@@ -908,6 +908,73 @@ class NotificationService
                 'employee_code' => $employee->employee_code,
                 'employment_status' => $employee->employment_status,
                 'account_type' => 'employee',
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    // ==================== PAYROLL NOTIFICATIONS ====================
+
+    /**
+     * Create a notification when a new payroll record is created
+     * Notifies both admin and the specific employee about the new payroll record
+     */
+    public function notifyNewPayrollRecord(\App\Models\Booking $booking): void
+    {
+        // Load necessary relationships
+        $booking->load(['customer.user', 'staffAssignments.employee.user']);
+        
+        // Get the assigned employee (assuming one employee per booking for payroll)
+        $assignedEmployee = $booking->staffAssignments->first();
+        if (!$assignedEmployee || !$assignedEmployee->employee) {
+            return; // No employee assigned, no payroll notification needed
+        }
+        
+        $employee = $assignedEmployee->employee;
+        $employeeUser = $employee->user;
+        $customer = $booking->customer;
+        $customerUser = $customer->user;
+        
+        // Notify admin about new payroll record
+        Notification::create([
+            'type' => 'new_payroll_record',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'New Payroll Record Created',
+            'message' => "A new payroll record has been created for employee {$employeeUser->first_name} {$employeeUser->last_name} for booking {$booking->code}. Amount: ₱" . number_format($booking->total_due_cents / 100, 2),
+            'data' => [
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'employee_id' => $employee->id,
+                'employee_name' => "{$employeeUser->first_name} {$employeeUser->last_name}",
+                'customer_name' => "{$customerUser->first_name} {$customerUser->last_name}",
+                'amount' => $booking->total_due_cents,
+                'payment_method' => $booking->payment_method,
+                'payment_status' => $booking->payment_status,
+                'completed_at' => $booking->completed_at?->toISOString(),
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+
+        // Notify the specific employee about their new payroll record
+        Notification::create([
+            'type' => 'employee_payroll_record',
+            'recipient_type' => 'employee',
+            'recipient_id' => $employeeUser->id, // User ID of the employee
+            'title' => 'New Payroll Record Added',
+            'message' => "A new payroll record has been added to your account for booking {$booking->code}. Amount: ₱" . number_format($booking->total_due_cents / 100, 2),
+            'data' => [
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'employee_id' => $employee->id,
+                'employee_name' => "{$employeeUser->first_name} {$employeeUser->last_name}",
+                'customer_name' => "{$customerUser->first_name} {$customerUser->last_name}",
+                'amount' => $booking->total_due_cents,
+                'payment_method' => $booking->payment_method,
+                'payment_status' => $booking->payment_status,
+                'completed_at' => $booking->completed_at?->toISOString(),
             ],
             'is_read' => false,
             'created_at' => now(),

@@ -195,7 +195,8 @@
                 'new_customer_registered': 'ri-user-add-line',
                 'new_employee_created': 'ri-user-settings-line',
                 'customer_deleted': 'ri-user-unfollow-line',
-                'employee_deleted': 'ri-user-unfollow-line'
+                'employee_deleted': 'ri-user-unfollow-line',
+                'new_payroll_record': 'ri-money-dollar-circle-line'
             };
             return icons[type] || 'ri-notification-3-line';
         }

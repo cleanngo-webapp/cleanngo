@@ -61,6 +61,8 @@
                                 <i class="ri-user-unfollow-line text-red-600"></i>
                             @elseif($notification->type === 'employee_deleted')
                                 <i class="ri-user-unfollow-line text-red-600"></i>
+                            @elseif($notification->type === 'new_payroll_record')
+                                <i class="ri-money-dollar-circle-line text-green-600"></i>
                             @else
                                 <i class="ri-notification-3-line text-emerald-600"></i>
                             @endif

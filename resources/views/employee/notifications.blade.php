@@ -45,6 +45,8 @@
                                 <i class="ri-money-dollar-circle-line text-emerald-600"></i>
                             @elseif($notification->type === 'employee_account_created')
                                 <i class="ri-user-settings-line text-green-600"></i>
+                            @elseif($notification->type === 'employee_payroll_record')
+                                <i class="ri-money-dollar-circle-line text-green-600"></i>
                             @else
                                 <i class="ri-notification-3-line text-emerald-600"></i>
                             @endif
