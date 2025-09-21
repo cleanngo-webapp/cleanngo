@@ -230,6 +230,63 @@ class AdminEmployeeController extends Controller
     }
 
     /**
+     * Delete an employee (remove user from users table)
+     * This will permanently delete the employee and all their data
+     */
+    public function destroy($userId)
+    {
+        try {
+            $user = User::findOrFail($userId);
+            
+            // Ensure this is an employee
+            if ($user->role !== 'employee') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is not an employee'
+                ], 400);
+            }
+
+            // Check if employee has any active bookings
+            $activeBookings = DB::table('booking_staff_assignments')
+                ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+                ->where('booking_staff_assignments.employee_id', $user->employee->id ?? null)
+                ->whereIn('bookings.status', ['pending', 'confirmed', 'in_progress'])
+                ->count();
+
+            if ($activeBookings > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete employee with active bookings. Please reassign or complete their bookings first.'
+                ], 400);
+            }
+
+            // Delete related records first (cascade delete)
+            if ($user->employee) {
+                // Delete booking staff assignments
+                DB::table('booking_staff_assignments')
+                    ->where('employee_id', $user->employee->id)
+                    ->delete();
+                
+                // Delete employee record
+                $user->employee->delete();
+            }
+
+            // Delete the user
+            $user->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete employee: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Increment jobs completed count for an employee
      * This should be called when a job is completed
      */

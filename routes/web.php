@@ -154,6 +154,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/employees', [AdminEmployeeController::class, 'store'])->name('employees.store');
     Route::get('/employee/{userId}', [AdminEmployeeController::class, 'show'])->name('employee.show');
     Route::put('/employee/{userId}', [AdminEmployeeController::class, 'update'])->name('employee.update');
+    Route::delete('/employees/{userId}', [AdminEmployeeController::class, 'destroy'])->name('employees.destroy');
     Route::post('/employee/{employeeId}/increment-jobs', [AdminEmployeeController::class, 'incrementJobsCompleted'])->name('employee.increment-jobs');
     Route::post('/employees/update-job-counts', [AdminEmployeeController::class, 'updateAllJobCounts'])->name('employees.update-job-counts');
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory');
