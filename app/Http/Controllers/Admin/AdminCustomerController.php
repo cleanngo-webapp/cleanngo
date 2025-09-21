@@ -64,6 +64,98 @@ class AdminCustomerController extends Controller
 
         return view('admin.customers', compact('customers', 'search', 'sort', 'sortOrder'));
     }
+
+    /**
+     * Delete a customer (remove user from users table)
+     * This will permanently delete the customer and all their data
+     */
+    public function destroy($userId)
+    {
+        try {
+            $user = DB::table('users')->where('id', $userId)->first();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer not found'
+                ], 404);
+            }
+            
+            // Ensure this is a customer
+            if ($user->role !== 'customer') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is not a customer'
+                ], 400);
+            }
+
+            // Get customer record
+            $customer = DB::table('customers')->where('user_id', $userId)->first();
+
+            // Check if customer has any active bookings
+            if ($customer) {
+                $activeBookings = DB::table('bookings')
+                    ->where('customer_id', $customer->id)
+                    ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
+                    ->count();
+
+                if ($activeBookings > 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot delete customer with active bookings. Please complete or cancel their bookings first.'
+                    ], 400);
+                }
+
+                // Check if customer has any pending payments
+                $pendingPayments = DB::table('bookings')
+                    ->where('customer_id', $customer->id)
+                    ->where('status', 'completed')
+                    ->where('payment_status', 'pending')
+                    ->count();
+
+                if ($pendingPayments > 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot delete customer with pending payments. Please resolve all payment issues first.'
+                    ], 400);
+                }
+            }
+
+            // Delete related records first (cascade delete)
+            if ($customer) {
+                // Delete customer addresses
+                DB::table('addresses')
+                    ->where('customer_id', $customer->id)
+                    ->delete();
+                
+                // Delete customer bookings (completed ones only for safety)
+                DB::table('bookings')
+                    ->where('customer_id', $customer->id)
+                    ->whereIn('status', ['completed', 'cancelled'])
+                    ->delete();
+                
+                // Delete customer record
+                DB::table('customers')
+                    ->where('id', $customer->id)
+                    ->delete();
+            }
+
+            // Delete the user
+            DB::table('users')
+                ->where('id', $userId)
+                ->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Customer deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete customer: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
 ?>

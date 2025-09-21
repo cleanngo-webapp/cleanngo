@@ -164,6 +164,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::delete('/inventory/{id}', [AdminInventoryController::class, 'destroy'])->name('inventory.destroy');
     Route::get('/inventory-stats', [AdminInventoryController::class, 'getStats'])->name('inventory.stats');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers');
+    Route::delete('/customers/{userId}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
     Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('gallery');
     Route::get('/gallery/{serviceType}', [AdminGalleryController::class, 'showService'])->name('gallery.service');
     Route::post('/gallery', [AdminGalleryController::class, 'store'])->name('gallery.store');

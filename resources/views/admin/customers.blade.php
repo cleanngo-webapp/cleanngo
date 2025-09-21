@@ -79,6 +79,10 @@
                                     <i class="ri-map-pin-line mr-1"></i>
                                     View Location
                                 </button>
+                                <button onclick="deleteCustomer({{ $cust->user_id }}, this)" class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" aria-label="Delete Customer">
+                                    <i class="ri-delete-bin-line mr-1"></i>
+                                    Delete
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -272,6 +276,110 @@
         performSearch();
     }
     
+    // Delete customer function
+    function deleteCustomer(userId, buttonElement) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this! This will permanently delete the customer and all their data including booking history.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete customer!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state on the delete button
+                const deleteButton = buttonElement;
+                const originalButtonContent = deleteButton.innerHTML;
+                deleteButton.disabled = true;
+                deleteButton.innerHTML = '<div class="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin mr-1 inline-block"></div>Deleting...';
+                
+                fetch(`/admin/customers/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success alert that auto-disappears
+                        showCustomerSuccessAlert(data.message);
+                        
+                        // Remove the table row
+                        const tableRow = deleteButton.closest('tr');
+                        if (tableRow) {
+                            tableRow.remove();
+                        }
+                        
+                        // Refresh the page after a short delay to show updated data
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        // Handle errors
+                        showCustomerErrorAlert(data.message || 'An error occurred while deleting the customer.');
+                        
+                        // Reset button on error
+                        deleteButton.disabled = false;
+                        deleteButton.innerHTML = originalButtonContent;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showCustomerErrorAlert('An error occurred while deleting the customer. Please try again.');
+                    
+                    // Reset button on error
+                    deleteButton.disabled = false;
+                    deleteButton.innerHTML = originalButtonContent;
+                });
+            }
+        });
+    }
+
+    // Show success alert that auto-disappears
+    function showCustomerSuccessAlert(message) {
+        const alert = document.createElement('div');
+        alert.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+        alert.style.transform = 'translateX(100%)';
+        
+        alert.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <i class="ri-check-line text-xl"></i>
+                <span class="font-medium">${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Animate in
+        setTimeout(() => {
+            alert.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            alert.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Show error alert
+    function showCustomerErrorAlert(message) {
+        Swal.fire({
+            title: 'Error',
+            text: message,
+            icon: 'error',
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'OK'
+        });
+    }
+
     // Map functionality
     function hideCustMap(){
         const m = document.getElementById('customer-map-modal');
