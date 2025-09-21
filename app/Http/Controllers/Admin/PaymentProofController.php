@@ -87,12 +87,14 @@ class PaymentProofController extends Controller
         ]);
 
         // Update the booking's payment status and payment method when payment proof is approved
-        DB::table('bookings')->where('id', $proof->booking_id)->update([
-            'payment_status' => 'paid',
-            'payment_method' => $proof->payment_method,
-            'amount_paid_cents' => $proof->amount * 100, // Convert to cents
-            'updated_at' => now(),
-        ]);
+        // Use Eloquent model to trigger events (including payroll notifications)
+        $booking = \App\Models\Booking::find($proof->booking_id);
+        if ($booking) {
+            $booking->payment_status = 'paid';
+            $booking->payment_method = $proof->payment_method;
+            $booking->amount_paid_cents = $proof->amount * 100; // Convert to cents
+            $booking->save(); // This will trigger the updated event and payroll notifications
+        }
 
         // Return JSON response for AJAX requests
         if (request()->ajax() || request()->wantsJson()) {

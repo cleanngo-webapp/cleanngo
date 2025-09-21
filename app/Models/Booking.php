@@ -71,7 +71,14 @@ class Booking extends Model
             }
             
             // Check if this booking just became a payroll record (completed + paid)
-            if ($booking->isDirty('payment_status') && $booking->payment_status === 'paid' && $booking->status === 'completed') {
+            // This handles both cases:
+            // 1. Payment status changes to 'paid' while booking is already 'completed'
+            // 2. Status changes to 'completed' while payment is already 'paid'
+            // 3. Both status and payment_status change in the same update
+            $wasEligibleForPayroll = $booking->getOriginal('status') === 'completed' && $booking->getOriginal('payment_status') === 'paid';
+            $isEligibleForPayroll = $booking->status === 'completed' && $booking->payment_status === 'paid';
+            
+            if (!$wasEligibleForPayroll && $isEligibleForPayroll) {
                 // This booking just became a payroll record, notify admin and employee
                 $notificationService = app(NotificationService::class);
                 $notificationService->notifyNewPayrollRecord($booking);
@@ -87,6 +94,37 @@ class Booking extends Model
     {
         $notificationService = app(NotificationService::class);
         $notificationService->notifyBookingCreated($this);
+    }
+
+    /**
+     * Manually trigger payroll notification for this booking
+     * This can be used to fix missing notifications for existing completed and paid bookings
+     */
+    public function triggerPayrollNotification(): void
+    {
+        if ($this->status === 'completed' && $this->payment_status === 'paid') {
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyNewPayrollRecord($this);
+        }
+    }
+
+    /**
+     * Static method to trigger payroll notifications for all eligible bookings
+     * This can be used to fix missing notifications in bulk
+     */
+    public static function triggerMissingPayrollNotifications(): int
+    {
+        $eligibleBookings = static::where('status', 'completed')
+            ->where('payment_status', 'paid')
+            ->get();
+        
+        $count = 0;
+        foreach ($eligibleBookings as $booking) {
+            $booking->triggerPayrollNotification();
+            $count++;
+        }
+        
+        return $count;
     }
 }
 

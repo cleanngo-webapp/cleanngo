@@ -260,6 +260,11 @@ class AdminBookingController extends Controller
                     'reviewed_by' => Auth::id(),
                     'reviewed_at' => now(),
                 ]);
+                
+                // Also update the booking's payment status to 'paid' to trigger payroll notifications
+                $booking->payment_status = 'paid';
+                $booking->payment_method = 'admin_bypass';
+                $booking->amount_paid_cents = $booking->total_due_cents;
             }
             
             // Set completed_at timestamp
