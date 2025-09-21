@@ -81,6 +81,8 @@ class User extends Authenticatable
             // Notify admin about new customer registrations
             if ($user->role === 'customer') {
                 $notificationService->notifyNewCustomerRegistered($user);
+                // Also notify the customer about their account creation
+                $notificationService->notifyCustomerAccountCreated($user);
             }
         });
     }

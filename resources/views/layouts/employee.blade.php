@@ -184,7 +184,8 @@
                 'booking_status_changed': 'ri-calendar-check-line',
                 'employee_assigned': 'ri-user-add-line',
                 'payment_status_changed': 'ri-money-dollar-circle-line',
-                'payment_proof_submitted': 'ri-file-upload-line'
+                'payment_proof_submitted': 'ri-file-upload-line',
+                'employee_account_created': 'ri-user-settings-line'
             };
             return icons[type] || 'ri-notification-3-line';
         }

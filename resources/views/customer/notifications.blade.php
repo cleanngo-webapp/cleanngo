@@ -43,6 +43,8 @@
                                 <i class="ri-user-add-line text-emerald-600"></i>
                             @elseif($notification->type === 'payment_status_changed')
                                 <i class="ri-money-dollar-circle-line text-emerald-600"></i>
+                            @elseif($notification->type === 'customer_account_created')
+                                <i class="ri-user-heart-line text-green-600"></i>
                             @else
                                 <i class="ri-notification-3-line text-emerald-600"></i>
                             @endif

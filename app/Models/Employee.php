@@ -80,7 +80,10 @@ class Employee extends Model
             $employee->load('user');
             
             if ($employee->user) {
+                // Notify admin about new employee creation
                 $notificationService->notifyNewEmployeeCreated($employee->user, $employee);
+                // Also notify the employee about their account creation
+                $notificationService->notifyEmployeeAccountCreated($employee->user, $employee);
             }
         });
     }

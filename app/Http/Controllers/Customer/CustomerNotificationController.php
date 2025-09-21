@@ -29,15 +29,15 @@ class CustomerNotificationController extends Controller
      */
     public function index()
     {
-        $customer = Auth::user()->customer;
+        $user = Auth::user();
         
-        if (!$customer) {
-            abort(404, 'Customer profile not found');
+        if ($user->role !== 'customer') {
+            abort(404, 'User is not a customer');
         }
 
-        // Get all notifications for this customer
-        $notifications = $this->notificationService->getNotificationsForRecipient('customer', $customer->id);
-        $unreadCount = $this->notificationService->getUnreadCountForRecipient('customer', $customer->id);
+        // Get all notifications for this customer using user ID
+        $notifications = $this->notificationService->getNotificationsForRecipient('customer', $user->id);
+        $unreadCount = $this->notificationService->getUnreadCountForRecipient('customer', $user->id);
 
         return view('customer.notifications', compact('notifications', 'unreadCount'));
     }
@@ -48,14 +48,14 @@ class CustomerNotificationController extends Controller
      */
     public function getNotifications(): JsonResponse
     {
-        $customer = Auth::user()->customer;
+        $user = Auth::user();
         
-        if (!$customer) {
-            return response()->json(['error' => 'Customer profile not found'], 404);
+        if ($user->role !== 'customer') {
+            return response()->json(['error' => 'User is not a customer'], 404);
         }
 
-        $notifications = $this->notificationService->getNotificationsForRecipient('customer', $customer->id);
-        $unreadCount = $this->notificationService->getUnreadCountForRecipient('customer', $customer->id);
+        $notifications = $this->notificationService->getNotificationsForRecipient('customer', $user->id);
+        $unreadCount = $this->notificationService->getUnreadCountForRecipient('customer', $user->id);
 
         return response()->json([
             'notifications' => $notifications,
@@ -72,16 +72,16 @@ class CustomerNotificationController extends Controller
             'notification_id' => 'required|exists:notifications,id',
         ]);
 
-        $customer = Auth::user()->customer;
+        $user = Auth::user();
         
-        if (!$customer) {
-            return response()->json(['error' => 'Customer profile not found'], 404);
+        if ($user->role !== 'customer') {
+            return response()->json(['error' => 'User is not a customer'], 404);
         }
 
         $notification = \App\Models\Notification::findOrFail($request->notification_id);
         
         // Ensure this notification belongs to this customer
-        if ($notification->recipient_type !== 'customer' || $notification->recipient_id !== $customer->id) {
+        if ($notification->recipient_type !== 'customer' || $notification->recipient_id !== $user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -95,13 +95,13 @@ class CustomerNotificationController extends Controller
      */
     public function markAllAsRead(): JsonResponse
     {
-        $customer = Auth::user()->customer;
+        $user = Auth::user();
         
-        if (!$customer) {
-            return response()->json(['error' => 'Customer profile not found'], 404);
+        if ($user->role !== 'customer') {
+            return response()->json(['error' => 'User is not a customer'], 404);
         }
 
-        $this->notificationService->markAllAsReadForRecipient('customer', $customer->id);
+        $this->notificationService->markAllAsReadForRecipient('customer', $user->id);
 
         return response()->json(['success' => true]);
     }
@@ -111,13 +111,13 @@ class CustomerNotificationController extends Controller
      */
     public function getUnreadCount(): JsonResponse
     {
-        $customer = Auth::user()->customer;
+        $user = Auth::user();
         
-        if (!$customer) {
-            return response()->json(['error' => 'Customer profile not found'], 404);
+        if ($user->role !== 'customer') {
+            return response()->json(['error' => 'User is not a customer'], 404);
         }
 
-        $unreadCount = $this->notificationService->getUnreadCountForRecipient('customer', $customer->id);
+        $unreadCount = $this->notificationService->getUnreadCountForRecipient('customer', $user->id);
 
         return response()->json(['unread_count' => $unreadCount]);
     }
@@ -127,15 +127,15 @@ class CustomerNotificationController extends Controller
      */
     public function getDropdownNotifications(): JsonResponse
     {
-        $customer = Auth::user()->customer;
+        $user = Auth::user();
         
-        if (!$customer) {
-            return response()->json(['error' => 'Customer profile not found'], 404);
+        if ($user->role !== 'customer') {
+            return response()->json(['error' => 'User is not a customer'], 404);
         }
 
         // Get unread notifications only, limited to 4 for dropdown
         $notifications = \App\Models\Notification::where('recipient_type', 'customer')
-            ->where('recipient_id', $customer->id)
+            ->where('recipient_id', $user->id)
             ->where('is_read', false)
             ->orderBy('created_at', 'desc')
             ->limit(4)

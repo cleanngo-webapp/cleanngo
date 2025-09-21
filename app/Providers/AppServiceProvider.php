@@ -29,12 +29,12 @@ class AppServiceProvider extends ServiceProvider
                 $unreadNotificationCount = 0;
                 
                 // Get unread count based on user type
-                if ($user->customer) {
+                if ($user->role === 'customer') {
                     $notificationService = app(NotificationService::class);
-                    $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('customer', $user->customer->id);
-                } elseif ($user->employee) {
+                    $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('customer', $user->id);
+                } elseif ($user->role === 'employee') {
                     $notificationService = app(NotificationService::class);
-                    $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('employee', $user->employee->id);
+                    $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('employee', $user->id);
                 } elseif ($user->role === 'admin') {
                     $notificationService = app(NotificationService::class);
                     $unreadNotificationCount = $notificationService->getUnreadCountForRecipient('admin', null);

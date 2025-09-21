@@ -29,15 +29,15 @@ class EmployeeNotificationController extends Controller
      */
     public function index()
     {
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
         
-        if (!$employee) {
-            abort(404, 'Employee profile not found');
+        if ($user->role !== 'employee') {
+            abort(404, 'User is not an employee');
         }
 
-        // Get all notifications for this employee
-        $notifications = $this->notificationService->getNotificationsForRecipient('employee', $employee->id);
-        $unreadCount = $this->notificationService->getUnreadCountForRecipient('employee', $employee->id);
+        // Get all notifications for this employee using user ID
+        $notifications = $this->notificationService->getNotificationsForRecipient('employee', $user->id);
+        $unreadCount = $this->notificationService->getUnreadCountForRecipient('employee', $user->id);
 
         return view('employee.notifications', compact('notifications', 'unreadCount'));
     }
@@ -48,14 +48,14 @@ class EmployeeNotificationController extends Controller
      */
     public function getNotifications(): JsonResponse
     {
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
         
-        if (!$employee) {
-            return response()->json(['error' => 'Employee profile not found'], 404);
+        if ($user->role !== 'employee') {
+            return response()->json(['error' => 'User is not an employee'], 404);
         }
 
-        $notifications = $this->notificationService->getNotificationsForRecipient('employee', $employee->id);
-        $unreadCount = $this->notificationService->getUnreadCountForRecipient('employee', $employee->id);
+        $notifications = $this->notificationService->getNotificationsForRecipient('employee', $user->id);
+        $unreadCount = $this->notificationService->getUnreadCountForRecipient('employee', $user->id);
 
         return response()->json([
             'notifications' => $notifications,
@@ -72,16 +72,16 @@ class EmployeeNotificationController extends Controller
             'notification_id' => 'required|exists:notifications,id',
         ]);
 
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
         
-        if (!$employee) {
-            return response()->json(['error' => 'Employee profile not found'], 404);
+        if ($user->role !== 'employee') {
+            return response()->json(['error' => 'User is not an employee'], 404);
         }
 
         $notification = \App\Models\Notification::findOrFail($request->notification_id);
         
         // Ensure this notification belongs to this employee
-        if ($notification->recipient_type !== 'employee' || $notification->recipient_id !== $employee->id) {
+        if ($notification->recipient_type !== 'employee' || $notification->recipient_id !== $user->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -95,13 +95,13 @@ class EmployeeNotificationController extends Controller
      */
     public function markAllAsRead(): JsonResponse
     {
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
         
-        if (!$employee) {
-            return response()->json(['error' => 'Employee profile not found'], 404);
+        if ($user->role !== 'employee') {
+            return response()->json(['error' => 'User is not an employee'], 404);
         }
 
-        $this->notificationService->markAllAsReadForRecipient('employee', $employee->id);
+        $this->notificationService->markAllAsReadForRecipient('employee', $user->id);
 
         return response()->json(['success' => true]);
     }
@@ -111,13 +111,13 @@ class EmployeeNotificationController extends Controller
      */
     public function getUnreadCount(): JsonResponse
     {
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
         
-        if (!$employee) {
-            return response()->json(['error' => 'Employee profile not found'], 404);
+        if ($user->role !== 'employee') {
+            return response()->json(['error' => 'User is not an employee'], 404);
         }
 
-        $unreadCount = $this->notificationService->getUnreadCountForRecipient('employee', $employee->id);
+        $unreadCount = $this->notificationService->getUnreadCountForRecipient('employee', $user->id);
 
         return response()->json(['unread_count' => $unreadCount]);
     }
@@ -127,15 +127,15 @@ class EmployeeNotificationController extends Controller
      */
     public function getDropdownNotifications(): JsonResponse
     {
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
         
-        if (!$employee) {
-            return response()->json(['error' => 'Employee profile not found'], 404);
+        if ($user->role !== 'employee') {
+            return response()->json(['error' => 'User is not an employee'], 404);
         }
 
         // Get unread notifications only, limited to 4 for dropdown
         $notifications = \App\Models\Notification::where('recipient_type', 'employee')
-            ->where('recipient_id', $employee->id)
+            ->where('recipient_id', $user->id)
             ->where('is_read', false)
             ->orderBy('created_at', 'desc')
             ->limit(4)

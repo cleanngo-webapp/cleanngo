@@ -858,4 +858,59 @@ class NotificationService
             'created_at' => now(),
         ]);
     }
+
+    // ==================== ACCOUNT CREATION NOTIFICATIONS ====================
+
+    /**
+     * Create a notification when a customer account is successfully created
+     * Notifies the customer about their successful account creation
+     */
+    public function notifyCustomerAccountCreated(User $user): void
+    {
+        Notification::create([
+            'type' => 'customer_account_created',
+            'recipient_type' => 'customer',
+            'recipient_id' => $user->id,
+            'title' => 'Customer Account Successfully Created',
+            'message' => "Welcome to CleanSaver! Your customer account has been successfully created. You can now book cleaning services and manage your bookings.",
+            'data' => [
+                'user_id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'account_type' => 'customer',
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when an employee account is successfully created
+     * Notifies the employee about their successful account creation
+     */
+    public function notifyEmployeeAccountCreated(User $user, Employee $employee): void
+    {
+        Notification::create([
+            'type' => 'employee_account_created',
+            'recipient_type' => 'employee',
+            'recipient_id' => $user->id,
+            'title' => 'Employee Account Successfully Created',
+            'message' => "Welcome to CleanSaver! Your employee account has been successfully created. You can now view your assigned jobs and manage your work schedule.",
+            'data' => [
+                'user_id' => $user->id,
+                'employee_id' => $employee->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'employee_code' => $employee->employee_code,
+                'employment_status' => $employee->employment_status,
+                'account_type' => 'employee',
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
 }
