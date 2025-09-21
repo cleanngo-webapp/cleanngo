@@ -276,8 +276,15 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Payment Proof Image</label>
-                    <input type="file" name="proof_image" accept="image/*" id="proof-image-input" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500 cursor-pointer" required>
-                    <p class="text-xs text-gray-500 mt-1 cursor-pointer">Upload Receipt or Cash in hand image (max 2MB)</p>
+                    
+                    <!-- Custom File Input Container -->
+                    <div class="relative">
+                        <input type="file" name="proof_image" accept="image/*" id="proof-image-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                        <div id="file-input-display" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white hover:bg-gray-50 transition-colors cursor-pointer">
+                            <span id="file-input-text" class="text-gray-500">Choose File</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Upload Receipt or Cash in hand image (max 2MB)</p>
                     
                     <!-- Image Preview Container -->
                     <div id="image-preview-container" class="mt-3 hidden">
@@ -416,14 +423,21 @@ function hideImagePreview() {
 document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('proof-image-input');
     const removePreviewBtn = document.getElementById('remove-image-preview');
+    const fileInputText = document.getElementById('file-input-text');
     
     // Handle file input change
     if (imageInput) {
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // Update the custom file input text to show selected file name
+                fileInputText.textContent = file.name;
+                fileInputText.className = 'text-gray-700 font-medium';
                 showImagePreview(file);
             } else {
+                // Reset to default text when no file is selected
+                fileInputText.textContent = 'Choose File';
+                fileInputText.className = 'text-gray-500';
                 hideImagePreview();
             }
         });
@@ -433,6 +447,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (removePreviewBtn) {
         removePreviewBtn.addEventListener('click', function() {
             document.getElementById('proof-image-input').value = '';
+            // Reset the custom file input text
+            fileInputText.textContent = 'Choose File';
+            fileInputText.className = 'text-gray-500';
             hideImagePreview();
         });
     }

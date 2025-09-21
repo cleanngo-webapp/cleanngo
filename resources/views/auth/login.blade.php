@@ -105,6 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            
             const targetId = this.getAttribute('data-target');
             const passwordInput = document.querySelector(targetId);
             const icon = this.querySelector('i');
