@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Employee;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,13 @@ use Illuminate\Validation\Rule;
 
 class AdminEmployeeController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     public function index(Request $request)
     {
         $today = Carbon::today();
@@ -246,6 +254,11 @@ class AdminEmployeeController extends Controller
                 ], 400);
             }
 
+            // Store employee details for notification before deletion
+            $employeeName = $user->first_name . ' ' . $user->last_name;
+            $employeeCode = $user->employee->employee_code ?? 'N/A';
+            $username = $user->username;
+
             // Check if employee has any active bookings
             $activeBookings = DB::table('booking_staff_assignments')
                 ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
@@ -273,6 +286,9 @@ class AdminEmployeeController extends Controller
 
             // Delete the user
             $user->delete();
+
+            // Trigger notification for employee deletion
+            $this->notificationService->notifyEmployeeDeleted($employeeName, $employeeCode, $username);
             
             return response()->json([
                 'success' => true,

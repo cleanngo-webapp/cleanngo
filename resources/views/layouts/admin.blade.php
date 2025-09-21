@@ -191,7 +191,11 @@
                 'inventory_item_created': 'ri-add-box-line',
                 'inventory_item_updated': 'ri-edit-box-line',
                 'inventory_low_stock': 'ri-alert-line',
-                'inventory_out_of_stock': 'ri-error-warning-line'
+                'inventory_out_of_stock': 'ri-error-warning-line',
+                'new_customer_registered': 'ri-user-add-line',
+                'new_employee_created': 'ri-user-settings-line',
+                'customer_deleted': 'ri-user-unfollow-line',
+                'employee_deleted': 'ri-user-unfollow-line'
             };
             return icons[type] || 'ri-notification-3-line';
         }

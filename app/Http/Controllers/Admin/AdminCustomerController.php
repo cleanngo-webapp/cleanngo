@@ -3,11 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminCustomerController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     public function index(Request $request)
     {
         // Get search and sort parameters
@@ -92,6 +100,11 @@ class AdminCustomerController extends Controller
             // Get customer record
             $customer = DB::table('customers')->where('user_id', $userId)->first();
 
+            // Store customer details for notification before deletion
+            $customerName = $user->first_name . ' ' . $user->last_name;
+            $customerCode = $customer->customer_code ?? 'N/A';
+            $username = $user->username;
+
             // Check if customer has any active bookings
             if ($customer) {
                 $activeBookings = DB::table('bookings')
@@ -125,7 +138,7 @@ class AdminCustomerController extends Controller
             if ($customer) {
                 // Delete customer addresses
                 DB::table('addresses')
-                    ->where('customer_id', $customer->id)
+                    ->where('user_id', $userId)
                     ->delete();
                 
                 // Delete customer bookings (completed ones only for safety)
@@ -144,6 +157,9 @@ class AdminCustomerController extends Controller
             DB::table('users')
                 ->where('id', $userId)
                 ->delete();
+
+            // Trigger notification for customer deletion
+            $this->notificationService->notifyCustomerDeleted($customerName, $customerCode, $username);
             
             return response()->json([
                 'success' => true,

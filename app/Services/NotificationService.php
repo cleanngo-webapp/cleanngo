@@ -8,6 +8,7 @@ use App\Models\PaymentProof;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\InventoryItem;
+use App\Models\User;
 use Carbon\Carbon;
 
 /**
@@ -753,5 +754,108 @@ class NotificationService
         }
         
         return $changes;
+    }
+
+    // ==================== USER MANAGEMENT NOTIFICATIONS ====================
+
+    /**
+     * Create a notification when a new customer is registered
+     * Notifies admin when a new customer account is created
+     */
+    public function notifyNewCustomerRegistered(User $user): void
+    {
+        Notification::create([
+            'type' => 'new_customer_registered',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'New Customer Registered',
+            'message' => "A new customer '{$user->first_name} {$user->last_name}' ({$user->username}) has registered in the system.",
+            'data' => [
+                'user_id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'phone' => $user->phone,
+                'role' => $user->role,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when a new employee is created by admin
+     * Notifies admin when a new employee account is created
+     */
+    public function notifyNewEmployeeCreated(User $user, Employee $employee): void
+    {
+        Notification::create([
+            'type' => 'new_employee_created',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'New Employee Created',
+            'message' => "A new employee '{$user->first_name} {$user->last_name}' ({$employee->employee_code}) has been added to the system.",
+            'data' => [
+                'user_id' => $user->id,
+                'employee_id' => $employee->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'phone' => $user->phone,
+                'employee_code' => $employee->employee_code,
+                'employment_status' => $employee->employment_status,
+                'date_hired' => $employee->date_hired,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when a customer is deleted by admin
+     * Notifies admin when a customer account is permanently removed
+     */
+    public function notifyCustomerDeleted(string $customerName, string $customerCode, string $username): void
+    {
+        Notification::create([
+            'type' => 'customer_deleted',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Customer Deleted',
+            'message' => "Customer '{$customerName}' ({$customerCode}) with username '{$username}' has been permanently deleted from the system.",
+            'data' => [
+                'customer_name' => $customerName,
+                'customer_code' => $customerCode,
+                'username' => $username,
+                'deleted_at' => now()->toISOString(),
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when an employee is deleted by admin
+     * Notifies admin when an employee account is permanently removed
+     */
+    public function notifyEmployeeDeleted(string $employeeName, string $employeeCode, string $username): void
+    {
+        Notification::create([
+            'type' => 'employee_deleted',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Employee Deleted',
+            'message' => "Employee '{$employeeName}' ({$employeeCode}) with username '{$username}' has been permanently deleted from the system.",
+            'data' => [
+                'employee_name' => $employeeName,
+                'employee_code' => $employeeCode,
+                'username' => $username,
+                'deleted_at' => now()->toISOString(),
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
     }
 }

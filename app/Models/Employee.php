@@ -64,6 +64,26 @@ class Employee extends Model
         $this->increment('jobs_completed');
         return $this->jobs_completed;
     }
+
+    /**
+     * Boot method to trigger notifications for new employee creation
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Trigger notification when a new employee is created
+        static::created(function ($employee) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            
+            // Load the user relationship to get user details
+            $employee->load('user');
+            
+            if ($employee->user) {
+                $notificationService->notifyNewEmployeeCreated($employee->user, $employee);
+            }
+        });
+    }
 }
 
 

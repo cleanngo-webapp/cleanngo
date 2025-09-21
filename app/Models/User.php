@@ -66,4 +66,22 @@ class User extends Authenticatable
     {
         return $this->hasOne(Employee::class);
     }
+
+    /**
+     * Boot method to trigger notifications for new user registrations
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Trigger notification when a new user is created
+        static::created(function ($user) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            
+            // Notify admin about new customer registrations
+            if ($user->role === 'customer') {
+                $notificationService->notifyNewCustomerRegistered($user);
+            }
+        });
+    }
 }

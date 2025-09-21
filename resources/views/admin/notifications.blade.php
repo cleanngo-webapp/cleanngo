@@ -53,6 +53,14 @@
                                 <i class="ri-alert-line text-yellow-600"></i>
                             @elseif($notification->type === 'inventory_out_of_stock')
                                 <i class="ri-error-warning-line text-red-600"></i>
+                            @elseif($notification->type === 'new_customer_registered')
+                                <i class="ri-user-add-line text-blue-600"></i>
+                            @elseif($notification->type === 'new_employee_created')
+                                <i class="ri-user-settings-line text-green-600"></i>
+                            @elseif($notification->type === 'customer_deleted')
+                                <i class="ri-user-unfollow-line text-red-600"></i>
+                            @elseif($notification->type === 'employee_deleted')
+                                <i class="ri-user-unfollow-line text-red-600"></i>
                             @else
                                 <i class="ri-notification-3-line text-emerald-600"></i>
                             @endif
