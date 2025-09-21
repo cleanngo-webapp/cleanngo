@@ -13,7 +13,7 @@
 				{{ $errors->first() }}
 			</div>
 		@endif
-		<form method="POST" action="{{ route('register.post') }}" class="mt-6 space-y-4">
+		<form method="POST" action="{{ route('register.post') }}" class="mt-6 space-y-4" id="registerForm">
 			@csrf
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>
@@ -73,16 +73,17 @@
 			</div>
 			<div class="flex justify-between items-center">
 				<a href="{{ route('login') }}" class="text-emerald-700 cursor-pointer hover:text-brand-highlight">Cancel</a>
-				<button class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-highlight" type="submit">Sign Up</button>
+				<button id="registerButton" class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-highlight" type="submit">Sign Up</button>
 			</div>
 		</form>
 	</div>
 	</div>
 
 	<script>
-		// Handle form submission with SweetAlert confirmation
+		// Handle form submission with SweetAlert confirmation and preloader
 		document.addEventListener('DOMContentLoaded', function() {
-			const form = document.querySelector('form[action="{{ route('register.post') }}"]');
+			const form = document.getElementById('registerForm');
+			const submitButton = document.getElementById('registerButton');
 			
 			form.addEventListener('submit', function(e) {
 				e.preventDefault(); // Prevent default form submission
@@ -131,10 +132,38 @@
 					reverseButtons: true
 				}).then((result) => {
 					if (result.isConfirmed) {
-						// If confirmed, submit the form
+						// Show preloader and submit the form
+						if (submitButton) {
+							submitButton.disabled = true;
+							submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Creating Account...';
+						}
+						
+						// Submit the form
 						form.submit();
 					}
 					// If cancelled, do nothing (form stays on page)
+				});
+			});
+			
+			// Password toggle functionality
+			const toggleButtons = document.querySelectorAll('[data-toggle-password]');
+			
+			toggleButtons.forEach(button => {
+				button.addEventListener('click', function(e) {
+					e.preventDefault();
+					const targetId = this.getAttribute('data-target');
+					const passwordInput = document.querySelector(targetId);
+					const icon = this.querySelector('i');
+					
+					if (passwordInput && icon) {
+						if (passwordInput.type === 'password') {
+							passwordInput.type = 'text';
+							icon.className = 'ri-eye-off-line text-xl cursor-pointer';
+						} else {
+							passwordInput.type = 'password';
+							icon.className = 'ri-eye-line text-xl cursor-pointer';
+						}
+					}
 				});
 			});
 		});

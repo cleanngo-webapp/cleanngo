@@ -14,7 +14,7 @@
 					{{ $errors->first() }}
 				</div>
 			@endif
-			<form method="POST" action="{{ route('login.post') }}" class="mt-6 space-y-4">
+			<form method="POST" action="{{ route('login.post') }}" class="mt-6 space-y-4" id="loginForm">
 				@csrf
 				<div>
 					<label class="block text-sm font-medium">Email or Username</label>
@@ -37,11 +37,59 @@
 				</div>
 				<div class="flex justify-between items-center">
 					<a href="{{ route('register') }}" class="text-emerald-700 cursor-pointer hover:text-brand-highlight">Sign Up</a>
-					<button class="bg-brand-green text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-highlight" type="submit">Sign In</button>
+					<button id="loginButton" class="bg-brand-green text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-highlight" type="submit">Sign In</button>
 				</div>
 			</form>
 		</div>
 		</div>
+
+@push('scripts')
+<script>
+// Login form preloader functionality
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    const submitButton = document.getElementById('loginButton');
+    
+    // Disable submit button and show loading state
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Signing In...';
+        
+        // Add a small delay to ensure the preloader is visible before form submission
+        setTimeout(() => {
+            // Allow the form to submit naturally after the preloader is shown
+            this.submit();
+        }, 100);
+        
+        // Prevent immediate form submission
+        e.preventDefault();
+    }
+});
+
+// Password toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('[data-toggle-password]');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.querySelector(targetId);
+            const icon = this.querySelector('i');
+            
+            if (passwordInput && icon) {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.className = 'ri-eye-off-line text-xl cursor-pointer';
+                } else {
+                    passwordInput.type = 'password';
+                    icon.className = 'ri-eye-line text-xl cursor-pointer';
+                }
+            }
+        });
+    });
+});
+</script>
+@endpush
 @endsection
 
 

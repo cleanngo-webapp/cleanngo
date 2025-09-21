@@ -295,7 +295,7 @@
 								@endif
 								
 								<!-- Save Button -->
-								<button type="button" onclick="openSaveAddressConfirm()" 
+								<button id="saveAddressButton" type="button" onclick="openSaveAddressConfirm()" 
 									class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium cursor-pointer">
 									<i class="ri-save-line mr-2"></i>
 									Save Address
@@ -485,6 +485,21 @@ function closeModal(id){
 }
 function submitAddressForm(){
     console.log('Submitting address form');
+    
+    // Show preloader on both save buttons
+    const saveButton = document.getElementById('saveAddressButton');
+    const confirmButton = document.getElementById('confirm-save-address-yes');
+    
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Saving...';
+    }
+    
+    if (confirmButton) {
+        confirmButton.disabled = true;
+        confirmButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Saving...';
+    }
+    
     // Look specifically for the address form by finding the form that contains the line1 input
     const line1Input = document.querySelector('input[name="line1"]');
     if (line1Input) {
@@ -495,10 +510,30 @@ function submitAddressForm(){
         } else {
             console.error('Could not find form containing line1 input');
             alert('Error: Address form not found. Please refresh the page and try again.');
+            
+            // Reset buttons on error
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.innerHTML = '<i class="ri-save-line mr-2"></i>Save Address';
+            }
+            if (confirmButton) {
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = '<i class="ri-save-fill mr-2"></i>Save Address';
+            }
         }
     } else {
         console.error('Line1 input not found');
         alert('Error: Address form not found. Please refresh the page and try again.');
+        
+        // Reset buttons on error
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.innerHTML = '<i class="ri-save-line mr-2"></i>Save Address';
+        }
+        if (confirmButton) {
+            confirmButton.disabled = false;
+            confirmButton.innerHTML = '<i class="ri-save-fill mr-2"></i>Save Address';
+        }
     }
 }
 function submitPendingForm(){
