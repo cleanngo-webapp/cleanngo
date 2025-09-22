@@ -62,7 +62,7 @@
                                         <p class="text-sm font-medium text-gray-900">Selected Image</p>
                                         <p class="text-xs text-gray-500">Ready to upload</p>
                                     </div>
-                                    <button type="button" onclick="removeAvatarPreview()" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors">
+                                    <button type="button" onclick="removeAvatarPreview()" class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors cursor-pointer">
                                         <i class="ri-close-line text-lg"></i>
                                     </button>
                                 </div>
