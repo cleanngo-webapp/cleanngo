@@ -161,6 +161,7 @@
                         Cancel
                     </button>
                     <button type="submit" 
+                            id="updateCommentBtn"
                             class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer">
                         Update Comment
                     </button>
@@ -193,6 +194,7 @@
                         Cancel
                     </button>
                     <button type="button" 
+                            id="deleteCommentBtn"
                             onclick="confirmDeleteComment()"
                             class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 cursor-pointer">
                         Delete Comment
@@ -439,7 +441,10 @@ function resetRating() {
 }
 
 // Submit comment form
-document.getElementById('commentForm').addEventListener('submit', async function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     console.log('Form submit event triggered!');
@@ -514,6 +519,8 @@ document.getElementById('commentForm').addEventListener('submit', async function
     } finally {
         resetSubmitButton();
     }
+        });
+    }
 });
 
 // Reset submit button state
@@ -527,6 +534,7 @@ function resetSubmitButton() {
 
 // Edit comment
 function editComment(commentId, commentText, rating) {
+    console.log('editComment called with:', { commentId, commentText, rating });
     document.getElementById('editCommentId').value = commentId;
     document.getElementById('editComment').value = commentText;
     document.getElementById('editRating').value = rating;
@@ -563,6 +571,7 @@ function closeEditCommentModal() {
 
 // Delete comment - show confirmation modal
 function deleteComment(commentId) {
+    console.log('deleteComment called with:', commentId);
     commentToDelete = commentId;
     const modal = document.getElementById('deleteCommentModal');
     modal.style.display = 'flex';
@@ -581,8 +590,18 @@ function closeDeleteCommentModal() {
 
 // Confirm delete comment
 async function confirmDeleteComment() {
+    console.log('confirmDeleteComment called, commentToDelete:', commentToDelete);
     if (!commentToDelete) {
+        console.log('No comment to delete');
         return;
+    }
+    
+    // Show preloader on delete button
+    const deleteBtn = document.getElementById('deleteCommentBtn');
+    if (deleteBtn) {
+        deleteBtn.disabled = true;
+        deleteBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        deleteBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Deleting Comment';
     }
     
     try {
@@ -605,40 +624,70 @@ async function confirmDeleteComment() {
         console.error('Error deleting comment:', error);
         showNotification('Failed to delete comment. Please try again.', 'error');
     } finally {
+        // Reset delete button
+        const deleteBtn = document.getElementById('deleteCommentBtn');
+        if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            deleteBtn.innerHTML = 'Delete Comment';
+        }
         closeDeleteCommentModal();
     }
 }
 
 // Submit edit comment form
-document.getElementById('editCommentForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const commentId = document.getElementById('editCommentId').value;
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-    
-    try {
-        const response = await fetch(`/service-comments/${commentId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(data)
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('editCommentForm');
+    if (editForm) {
+        editForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Edit form submitted');
+            
+            // Show preloader on update button
+            const updateBtn = document.getElementById('updateCommentBtn');
+            if (updateBtn) {
+                updateBtn.disabled = true;
+                updateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                updateBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Updating Comment';
+            }
+            
+            const commentId = document.getElementById('editCommentId').value;
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            console.log('Edit form data:', data);
+            
+            try {
+                const response = await fetch(`/service-comments/${commentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeEditCommentModal();
+                    loadComments(currentServiceType);
+                    showNotification('Comment updated successfully!', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to update comment');
+                }
+            } catch (error) {
+                console.error('Error updating comment:', error);
+                showNotification('Failed to update comment. Please try again.', 'error');
+            } finally {
+                // Reset update button
+                const updateBtn = document.getElementById('updateCommentBtn');
+                if (updateBtn) {
+                    updateBtn.disabled = false;
+                    updateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    updateBtn.innerHTML = 'Update Comment';
+                }
+            }
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            closeEditCommentModal();
-            loadComments(currentServiceType);
-            showNotification('Comment updated successfully!', 'success');
-        } else {
-            throw new Error(result.error || 'Failed to update comment');
-        }
-    } catch (error) {
-        console.error('Error updating comment:', error);
-        showNotification('Failed to update comment. Please try again.', 'error');
     }
 });
 
