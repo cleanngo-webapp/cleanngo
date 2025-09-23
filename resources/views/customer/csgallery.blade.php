@@ -496,7 +496,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Comment added successfully, reloading comments...');
             // Show preloader and reload comments
             showPreloader();
-            loadComments(currentServiceType);
+            // Add small delay to make preloader visible
+            setTimeout(() => {
+                loadComments(currentServiceType);
+            }, 300);
             // Reset form
             this.reset();
             resetRating();
@@ -626,7 +629,10 @@ async function confirmDeleteComment() {
         
         if (result.success) {
             showPreloader();
-            loadComments(currentServiceType);
+            // Add small delay to make preloader visible
+            setTimeout(() => {
+                loadComments(currentServiceType);
+            }, 300);
             showNotification('Comment deleted successfully!', 'success');
         } else {
             throw new Error(result.error || 'Failed to delete comment');
@@ -682,7 +688,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (result.success) {
                     closeEditCommentModal();
                     showPreloader();
-                    loadComments(currentServiceType);
+                    // Add small delay to make preloader visible
+                    setTimeout(() => {
+                        loadComments(currentServiceType);
+                    }, 300);
                     showNotification('Comment updated successfully!', 'success');
                 } else {
                     throw new Error(result.error || 'Failed to update comment');
