@@ -109,8 +109,7 @@
                     <div class="flex justify-end flex-shrink-0">
                         <button type="submit" id="submitCommentBtn"
                                 class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
-                            <span id="submitText">Post Comment</span>
-                            <span id="submitLoading" class="hidden">Posting...</span>
+                            Post Comment
                         </button>
                     </div>
                 </form>
@@ -445,14 +444,12 @@ document.getElementById('commentForm').addEventListener('submit', async function
     
     console.log('Form submit event triggered!');
     
-    // Show loading state
+    // Show loading state with spinner
     const submitBtn = document.getElementById('submitCommentBtn');
-    const submitText = document.getElementById('submitText');
-    const submitLoading = document.getElementById('submitLoading');
     
     submitBtn.disabled = true;
-    submitText.classList.add('hidden');
-    submitLoading.classList.remove('hidden');
+    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    submitBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Posting Comment';
     
     const formData = new FormData(this);
     const data = Object.fromEntries(formData);
@@ -522,12 +519,10 @@ document.getElementById('commentForm').addEventListener('submit', async function
 // Reset submit button state
 function resetSubmitButton() {
     const submitBtn = document.getElementById('submitCommentBtn');
-    const submitText = document.getElementById('submitText');
-    const submitLoading = document.getElementById('submitLoading');
     
     submitBtn.disabled = false;
-    submitText.classList.remove('hidden');
-    submitLoading.classList.add('hidden');
+    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    submitBtn.innerHTML = 'Post Comment';
 }
 
 // Edit comment
