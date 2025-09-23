@@ -342,7 +342,7 @@ function displayComments(comments) {
     console.log('Rendering', comments.length, 'comments');
     
     commentsList.innerHTML = comments.map(comment => `
-        <div class="border border-gray-200 rounded-lg p-4 fade-in-up">
+        <div class="border border-gray-200 rounded-lg p-4 fade-in-up hover:shadow-sm transition-shadow duration-200">
             <div class="flex items-start justify-between mb-2">
                 <div class="flex items-center space-x-3">
                     ${comment.customer_avatar ? 
