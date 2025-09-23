@@ -38,7 +38,7 @@
                                 Upload New Profile Picture
                             </label>
                             <div id="avatar-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-emerald-400 transition-colors cursor-pointer" 
-                                 onclick="document.getElementById('avatar').click()"
+                                 onclick="triggerFileInput()"
                                  ondrop="handleAvatarDrop(event)" 
                                  ondragover="handleAvatarDragOver(event)" 
                                  ondragenter="handleAvatarDragEnter(event)" 
@@ -46,12 +46,10 @@
                                 <div class="space-y-1 text-center">
                                     <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
                                     <div class="flex text-sm text-gray-600">
-                                        <label for="avatar" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500">
-                                            <span>Upload Profile Picture</span>
-                                            <input id="avatar" name="avatar" type="file" class="sr-only" accept="image/*" onchange="previewAvatar(this)">
-                                        </label>
+                                        <span class="font-medium text-emerald-600">Upload Profile Picture</span>
                                         <p class="pl-1">or drag and drop</p>
                                     </div>
+                                    <input id="avatar" name="avatar" type="file" class="sr-only" accept="image/*" onchange="previewAvatar(this)">
                                     <p class="text-xs text-gray-500">JPEG, PNG, JPG, GIF up to 10MB</p>
                                 </div>
                             </div>
@@ -643,6 +641,11 @@ function handleAvatarDrop(e) {
             });
         }
     }
+}
+
+// Trigger file input when clicking on upload area
+function triggerFileInput() {
+    document.getElementById('avatar').click();
 }
 
 // Show upload confirmation with SweetAlert
