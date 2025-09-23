@@ -409,6 +409,18 @@ function hidePasswordConfirmation() {
 
 // Confirm password update
 document.getElementById('confirmPasswordUpdate').addEventListener('click', function() {
+    // Close the modal
+    hidePasswordConfirmation();
+    
+    // Show spinner and disable main button
+    const mainButton = document.querySelector('button[onclick="showPasswordConfirmation()"]');
+    
+    if (mainButton) {
+        mainButton.disabled = true;
+        mainButton.classList.add('opacity-50', 'cursor-not-allowed');
+        mainButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Updating';
+    }
+    
     document.getElementById('passwordForm').submit();
 });
 
@@ -456,6 +468,18 @@ function hideProfileConfirmation() {
 
 // Confirm profile update
 document.getElementById('confirmProfileUpdate').addEventListener('click', function() {
+    // Close the modal
+    hideProfileConfirmation();
+    
+    // Show spinner and disable main button
+    const mainButton = document.getElementById('updateProfileBtn');
+    
+    if (mainButton) {
+        mainButton.disabled = true;
+        mainButton.classList.add('opacity-50', 'cursor-not-allowed');
+        mainButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Updating';
+    }
+    
     document.getElementById('profileForm').submit();
 });
 
