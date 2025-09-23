@@ -136,11 +136,11 @@
                 <div class="flex-shrink-0">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
                     <div class="flex space-x-1" id="editRatingStars">
-                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="1">★</button>
-                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="2">★</button>
-                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="3">★</button>
-                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="4">★</button>
-                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl" data-rating="5">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" style="cursor: pointer;" data-rating="1">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" style="cursor: pointer;" data-rating="2">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" style="cursor: pointer;" data-rating="3">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" style="cursor: pointer;" data-rating="4">★</button>
+                        <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" style="cursor: pointer;" data-rating="5">★</button>
                     </div>
                     <input type="hidden" id="editRating" name="rating">
                 </div>
@@ -406,7 +406,7 @@ function setupRating(starsContainer, ratingInput) {
             // Update star display
             stars.forEach((s, i) => {
                 s.textContent = i < rating ? '★' : '☆';
-                s.className = i < rating ? 'text-yellow-400 text-xl' : 'text-gray-300 hover:text-yellow-400 text-xl';
+                s.className = i < rating ? 'text-yellow-400 text-xl cursor-pointer' : 'text-gray-300 hover:text-yellow-400 text-xl cursor-pointer';
             });
         });
         
@@ -414,7 +414,7 @@ function setupRating(starsContainer, ratingInput) {
             const rating = index + 1;
             stars.forEach((s, i) => {
                 s.textContent = i < rating ? '★' : '☆';
-                s.className = i < rating ? 'text-yellow-400 text-xl' : 'text-gray-300 text-xl';
+                s.className = i < rating ? 'text-yellow-400 text-xl cursor-pointer' : 'text-gray-300 text-xl cursor-pointer';
             });
         });
     });
@@ -423,7 +423,7 @@ function setupRating(starsContainer, ratingInput) {
         const currentRating = parseInt(ratingInput.value) || 0;
         stars.forEach((s, i) => {
             s.textContent = i < currentRating ? '★' : '☆';
-            s.className = i < currentRating ? 'text-yellow-400 text-xl' : 'text-gray-300 hover:text-yellow-400 text-xl';
+            s.className = i < currentRating ? 'text-yellow-400 text-xl cursor-pointer' : 'text-gray-300 hover:text-yellow-400 text-xl cursor-pointer';
         });
     });
 }
@@ -556,7 +556,7 @@ function editComment(commentId, commentText, rating) {
     const stars = document.querySelectorAll('#editRatingStars button');
     stars.forEach((star, index) => {
         star.textContent = index < rating ? '★' : '☆';
-        star.className = index < rating ? 'text-yellow-400 text-xl' : 'text-gray-300 hover:text-yellow-400 text-xl';
+        star.className = index < rating ? 'text-yellow-400 text-xl cursor-pointer' : 'text-gray-300 hover:text-yellow-400 text-xl cursor-pointer';
     });
     
     // Auto-resize the textarea after setting content
