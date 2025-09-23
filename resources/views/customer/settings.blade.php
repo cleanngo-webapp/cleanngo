@@ -70,8 +70,9 @@
                         </div>
                         
                         <div class="flex space-x-3">
-                            <button type="submit" 
+                            <button type="button" 
                                     id="uploadAvatarBtn"
+                                    onclick="showUploadConfirmation()"
                                     disabled
                                     class="bg-gray-400 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium cursor-not-allowed">
                                 Update Profile Picture
@@ -644,6 +645,25 @@ function handleAvatarDrop(e) {
     }
 }
 
+// Show upload confirmation with SweetAlert
+function showUploadConfirmation() {
+    Swal.fire({
+        title: 'Upload Profile Picture?',
+        text: 'Are you sure you want to upload this profile picture? This will replace your current profile picture.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#047857',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Upload Picture',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            uploadAvatar();
+        }
+    });
+}
+
 // Show remove avatar confirmation with SweetAlert
 function showRemoveAvatarConfirmation() {
     Swal.fire({
@@ -661,6 +681,22 @@ function showRemoveAvatarConfirmation() {
             removeAvatar();
         }
     });
+}
+
+// Upload avatar function with preloader
+function uploadAvatar() {
+    const uploadBtn = document.getElementById('uploadAvatarBtn');
+    const avatarForm = document.getElementById('avatarForm');
+    
+    if (uploadBtn) {
+        uploadBtn.disabled = true;
+        uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        uploadBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Uploading Picture';
+    }
+    
+    if (avatarForm) {
+        avatarForm.submit();
+    }
 }
 
 // Remove avatar function with preloader
@@ -697,19 +733,5 @@ function removeAvatar() {
     form.submit();
 }
 
-// Handle avatar form submission with preloader
-document.addEventListener('DOMContentLoaded', function() {
-    const avatarForm = document.getElementById('avatarForm');
-    const uploadBtn = document.getElementById('uploadAvatarBtn');
-    
-    if (avatarForm && uploadBtn) {
-        avatarForm.addEventListener('submit', function(e) {
-            // Show preloader on the upload button
-            uploadBtn.disabled = true;
-            uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            uploadBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Uploading Picture';
-        });
-    }
-});
 </script>
 @endsection
