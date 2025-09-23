@@ -368,7 +368,7 @@ function displayComments(comments) {
                 ${comment.can_edit || comment.can_delete ? `
                     <div class="flex space-x-2 flex-shrink-0">
                         ${comment.can_edit ? `
-                            <button onclick="editComment(${comment.id}, '${comment.comment.replace(/'/g, "\\'")}', ${comment.rating || 0})" 
+                            <button id="editBtn-${comment.id}" onclick="editComment(${comment.id}, '${comment.comment.replace(/'/g, "\\'")}', ${comment.rating || 0})" 
                                     class="group relative p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200 cursor-pointer"
                                     title="Edit comment">
                                 <i class="ri-edit-line text-lg"></i>
@@ -378,7 +378,7 @@ function displayComments(comments) {
                             </button>
                         ` : ''}
                         ${comment.can_delete ? `
-                            <button onclick="deleteComment(${comment.id})" 
+                            <button id="deleteBtn-${comment.id}" onclick="deleteComment(${comment.id})" 
                                     class="group relative p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200 cursor-pointer"
                                     title="Delete comment">
                                 <i class="ri-delete-bin-line text-xl"></i>
@@ -494,7 +494,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (response.ok && result.success) {
             console.log('Comment added successfully, reloading comments...');
-            // Reload comments
+            // Show preloader and reload comments
+            showPreloader();
             loadComments(currentServiceType);
             // Reset form
             this.reset();
@@ -535,6 +536,15 @@ function resetSubmitButton() {
 // Edit comment
 function editComment(commentId, commentText, rating) {
     console.log('editComment called with:', { commentId, commentText, rating });
+    
+    // Show preloader on edit button
+    const editBtn = document.getElementById(`editBtn-${commentId}`);
+    if (editBtn) {
+        editBtn.disabled = true;
+        editBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        editBtn.innerHTML = '<div class="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>';
+    }
+    
     document.getElementById('editCommentId').value = commentId;
     document.getElementById('editComment').value = commentText;
     document.getElementById('editRating').value = rating;
@@ -615,6 +625,7 @@ async function confirmDeleteComment() {
         const result = await response.json();
         
         if (result.success) {
+            showPreloader();
             loadComments(currentServiceType);
             showNotification('Comment deleted successfully!', 'success');
         } else {
@@ -670,6 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (result.success) {
                     closeEditCommentModal();
+                    showPreloader();
                     loadComments(currentServiceType);
                     showNotification('Comment updated successfully!', 'success');
                 } else {
