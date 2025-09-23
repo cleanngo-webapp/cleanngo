@@ -66,7 +66,7 @@
         </div>
 
         <div class="flex justify-end">
-            <button class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Save Changes</button>
+            <button type="button" id="saveChangesBtn" onclick="showSaveConfirmation()" class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Save Changes</button>
         </div>
     </form>
 
@@ -132,6 +132,39 @@
         </div>
     </div>
 </div>
+
+<script>
+// Show save confirmation modal
+function showSaveConfirmation() {
+    Swal.fire({
+        title: 'Save Profile Changes?',
+        text: 'Are you sure you want to save these changes to your profile?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#047857',
+        cancelButtonColor: '#dc2626',
+        confirmButtonText: 'Yes, Save Changes',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show preloader and submit form
+            const saveButton = document.getElementById('saveChangesBtn');
+            const form = document.querySelector('form[action="{{ route("employee.profile.update") }}"]');
+            
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.classList.add('opacity-50', 'cursor-not-allowed');
+                saveButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Saving Changes';
+            }
+            
+            if (form) {
+                form.submit();
+            }
+        }
+    });
+}
+</script>
 @endsection
 
 

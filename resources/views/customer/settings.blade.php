@@ -79,7 +79,8 @@
                             
                             @if(auth()->user()->avatar)
                                 <button type="button" 
-                                        onclick="removeAvatar()"
+                                        id="removeAvatarBtn"
+                                        onclick="showRemoveAvatarConfirmation()"
                                         class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors font-medium cursor-pointer">
                                     Remove Picture
                                 </button>
@@ -643,32 +644,72 @@ function handleAvatarDrop(e) {
     }
 }
 
-// Remove avatar function
-function removeAvatar() {
-    if (confirm('Are you sure you want to remove your profile picture?')) {
-        // Create a form to submit DELETE request
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("customer.settings.avatar.remove") }}';
-        
-        // Add CSRF token
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
-        form.appendChild(csrfToken);
-        
-        // Add method override for DELETE
-        const methodField = document.createElement('input');
-        methodField.type = 'hidden';
-        methodField.name = '_method';
-        methodField.value = 'DELETE';
-        form.appendChild(methodField);
-        
-        // Submit the form
-        document.body.appendChild(form);
-        form.submit();
-    }
+// Show remove avatar confirmation with SweetAlert
+function showRemoveAvatarConfirmation() {
+    Swal.fire({
+        title: 'Remove Profile Picture?',
+        text: 'Are you sure you want to remove your profile picture? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Remove Picture',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            removeAvatar();
+        }
+    });
 }
+
+// Remove avatar function with preloader
+function removeAvatar() {
+    const removeBtn = document.getElementById('removeAvatarBtn');
+    
+    if (removeBtn) {
+        removeBtn.disabled = true;
+        removeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        removeBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Removing Picture';
+    }
+    
+    // Create a form to submit DELETE request
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route("customer.settings.avatar.remove") }}';
+    
+    // Add CSRF token
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = '_token';
+    csrfToken.value = '{{ csrf_token() }}';
+    form.appendChild(csrfToken);
+    
+    // Add method override for DELETE
+    const methodField = document.createElement('input');
+    methodField.type = 'hidden';
+    methodField.name = '_method';
+    methodField.value = 'DELETE';
+    form.appendChild(methodField);
+    
+    // Submit the form
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Handle avatar form submission with preloader
+document.addEventListener('DOMContentLoaded', function() {
+    const avatarForm = document.getElementById('avatarForm');
+    const uploadBtn = document.getElementById('uploadAvatarBtn');
+    
+    if (avatarForm && uploadBtn) {
+        avatarForm.addEventListener('submit', function(e) {
+            // Show preloader on the upload button
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            uploadBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Uploading Picture';
+        });
+    }
+});
 </script>
 @endsection
