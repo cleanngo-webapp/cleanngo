@@ -21,6 +21,10 @@
                         class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer flex items-center gap-2">
                     <i class="ri-check-double-line"></i>
                     <span id="mark-all-read-text">Mark All as Read ({{ $unreadCount }})</span>
+                    <!-- Spinner for loading state -->
+                    <div id="mark-all-spinner" class="hidden">
+                        <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    </div>
                 </button>
             @endif
         </div>
@@ -155,6 +159,22 @@ function updateMarkAllButtonCount() {
 
 // Function to mark all notifications as read
 function markAllAsRead() {
+    // Show spinner and disable button
+    const button = document.getElementById('mark-all-read-btn');
+    const spinner = document.getElementById('mark-all-spinner');
+    const textSpan = document.getElementById('mark-all-read-text');
+    
+    if (spinner) {
+        spinner.classList.remove('hidden');
+    }
+    if (textSpan) {
+        textSpan.textContent = 'Marking as read...';
+    }
+    if (button) {
+        button.disabled = true;
+        button.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
     fetch('/employee/notifications/mark-all-read', {
         method: 'POST',
         headers: {
@@ -192,14 +212,25 @@ function markAllAsRead() {
             }
             
             // Hide the "Mark All as Read" button
-            const markAllButton = document.getElementById('mark-all-read-btn');
-            if (markAllButton) {
-                markAllButton.style.display = 'none';
+            if (button) {
+                button.style.display = 'none';
             }
         }
     })
     .catch(error => {
         console.error('Error marking all notifications as read:', error);
+        
+        // Hide spinner and re-enable button on error
+        if (spinner) {
+            spinner.classList.add('hidden');
+        }
+        if (textSpan) {
+            textSpan.textContent = 'Mark All as Read';
+        }
+        if (button) {
+            button.disabled = false;
+            button.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
     });
 }
 
