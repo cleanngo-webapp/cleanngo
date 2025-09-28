@@ -4,6 +4,54 @@
 
 @push('head')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+/* Admin Booking Modal Styles - Simplified version without fancy animations */
+.quantity-btn {
+    @apply w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200 ease-in-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-95;
+}
+
+.quantity-btn:hover {
+    @apply transform scale-105;
+}
+
+.quantity-btn:active {
+    @apply transform scale-95;
+}
+
+.quantity-display {
+    @apply min-w-[2rem] text-center font-semibold text-white text-lg;
+    @apply bg-white/10 rounded-lg px-3 py-1;
+}
+
+/* Enhanced card styling for better visual hierarchy */
+.bg-white\/10 {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bg-white\/10:hover {
+    @apply bg-white/15;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Active state for navigation buttons */
+.nav-button {
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-button.active {
+    background-color: white;
+    color: #059669; /* emerald-700 */
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Receipt card styling */
+.receipt-card {
+    transition: all 0.3s ease-in-out;
+}
+</style>
 @endpush
 
 @section('content')
@@ -298,42 +346,433 @@
         </div>
     </div>
 
-    <div id="create-booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Create Booking</div>
-                <button onclick="document.getElementById('create-booking-modal').classList.add('hidden')">✕</button>
+    <!-- Admin Booking Modal - Based on Customer Services Page Design -->
+    <div id="create-booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]" style="overscroll-behavior: contain;">
+        <div class="bg-white rounded-xl w-full max-w-6xl p-4 m-4" style="max-height: 90vh; overflow-y: auto; overscroll-behavior: contain;">
+            <div class="flex items-center justify-between mb-4">
+                <div class="font-semibold text-lg">Create Manual Booking</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeAdminBookingModal()">✕</button>
             </div>
-            <form method="POST" action="{{ url('/admin/bookings') }}" class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Left: Services Nav -->
+                <aside class="bg-emerald-700 flex flex-col rounded-xl border-none p-3 gap-2">
+                    <div class="font-semibold flex flex-col mb-2 text-center text-white">SERVICES</div>
+                    <div class="flex flex-col gap-2">
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer active" data-service="sofa">Sofa / Mattress Deep Cleaning</button>
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="carpet">Carpet Deep Cleaning</button>
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="carInterior">Home Service Car Interior Detailing</button>
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="postConstruction">Post Construction Cleaning</button>
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="disinfection">Home/Office Disinfection</button>
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="glass">Glass Cleaning</button>
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="houseCleaning">House Cleaning</button>
+                        <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="curtainCleaning">Curtain Cleaning</button>
+                    </div>
+                </aside>
+
+                <!-- Middle: Active Service Form -->
+                <section class="bg-brand-green rounded-xl text-white p-4 md:col-span-1" id="adminServiceForms">
+                    <!-- Sofa/Mattress -->
+                    <div data-form="sofa" class="">
+                        <h2 class="font-semibold text-center mb-4">Sofa Deep Cleaning</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">1 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_1" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_1" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_1" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">2 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_2" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_2" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_2" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">3 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_3" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_3" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_3" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">4 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_4" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_4" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_4" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">5 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_5" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_5" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_5" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">6 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_6" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_6" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_6" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">7 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_7" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_7" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_7" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">8 seater</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_8" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_sofa_8" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_8" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="font-semibold mt-8 mb-4 text-center">Mattress Deep Cleaning</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Single bed</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_single" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_mattress_single" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_single" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Double bed</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_double" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_mattress_double" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_double" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">King bed</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_king" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_mattress_king" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_king" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">California bed</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_california" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_mattress_california" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_california" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carpet -->
+                    <div data-form="carpet" class="hidden">
+                        <h2 class="font-semibold text-center mb-4">Carpet Deep Cleaning</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Square Foot</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_carpet_qty" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_carpet_qty" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_carpet_qty" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Car Interior -->
+                    <div data-form="carInterior" class="hidden">
+                        <h2 class="font-semibold text-center mb-4">Home Service Car Interior Detailing</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Sedan</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_sedan" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_car_sedan" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_sedan" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">SUV</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_suv" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_car_suv" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_suv" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Van</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_van" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_car_van" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_van" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Hatchback</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_coaster" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_car_coaster" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_coaster" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Post Construction -->
+                    <div data-form="postConstruction" class="hidden">
+                        <h2 class="font-semibold text-center mb-4">Post Construction Cleaning</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Square Meter</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_pcc_qty" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_pcc_qty" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_pcc_qty" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Disinfection -->
+                    <div data-form="disinfection" class="hidden">
+                        <h2 class="font-semibold text-center mb-4">Home/Office Disinfection</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Square Meter</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_disinfect_qty" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_disinfect_qty" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_disinfect_qty" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Glass -->
+                    <div data-form="glass" class="hidden">
+                        <h2 class="font-semibold text-center mb-4">Glass Cleaning</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Square Foot</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_glass_qty" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_glass_qty" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_glass_qty" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- House Cleaning -->
+                    <div data-form="houseCleaning" class="hidden">
+                        <h2 class="font-semibold text-center mb-4">House Cleaning</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Square Meter</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_house_qty" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_house_qty" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_house_qty" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Curtain Cleaning -->
+                    <div data-form="curtainCleaning" class="hidden">
+                        <h2 class="font-semibold text-center mb-4">Curtain Cleaning</h2>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                                <span class="text-white font-medium">Yard</span>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_curtain_qty" data-action="decrease">
+                                        <i class="ri-subtract-line text-lg"></i>
+                                    </button>
+                                    <span id="admin_curtain_qty" class="quantity-display">0</span>
+                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_curtain_qty" data-action="increase">
+                                        <i class="ri-add-line text-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right: Receipt and Booking Form -->
+                <aside class="receipt-card bg-white rounded-xl shadow-sm p-4">
+                    <div class="font-bold text-lg uppercase mb-2">Total Estimation</div>
+                    <div class="text-xs text-gray-500 mb-3" id="admin_receipt_title">Sofa / Mattress Deep Cleaning</div>
+                    
+                    <!-- Service Items List -->
+                    <div id="admin_receipt_lines" class="space-y-3 mb-4"></div>
+                    
+                    <!-- Separator Line -->
+                    <div class="border-t border-gray-300 my-3"></div>
+                    
+                    <!-- Totals -->
+                    <div class="space-y-1">
+                        <div class="text-sm flex justify-between">
+                            <span>Subtotal</span> 
+                            <span id="admin_estimate_subtotal">PHP 0.00</span>
+                        </div>
+                        <div class="text-sm flex justify-between font-bold">
+                            <span>TOTAL</span> 
+                            <span id="admin_estimate_total">PHP 0.00</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Form -->
+                    <form method="POST" action="{{ url('/admin/bookings') }}" class="mt-4 space-y-3" onsubmit="return confirmAdminBookingSubmission(event)">
                 @csrf
-                <label class="text-sm col-span-2">Customer
-                    <select name="user_id" class="border rounded px-2 py-1 w-full" required>
+                        
+                        <!-- Customer Selection -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                            <select name="user_id" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                                <option value="">Select Customer</option>
                         @foreach($customers as $c)
                             <option value="{{ $c->id }}">{{ $c->first_name }} {{ $c->last_name }}</option>
                         @endforeach
                     </select>
-                </label>
-                <label class="text-sm">Date
-                    <input type="date" name="date" class="border rounded px-2 py-1 w-full" required>
-                </label>
-                <label class="text-sm">Time
-                    <input type="time" name="time" class="border rounded px-2 py-1 w-full" required>
-                </label>
-                <label class="text-sm col-span-2">Assign Employee (optional)
-                    <select name="employee_user_id" class="border rounded px-2 py-1 w-full">
-                        <option value="">—</option>
+                        </div>
+                        
+                        <!-- Date and Time Selection -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                <input type="date" name="date" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                                <input type="time" name="time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Employee Assignment -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Assign Employee (optional)</label>
+                            <select name="employee_user_id" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                <option value="">No assignment</option>
                         @foreach($employees as $e)
                             <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
                         @endforeach
                     </select>
-                </label>
-                <label class="text-sm col-span-2">Notes
-                    <textarea name="summary" class="border rounded px-2 py-1 w-full" placeholder="Service details"></textarea>
-                </label>
-                <div class="col-span-2 flex justify-end gap-2">
-                    <button class="px-3 py-2 bg-emerald-700 text-white rounded">Save</button>
+                        </div>
+                        
+                        <!-- Hidden fields for booking data -->
+                        <input type="hidden" name="total" id="admin_booking_total">
+                        <input type="hidden" name="items_json" id="admin_items_json">
+                        <input type="hidden" name="status" value="confirmed">
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 transition-colors duration-200" onclick="closeAdminBookingModal()">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-800 transition-colors duration-200">
+                                Create Booking
+                            </button>
                 </div>
             </form>
+                </aside>
+            </div>
         </div>
         </div>
 
@@ -1469,6 +1908,500 @@
             }, 300);
         }, 3000);
     }
+    </script>
+    
+    <!-- Admin Booking Modal JavaScript -->
+    <script>
+    // Admin booking modal functionality - simplified version without fancy animations
+    const adminPeso = v => 'PHP ' + Number(v||0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+    // Admin Quantity Control Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle quantity button clicks for admin modal
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.quantity-btn') && e.target.closest('#adminServiceForms')) {
+                e.preventDefault();
+                const button = e.target.closest('.quantity-btn');
+                const targetId = button.getAttribute('data-target');
+                const action = button.getAttribute('data-action');
+                const display = document.getElementById(targetId);
+                
+                if (display) {
+                    let currentValue = parseInt(display.textContent) || 0;
+                    let newValue = currentValue;
+                    
+                    if (action === 'increase') {
+                        newValue = currentValue + 1;
+                    } else if (action === 'decrease') {
+                        newValue = Math.max(0, currentValue - 1);
+                    }
+                    
+                    if (newValue !== currentValue) {
+                        display.textContent = newValue;
+                        adminCalc();
+                    }
+                }
+            }
+        });
+    });
+
+    // Admin Service switching functionality
+    const adminForms = document.querySelectorAll('#adminServiceForms [data-form]');
+    const adminNavButtons = document.querySelectorAll('#create-booking-modal [data-service]');
+    let adminCurrentService = 'sofa'; // Default to first service
+
+    function adminShowForm(name) {
+        adminCurrentService = name;
+        
+        // Show/hide forms
+        adminForms.forEach(f => f.classList.toggle('hidden', f.getAttribute('data-form') !== name));
+        
+        // Update navigation buttons
+        adminNavButtons.forEach(btn => {
+            const isActive = btn.dataset.service === name;
+            btn.classList.toggle('active', isActive);
+        });
+        
+        // Update receipt title
+        const titles = {
+            sofa: 'Sofa / Mattress Deep Cleaning',
+            carpet: 'Carpet Deep Cleaning',
+            carInterior: 'Home Service Car Interior Detailing',
+            postConstruction: 'Post Construction Cleaning',
+            disinfection: 'Home/Office Disinfection',
+            glass: 'Glass Cleaning',
+            houseCleaning: 'House Cleaning',
+            curtainCleaning: 'Curtain Cleaning'
+        };
+        document.getElementById('admin_receipt_title').textContent = titles[name];
+        
+        // Calculate totals
+        adminCalc();
+    }
+
+    // Add click event listeners to admin navigation buttons
+    adminNavButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            adminShowForm(btn.dataset.service);
+        });
+    });
+
+    // Admin calculation function - simplified version
+    function adminCalc() {
+        const receipt = [];
+        let subtotal = 0;
+        let itemCounter = 1;
+
+        const u = id => parseInt(document.getElementById(id)?.textContent || 0);
+        const s = id => parseFloat(document.getElementById(id)?.textContent || 0);
+
+        // Sofa/Mattress services
+        const sofaItems = [];
+        const sofaInputs = [
+            {id: 'admin_sofa_1', label: '1 seater', qty: u('admin_sofa_1')},
+            {id: 'admin_sofa_2', label: '2 seater', qty: u('admin_sofa_2')},
+            {id: 'admin_sofa_3', label: '3 seater', qty: u('admin_sofa_3')},
+            {id: 'admin_sofa_4', label: '4 seater', qty: u('admin_sofa_4')},
+            {id: 'admin_sofa_5', label: '5 seater', qty: u('admin_sofa_5')},
+            {id: 'admin_sofa_6', label: '6 seater', qty: u('admin_sofa_6')},
+            {id: 'admin_sofa_7', label: '7 seater', qty: u('admin_sofa_7')},
+            {id: 'admin_sofa_8', label: '8 seater', qty: u('admin_sofa_8')}
+        ];
+
+        const mattressItems = [];
+        const mattressInputs = [
+            {id: 'admin_mattress_single', label: 'Single', qty: u('admin_mattress_single')},
+            {id: 'admin_mattress_double', label: 'Double', qty: u('admin_mattress_double')},
+            {id: 'admin_mattress_king', label: 'King', qty: u('admin_mattress_king')},
+            {id: 'admin_mattress_california', label: 'California', qty: u('admin_mattress_california')}
+        ];
+
+        // Sofa pricing
+        const sofaPrices = {
+            'admin_sofa_1': 750,
+            'admin_sofa_2': 1250,
+            'admin_sofa_3': 1750,
+            'admin_sofa_4': 2250,
+            'admin_sofa_5': 2750,
+            'admin_sofa_6': 3250,
+            'admin_sofa_7': 3750,
+            'admin_sofa_8': 4250
+        };
+
+        sofaInputs.forEach(item => {
+            if (item.qty > 0 && sofaPrices[item.id] > 0) {
+                sofaItems.push({...item, price: sofaPrices[item.id], total: item.qty * sofaPrices[item.id]});
+            }
+        });
+
+        // Mattress pricing
+        const mattressPrices = {
+            'admin_mattress_single': 950,
+            'admin_mattress_double': 1100,
+            'admin_mattress_king': 1450,
+            'admin_mattress_california': 1350
+        };
+
+        mattressInputs.forEach(item => {
+            if (item.qty > 0) {
+                mattressItems.push({...item, price: mattressPrices[item.id], total: item.qty * mattressPrices[item.id]});
+            }
+        });
+
+        // Create combined Sofa/Mattress card if any items exist
+        if (sofaItems.length > 0 || mattressItems.length > 0) {
+            const allItems = [...sofaItems, ...mattressItems];
+            const totalAmount = allItems.reduce((sum, item) => sum + item.total, 0);
+            
+            let itemsHtml = '';
+            allItems.forEach(item => {
+                itemsHtml += `
+                    <div class="flex justify-between items-center py-1">
+                        <div class="flex-1">
+                            <span class="text-xs text-gray-600">${item.label}</span>
+                            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
+                        </div>
+                        <span class="text-xs font-semibold">${adminPeso(item.total)}</span>
+                    </div>
+                `;
+            });
+
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
+                            <div class="mt-2 space-y-1">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                        <span class="text-xs text-gray-500">Total</span>
+                        <span class="font-semibold">${adminPeso(totalAmount)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += totalAmount;
+            itemCounter++;
+        }
+
+        // Car Interior Detailing
+        const carItems = [];
+        const carInputs = [
+            {id: 'admin_car_sedan', label: 'Sedan', qty: u('admin_car_sedan')},
+            {id: 'admin_car_suv', label: 'SUV', qty: u('admin_car_suv')},
+            {id: 'admin_car_van', label: 'Van', qty: u('admin_car_van')},
+            {id: 'admin_car_coaster', label: 'Hatchback', qty: u('admin_car_coaster')}
+        ];
+
+        const carPrices = {
+            'admin_car_sedan': 2900,
+            'admin_car_suv': 3900,
+            'admin_car_van': 6900,
+            'admin_car_coaster': 3000
+        };
+
+        carInputs.forEach(item => {
+            if (item.qty > 0) {
+                carItems.push({...item, price: carPrices[item.id], total: item.qty * carPrices[item.id]});
+            }
+        });
+
+        if (carItems.length > 0) {
+            const totalAmount = carItems.reduce((sum, item) => sum + item.total, 0);
+            
+            let itemsHtml = '';
+            carItems.forEach(item => {
+                itemsHtml += `
+                    <div class="flex justify-between items-center py-1">
+                        <div class="flex-1">
+                            <span class="text-xs text-gray-600">${item.label}</span>
+                            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
+                        </div>
+                        <span class="text-xs font-semibold">${adminPeso(item.total)}</span>
+                    </div>
+                `;
+            });
+
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
+                            <div class="mt-2 space-y-1">
+                                ${itemsHtml}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                        <span class="text-xs text-gray-500">Total</span>
+                        <span class="font-semibold">${adminPeso(totalAmount)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += totalAmount;
+            itemCounter++;
+        }
+
+        // Individual service categories
+        const carpetQty = s('admin_carpet_qty');
+        if (carpetQty > 0) {
+            const amt = carpetQty * 30;
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Carpet Deep Cleaning</div>
+                            <div class="text-xs text-gray-600">Square Foot</div>
+                            <div class="text-xs text-gray-500 text-right">${carpetQty}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${carpetQty} Square Foot × ₱30</span>
+                        <span class="font-semibold">${adminPeso(amt)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += amt;
+            itemCounter++;
+        }
+
+        const pccQty = s('admin_pcc_qty');
+        if (pccQty > 0) {
+            const amt = pccQty * 101.67;
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Post Construction Cleaning</div>
+                            <div class="text-xs text-gray-600">Square Meter</div>
+                            <div class="text-xs text-gray-500 text-right">${pccQty}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${pccQty} Square Meter × ₱101.67</span>
+                        <span class="font-semibold">${adminPeso(amt)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += amt;
+            itemCounter++;
+        }
+
+        const disinfectQty = s('admin_disinfect_qty');
+        if (disinfectQty > 0) {
+            const amt = disinfectQty * 90;
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Home/Office Disinfection</div>
+                            <div class="text-xs text-gray-600">Square Meter</div>
+                            <div class="text-xs text-gray-500 text-right">${disinfectQty}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${disinfectQty} Square Meter × ₱90</span>
+                        <span class="font-semibold">${adminPeso(amt)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += amt;
+            itemCounter++;
+        }
+
+        const glassQty = s('admin_glass_qty');
+        if (glassQty > 0) {
+            const amt = glassQty * 50;
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Glass Cleaning</div>
+                            <div class="text-xs text-gray-600">Square Foot</div>
+                            <div class="text-xs text-gray-500 text-right">${glassQty}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${glassQty} Square Foot × ₱50</span>
+                        <span class="font-semibold">${adminPeso(amt)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += amt;
+            itemCounter++;
+        }
+
+        const houseQty = s('admin_house_qty');
+        if (houseQty > 0) {
+            const amt = houseQty * 91;
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. House Cleaning</div>
+                            <div class="text-xs text-gray-600">Square Meter</div>
+                            <div class="text-xs text-gray-500 text-right">${houseQty}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${houseQty} Square Meter × ₱91</span>
+                        <span class="font-semibold">${adminPeso(amt)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += amt;
+            itemCounter++;
+        }
+
+        const curtainQty = s('admin_curtain_qty');
+        if (curtainQty > 0) {
+            const amt = curtainQty * 50;
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Curtain Cleaning</div>
+                            <div class="text-xs text-gray-600">Yard</div>
+                            <div class="text-xs text-gray-500 text-right">${curtainQty}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${curtainQty} Yard × ₱50</span>
+                        <span class="font-semibold">${adminPeso(amt)}</span>
+                    </div>
+                </div>
+            `);
+            subtotal += amt;
+            itemCounter++;
+        }
+
+        document.getElementById('admin_receipt_lines').innerHTML = receipt.join('');
+        document.getElementById('admin_estimate_subtotal').textContent = adminPeso(subtotal);
+        document.getElementById('admin_estimate_total').textContent = adminPeso(subtotal);
+        return subtotal;
+    }
+
+    // Function to close admin booking modal
+    function closeAdminBookingModal() {
+        const modal = document.getElementById('create-booking-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        
+        // Reset all quantities
+        const quantityDisplays = document.querySelectorAll('#adminServiceForms .quantity-display');
+        quantityDisplays.forEach(display => {
+            display.textContent = '0';
+        });
+        
+        // Reset form
+        const form = modal.querySelector('form');
+        if (form) {
+            form.reset();
+        }
+        
+        // Reset to first service
+        adminShowForm('sofa');
+    }
+
+    // Function to handle admin booking form submission
+    function confirmAdminBookingSubmission(event) {
+        event.preventDefault();
+        
+        const total = adminCalc();
+        
+        // Check if any services are selected
+        if (total <= 0) {
+            Swal.fire({
+                title: 'No Services Selected',
+                text: 'Please select at least one service before creating the booking.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#10b981'
+            });
+            return false;
+        }
+        
+        // Build items payload
+        const items = [];
+        const addItem = (type, qty, unitPrice) => {
+            qty = parseInt(qty||0); 
+            if(!qty) return; 
+            items.push({ type, qty, unitPrice }); 
+        };
+        
+        // Sofa/Mattress
+        addItem('sofa_1_seater', document.getElementById('admin_sofa_1').textContent, 750);
+        addItem('sofa_2_seater', document.getElementById('admin_sofa_2').textContent, 1250);
+        addItem('sofa_3_seater', document.getElementById('admin_sofa_3').textContent, 1750);
+        addItem('sofa_4_seater', document.getElementById('admin_sofa_4').textContent, 2250);
+        addItem('sofa_5_seater', document.getElementById('admin_sofa_5').textContent, 2750);
+        addItem('sofa_6_seater', document.getElementById('admin_sofa_6').textContent, 3250);
+        addItem('sofa_7_seater', document.getElementById('admin_sofa_7').textContent, 3750);
+        addItem('sofa_8_seater', document.getElementById('admin_sofa_8').textContent, 4250);
+        addItem('mattress_single', document.getElementById('admin_mattress_single').textContent, 950);
+        addItem('mattress_double', document.getElementById('admin_mattress_double').textContent, 1100);
+        addItem('mattress_king', document.getElementById('admin_mattress_king').textContent, 1450);
+        addItem('mattress_california', document.getElementById('admin_mattress_california').textContent, 1350);
+        
+        // Simplified services
+        const addSimplified = (label, qtyId, pricePerUnit) => {
+            const qty = parseInt(document.getElementById(qtyId)?.textContent||0);
+            if (qty>0) items.push({ type: label, qty, unitPrice: pricePerUnit });
+        };
+        addSimplified('carpet_sqft', 'admin_carpet_qty', 30);
+        addSimplified('post_construction_sqm', 'admin_pcc_qty', 101.67);
+        addSimplified('disinfect_sqm', 'admin_disinfect_qty', 90);
+        addSimplified('glass_sqft', 'admin_glass_qty', 50);
+        addSimplified('house_cleaning_sqm', 'admin_house_qty', 91);
+        addSimplified('curtain_cleaning_yard', 'admin_curtain_qty', 50);
+        
+        // Car detailing
+        addItem('car_sedan', document.getElementById('admin_car_sedan').textContent, 2900);
+        addItem('car_suv', document.getElementById('admin_car_suv').textContent, 3900);
+        addItem('car_van', document.getElementById('admin_car_van').textContent, 6900);
+        addItem('car_coaster', document.getElementById('admin_car_coaster').textContent, 3000);
+
+        // Set hidden fields
+        document.getElementById('admin_booking_total').value = total;
+        document.getElementById('admin_items_json').value = JSON.stringify(items);
+        
+        // Show confirmation
+        Swal.fire({
+            title: 'Confirm Manual Booking',
+            text: `Create booking for PHP ${adminPeso(total)}? This will be automatically confirmed.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, Create Booking',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Submit the form
+                event.target.submit();
+            }
+        });
+        
+        return false;
+    }
+
+    // Initialize admin modal when opened
+    document.addEventListener('DOMContentLoaded', function() {
+        // Override the original modal opening to initialize admin functionality
+        const originalButton = document.querySelector('button[onclick*="create-booking-modal"]');
+        if (originalButton) {
+            originalButton.onclick = function() {
+                const modal = document.getElementById('create-booking-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+                // Initialize with first service active
+                adminShowForm('sofa');
+            };
+        }
+    });
     </script>
     @endpush
 </div>
