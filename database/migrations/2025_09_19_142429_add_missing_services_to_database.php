@@ -14,13 +14,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Insert the missing services that are mapped in the booking controller
+        // Updated services with new pricing structure and added new services
         $services = [
             [
-                'name' => 'Sofa Deep Cleaning',
-                'description' => 'Professional deep cleaning for all types of sofas and couches',
-                'base_price_cents' => 400000, // ₱4,000.00
-                'duration_minutes' => 120, // 2 hours
+                'name' => 'Sofa Mattress Deep Cleaning',
+                'description' => 'Professional deep cleaning for all types of sofas and mattresses (removed L-shape and cross sectional)',
+                'base_price_cents' => 75000, // ₱750.00 - Single chair (1 seater) base price
+                'duration_minutes' => 60, // 1 hour base duration
                 'is_active' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -28,26 +28,8 @@ return new class extends Migration
             [
                 'name' => 'Mattress Deep Cleaning',
                 'description' => 'Thorough deep cleaning for mattresses of all sizes',
-                'base_price_cents' => 400000, // ₱4,000.00
-                'duration_minutes' => 90, // 1.5 hours
-                'is_active' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Home Service Car Interior Detailing',
-                'description' => 'Complete interior detailing service for cars, SUVs, vans, and coasters',
-                'base_price_cents' => 400000, // ₱4,000.00
-                'duration_minutes' => 180, // 3 hours
-                'is_active' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Post Construction Cleaning',
-                'description' => 'Comprehensive cleaning service for post-construction areas',
-                'base_price_cents' => 50000, // ₱500.00 per sqm
-                'duration_minutes' => 60, // 1 hour per sqm
+                'base_price_cents' => 95000, // ₱950.00 - Single mattress base price
+                'duration_minutes' => 60, // 1 hour base duration
                 'is_active' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -55,17 +37,35 @@ return new class extends Migration
             [
                 'name' => 'Carpet Deep Cleaning',
                 'description' => 'Professional carpet cleaning to remove dirt, stains, and allergens',
-                'base_price_cents' => 50000, // ₱500.00 per sqm
-                'duration_minutes' => 45, // 45 minutes per sqm
+                'base_price_cents' => 3000, // ₱30.00 per square foot
+                'duration_minutes' => 15, // 15 minutes per square foot
                 'is_active' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Enhanced Disinfection',
-                'description' => 'Advanced disinfection service for homes and offices',
-                'base_price_cents' => 50000, // ₱500.00 per sqm
+                'name' => 'Home Service Car Interior Detailing',
+                'description' => 'Complete interior detailing service for cars, SUVs, vans, and coasters',
+                'base_price_cents' => 290000, // ₱2,900.00 - Sedan base price
+                'duration_minutes' => 180, // 3 hours base duration
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Post Construction Cleaning',
+                'description' => 'Comprehensive cleaning service for post-construction areas',
+                'base_price_cents' => 10167, // ₱101.67 per sqm
                 'duration_minutes' => 30, // 30 minutes per sqm
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Home/Office Disinfection',
+                'description' => 'Advanced disinfection service for homes and offices',
+                'base_price_cents' => 9000, // ₱90.00 per sqm
+                'duration_minutes' => 20, // 20 minutes per sqm
                 'is_active' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -73,8 +73,26 @@ return new class extends Migration
             [
                 'name' => 'Glass Cleaning',
                 'description' => 'Professional glass cleaning for windows, mirrors, and glass surfaces',
-                'base_price_cents' => 50000, // ₱500.00 per sqm
-                'duration_minutes' => 30, // 30 minutes per sqm
+                'base_price_cents' => 5000, // ₱50.00 per square foot
+                'duration_minutes' => 10, // 10 minutes per square foot
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Curtain Cleaning',
+                'description' => 'Professional curtain cleaning service',
+                'base_price_cents' => 5000, // ₱50.00 per yard
+                'duration_minutes' => 15, // 15 minutes per yard
+                'is_active' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'House Cleaning',
+                'description' => 'Comprehensive house cleaning service',
+                'base_price_cents' => 9100, // ₱91.00 per sqm
+                'duration_minutes' => 25, // 25 minutes per sqm
                 'is_active' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -107,13 +125,15 @@ return new class extends Migration
     {
         // Remove the services that were added
         $serviceNames = [
-            'Sofa Deep Cleaning',
+            'Sofa Mattress Deep Cleaning',
             'Mattress Deep Cleaning', 
+            'Carpet Deep Cleaning',
             'Home Service Car Interior Detailing',
             'Post Construction Cleaning',
-            'Carpet Deep Cleaning',
-            'Enhanced Disinfection',
+            'Home/Office Disinfection',
             'Glass Cleaning',
+            'Curtain Cleaning',
+            'House Cleaning',
             'General'
         ];
 

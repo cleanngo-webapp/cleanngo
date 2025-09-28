@@ -15,8 +15,10 @@
                 <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="carpet">Carpet Deep Cleaning</button>
                 <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="carInterior">Home Service Car Interior Detailing</button>
                 <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="postConstruction">Post Construction Cleaning</button>
-                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="disinfection">Enhanced Disinfection</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="disinfection">Home/Office Disinfection</button>
                 <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="glass">Glass Cleaning</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="houseCleaning">House Cleaning</button>
+                <button class="nav-button text-left px-3 py-2 rounded text-white hover:bg-white hover:text-emerald-700 cursor-pointer" data-service="curtainCleaning">Curtain Cleaning</button>
             </div>
         </aside>
 
@@ -122,30 +124,6 @@
                             </button>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">L-shape</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_l" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_l" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_l" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Cross Sectional</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_cross" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_cross" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_cross" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
                 </div>
                 <h2 class="font-semibold mt-8 mb-4 text-center">Mattress Deep Cleaning</h2>
                 <div class="space-y-3">
@@ -205,19 +183,7 @@
                 <h2 class="font-semibold text-center mb-4">Carpet Deep Cleaning</h2>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square meters</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_sqm" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="carpet_sqm" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_sqm" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Quantity</span>
+                        <span class="text-white font-medium">Square Foot</span>
                         <div class="flex items-center gap-2">
                             <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_qty" data-action="decrease">
                                 <i class="ri-subtract-line text-lg"></i>
@@ -272,7 +238,7 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Coaster</span>
+                        <span class="text-white font-medium">Hatchback</span>
                         <div class="flex items-center gap-2">
                             <button type="button" class="quantity-btn cursor-pointer" data-target="car_coaster" data-action="decrease">
                                 <i class="ri-subtract-line text-lg"></i>
@@ -291,19 +257,7 @@
                 <h2 class="font-semibold text-center mb-4">Post Construction Cleaning</h2>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square meters</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_sqm" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="pcc_sqm" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_sqm" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Quantity</span>
+                        <span class="text-white font-medium">Square Meter</span>
                         <div class="flex items-center gap-2">
                             <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_qty" data-action="decrease">
                                 <i class="ri-subtract-line text-lg"></i>
@@ -319,22 +273,10 @@
 
             <!-- Enhanced Disinfection -->
             <div data-form="disinfection" class="hidden">
-                <h2 class="font-semibold text-center mb-4">Enhanced Disinfection</h2>
+                <h2 class="font-semibold text-center mb-4">Home/Office Disinfection</h2>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square meters</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_sqm" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="disinfect_sqm" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_sqm" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Quantity</span>
+                        <span class="text-white font-medium">Square Meter</span>
                         <div class="flex items-center gap-2">
                             <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_qty" data-action="decrease">
                                 <i class="ri-subtract-line text-lg"></i>
@@ -353,25 +295,51 @@
                 <h2 class="font-semibold text-center mb-4">Glass Cleaning</h2>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square meters</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_sqm" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="glass_sqm" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_sqm" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Quantity</span>
+                        <span class="text-white font-medium">Square Foot</span>
                         <div class="flex items-center gap-2">
                             <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="decrease">
                                 <i class="ri-subtract-line text-lg"></i>
                             </button>
                             <span id="glass_qty" class="quantity-display">0</span>
                             <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- House Cleaning -->
+            <div data-form="houseCleaning" class="hidden">
+                <h2 class="font-semibold text-center mb-4">House Cleaning</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Square Meter</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="house_qty" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="house_qty" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="house_qty" data-action="increase">
+                                <i class="ri-add-line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Curtain Cleaning -->
+            <div data-form="curtainCleaning" class="hidden">
+                <h2 class="font-semibold text-center mb-4">Curtain Cleaning</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                        <span class="text-white font-medium">Yard</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="curtain_qty" data-action="decrease">
+                                <i class="ri-subtract-line text-lg"></i>
+                            </button>
+                            <span id="curtain_qty" class="quantity-display">0</span>
+                            <button type="button" class="quantity-btn cursor-pointer" data-target="curtain_qty" data-action="increase">
                                 <i class="ri-add-line text-lg"></i>
                             </button>
                         </div>
@@ -555,8 +523,10 @@ function showForm(name) {
     carpet: 'Carpet Deep Cleaning',
     carInterior: 'Home Service Car Interior Detailing',
     postConstruction: 'Post Construction Cleaning',
-    disinfection: 'Enhanced Disinfection',
-    glass: 'Glass Cleaning'
+    disinfection: 'Home/Office Disinfection',
+    glass: 'Glass Cleaning',
+    houseCleaning: 'House Cleaning',
+    curtainCleaning: 'Curtain Cleaning'
   };
   document.getElementById('receipt_title').textContent = titles[name];
   
@@ -689,17 +659,37 @@ function calc(){
     {id: 'mattress_california', label: 'California', qty: u('mattress_california')}
   ];
 
-  // Collect sofa items
+  // Collect sofa items with new pricing structure
+  const sofaPrices = {
+    'sofa_1': 750,   // Single chair (1 seater)
+    'sofa_2': 1250,  // 2-seater
+    'sofa_3': 1750,  // 3-seater
+    'sofa_4': 2250,  // 4-seater
+    'sofa_5': 2750,  // 5-seater
+    'sofa_6': 3250,  // 6-seater
+    'sofa_7': 3750,  // 7-seater
+    'sofa_8': 4250,  // 8-seater
+    'sofa_l': 0,     // L-shape (removed)
+    'sofa_cross': 0  // Cross Sectional (removed)
+  };
+
   sofaInputs.forEach(item => {
-    if (item.qty > 0) {
-      sofaItems.push({...item, price: 4000, total: item.qty * 4000});
+    if (item.qty > 0 && sofaPrices[item.id] > 0) {
+      sofaItems.push({...item, price: sofaPrices[item.id], total: item.qty * sofaPrices[item.id]});
     }
   });
 
-  // Collect mattress items
+  // Collect mattress items with new pricing structure
+  const mattressPrices = {
+    'mattress_single': 950,     // Single
+    'mattress_double': 1100,    // Double
+    'mattress_king': 1450,      // King
+    'mattress_california': 1350 // Queen (old california)
+  };
+
   mattressInputs.forEach(item => {
     if (item.qty > 0) {
-      mattressItems.push({...item, price: 4000, total: item.qty * 4000});
+      mattressItems.push({...item, price: mattressPrices[item.id], total: item.qty * mattressPrices[item.id]});
     }
   });
 
@@ -748,12 +738,20 @@ function calc(){
     {id: 'car_sedan', label: 'Sedan', qty: u('car_sedan')},
     {id: 'car_suv', label: 'SUV', qty: u('car_suv')},
     {id: 'car_van', label: 'Van', qty: u('car_van')},
-    {id: 'car_coaster', label: 'Coaster', qty: u('car_coaster')}
+    {id: 'car_coaster', label: 'Hatchback', qty: u('car_coaster')}
   ];
+
+  // Car detailing pricing structure
+  const carPrices = {
+    'car_sedan': 2900,     // Sedan
+    'car_suv': 3900,       // SUV
+    'car_van': 6900,       // Van
+    'car_coaster': 3000    // Hatchback
+  };
 
   carInputs.forEach(item => {
     if (item.qty > 0) {
-      carItems.push({...item, price: 4000, total: item.qty * 4000});
+      carItems.push({...item, price: carPrices[item.id], total: item.qty * carPrices[item.id]});
     }
   });
 
@@ -794,40 +792,151 @@ function calc(){
     itemCounter++;
   }
 
-  // SQM-based services (each as separate card)
-  const sqmServices = [
-    {label: 'Carpet Deep Cleaning', sqmId: 'carpet_sqm', qtyId: 'carpet_qty'},
-    {label: 'Post Construction Cleaning', sqmId: 'pcc_sqm', qtyId: 'pcc_qty'},
-    {label: 'Enhanced Disinfection', sqmId: 'disinfect_sqm', qtyId: 'disinfect_qty'},
-    {label: 'Glass Cleaning', sqmId: 'glass_sqm', qtyId: 'glass_qty'}
-  ];
-
-  sqmServices.forEach(service => {
-    const sqm = s(service.sqmId), qty = s(service.qtyId);
-    if (sqm > 0 && qty > 0) {
-      const amt = sqm * qty * 500;
-      receipt.push(`
-        <div class="border border-gray-200 rounded-lg p-3">
-          <div class="flex items-start justify-between mb-2">
-            <div class="flex-1">
-              <div class="font-semibold text-sm">${itemCounter}. ${service.label}</div>
-              <div class="text-xs text-gray-600">How many square meters?</div>
-              <div class="text-xs text-gray-500 text-right">${sqm}</div>
-              <div class="text-xs text-gray-600">Qty</div>
-              <div class="text-xs text-gray-500 text-right">${qty}</div>
-            </div>
-            <button onclick="removeSqmItem('${service.sqmId}', '${service.qtyId}')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+  // Individual service categories (no "Other Services" grouping)
+  
+  // Carpet Deep Cleaning
+  const carpetQty = s('carpet_qty');
+  if (carpetQty > 0) {
+    const amt = carpetQty * 30; // ₱30 per square foot
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. Carpet Deep Cleaning</div>
+            <div class="text-xs text-gray-600">Square Foot</div>
+            <div class="text-xs text-gray-500 text-right">${carpetQty}</div>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-gray-500">x ${qty}</span>
-            <span class="font-semibold">${peso(amt)}</span>
-          </div>
+          <button onclick="removeSimplifiedItem('carpet_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
         </div>
-      `);
-      subtotal += amt;
-      itemCounter++;
-    }
-  });
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">${carpetQty} Square Foot × ₱30</span>
+          <span class="font-semibold">${peso(amt)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += amt;
+    itemCounter++;
+  }
+
+  // Post Construction Cleaning
+  const pccQty = s('pcc_qty');
+  if (pccQty > 0) {
+    const amt = pccQty * 101.67; // ₱101.67 per sqm
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. Post Construction Cleaning</div>
+            <div class="text-xs text-gray-600">Square Meter</div>
+            <div class="text-xs text-gray-500 text-right">${pccQty}</div>
+          </div>
+          <button onclick="removeSimplifiedItem('pcc_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">${pccQty} Square Meter × ₱101.67</span>
+          <span class="font-semibold">${peso(amt)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += amt;
+    itemCounter++;
+  }
+
+  // Home/Office Disinfection (updated name)
+  const disinfectQty = s('disinfect_qty');
+  if (disinfectQty > 0) {
+    const amt = disinfectQty * 90; // ₱90 per sqm
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. Home/Office Disinfection</div>
+            <div class="text-xs text-gray-600">Square Meter</div>
+            <div class="text-xs text-gray-500 text-right">${disinfectQty}</div>
+          </div>
+          <button onclick="removeSimplifiedItem('disinfect_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">${disinfectQty} Square Meter × ₱90</span>
+          <span class="font-semibold">${peso(amt)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += amt;
+    itemCounter++;
+  }
+
+  // Glass Cleaning
+  const glassQty = s('glass_qty');
+  if (glassQty > 0) {
+    const amt = glassQty * 50; // ₱50 per square foot
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. Glass Cleaning</div>
+            <div class="text-xs text-gray-600">Square Foot</div>
+            <div class="text-xs text-gray-500 text-right">${glassQty}</div>
+          </div>
+          <button onclick="removeSimplifiedItem('glass_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">${glassQty} Square Foot × ₱50</span>
+          <span class="font-semibold">${peso(amt)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += amt;
+    itemCounter++;
+  }
+
+  // House Cleaning
+  const houseQty = s('house_qty');
+  if (houseQty > 0) {
+    const amt = houseQty * 91; // ₱91 per sqm
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. House Cleaning</div>
+            <div class="text-xs text-gray-600">Square Meter</div>
+            <div class="text-xs text-gray-500 text-right">${houseQty}</div>
+          </div>
+          <button onclick="removeSimplifiedItem('house_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">${houseQty} Square Meter × ₱91</span>
+          <span class="font-semibold">${peso(amt)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += amt;
+    itemCounter++;
+  }
+
+  // Curtain Cleaning
+  const curtainQty = s('curtain_qty');
+  if (curtainQty > 0) {
+    const amt = curtainQty * 50; // ₱50 per yard
+    receipt.push(`
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <div class="font-semibold text-sm">${itemCounter}. Curtain Cleaning</div>
+            <div class="text-xs text-gray-600">Yard</div>
+            <div class="text-xs text-gray-500 text-right">${curtainQty}</div>
+          </div>
+          <button onclick="removeSimplifiedItem('curtain_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-500">${curtainQty} Yard × ₱50</span>
+          <span class="font-semibold">${peso(amt)}</span>
+        </div>
+      </div>
+    `);
+    subtotal += amt;
+    itemCounter++;
+  }
 
   document.getElementById('receipt_lines').innerHTML = receipt.join('');
   document.getElementById('estimate_subtotal').textContent = peso(subtotal);
@@ -853,17 +962,8 @@ function removeItem(inputId) {
   }
 }
 
-function removeSqmItem(sqmId, qtyId) {
-  const sqmElement = document.getElementById(sqmId);
+function removeSimplifiedItem(qtyId) {
   const qtyElement = document.getElementById(qtyId);
-  
-  if (sqmElement) {
-    if (sqmElement.tagName === 'INPUT') {
-      sqmElement.value = 0;
-    } else {
-      sqmElement.textContent = 0;
-    }
-  }
   
   if (qtyElement) {
     if (qtyElement.tagName === 'INPUT') {
@@ -878,9 +978,14 @@ function removeSqmItem(sqmId, qtyId) {
   calc();
 }
 
+// Keep the old function for backward compatibility (though it's not used anymore)
+function removeSqmItem(sqmId, qtyId) {
+  removeSimplifiedItem(qtyId);
+}
+
 function removeSofaMattressGroup() {
-  // Clear all sofa quantity displays
-  ['sofa_1', 'sofa_2', 'sofa_3', 'sofa_4', 'sofa_5', 'sofa_6', 'sofa_7', 'sofa_8', 'sofa_l', 'sofa_cross'].forEach(id => {
+  // Clear all sofa quantity displays (removed L-shape and cross sectional)
+  ['sofa_1', 'sofa_2', 'sofa_3', 'sofa_4', 'sofa_5', 'sofa_6', 'sofa_7', 'sofa_8'].forEach(id => {
     const element = document.getElementById(id);
     if (element) {
       if (element.tagName === 'INPUT') {
@@ -942,36 +1047,36 @@ function openBookingForm(){
   const items = [];
   const addItem = (type, qty, unitPrice, areaSqm) => {
     qty = parseInt(qty||0); if(!qty && !areaSqm) return; items.push({ type, qty, unitPrice, areaSqm }); };
-  // Sofa/Mattress
-  addItem('sofa_1_seater', document.getElementById('sofa_1').textContent, 4000);
-  addItem('sofa_2_seater', document.getElementById('sofa_2').textContent, 4000);
-  addItem('sofa_3_seater', document.getElementById('sofa_3').textContent, 4000);
-  addItem('sofa_4_seater', document.getElementById('sofa_4').textContent, 4000);
-  addItem('sofa_5_seater', document.getElementById('sofa_5').textContent, 4000);
-  addItem('sofa_6_seater', document.getElementById('sofa_6').textContent, 4000);
-  addItem('sofa_7_seater', document.getElementById('sofa_7').textContent, 4000);
-  addItem('sofa_8_seater', document.getElementById('sofa_8').textContent, 4000);
-  addItem('sofa_l_shape', document.getElementById('sofa_l').textContent, 4000);
-  addItem('sofa_cross', document.getElementById('sofa_cross').textContent, 4000);
-  addItem('mattress_single', document.getElementById('mattress_single').textContent, 4000);
-  addItem('mattress_double', document.getElementById('mattress_double').textContent, 4000);
-  addItem('mattress_king', document.getElementById('mattress_king').textContent, 4000);
-  addItem('mattress_california', document.getElementById('mattress_california').textContent, 4000);
-  // Carpet/Post/Disinfect/Glass (sqm * qty * 500)
-  const addSqm = (label, sqmId, qtyId) => {
-    const sqm = parseFloat(document.getElementById(sqmId)?.textContent||0);
+  // Sofa/Mattress with new pricing
+  addItem('sofa_1_seater', document.getElementById('sofa_1').textContent, 750);
+  addItem('sofa_2_seater', document.getElementById('sofa_2').textContent, 1250);
+  addItem('sofa_3_seater', document.getElementById('sofa_3').textContent, 1750);
+  addItem('sofa_4_seater', document.getElementById('sofa_4').textContent, 2250);
+  addItem('sofa_5_seater', document.getElementById('sofa_5').textContent, 2750);
+  addItem('sofa_6_seater', document.getElementById('sofa_6').textContent, 3250);
+  addItem('sofa_7_seater', document.getElementById('sofa_7').textContent, 3750);
+  addItem('sofa_8_seater', document.getElementById('sofa_8').textContent, 4250);
+  // L-shape and cross sectional removed
+  addItem('mattress_single', document.getElementById('mattress_single').textContent, 950);
+  addItem('mattress_double', document.getElementById('mattress_double').textContent, 1100);
+  addItem('mattress_king', document.getElementById('mattress_king').textContent, 1450);
+  addItem('mattress_california', document.getElementById('mattress_california').textContent, 1350);
+  // Simplified services with updated pricing
+  const addSimplified = (label, qtyId, pricePerUnit) => {
     const qty = parseInt(document.getElementById(qtyId)?.textContent||0);
-    if (sqm>0 && qty>0) items.push({ type: label, qty, unitPrice: 500, areaSqm: sqm });
+    if (qty>0) items.push({ type: label, qty, unitPrice: pricePerUnit });
   };
-  addSqm('carpet_sqm', 'carpet_sqm', 'carpet_qty');
-  addSqm('post_construction_sqm', 'pcc_sqm', 'pcc_qty');
-  addSqm('disinfect_sqm', 'disinfect_sqm', 'disinfect_qty');
-  addSqm('glass_sqm', 'glass_sqm', 'glass_qty');
-  // Car detailing
-  addItem('car_sedan', document.getElementById('car_sedan').textContent, 4000);
-  addItem('car_suv', document.getElementById('car_suv').textContent, 4000);
-  addItem('car_van', document.getElementById('car_van').textContent, 4000);
-  addItem('car_coaster', document.getElementById('car_coaster').textContent, 4000);
+  addSimplified('carpet_sqft', 'carpet_qty', 30); // ₱30 per square foot
+  addSimplified('post_construction_sqm', 'pcc_qty', 101.67); // ₱101.67 per sqm
+  addSimplified('disinfect_sqm', 'disinfect_qty', 90); // ₱90 per sqm
+  addSimplified('glass_sqft', 'glass_qty', 50); // ₱50 per square foot
+  addSimplified('house_cleaning_sqm', 'house_qty', 91); // ₱91 per sqm
+  addSimplified('curtain_cleaning_yard', 'curtain_qty', 50); // ₱50 per yard
+  // Car detailing with new pricing
+  addItem('car_sedan', document.getElementById('car_sedan').textContent, 2900);
+  addItem('car_suv', document.getElementById('car_suv').textContent, 3900);
+  addItem('car_van', document.getElementById('car_van').textContent, 6900);
+  addItem('car_coaster', document.getElementById('car_coaster').textContent, 3000);
 
   window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }

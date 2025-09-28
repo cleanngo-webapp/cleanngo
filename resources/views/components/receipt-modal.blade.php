@@ -41,9 +41,7 @@ const serviceCategories = {
             'sofa_5_seater': '5-Seater Sofa',
             'sofa_6_seater': '6-Seater Sofa',
             'sofa_7_seater': '7-Seater Sofa',
-            'sofa_8_seater': '8-Seater Sofa',
-            'sofa_l_shape': 'L-Shape Sofa',
-            'sofa_cross': 'Cross Sofa'
+            'sofa_8_seater': '8-Seater Sofa'
         }
     },
     'mattress': {
@@ -58,7 +56,7 @@ const serviceCategories = {
     'carpet': {
         name: 'Carpet Deep Cleaning',
         items: {
-            'carpet_sqm': 'Service Area'
+            'carpet_sqft': 'Square Foot'
         }
     },
     'car': {
@@ -67,25 +65,37 @@ const serviceCategories = {
             'car_sedan': 'Sedan',
             'car_suv': 'SUV',
             'car_van': 'Van',
-            'car_coaster': 'Coaster'
+            'car_coaster': 'Hatchback'
         }
     },
     'post_construction': {
         name: 'Post Construction Cleaning',
         items: {
-            'post_construction_sqm': 'Service Area'
+            'post_construction_sqm': 'Square Meter'
         }
     },
     'disinfect': {
-        name: 'Enhanced Disinfection',
+        name: 'Home/Office Disinfection',
         items: {
-            'disinfect_sqm': 'Service Area'
+            'disinfect_sqm': 'Square Meter'
         }
     },
     'glass': {
         name: 'Glass Cleaning',
         items: {
-            'glass_sqm': 'Service Area'
+            'glass_sqft': 'Square Foot'
+        }
+    },
+    'house_cleaning': {
+        name: 'House Cleaning',
+        items: {
+            'house_cleaning_sqm': 'Square Meter'
+        }
+    },
+    'curtain_cleaning': {
+        name: 'Curtain Cleaning',
+        items: {
+            'curtain_cleaning_yard': 'Yard'
         }
     }
 };
@@ -100,7 +110,8 @@ function categorizeReceiptItems(items) {
         'post_construction': [],
         'disinfect': [],
         'glass': [],
-        'other': []
+        'house_cleaning': [],
+        'curtain_cleaning': []
     };
     
     items.forEach(item => {
@@ -119,12 +130,9 @@ function categorizeReceiptItems(items) {
             }
         }
         
-        // If not categorized, add to other
+        // If not categorized, skip it (no "Other Services" section)
         if (!categorized_item) {
-            categorized.other.push({
-                ...item,
-                displayName: itemType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-            });
+            console.warn('Uncategorized item:', itemType);
         }
     });
     
@@ -185,13 +193,12 @@ function openReceipt(modalId, bookingId, receiptData, options = {}) {
                 // Build item description
                 let itemDesc = item.displayName;
                 
-                // For individual area-based service categories, show quantity and sqm
-                if (['carpet', 'post_construction', 'disinfect', 'glass'].includes(categoryKey)) {
+                // For area-based services, show quantity with proper unit
+                if (['carpet', 'post_construction', 'disinfect', 'glass', 'house_cleaning', 'curtain_cleaning'].includes(categoryKey)) {
                     if (quantity > 0) {
+                        const unit = categoryKey === 'carpet' || categoryKey === 'glass' ? 'Square Foot' : 
+                                   categoryKey === 'curtain_cleaning' ? 'Yard' : 'Square Meter';
                         itemDesc += ` x ${quantity}`;
-                    }
-                    if (areaSqm) {
-                        itemDesc += ` (${areaSqm} sqm)`;
                     }
                 } else {
                     // For other services, show quantity only if > 1
