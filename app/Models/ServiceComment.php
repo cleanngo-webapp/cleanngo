@@ -49,11 +49,13 @@ class ServiceComment extends Model
     {
         $serviceNames = [
             'carpet' => 'Carpet Deep Cleaning',
-            'disinfection' => 'Enhanced Disinfection',
+            'disinfection' => 'Home/Office Disinfection',
             'glass' => 'Glass Cleaning',
             'carInterior' => 'Home Service Car Interior Detailing',
             'postConstruction' => 'Post Construction Cleaning',
-            'sofa' => 'Sofa / Mattress Deep Cleaning'
+            'sofa' => 'Sofa Mattress Deep Cleaning',
+            'houseCleaning' => 'House Cleaning',
+            'curtainCleaning' => 'Curtain Cleaning'
         ];
 
         return $serviceNames[$this->service_type] ?? 'Unknown Service';

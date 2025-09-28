@@ -34,7 +34,7 @@ class CustomerBookingController extends Controller
         }
 
         // Get the primary service ID (will be updated based on items)
-        $service = Service::where('name','Sofa Deep Cleaning')->first();
+        $service = Service::where('name','Sofa Mattress Deep Cleaning')->first();
         if (!$service) {
             $service = Service::where('name','General')->first();
         }
@@ -69,17 +69,15 @@ class CustomerBookingController extends Controller
         
         // Map item types to service IDs
         $serviceMapping = [
-            // Sofa items
-            'sofa_1_seater' => 'Sofa Deep Cleaning',
-            'sofa_2_seater' => 'Sofa Deep Cleaning',
-            'sofa_3_seater' => 'Sofa Deep Cleaning',
-            'sofa_4_seater' => 'Sofa Deep Cleaning',
-            'sofa_5_seater' => 'Sofa Deep Cleaning',
-            'sofa_6_seater' => 'Sofa Deep Cleaning',
-            'sofa_7_seater' => 'Sofa Deep Cleaning',
-            'sofa_8_seater' => 'Sofa Deep Cleaning',
-            'sofa_l_shape' => 'Sofa Deep Cleaning',
-            'sofa_cross' => 'Sofa Deep Cleaning',
+        
+            'sofa_1_seater' => 'Sofa Mattress Deep Cleaning',
+            'sofa_2_seater' => 'Sofa Mattress Deep Cleaning',
+            'sofa_3_seater' => 'Sofa Mattress Deep Cleaning',
+            'sofa_4_seater' => 'Sofa Mattress Deep Cleaning',
+            'sofa_5_seater' => 'Sofa Mattress Deep Cleaning',
+            'sofa_6_seater' => 'Sofa Mattress Deep Cleaning',
+            'sofa_7_seater' => 'Sofa Mattress Deep Cleaning',
+            'sofa_8_seater' => 'Sofa Mattress Deep Cleaning',
             
             // Mattress items
             'mattress_single' => 'Mattress Deep Cleaning',
@@ -93,11 +91,13 @@ class CustomerBookingController extends Controller
             'car_van' => 'Home Service Car Interior Detailing',
             'car_coaster' => 'Home Service Car Interior Detailing',
             
-            // Area-based services
-            'carpet_sqm' => 'Carpet Deep Cleaning',
+            // Area-based services (updated names and added new services)
+            'carpet_sqft' => 'Carpet Deep Cleaning',
             'post_construction_sqm' => 'Post Construction Cleaning',
-            'disinfect_sqm' => 'Enhanced Disinfection',
-            'glass_sqm' => 'Glass Cleaning',
+            'disinfect_sqm' => 'Home/Office Disinfection',
+            'glass_sqft' => 'Glass Cleaning',
+            'house_cleaning_sqm' => 'House Cleaning',
+            'curtain_cleaning_yard' => 'Curtain Cleaning',
         ];
         
         foreach ($items as $item) {

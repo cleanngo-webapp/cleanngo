@@ -13,11 +13,11 @@ class AdminGalleryController extends Controller
 {
     /**
      * Display the gallery management page with service cards
-     * This shows all 6 services and allows admin to manage images for each
+     * This shows all 8 services and allows admin to manage images for each
      */
     public function index()
     {
-        // Define the 6 services with their details
+        // Define the 8 services with their details
         $services = [
             [
                 'type' => 'carpet',
@@ -27,7 +27,7 @@ class AdminGalleryController extends Controller
             ],
             [
                 'type' => 'disinfection',
-                'name' => 'Enhanced Disinfection',
+                'name' => 'Home/Office Disinfection',
                 'description' => 'Advanced disinfection for safer homes and workplaces.',
                 'image' => 'cs-dashboard-home-dis.webp'
             ],
@@ -51,9 +51,21 @@ class AdminGalleryController extends Controller
             ],
             [
                 'type' => 'sofa',
-                'name' => 'Sofa / Mattress Deep Cleaning',
+                'name' => 'Sofa Mattress Deep Cleaning',
                 'description' => 'Eliminates dust, stains, and allergens to restore comfort and hygiene.',
                 'image' => 'cs-services-sofa-mattress-cleaning.webp'
+            ],
+            [
+                'type' => 'houseCleaning',
+                'name' => 'House Cleaning',
+                'description' => 'Comprehensive cleaning service for residential spaces.',
+                'image' => 'home-cleaning.webp'
+            ],
+            [
+                'type' => 'curtainCleaning',
+                'name' => 'Curtain Cleaning',
+                'description' => 'Professional curtain and drapery cleaning service.',
+                'image' => 'curtain-cleaning.webp'
             ]
         ];
 
@@ -72,7 +84,7 @@ class AdminGalleryController extends Controller
     public function showService($serviceType)
     {
         // Validate service type
-        $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa'];
+        $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa', 'houseCleaning', 'curtainCleaning'];
         if (!in_array($serviceType, $validServices)) {
             return redirect()->route('admin.gallery')->with('error', 'Invalid service type.');
         }
@@ -80,11 +92,13 @@ class AdminGalleryController extends Controller
         // Get service details
         $serviceNames = [
             'carpet' => 'Carpet Deep Cleaning',
-            'disinfection' => 'Enhanced Disinfection',
+            'disinfection' => 'Home/Office Disinfection',
             'glass' => 'Glass Cleaning',
             'carInterior' => 'Home Service Car Interior Detailing',
             'postConstruction' => 'Post Construction Cleaning',
-            'sofa' => 'Sofa / Mattress Deep Cleaning'
+            'sofa' => 'Sofa Mattress Deep Cleaning',
+            'houseCleaning' => 'House Cleaning',
+            'curtainCleaning' => 'Curtain Cleaning'
         ];
 
         $serviceName = $serviceNames[$serviceType];
@@ -103,7 +117,7 @@ class AdminGalleryController extends Controller
     {
         // Validate the request
         $request->validate([
-            'service_type' => 'required|in:carpet,disinfection,glass,carInterior,postConstruction,sofa',
+            'service_type' => 'required|in:carpet,disinfection,glass,carInterior,postConstruction,sofa,houseCleaning,curtainCleaning',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // Max 10MB
             'alt_text' => 'nullable|string|max:255'
         ]);
@@ -184,7 +198,7 @@ class AdminGalleryController extends Controller
     public function getServiceComments($serviceType)
     {
         // Validate service type
-        $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa'];
+        $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa', 'houseCleaning', 'curtainCleaning'];
         if (!in_array($serviceType, $validServices)) {
             return response()->json(['error' => 'Invalid service type'], 400);
         }

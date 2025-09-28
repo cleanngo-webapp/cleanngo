@@ -105,7 +105,7 @@ class AdminDashboardController extends Controller
                     $category = '';
                     
                     if (strpos($itemType, 'sofa') === 0) {
-                        $category = 'Sofa Deep Cleaning';
+                        $category = 'Sofa Mattress Deep Cleaning';
                     } elseif (strpos($itemType, 'mattress') === 0) {
                         $category = 'Mattress Deep Cleaning';
                     } elseif (strpos($itemType, 'carpet') === 0) {
@@ -115,9 +115,13 @@ class AdminDashboardController extends Controller
                     } elseif (strpos($itemType, 'post_construction') === 0) {
                         $category = 'Post Construction Cleaning';
                     } elseif (strpos($itemType, 'disinfect') === 0) {
-                        $category = 'Enhanced Disinfection';
+                        $category = 'Home/Office Disinfection';
                     } elseif (strpos($itemType, 'glass') === 0) {
                         $category = 'Glass Cleaning';
+                    } elseif (strpos($itemType, 'house') === 0) {
+                        $category = 'House Cleaning';
+                    } elseif (strpos($itemType, 'curtain') === 0) {
+                        $category = 'Curtain Cleaning';
                     } else {
                         $category = ucwords(str_replace('_', ' ', $itemType));
                     }

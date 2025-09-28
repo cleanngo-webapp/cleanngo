@@ -27,19 +27,19 @@
             </div>
         </div>
         
-        {{-- Enhanced Disinfection --}}
+        {{-- Home/Office Disinfection --}}
         <div onclick="window.location='{{ route('customer.services') }}#disinfection'" class="bg-white rounded-2xl shadow overflow-hidden flex flex-col cursor-pointer">
             <div class="aspect-[4/3] bg-white">
-                <img src="{{ asset('assets/cs-dashboard-home-dis.webp') }}" alt="Enhanced Disinfection" class="w-full h-full object-cover">
+                <img src="{{ asset('assets/cs-dashboard-home-dis.webp') }}" alt="Home/Office Disinfection" class="w-full h-full object-cover">
             </div>
             <div class="bg-emerald-700 text-white p-4 flex-1 flex flex-col justify-between">
                 <div>
-                    <div class="text-lg font-semibold">Enhanced Disinfection</div>
+                    <div class="text-lg font-semibold">Home/Office Disinfection</div>
                     <p class="text-white/90 text-sm mt-2">Advanced disinfection for safer homes and workplaces.</p>
                 </div>
                 <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#disinfection" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
-                    <button onclick="event.stopPropagation(); showCommentsModal('disinfection', 'Enhanced Disinfection')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                    <button onclick="event.stopPropagation(); showCommentsModal('disinfection', 'Home/Office Disinfection')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
                         <i class="ri-chat-3-line mr-1"></i>Comments
                     </button>
                 </div>
@@ -117,6 +117,44 @@
                 <div class="mt-4 flex justify-center space-x-2">
                     <a href="{{ route('customer.services') }}#sofa" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
                         <button onclick="event.stopPropagation(); showCommentsModal('sofa', 'Sofa / Mattress Deep Cleaning')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- House Cleaning --}}
+        <div onclick="window.location='{{ route('customer.services') }}#houseCleaning'" class="bg-white rounded-2xl shadow overflow-hidden flex flex-col cursor-pointer">
+            <div class="aspect-[4/3] bg-white">
+                <img src="{{ asset('assets/home-cleaning.webp') }}" alt="House Cleaning" class="w-full h-full object-cover">
+            </div>
+            <div class="bg-emerald-700 text-white p-4 flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="text-lg font-semibold">House Cleaning</div>
+                    <p class="text-white/90 text-sm mt-2">Comprehensive cleaning service for residential spaces.</p>
+                </div>
+                <div class="mt-4 flex justify-center space-x-2">
+                    <a href="{{ route('customer.services') }}#houseCleaning" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                    <button onclick="event.stopPropagation(); showCommentsModal('houseCleaning', 'House Cleaning')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
+                        <i class="ri-chat-3-line mr-1"></i>Comments
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Curtain Cleaning --}}
+        <div onclick="window.location='{{ route('customer.services') }}#curtainCleaning'" class="bg-white rounded-2xl shadow overflow-hidden flex flex-col cursor-pointer">
+            <div class="aspect-[4/3] bg-white">
+                <img src="{{ asset('assets/curtain-cleaning.webp') }}" alt="Curtain Cleaning" class="w-full h-full object-cover">
+            </div>
+            <div class="bg-emerald-700 text-white p-4 flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="text-lg font-semibold">Curtain Cleaning</div>
+                    <p class="text-white/90 text-sm mt-2">Professional curtain and drapery cleaning service.</p>
+                </div>
+                <div class="mt-4 flex justify-center space-x-2">
+                    <a href="{{ route('customer.services') }}#curtainCleaning" onclick="event.stopPropagation()" class="inline-block bg-white text-gray-900 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
+                    <button onclick="event.stopPropagation(); showCommentsModal('curtainCleaning', 'Curtain Cleaning')" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-full shadow hover:shadow-lg transition-all duration-200 cursor-pointer">
                         <i class="ri-chat-3-line mr-1"></i>Comments
                     </button>
                 </div>

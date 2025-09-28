@@ -10,11 +10,11 @@ class CustomerGalleryController extends Controller
 {
     /**
      * Display the customer gallery page
-     * This shows all services with their gallery images in a view-only format
+     * This shows all 8 services with their gallery images in a view-only format
      */
     public function index()
     {
-        // Define the 6 services with their details
+        // Define the 8 services with their details
         $services = [
             [
                 'type' => 'carpet',
@@ -24,7 +24,7 @@ class CustomerGalleryController extends Controller
             ],
             [
                 'type' => 'disinfection',
-                'name' => 'Enhanced Disinfection',
+                'name' => 'Home/Office Disinfection',
                 'description' => 'Advanced disinfection for safer homes and workplaces.',
                 'image' => 'cs-dashboard-home-dis.webp'
             ],
@@ -48,9 +48,21 @@ class CustomerGalleryController extends Controller
             ],
             [
                 'type' => 'sofa',
-                'name' => 'Sofa / Mattress Deep Cleaning',
+                'name' => 'Sofa Mattress Deep Cleaning',
                 'description' => 'Eliminates dust, stains, and allergens to restore comfort and hygiene.',
                 'image' => 'cs-services-sofa-mattress-cleaning.webp'
+            ],
+            [
+                'type' => 'houseCleaning',
+                'name' => 'House Cleaning',
+                'description' => 'Comprehensive cleaning service for residential spaces.',
+                'image' => 'home-cleaning.webp'
+            ],
+            [
+                'type' => 'curtainCleaning',
+                'name' => 'Curtain Cleaning',
+                'description' => 'Professional curtain and drapery cleaning service.',
+                'image' => 'curtain-cleaning.webp'
             ]
         ];
 
@@ -79,7 +91,7 @@ class CustomerGalleryController extends Controller
     public function showService($serviceType)
     {
         // Validate service type
-        $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa'];
+        $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa', 'houseCleaning', 'curtainCleaning'];
         if (!in_array($serviceType, $validServices)) {
             return redirect()->route('customer.gallery')->with('error', 'Invalid service type.');
         }
@@ -87,11 +99,13 @@ class CustomerGalleryController extends Controller
         // Get service details
         $serviceNames = [
             'carpet' => 'Carpet Deep Cleaning',
-            'disinfection' => 'Enhanced Disinfection',
+            'disinfection' => 'Home/Office Disinfection',
             'glass' => 'Glass Cleaning',
             'carInterior' => 'Home Service Car Interior Detailing',
             'postConstruction' => 'Post Construction Cleaning',
-            'sofa' => 'Sofa / Mattress Deep Cleaning'
+            'sofa' => 'Sofa Mattress Deep Cleaning',
+            'houseCleaning' => 'House Cleaning',
+            'curtainCleaning' => 'Curtain Cleaning'
         ];
 
         $serviceName = $serviceNames[$serviceType];
