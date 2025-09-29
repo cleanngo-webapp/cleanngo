@@ -914,6 +914,330 @@ class NotificationService
         ]);
     }
 
+    // ==================== PROFILE UPDATE NOTIFICATIONS ====================
+
+    /**
+     * Create a notification when a customer updates their profile
+     * Notifies admin when customer changes their profile information
+     */
+    public function notifyCustomerProfileUpdated(User $user, array $originalData): void
+    {
+        $changes = $this->getUserProfileChanges($user, $originalData);
+        
+        if (empty($changes)) {
+            return; // No significant changes to notify about
+        }
+
+        $changeText = implode(', ', $changes);
+        $customerName = $user->first_name . ' ' . $user->last_name;
+        
+        Notification::create([
+            'type' => 'customer_profile_updated',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Customer Profile Updated',
+            'message' => "Customer '{$customerName}' ({$user->username}) has updated their profile: {$changeText}.",
+            'data' => [
+                'user_id' => $user->id,
+                'customer_name' => $customerName,
+                'username' => $user->username,
+                'email' => $user->email,
+                'changes' => $changes,
+                'updated_fields' => array_keys($changes),
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when a customer updates their address
+     * Notifies admin when customer changes their address information
+     */
+    public function notifyCustomerAddressUpdated(User $user, array $originalAddressData, array $newAddressData): void
+    {
+        $changes = $this->getAddressChanges($originalAddressData, $newAddressData);
+        
+        if (empty($changes)) {
+            return; // No significant changes to notify about
+        }
+
+        $changeText = implode(', ', $changes);
+        $customerName = $user->first_name . ' ' . $user->last_name;
+        
+        Notification::create([
+            'type' => 'customer_address_updated',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Customer Address Updated',
+            'message' => "Customer '{$customerName}' ({$user->username}) has updated their address: {$changeText}.",
+            'data' => [
+                'user_id' => $user->id,
+                'customer_name' => $customerName,
+                'username' => $user->username,
+                'email' => $user->email,
+                'changes' => $changes,
+                'updated_fields' => array_keys($changes),
+                'new_address' => $newAddressData,
+                'original_address' => $originalAddressData,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when an employee updates their profile
+     * Notifies admin when employee changes their profile information
+     */
+    public function notifyEmployeeProfileUpdated(User $user, Employee $employee, array $originalData): void
+    {
+        $changes = $this->getEmployeeProfileChanges($employee, $originalData);
+        
+        if (empty($changes)) {
+            return; // No significant changes to notify about
+        }
+
+        $changeText = implode(', ', $changes);
+        $employeeName = $user->first_name . ' ' . $user->last_name;
+        
+        Notification::create([
+            'type' => 'employee_profile_updated',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Employee Profile Updated',
+            'message' => "Employee '{$employeeName}' ({$employee->employee_code}) has updated their profile: {$changeText}.",
+            'data' => [
+                'user_id' => $user->id,
+                'employee_id' => $employee->id,
+                'employee_name' => $employeeName,
+                'employee_code' => $employee->employee_code,
+                'username' => $user->username,
+                'email' => $user->email,
+                'changes' => $changes,
+                'updated_fields' => array_keys($changes),
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when admin updates their own profile
+     * Notifies admin about their own profile changes for audit purposes
+     */
+    public function notifyAdminProfileUpdated(User $user, array $originalData): void
+    {
+        $changes = $this->getUserProfileChanges($user, $originalData);
+        
+        if (empty($changes)) {
+            return; // No significant changes to notify about
+        }
+
+        $changeText = implode(', ', $changes);
+        $adminName = $user->first_name . ' ' . $user->last_name;
+        
+        Notification::create([
+            'type' => 'admin_profile_updated',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Admin Profile Updated',
+            'message' => "Admin '{$adminName}' ({$user->username}) has updated their profile: {$changeText}.",
+            'data' => [
+                'user_id' => $user->id,
+                'admin_name' => $adminName,
+                'username' => $user->username,
+                'email' => $user->email,
+                'changes' => $changes,
+                'updated_fields' => array_keys($changes),
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Create a notification when admin updates their payment settings
+     * Notifies admin about their own payment settings changes for audit purposes
+     */
+    public function notifyAdminPaymentSettingsUpdated(User $user, array $originalData, array $newData): void
+    {
+        $changes = $this->getPaymentSettingsChanges($originalData, $newData);
+        
+        if (empty($changes)) {
+            return; // No significant changes to notify about
+        }
+
+        $changeText = implode(', ', $changes);
+        $adminName = $user->first_name . ' ' . $user->last_name;
+        
+        Notification::create([
+            'type' => 'admin_payment_settings_updated',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Admin Payment Settings Updated',
+            'message' => "Admin '{$adminName}' ({$user->username}) has updated their payment settings: {$changeText}.",
+            'data' => [
+                'user_id' => $user->id,
+                'admin_name' => $adminName,
+                'username' => $user->username,
+                'email' => $user->email,
+                'changes' => $changes,
+                'updated_fields' => array_keys($changes),
+                'new_settings' => $newData,
+                'original_settings' => $originalData,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Helper method to detect and format user profile changes
+     */
+    private function getUserProfileChanges(User $user, array $originalData): array
+    {
+        $changes = [];
+        
+        // Check for email changes
+        if (isset($originalData['email']) && $originalData['email'] != $user->email) {
+            $changes[] = "email from '{$originalData['email']}' to '{$user->email}'";
+        }
+        
+        // Check for first name changes
+        if (isset($originalData['first_name']) && $originalData['first_name'] != $user->first_name) {
+            $changes[] = "first name from '{$originalData['first_name']}' to '{$user->first_name}'";
+        }
+        
+        // Check for last name changes
+        if (isset($originalData['last_name']) && $originalData['last_name'] != $user->last_name) {
+            $changes[] = "last name from '{$originalData['last_name']}' to '{$user->last_name}'";
+        }
+        
+        // Check for phone changes
+        if (isset($originalData['phone']) && $originalData['phone'] != $user->phone) {
+            $changes[] = "phone from '{$originalData['phone']}' to '{$user->phone}'";
+        }
+        
+        return $changes;
+    }
+
+    /**
+     * Helper method to detect and format employee profile changes
+     */
+    private function getEmployeeProfileChanges(Employee $employee, array $originalData): array
+    {
+        $changes = [];
+        
+        // Check for position changes
+        if (isset($originalData['position']) && $originalData['position'] != $employee->position) {
+            $changes[] = "position from '{$originalData['position']}' to '{$employee->position}'";
+        }
+        
+        // Check for contact number changes
+        if (isset($originalData['contact_number']) && $originalData['contact_number'] != $employee->contact_number) {
+            $changes[] = "contact number from '{$originalData['contact_number']}' to '{$employee->contact_number}'";
+        }
+        
+        // Check for email address changes
+        if (isset($originalData['email_address']) && $originalData['email_address'] != $employee->email_address) {
+            $changes[] = "email address from '{$originalData['email_address']}' to '{$employee->email_address}'";
+        }
+        
+        // Check for home address changes
+        if (isset($originalData['home_address']) && $originalData['home_address'] != $employee->home_address) {
+            $changes[] = "home address from '{$originalData['home_address']}' to '{$employee->home_address}'";
+        }
+        
+        // Check for emergency contact changes
+        if (isset($originalData['emergency_contact_name']) && $originalData['emergency_contact_name'] != $employee->emergency_contact_name) {
+            $changes[] = "emergency contact name from '{$originalData['emergency_contact_name']}' to '{$employee->emergency_contact_name}'";
+        }
+        
+        if (isset($originalData['emergency_contact_number']) && $originalData['emergency_contact_number'] != $employee->emergency_contact_number) {
+            $changes[] = "emergency contact number from '{$originalData['emergency_contact_number']}' to '{$employee->emergency_contact_number}'";
+        }
+        
+        // Check for employment details changes
+        if (isset($originalData['department']) && $originalData['department'] != $employee->department) {
+            $changes[] = "department from '{$originalData['department']}' to '{$employee->department}'";
+        }
+        
+        if (isset($originalData['employment_type']) && $originalData['employment_type'] != $employee->employment_type) {
+            $changes[] = "employment type from '{$originalData['employment_type']}' to '{$employee->employment_type}'";
+        }
+        
+        if (isset($originalData['employment_status']) && $originalData['employment_status'] != $employee->employment_status) {
+            $changes[] = "employment status from '{$originalData['employment_status']}' to '{$employee->employment_status}'";
+        }
+        
+        return $changes;
+    }
+
+    /**
+     * Helper method to detect and format address changes
+     */
+    private function getAddressChanges(array $originalData, array $newData): array
+    {
+        $changes = [];
+        
+        // Check for street address changes
+        if (isset($originalData['street_address']) && $originalData['street_address'] != $newData['street_address']) {
+            $changes[] = "street address from '{$originalData['street_address']}' to '{$newData['street_address']}'";
+        }
+        
+        // Check for city changes
+        if (isset($originalData['city']) && $originalData['city'] != $newData['city']) {
+            $changes[] = "city from '{$originalData['city']}' to '{$newData['city']}'";
+        }
+        
+        // Check for state/province changes
+        if (isset($originalData['state']) && $originalData['state'] != $newData['state']) {
+            $changes[] = "state from '{$originalData['state']}' to '{$newData['state']}'";
+        }
+        
+        // Check for postal code changes
+        if (isset($originalData['postal_code']) && $originalData['postal_code'] != $newData['postal_code']) {
+            $changes[] = "postal code from '{$originalData['postal_code']}' to '{$newData['postal_code']}'";
+        }
+        
+        // Check for country changes
+        if (isset($originalData['country']) && $originalData['country'] != $newData['country']) {
+            $changes[] = "country from '{$originalData['country']}' to '{$newData['country']}'";
+        }
+        
+        return $changes;
+    }
+
+    /**
+     * Helper method to detect and format payment settings changes
+     */
+    private function getPaymentSettingsChanges(array $originalData, array $newData): array
+    {
+        $changes = [];
+        
+        // Check for GCash name changes
+        if (isset($originalData['gcash_name']) && $originalData['gcash_name'] != $newData['gcash_name']) {
+            $changes[] = "GCash name from '{$originalData['gcash_name']}' to '{$newData['gcash_name']}'";
+        }
+        
+        // Check for GCash number changes
+        if (isset($originalData['gcash_number']) && $originalData['gcash_number'] != $newData['gcash_number']) {
+            $changes[] = "GCash number from '{$originalData['gcash_number']}' to '{$newData['gcash_number']}'";
+        }
+        
+        // Check for QR code changes
+        if (isset($newData['qr_code_path']) && !isset($originalData['qr_code_path'])) {
+            $changes[] = "QR code uploaded";
+        } elseif (isset($originalData['qr_code_path']) && !isset($newData['qr_code_path'])) {
+            $changes[] = "QR code removed";
+        } elseif (isset($originalData['qr_code_path']) && isset($newData['qr_code_path']) && $originalData['qr_code_path'] != $newData['qr_code_path']) {
+            $changes[] = "QR code updated";
+        }
+        
+        return $changes;
+    }
+
     // ==================== PAYROLL NOTIFICATIONS ====================
 
     /**

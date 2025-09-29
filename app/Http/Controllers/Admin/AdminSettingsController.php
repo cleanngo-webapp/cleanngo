@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 use App\Models\PaymentSettings;
+use App\Services\NotificationService;
 
 class AdminSettingsController extends Controller
 {
@@ -134,6 +135,9 @@ class AdminSettingsController extends Controller
             // Get current active payment settings
             $currentSettings = PaymentSettings::getActive();
             
+            // Store original data for notification comparison
+            $originalData = $currentSettings ? $currentSettings->toArray() : [];
+            
             $data = [
                 'gcash_name' => $request->gcash_name,
                 'gcash_number' => $request->gcash_number,
@@ -162,6 +166,11 @@ class AdminSettingsController extends Controller
                 // Only create new record if no existing settings found
                 PaymentSettings::create($data);
             }
+
+            // Trigger notification for admin payment settings update
+            $user = Auth::guard('admin')->user();
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyAdminPaymentSettingsUpdated($user, $originalData, $data);
 
             // Clean up old inactive payment settings records (keep only the last 3 inactive ones)
             $this->cleanupOldPaymentSettings();

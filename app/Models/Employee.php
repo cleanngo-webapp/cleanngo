@@ -66,7 +66,7 @@ class Employee extends Model
     }
 
     /**
-     * Boot method to trigger notifications for new employee creation
+     * Boot method to trigger notifications for new employee creation and profile updates
      */
     protected static function boot()
     {
@@ -84,6 +84,41 @@ class Employee extends Model
                 $notificationService->notifyNewEmployeeCreated($employee->user, $employee);
                 // Also notify the employee about their account creation
                 $notificationService->notifyEmployeeAccountCreated($employee->user, $employee);
+            }
+        });
+
+        // Trigger notification when employee profile is updated
+        static::updated(function ($employee) {
+            // Only trigger notifications for profile-related fields
+            $profileFields = [
+                'position', 'date_of_birth', 'gender', 'contact_number', 'email_address', 
+                'home_address', 'emergency_contact_name', 'emergency_contact_number',
+                'department', 'employment_type', 'date_hired', 'employment_status', 
+                'work_schedule', 'jobs_completed', 'recent_job', 'attendance_summary', 
+                'performance_rating'
+            ];
+            $hasProfileChanges = false;
+            
+            foreach ($profileFields as $field) {
+                if ($employee->isDirty($field)) {
+                    $hasProfileChanges = true;
+                    break;
+                }
+            }
+            
+            if ($hasProfileChanges) {
+                $notificationService = app(\App\Services\NotificationService::class);
+                
+                // Load the user relationship
+                $employee->load('user');
+                
+                if ($employee->user) {
+                    // Get original data for comparison
+                    $originalData = $employee->getOriginal();
+                    
+                    // Notify admin about employee profile updates
+                    $notificationService->notifyEmployeeProfileUpdated($employee->user, $employee, $originalData);
+                }
             }
         });
     }

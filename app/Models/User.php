@@ -68,7 +68,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Boot method to trigger notifications for new user registrations
+     * Boot method to trigger notifications for new user registrations and profile updates
      */
     protected static function boot()
     {
@@ -83,6 +83,35 @@ class User extends Authenticatable
                 $notificationService->notifyNewCustomerRegistered($user);
                 // Also notify the customer about their account creation
                 $notificationService->notifyCustomerAccountCreated($user);
+            }
+        });
+
+        // Trigger notification when user profile is updated
+        static::updated(function ($user) {
+            // Only trigger notifications for profile-related fields
+            $profileFields = ['email', 'first_name', 'last_name', 'phone'];
+            $hasProfileChanges = false;
+            
+            foreach ($profileFields as $field) {
+                if ($user->isDirty($field)) {
+                    $hasProfileChanges = true;
+                    break;
+                }
+            }
+            
+            if ($hasProfileChanges) {
+                $notificationService = app(\App\Services\NotificationService::class);
+                
+                // Get original data for comparison
+                $originalData = $user->getOriginal();
+                
+                // Notify admin based on user role
+                if ($user->role === 'customer') {
+                    $notificationService->notifyCustomerProfileUpdated($user, $originalData);
+                } elseif ($user->role === 'admin') {
+                    $notificationService->notifyAdminProfileUpdated($user, $originalData);
+                }
+                // Note: Employee profile updates are handled in Employee model observer
             }
         });
     }
