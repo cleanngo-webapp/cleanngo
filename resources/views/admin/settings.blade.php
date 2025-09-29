@@ -244,7 +244,7 @@
                         GCash QR Code
                     </label>
                     <div id="qr-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-emerald-400 transition-colors cursor-pointer" 
-                         onclick="document.getElementById('qr_code').click()"
+                         onclick="handleUploadAreaClick(event)"
                          ondrop="handleDrop(event)" 
                          ondragover="handleDragOver(event)" 
                          ondragenter="handleDragEnter(event)" 
@@ -608,6 +608,14 @@ document.getElementById('gcash_number').addEventListener('input', checkPaymentCh
 document.getElementById('qr_code').addEventListener('change', checkPaymentChanges);
 
 // Payment Settings Functions
+function handleUploadAreaClick(event) {
+    // Only trigger file input if the click wasn't on the label element
+    // This prevents double triggering when clicking the "Upload QR Code" text
+    if (event.target.tagName !== 'LABEL' && !event.target.closest('label')) {
+        document.getElementById('qr_code').click();
+    }
+}
+
 function previewQRCode(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
