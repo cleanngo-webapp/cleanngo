@@ -259,7 +259,7 @@
 										<button type="button" id="auto-locate" 
 											class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 cursor-pointer">
 											<i class="ri-map-pin-line"></i>
-											<span class="hidden sm:inline">Auto Locate</span>
+											<span class="hidden sm:inline">Find on Map</span>
 										</button>
 									</div>
 								</div>
@@ -404,6 +404,7 @@
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var map = L.map('map').setView([13.6218, 123.1948], 12);
@@ -438,24 +439,404 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Function to normalize and clean address components
+    function normalizeAddressComponent(text) {
+        if (!text) return '';
+        
+        return text.trim()
+            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+            .replace(/[^\w\s,.-]/g, '') // Remove special characters except common address chars
+            .toLowerCase();
+    }
+    
+    // Function to build multiple address variations for better geocoding
+    function buildAddressVariations() {
+        const line1 = document.querySelector('input[name="line1"]').value.trim();
+        const barangay = document.querySelector('input[name="barangay"]').value.trim();
+        const city = document.querySelector('input[name="city"]').value.trim();
+        const province = document.querySelector('input[name="province"]').value.trim();
+        const postalCode = document.querySelector('input[name="postal_code"]').value.trim();
+        
+        // Build different address combinations for better matching
+        const variations = [];
+        
+        // Variation 1: Complete address
+        if (line1 && city && province) {
+            const fullAddress = [line1, barangay, city, province, postalCode].filter(Boolean).join(', ');
+            variations.push({
+                query: fullAddress,
+                priority: 1,
+                description: 'Complete address'
+            });
+        }
+        
+        // Variation 2: Address without specific institution names
+        if (line1 && city && province) {
+            const cleanLine1 = line1.replace(/\b(university|college|school|hospital|mall|center|centre|building|bldg)\b/gi, '').trim();
+            if (cleanLine1 !== line1) {
+                const cleanAddress = [cleanLine1, barangay, city, province, postalCode].filter(Boolean).join(', ');
+                variations.push({
+                    query: cleanAddress,
+                    priority: 2,
+                    description: 'Address without institution names'
+                });
+            }
+        }
+        
+        // Variation 3: Barangay + City + Province
+        if (barangay && city && province) {
+            const barangayAddress = [barangay, city, province, postalCode].filter(Boolean).join(', ');
+            variations.push({
+                query: barangayAddress,
+                priority: 3,
+                description: 'Barangay and city'
+            });
+        }
+        
+        // Variation 4: City + Province only
+        if (city && province) {
+            const cityProvince = [city, province, postalCode].filter(Boolean).join(', ');
+            variations.push({
+                query: cityProvince,
+                priority: 4,
+                description: 'City and province'
+            });
+        }
+        
+        // Variation 5: Just the main address line + city
+        if (line1 && city) {
+            const lineCity = [line1, city, province].filter(Boolean).join(', ');
+            variations.push({
+                query: lineCity,
+                priority: 5,
+                description: 'Address line and city'
+            });
+        }
+        
+        return variations.sort((a, b) => a.priority - b.priority);
+    }
+    
+    // Function to score and rank geocoding results
+    function scoreGeocodingResult(result, searchQuery, addressComponents) {
+        let score = 0;
+        const displayName = result.display_name.toLowerCase();
+        const searchLower = searchQuery.toLowerCase();
+        
+        // Base score from importance (OpenStreetMap importance field)
+        score += (result.importance || 0) * 10;
+        
+        // Exact match bonus
+        if (displayName.includes(searchLower)) {
+            score += 50;
+        }
+        
+        // Component matching bonuses
+        const components = {
+            line1: normalizeAddressComponent(addressComponents.line1),
+            barangay: normalizeAddressComponent(addressComponents.barangay),
+            city: normalizeAddressComponent(addressComponents.city),
+            province: normalizeAddressComponent(addressComponents.province)
+        };
+        
+        // Check for city match
+        if (components.city && displayName.includes(components.city)) {
+            score += 30;
+        }
+        
+        // Check for province match
+        if (components.province && displayName.includes(components.province)) {
+            score += 25;
+        }
+        
+        // Check for barangay match
+        if (components.barangay && displayName.includes(components.barangay)) {
+            score += 20;
+        }
+        
+        // Check for address line match
+        if (components.line1 && displayName.includes(components.line1)) {
+            score += 15;
+        }
+        
+        // Penalty for very generic results
+        if (displayName.includes('philippines') && !displayName.includes(components.city)) {
+            score -= 20;
+        }
+        
+        // Bonus for results with detailed address information
+        if (result.address) {
+            if (result.address.city || result.address.town) score += 10;
+            if (result.address.state || result.address.province) score += 10;
+            if (result.address.suburb || result.address.barangay) score += 5;
+        }
+        
+        return score;
+    }
+    
+    // Enhanced OpenStreetMap geocoding optimized for Philippine addresses
+    async function geocodeWithOpenStreetMap() {
+        const addressComponents = {
+            line1: document.querySelector('input[name="line1"]').value.trim(),
+            barangay: document.querySelector('input[name="barangay"]').value.trim(),
+            city: document.querySelector('input[name="city"]').value.trim(),
+            province: document.querySelector('input[name="province"]').value.trim(),
+            postalCode: document.querySelector('input[name="postal_code"]').value.trim()
+        };
+        
+        // Build multiple address variations for better matching
+        const addressVariations = [
+            // Variation 1: Complete address
+            [addressComponents.line1, addressComponents.barangay, addressComponents.city, addressComponents.province, addressComponents.postalCode].filter(Boolean).join(', '),
+            
+            // Variation 2: Without postal code
+            [addressComponents.line1, addressComponents.barangay, addressComponents.city, addressComponents.province].filter(Boolean).join(', '),
+            
+            // Variation 3: Street + Barangay + City + Province
+            [addressComponents.line1, addressComponents.barangay, addressComponents.city, addressComponents.province].filter(Boolean).join(', '),
+            
+            // Variation 4: Barangay + City + Province
+            [addressComponents.barangay, addressComponents.city, addressComponents.province].filter(Boolean).join(', '),
+            
+            // Variation 5: City + Province
+            [addressComponents.city, addressComponents.province].filter(Boolean).join(', ')
+        ].filter(addr => addr.length > 0);
+        
+        // Try each address variation with different search strategies
+        for (let i = 0; i < addressVariations.length; i++) {
+            const address = addressVariations[i];
+            console.log(`Trying address variation ${i + 1}: "${address}"`);
+            
+            // Multiple search strategies for each variation
+            const searchStrategies = [
+                // Strategy 1: Standard search with Philippines filter
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=5&countrycodes=ph&addressdetails=1`,
+                
+                // Strategy 2: Structured search (if we have enough components)
+                addressComponents.line1 && addressComponents.city && addressComponents.province ? 
+                    `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(addressComponents.line1)}&city=${encodeURIComponent(addressComponents.city)}&state=${encodeURIComponent(addressComponents.province)}&country=Philippines&limit=5&addressdetails=1` : null,
+                
+                // Strategy 3: Broader search without country restriction
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=5&addressdetails=1`
+            ].filter(Boolean);
+            
+            for (let j = 0; j < searchStrategies.length; j++) {
+                try {
+                    console.log(`  Strategy ${j + 1}: ${searchStrategies[j]}`);
+                    
+                    // Add timeout to prevent hanging
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 second timeout per request
+                    
+                    const response = await fetch(searchStrategies[j], {
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    const data = await response.json();
+                    
+                    if (data && data.length > 0) {
+                        // Score the results
+                        const scoredResults = data.map(result => ({
+                            ...result,
+                            searchScore: scoreGeocodingResult(result, address, addressComponents),
+                            searchQuery: address,
+                            source: 'OpenStreetMap'
+                        }));
+                        
+                        // Sort by score and get the best match
+                        scoredResults.sort((a, b) => b.searchScore - a.searchScore);
+                        const bestMatch = scoredResults[0];
+                        
+                        if (bestMatch && bestMatch.searchScore > 3) { // Lower threshold for better coverage
+                            console.log('OpenStreetMap found result:', bestMatch.display_name, 'Score:', bestMatch.searchScore);
+                            return {
+                                lat: parseFloat(bestMatch.lat),
+                                lng: parseFloat(bestMatch.lon),
+                                formatted_address: bestMatch.display_name,
+                                searchScore: bestMatch.searchScore,
+                                source: 'OpenStreetMap'
+                            };
+                        }
+                    }
+                    
+                    // Small delay between requests to be respectful
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        console.warn(`    Strategy ${j + 1} timed out`);
+                    } else {
+                        console.warn(`    Strategy ${j + 1} failed:`, error.message);
+                    }
+                    continue;
+                }
+            }
+        }
+        
+        throw new Error('No results found in OpenStreetMap');
+    }
+    
+    // Optimized OpenStreetMap-only geocoding function
+    async function geocodeAddress() {
+        const addressComponents = {
+            line1: document.querySelector('input[name="line1"]').value.trim(),
+            barangay: document.querySelector('input[name="barangay"]').value.trim(),
+            city: document.querySelector('input[name="city"]').value.trim(),
+            province: document.querySelector('input[name="province"]').value.trim(),
+            postalCode: document.querySelector('input[name="postal_code"]').value.trim()
+        };
+        
+        // Build the complete address
+        const fullAddress = [addressComponents.line1, addressComponents.barangay, addressComponents.city, addressComponents.province, addressComponents.postalCode]
+            .filter(Boolean)
+            .join(', ');
+        
+        console.log('Attempting to geocode with OpenStreetMap:', fullAddress);
+        
+        // Set overall timeout for the entire geocoding process
+        const overallTimeout = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Geocoding timeout - taking too long')), 12000); // 12 second overall timeout
+        });
+        
+        const geocodingPromise = (async () => {
+            const osmResult = await geocodeWithOpenStreetMap();
+            
+            // Update map view and set coordinates
+            const latlng = {
+                lat: osmResult.lat,
+                lng: osmResult.lng
+            };
+            
+            map.setView(latlng, 16);
+            setLatLng(latlng);
+            
+            console.log('OpenStreetMap result:', osmResult.formatted_address);
+            
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Location Found!',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-2"><strong>Found:</strong> ${osmResult.formatted_address}</p>
+                        <p class="text-sm text-gray-600 mb-2">Source: OpenStreetMap</p>
+                        <p class="text-sm text-gray-500">Confidence: ${Math.round((osmResult.searchScore / 100) * 100)}%</p>
+                    </div>
+                `,
+                confirmButtonText: 'Great!',
+                confirmButtonColor: '#10b981'
+            });
+            
+            return true;
+        })();
+        
+        // Race between geocoding and timeout
+        return Promise.race([geocodingPromise, overallTimeout]);
+    }
+
     // Auto Locate button
     var autoBtn = document.getElementById('auto-locate');
-    function handleLocateSuccess(pos){
-        var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-        map.setView(latlng, 16);
-        setLatLng(latlng);
-    }
-    function handleLocateError(err){
-        console.warn('Geolocation error', err);
-        alert('Unable to get your location. Please allow location permission and try again. If you are not on http://localhost or https, the browser may block geolocation.');
-    }
     if (autoBtn) {
-        autoBtn.addEventListener('click', function(){
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser.');
+        autoBtn.addEventListener('click', async function(){
+            // Validate that we have at least some address information
+            const line1 = document.querySelector('input[name="line1"]').value.trim();
+            const city = document.querySelector('input[name="city"]').value.trim();
+            const province = document.querySelector('input[name="province"]').value.trim();
+            
+            if (!line1 && !city && !province) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Address Required',
+                    text: 'Please enter at least the address line, city, or province before searching on the map.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3b82f6'
+                });
                 return;
             }
-            navigator.geolocation.getCurrentPosition(handleLocateSuccess, handleLocateError, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+            
+            // Additional validation for better results
+            if (!city || !province) {
+                const result = await Swal.fire({
+                    icon: 'question',
+                    title: 'Missing Information',
+                    text: 'For better search results, it\'s recommended to fill in both City and Province. Would you like to continue with the current information?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Continue',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#6b7280'
+                });
+                
+                if (!result.isConfirmed) {
+                    return;
+                }
+            }
+            
+            // Show loading state
+            const originalText = autoBtn.innerHTML;
+            autoBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i><span class="hidden sm:inline">Searching...</span>';
+            autoBtn.disabled = true;
+            
+            try {
+                // Attempt to geocode the address using enhanced function
+                await geocodeAddress();
+            } catch (error) {
+                console.error('Geocoding failed:', error);
+                
+                // Check if it's a timeout error
+                const isTimeout = error.message.includes('timeout') || error.message.includes('taking too long');
+                
+                // Show appropriate error message
+                const cityProvince = city && province ? `${city}, ${province}` : 'the area';
+                
+                if (isTimeout) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Search Taking Too Long',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">The address search is taking longer than expected. This might be because:</p>
+                                <ul class="text-sm text-gray-600 mb-3 list-disc list-inside">
+                                    <li>Network connection is slow</li>
+                                    <li>The geocoding service is busy</li>
+                                    <li>The address is very specific</li>
+                                </ul>
+                                <p class="text-sm text-gray-500 mb-2">You can:</p>
+                                <ul class="text-sm text-gray-600 mb-3 list-disc list-inside">
+                                    <li>Try again in a moment</li>
+                                    <li>Manually click on the map to set the location</li>
+                                    <li>Use a broader address like "<strong>${cityProvince}</strong>"</li>
+                                </ul>
+                            </div>
+                        `,
+                        confirmButtonText: 'Got it',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Address Not Found',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-3">Unable to find the exact address on the map. This might be because:</p>
+                                <ul class="text-sm text-gray-600 mb-3 list-disc list-inside">
+                                    <li>The specific location isn't in the map database</li>
+                                    <li>The address format needs adjustment</li>
+                                    <li>The location is very specific or new</li>
+                                    <li>Try searching for just "<strong>${cityProvince}</strong>"</li>
+                                </ul>
+                                <p class="text-sm text-gray-500">You can still manually click on the map to set the location.</p>
+                            </div>
+                        `,
+                        confirmButtonText: 'Got it',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                }
+            } finally {
+                // Restore button state
+                autoBtn.innerHTML = originalText;
+                autoBtn.disabled = false;
+            }
         });
     }
 });
