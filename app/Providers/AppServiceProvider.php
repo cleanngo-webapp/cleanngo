@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS in production environment
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         // Share unread notification count across all views
         View::composer('*', function ($view) {
             if (Auth::check()) {
