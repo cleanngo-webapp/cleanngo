@@ -78,6 +78,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::post('/jobs/{bookingId}/start', [EmployeeJobsController::class, 'start'])->name('jobs.start');
     Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
     Route::post('/payment-proof/{bookingId}/upload', [App\Http\Controllers\Admin\PaymentProofController::class, 'upload'])->name('payment-proof.upload');
+    Route::get('/bookings/{bookingId}/photos', [EmployeeJobsController::class, 'getPhotos'])->name('bookings.photos');
     Route::get('/payroll', [EmployeePayrollController::class, 'index'])->name('payroll');
     Route::get('/notifications', [EmployeeNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/api', [EmployeeNotificationController::class, 'getNotifications'])->name('notifications.api');
@@ -153,6 +154,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/bookings/{bookingId}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{bookingId}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::match(['post','get'], '/bookings/{bookingId}/assign', [AdminBookingController::class, 'assignEmployee'])->name('bookings.assign');
+    Route::get('/bookings/{bookingId}/photos', [AdminBookingController::class, 'getPhotos'])->name('bookings.photos');
     Route::get('/payment-proof/{proofId}/details', [App\Http\Controllers\Admin\PaymentProofController::class, 'getDetails'])->name('payment-proof.details');
     Route::post('/payment-proof/{proofId}/approve', [App\Http\Controllers\Admin\PaymentProofController::class, 'approve'])->name('payment-proof.approve');
     Route::post('/payment-proof/{proofId}/decline', [App\Http\Controllers\Admin\PaymentProofController::class, 'decline'])->name('payment-proof.decline');

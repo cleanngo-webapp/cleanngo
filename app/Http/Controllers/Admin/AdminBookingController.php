@@ -31,7 +31,7 @@ class AdminBookingController extends Controller
                      ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');
             })
             ->select([
-                'b.id', 'b.code', 'b.scheduled_start', 'b.status', 'b.address_id',
+                'b.id', 'b.code', 'b.scheduled_start', 'b.status', 'b.address_id', 'b.booking_photos',
                 's.name as service_name',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw('u.phone as customer_phone'),
@@ -403,6 +403,41 @@ class AdminBookingController extends Controller
             if (!$exists) return $code;
         }
         return $prefix.$year.substr((string)microtime(true), -3);
+    }
+
+    /**
+     * Get booking photos for admin view
+     */
+    public function getPhotos($bookingId)
+    {
+        $booking = DB::table('bookings')
+            ->where('id', $bookingId)
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        $photos = [];
+        if ($booking->booking_photos) {
+            $photoPaths = json_decode($booking->booking_photos, true);
+            if (is_array($photoPaths)) {
+                foreach ($photoPaths as $path) {
+                    $photos[] = [
+                        'url' => asset('storage/' . $path),
+                        'filename' => basename($path)
+                    ];
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'photos' => $photos
+        ]);
     }
 }
 

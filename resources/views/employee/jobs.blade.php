@@ -192,6 +192,16 @@
                                     <i class="ri-map-pin-line mr-1"></i>
                                     Location
                                 </button>
+                                @php
+                                    $bookingPhotos = $b->booking_photos ? json_decode($b->booking_photos, true) : [];
+                                    $hasPhotos = is_array($bookingPhotos) && count($bookingPhotos) > 0;
+                                @endphp
+                                @if($hasPhotos)
+                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpBookingPhotos({{ $b->id }})" title="View Booking Photos">
+                                        <i class="ri-image-line mr-1"></i>
+                                        Photos
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -314,6 +324,19 @@
         'receiptData' => $receiptData ?? [],
         'bookingId' => null
     ])
+
+    <!-- Booking Photos Modal -->
+    <div id="emp-booking-photos-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-4xl p-4 m-4" style="max-height: 90vh; overflow-y: auto;">
+            <div class="flex items-center justify-between mb-4">
+                <div class="font-semibold text-lg">Booking Photos</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeEmpBookingPhotosModal()">✕</button>
+            </div>
+            <div id="emp-booking-photos-content" class="space-y-4">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 @push('scripts')
@@ -923,6 +946,128 @@ function showJobActionErrorAlert(message) {
         confirmButtonColor: '#dc2626',
         confirmButtonText: 'OK'
     });
+}
+
+// Employee Booking Photos Modal Functions
+let currentEmpBookingPhotos = null;
+
+function openEmpBookingPhotos(bookingId) {
+    currentEmpBookingPhotos = bookingId;
+    const modal = document.getElementById('emp-booking-photos-modal');
+    const content = document.getElementById('emp-booking-photos-content');
+    
+    // Show loading state
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="flex justify-center items-center space-x-2 mb-4">
+                <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+            </div>
+            <p class="text-gray-500 text-sm">Loading booking photos...</p>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Fetch booking photos
+    fetch(`/employee/bookings/${bookingId}/photos`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.photos && data.photos.length > 0) {
+                let photosHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+                
+                data.photos.forEach((photo, index) => {
+                    photosHtml += `
+                        <div class="relative group">
+                            <img src="${photo.url}" alt="Booking Photo ${index + 1}" 
+                                 class="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                                 data-photo-url="${photo.url}" 
+                                 data-photo-filename="${photo.filename}">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center pointer-events-none">
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <i class="ri-zoom-in-line text-white text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-center">
+                                <p class="text-sm text-gray-600">${photo.filename}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                photosHtml += '</div>';
+                content.innerHTML = photosHtml;
+                
+                // Add event delegation for photo clicks
+                content.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'IMG' && e.target.dataset.photoUrl) {
+                        openEmpPhotoViewer(e.target.dataset.photoUrl, e.target.dataset.photoFilename);
+                    }
+                });
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="ri-image-line text-2xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Photos Available</h3>
+                        <p class="text-sm text-gray-500">This booking doesn't have any photos uploaded.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading booking photos:', error);
+            content.innerHTML = '<div class="text-center py-4 text-red-500">Error loading booking photos.</div>';
+        });
+}
+
+function closeEmpBookingPhotosModal() {
+    const modal = document.getElementById('emp-booking-photos-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    currentEmpBookingPhotos = null;
+}
+
+function openEmpPhotoViewer(imageUrl, filename) {
+    // Create a simple photo viewer modal
+    const viewer = document.createElement('div');
+    viewer.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[2000]';
+    viewer.innerHTML = `
+        <div class="relative max-w-4xl max-h-full p-4">
+            <button class="emp-photo-viewer-close absolute top-4 right-4 text-white text-2xl hover:text-gray-300 cursor-pointer z-10">
+                ✕
+            </button>
+            <img src="${imageUrl}" alt="${filename}" class="max-w-full max-h-full object-contain">
+            <div class="absolute bottom-4 left-4 text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+                ${filename}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(viewer);
+    
+    // Add event listener for close button
+    const closeBtn = viewer.querySelector('.emp-photo-viewer-close');
+    closeBtn.addEventListener('click', () => {
+        viewer.remove();
+    });
+    
+    // Close on click outside image
+    viewer.addEventListener('click', (e) => {
+        if (e.target === viewer) {
+            viewer.remove();
+        }
+    });
+    
+    // Close on Escape key
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            viewer.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
 }
 </script>
 @endpush

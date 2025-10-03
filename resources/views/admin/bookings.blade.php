@@ -297,6 +297,15 @@
                                 <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openLocation({{ $b->id }})" title="View Location">
                                     <i class="ri-map-pin-line"></i>                                    
                                 </button>
+                                @php
+                                    $bookingPhotos = $b->booking_photos ? json_decode($b->booking_photos, true) : [];
+                                    $hasPhotos = is_array($bookingPhotos) && count($bookingPhotos) > 0;
+                                @endphp
+                                @if($hasPhotos)
+                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingPhotos({{ $b->id }})" title="View Booking Photos">
+                                        <i class="ri-image-line"></i>
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -937,6 +946,19 @@
         </div>
     </div>
 
+    <!-- Booking Photos Modal -->
+    <div id="booking-photos-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-4xl p-4 m-4" style="max-height: 90vh; overflow-y: auto;">
+            <div class="flex items-center justify-between mb-4">
+                <div class="font-semibold text-lg">Booking Photos</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeBookingPhotosModal()">✕</button>
+            </div>
+            <div id="booking-photos-content" class="space-y-4">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1404,6 +1426,128 @@
         const declineModal = document.getElementById('decline-payment-modal');
         declineModal.classList.add('hidden');
         declineModal.classList.remove('flex');
+    }
+    
+    // Booking Photos Modal Functions
+    let currentBookingPhotos = null;
+    
+    function openBookingPhotos(bookingId) {
+        currentBookingPhotos = bookingId;
+        const modal = document.getElementById('booking-photos-modal');
+        const content = document.getElementById('booking-photos-content');
+        
+        // Show loading state
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <div class="flex justify-center items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                </div>
+                <p class="text-gray-500 text-sm">Loading booking photos...</p>
+            </div>
+        `;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Fetch booking photos
+        fetch(`/admin/bookings/${bookingId}/photos`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.photos && data.photos.length > 0) {
+                    let photosHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+                    
+                    data.photos.forEach((photo, index) => {
+                        photosHtml += `
+                            <div class="relative group">
+                                <img src="${photo.url}" alt="Booking Photo ${index + 1}" 
+                                     class="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                                     data-photo-url="${photo.url}" 
+                                     data-photo-filename="${photo.filename}">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center pointer-events-none">
+                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        <i class="ri-zoom-in-line text-white text-2xl"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-center">
+                                    <p class="text-sm text-gray-600">${photo.filename}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    photosHtml += '</div>';
+                    content.innerHTML = photosHtml;
+                    
+                    // Add event delegation for photo clicks
+                    content.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'IMG' && e.target.dataset.photoUrl) {
+                            openPhotoViewer(e.target.dataset.photoUrl, e.target.dataset.photoFilename);
+                        }
+                    });
+                } else {
+                    content.innerHTML = `
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="ri-image-line text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Photos Available</h3>
+                            <p class="text-sm text-gray-500">This booking doesn't have any photos uploaded.</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading booking photos:', error);
+                content.innerHTML = '<div class="text-center py-4 text-red-500">Error loading booking photos.</div>';
+            });
+    }
+    
+    function closeBookingPhotosModal() {
+        const modal = document.getElementById('booking-photos-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        currentBookingPhotos = null;
+    }
+    
+    function openPhotoViewer(imageUrl, filename) {
+        // Create a simple photo viewer modal
+        const viewer = document.createElement('div');
+        viewer.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[2000]';
+        viewer.innerHTML = `
+            <div class="relative max-w-4xl max-h-full p-4">
+                <button class="photo-viewer-close absolute top-4 right-4 text-white text-2xl hover:text-gray-300 cursor-pointer z-10">
+                    ✕
+                </button>
+                <img src="${imageUrl}" alt="${filename}" class="max-w-full max-h-full object-contain">
+                <div class="absolute bottom-4 left-4 text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+                    ${filename}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(viewer);
+        
+        // Add event listener for close button
+        const closeBtn = viewer.querySelector('.photo-viewer-close');
+        closeBtn.addEventListener('click', () => {
+            viewer.remove();
+        });
+        
+        // Close on click outside image
+        viewer.addEventListener('click', (e) => {
+            if (e.target === viewer) {
+                viewer.remove();
+            }
+        });
+        
+        // Close on Escape key
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                viewer.remove();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
     }
     
     function confirmDecline() {

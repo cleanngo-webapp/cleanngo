@@ -1273,6 +1273,38 @@ function openBookingForm(){
         </div>
       </div>
       
+      <!-- Booking Photos Section -->
+      <div class="space-y-3">
+        <label class="block text-sm font-medium text-gray-700">
+          Photos of Items/Areas to be Cleaned <span class="text-red-500">*</span>
+        </label>
+        <p class="text-xs text-gray-500">Upload photos of the items or areas that need cleaning (minimum 1, maximum 3 photos)</p>
+        
+        <!-- Custom File Input Container -->
+        <div class="relative">
+          <input type="file" name="booking_photos[]" id="booking-photos-input" accept="image/*" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+          <div id="booking-photos-display" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white hover:bg-gray-50 transition-colors cursor-pointer">
+            <span id="booking-photos-text" class="text-gray-500">Choose Photos (1-3 images)</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500">Supported formats: JPG, PNG, GIF (max 2MB each)</p>
+        
+        <!-- Image Preview Container -->
+        <div id="booking-photos-preview-container" class="hidden">
+          <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+            <p class="text-sm font-medium text-gray-700 mb-2">Selected Photos:</p>
+            <div id="booking-photos-preview-grid" class="grid grid-cols-1 gap-3">
+              <!-- Preview images will be inserted here -->
+            </div>
+            <div class="flex justify-end mt-2">
+              <button type="button" id="remove-all-booking-photos" class="text-sm text-red-600 hover:text-red-700 cursor-pointer">
+                <i class="ri-delete-bin-line mr-1"></i>Remove All Photos
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- Hidden fields for booking data -->
       <input type="hidden" name="total" id="booking_total">
       <input type="hidden" name="items_json" id="items_json">
@@ -1568,7 +1600,148 @@ function openBookingForm(){
     document.getElementById('time-picker').value = '';
     document.getElementById('date-picker-dropdown').classList.add('hidden');
     document.getElementById('time-picker-dropdown').classList.add('hidden');
+    
+    // Reset photo uploads
+    resetBookingPhotos();
   }
+
+  // Booking Photos Handling
+  let selectedBookingPhotos = [];
+  const maxPhotos = 3;
+  const maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
+
+  function resetBookingPhotos() {
+    selectedBookingPhotos = [];
+    document.getElementById('booking-photos-input').value = '';
+    document.getElementById('booking-photos-text').textContent = 'Choose Photos (1-3 images)';
+    document.getElementById('booking-photos-text').className = 'text-gray-500';
+    hideBookingPhotosPreview();
+  }
+
+  function showBookingPhotosPreview(files) {
+    const previewContainer = document.getElementById('booking-photos-preview-container');
+    const previewGrid = document.getElementById('booking-photos-preview-grid');
+    
+    // Clear existing previews
+    previewGrid.innerHTML = '';
+    
+    // Validate files
+    const validFiles = [];
+    const errors = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Check file size
+      if (file.size > maxFileSize) {
+        errors.push(`${file.name}: File size must be less than 2MB`);
+        continue;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        errors.push(`${file.name}: Please select a valid image file`);
+        continue;
+      }
+      
+      validFiles.push(file);
+    }
+    
+    // Show errors if any
+    if (errors.length > 0) {
+      alert('Some files were rejected:\n' + errors.join('\n'));
+    }
+    
+    // Limit to max photos
+    const filesToShow = validFiles.slice(0, maxPhotos);
+    selectedBookingPhotos = filesToShow;
+    
+    if (filesToShow.length === 0) {
+      hideBookingPhotosPreview();
+      return;
+    }
+    
+    // Update file input text
+    const photosText = document.getElementById('booking-photos-text');
+    photosText.textContent = `${filesToShow.length} photo${filesToShow.length > 1 ? 's' : ''} selected`;
+    photosText.className = 'text-gray-700 font-medium';
+    
+    // Create previews
+    filesToShow.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'relative border border-gray-200 rounded-lg p-2 bg-white';
+        previewItem.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <img src="${e.target.result}" alt="Preview ${index + 1}" class="w-16 h-16 object-cover rounded">
+            <div class="flex-1">
+              <p class="text-sm font-medium text-gray-700">${file.name}</p>
+              <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(1)} KB</p>
+            </div>
+            <button type="button" onclick="removeBookingPhoto(${index})" class="text-red-500 hover:text-red-700 cursor-pointer" title="Remove photo">
+              <i class="ri-close-line text-lg"></i>
+            </button>
+          </div>
+        `;
+        previewGrid.appendChild(previewItem);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    previewContainer.classList.remove('hidden');
+  }
+
+  function hideBookingPhotosPreview() {
+    const previewContainer = document.getElementById('booking-photos-preview-container');
+    previewContainer.classList.add('hidden');
+  }
+
+  function removeBookingPhoto(index) {
+    selectedBookingPhotos.splice(index, 1);
+    
+    // Update file input
+    const fileInput = document.getElementById('booking-photos-input');
+    const dt = new DataTransfer();
+    selectedBookingPhotos.forEach(file => dt.items.add(file));
+    fileInput.files = dt.files;
+    
+    if (selectedBookingPhotos.length === 0) {
+      hideBookingPhotosPreview();
+      document.getElementById('booking-photos-text').textContent = 'Choose Photos (1-3 images)';
+      document.getElementById('booking-photos-text').className = 'text-gray-500';
+    } else {
+      showBookingPhotosPreview(selectedBookingPhotos);
+    }
+  }
+
+  function removeAllBookingPhotos() {
+    selectedBookingPhotos = [];
+    document.getElementById('booking-photos-input').value = '';
+    document.getElementById('booking-photos-text').textContent = 'Choose Photos (1-3 images)';
+    document.getElementById('booking-photos-text').className = 'text-gray-500';
+    hideBookingPhotosPreview();
+  }
+
+  // Add event listeners for photo handling
+  document.addEventListener('DOMContentLoaded', function() {
+    const photosInput = document.getElementById('booking-photos-input');
+    const removeAllBtn = document.getElementById('remove-all-booking-photos');
+    
+    if (photosInput) {
+      photosInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length > maxPhotos) {
+          alert(`You can only select up to ${maxPhotos} photos. Only the first ${maxPhotos} will be used.`);
+        }
+        showBookingPhotosPreview(files);
+      });
+    }
+    
+    if (removeAllBtn) {
+      removeAllBtn.addEventListener('click', removeAllBookingPhotos);
+    }
+  });
 
   // Event listener for opening the booking modal
   window.addEventListener('openBookingModal', function(e){
@@ -1815,6 +1988,32 @@ function openBookingForm(){
         parseFloat(addressData.longitude) !== 0;
       
       console.log('Will show view location button:', hasValidCoordinates);
+      
+      // Validate photos
+      const photosInput = document.getElementById('booking-photos-input');
+      const photos = photosInput.files;
+      
+      if (!photos || photos.length === 0) {
+        Swal.fire({
+          title: 'Photos Required',
+          text: 'Please upload at least one photo of the items/areas to be cleaned.',
+          icon: 'warning',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#10b981'
+        });
+        return false;
+      }
+      
+      if (photos.length > maxPhotos) {
+        Swal.fire({
+          title: 'Too Many Photos',
+          text: `You can only upload up to ${maxPhotos} photos. Please select fewer photos.`,
+          icon: 'warning',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#10b981'
+        });
+        return false;
+      }
       
       // Show confirmation modal with primary address details
       Swal.fire({

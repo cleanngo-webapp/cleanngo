@@ -45,7 +45,7 @@ class EmployeeJobsController extends Controller
             })
             ->where('a.employee_id', $employeeId)
             ->select([
-                'b.id', 'b.code', 'b.status', 'b.scheduled_start',
+                'b.id', 'b.code', 'b.status', 'b.scheduled_start', 'b.booking_photos',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw('u.phone as customer_phone'),
                 DB::raw("COALESCE(primary_addr.line1,'') as address_line1"),
@@ -231,6 +231,48 @@ class EmployeeJobsController extends Controller
         }
         
         return back()->with('status', 'Job marked as completed');
+    }
+
+    /**
+     * Get booking photos for employee view
+     */
+    public function getPhotos($bookingId)
+    {
+        $user = Auth::user();
+        
+        // Verify the employee is assigned to this booking
+        $booking = DB::table('bookings as b')
+            ->join('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
+            ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+            ->where('b.id', $bookingId)
+            ->where('e.user_id', $user->id)
+            ->select('b.*')
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found or not assigned to you'
+            ], 404);
+        }
+
+        $photos = [];
+        if ($booking->booking_photos) {
+            $photoPaths = json_decode($booking->booking_photos, true);
+            if (is_array($photoPaths)) {
+                foreach ($photoPaths as $path) {
+                    $photos[] = [
+                        'url' => asset('storage/' . $path),
+                        'filename' => basename($path)
+                    ];
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'photos' => $photos
+        ]);
     }
 }
 

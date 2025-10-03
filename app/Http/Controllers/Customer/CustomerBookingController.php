@@ -10,6 +10,7 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerBookingController extends Controller
 {
@@ -22,6 +23,8 @@ class CustomerBookingController extends Controller
             'time' => 'required',
             'total' => 'required|numeric|min:0',
             'items_json' => 'nullable|string',
+            'booking_photos' => 'required|array|min:1|max:3',
+            'booking_photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Ensure customer row exists
@@ -48,6 +51,19 @@ class CustomerBookingController extends Controller
             $code = 'B'.date('Y').str_pad((string)random_int(0,999),3,'0',STR_PAD_LEFT);
         }
         
+        // Handle photo uploads
+        $photoPaths = [];
+        if ($request->hasFile('booking_photos')) {
+            foreach ($request->file('booking_photos') as $photo) {
+                // Generate unique filename
+                $filename = 'booking_' . $user->id . '_' . time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+                
+                // Store the photo in public/booking-photos directory
+                $path = $photo->storeAs('booking-photos', $filename, 'public');
+                $photoPaths[] = $path;
+            }
+        }
+
         // Create booking using Eloquent model (this will trigger the notification)
         $booking = Booking::create([
             'code' => $code,
@@ -58,6 +74,7 @@ class CustomerBookingController extends Controller
             'status' => 'pending',
             'base_price_cents' => $totalCents,
             'total_due_cents' => $totalCents,
+            'booking_photos' => $photoPaths,
         ]);
 
         // Persist booking items if provided

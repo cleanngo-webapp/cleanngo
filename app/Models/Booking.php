@@ -25,6 +25,7 @@ class Booking extends Model
         'amount_paid_cents' => 'integer',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'booking_photos' => 'array',
     ];
 
     public function customer()
