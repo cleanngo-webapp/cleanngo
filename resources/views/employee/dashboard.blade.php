@@ -166,6 +166,30 @@
 			<h2 class="text-xl font-semibold text-gray-900">Schedule Calendar</h2>
 			<p class="text-sm text-gray-500 mt-1">View your upcoming job assignments</p>
 		</div>
+		
+		{{-- Color Legend --}}
+		<div class="px-6 py-3 bg-gray-50 border-b border-gray-100">
+			<div class="flex items-center gap-6 text-sm">
+				<span class="text-gray-600 font-medium">Status Colors:</span>
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 rounded" style="background-color: #F59E0B;"></div>
+					<span class="text-gray-700">Pending</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 rounded" style="background-color: #3B82F6;"></div>
+					<span class="text-gray-700">Confirmed</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 rounded" style="background-color: #8B5CF6;"></div>
+					<span class="text-gray-700">In Progress</span>
+				</div>
+				<div class="flex items-center gap-2">
+					<div class="w-4 h-4 rounded" style="background-color: #10B981;"></div>
+					<span class="text-gray-700">Completed</span>
+				</div>
+			</div>
+		</div>
+		
 		<div class="p-6">
 		<div id="employee-calendar" data-events-url="{{ route('employee.calendar.events') }}"></div>
 		</div>

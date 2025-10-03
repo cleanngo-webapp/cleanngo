@@ -32,11 +32,23 @@ class CalendarController extends Controller
             $assigned = optional($b->staffAssignments->first()?->employee?->user);
             $employeeName = trim(($assigned->first_name ?? '') . ' ' . ($assigned->last_name ?? '')) ?: null;
 
+            // Define colors based on booking status
+            $statusColors = [
+                'confirmed' => '#3B82F6', // Blue
+                'in_progress' => '#8B5CF6', // Yellow/Orange
+                'completed' => '#10B981', // Green
+                'pending' => '#F59E0B', // Gold
+                'no_show' => '#8B5CF6', // Purple
+            ];
+
             return [
                 'id' => $b->id,
                 'title' => $startText . ' • ' . $code,
                 'start' => $startIso,
                 'end' => optional($b->scheduled_end ?? $b->scheduled_start)->toIso8601String(),
+                'backgroundColor' => $statusColors[$b->status] ?? '#3B82F6', // Default to blue
+                'borderColor' => $statusColors[$b->status] ?? '#3B82F6', // Default to blue
+                'textColor' => '#FFFFFF', // White text for all events
                 'extendedProps' => [
                     'status' => $b->status,
                     'code' => $code,
@@ -86,11 +98,24 @@ class CalendarController extends Controller
             $assigned = optional($b->staffAssignments->first()?->employee?->user);
             $employeeName = trim(($assigned->first_name ?? '') . ' ' . ($assigned->last_name ?? '')) ?: null;
 
+            // Define colors based on booking status
+            $statusColors = [
+                'confirmed' => '#3B82F6', // Blue
+                'in_progress' => '#F59E0B', // Yellow/Orange
+                'completed' => '#10B981', // Green
+                'pending' => '#6B7280', // Gray
+                'cancelled' => '#EF4444', // Red
+                'no_show' => '#8B5CF6', // Purple
+            ];
+
             return [
                 'id' => $b->id,
                 'title' => $startText . ' • ' . $code,
                 'start' => $startIso,
                 'end' => optional($b->scheduled_end ?? $b->scheduled_start)->toIso8601String(),
+                'backgroundColor' => $statusColors[$b->status] ?? '#3B82F6', // Default to blue
+                'borderColor' => $statusColors[$b->status] ?? '#3B82F6', // Default to blue
+                'textColor' => '#FFFFFF', // White text for all events
                 'extendedProps' => [
                     'status' => $b->status,
                     'code' => $code,

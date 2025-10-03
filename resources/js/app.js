@@ -42,6 +42,17 @@ function renderCalendar(el) {
             info.el.style.boxSizing = "border-box";
             info.el.style.cursor = "pointer";
 
+            // Apply colors from event data (set by CalendarController)
+            if (info.event.backgroundColor) {
+                info.el.style.backgroundColor = info.event.backgroundColor;
+            }
+            if (info.event.borderColor) {
+                info.el.style.borderColor = info.event.borderColor;
+            }
+            if (info.event.textColor) {
+                info.el.style.color = info.event.textColor;
+            }
+
             // Create tooltip content
             const content = document.createElement("div");
             content.className = "calendar-tooltip hidden";
