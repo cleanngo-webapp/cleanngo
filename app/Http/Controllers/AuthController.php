@@ -126,7 +126,7 @@ class AuthController extends Controller
         try { Auth::guard($guard)->logout(); } catch (\Throwable $e) { Auth::logout(); }
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect()->route('landing');
     }
 
     // Redirect to role dashboard
@@ -140,12 +140,12 @@ class AuthController extends Controller
                 return match ($role) {
                     'admin' => redirect()->route('admin.dashboard'),
                     'employee' => redirect()->route('employee.dashboard'),
-                    'customer' => redirect()->route('preview.customer'),
+                    'customer' => redirect()->route('customer.dashboard'),
                     default => redirect()->route('login'),
                 };
             }
         }
-        return redirect()->route('login');
+        return redirect()->route('landing');
     }
 }
 

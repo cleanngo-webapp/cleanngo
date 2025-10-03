@@ -39,7 +39,13 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Customer\CustomerNotificationController;
 use App\Http\Controllers\Employee\EmployeeNotificationController;
 
-Route::redirect('/', '/login');
+// Public landing page route
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
+// Redirect /login to landing page if not authenticated
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 
 // Sitemap route
 Route::get('/sitemap.xml', function () {
@@ -56,7 +62,6 @@ Route::get('/terms-of-service', function () {
 })->name('terms-of-service');
 
 // Auth routes
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -89,7 +94,8 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::get('/calendar/events', [CalendarController::class, 'employeeEvents'])->name('calendar.events');
 });
 Route::middleware(['auth:customer','role:customer'])->group(function () {
-    Route::get('/customer', [CustomerHomeController::class, 'home'])->name('preview.customer');
+    Route::get('/customer', [CustomerHomeController::class, 'home'])->name('customer.dashboard');
+    Route::get('/customer/home', [CustomerHomeController::class, 'home'])->name('preview.customer');
     Route::get('/customer/profile', [CustomerDashboardController::class, 'show'])->name('customer.profile');
     Route::post('/customer/bookings/search', [CustomerDashboardController::class, 'searchBookings'])->name('customer.bookings.search');
     Route::view('/customer/all-services', 'customer.allservices')->name('customer.allservices');

@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="min-h-screen bg-gray-100 font-sans flex flex-col">
-    <nav class="bg-brand-green fixed top-0 left-0 right-0 z-9999">
+    <nav class="bg-brand-green fixed top-0 left-0 right-0 z-50 shadow-lg backdrop-blur-sm">
         <div class="max-w-7xl mx-auto h-16 flex justify-between items-center">
             <!-- Logo -->
             <div class="flex gap-4">
