@@ -26,173 +26,72 @@
         <section class="bg-brand-green rounded-xl text-white p-4 md:col-span-1" id="serviceForms">
             <!-- Sofa/Mattress -->
             <div data-form="sofa" class="hidden">
-                <h2 class="font-semibold text-center mb-4">Sofa Deep Cleaning</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">1 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_1" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_1" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_1" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">2 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_2" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_2" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_2" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">3 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_3" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_3" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_3" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">4 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_4" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_4" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_4" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">5 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_5" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_5" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_5" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">6 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_6" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_6" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_6" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">7 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_7" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_7" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_7" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">8 seater</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_8" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="sofa_8" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_8" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
+                <h2 class="font-semibold text-center mb-4">Sofa / Mattress Deep Cleaning</h2>
+                
+                <!-- All Types Dropdown -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Select Type</label>
+                    <select id="sofa-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30">
+                        <option value="">Choose type...</option>
+                        <optgroup label="Sofa Types">
+                            <option value="sofa_1">1 seater</option>
+                            <option value="sofa_2">2 seater</option>
+                            <option value="sofa_3">3 seater</option>
+                            <option value="sofa_4">4 seater</option>
+                            <option value="sofa_5">5 seater</option>
+                            <option value="sofa_6">6 seater</option>
+                            <option value="sofa_7">7 seater</option>
+                            <option value="sofa_8">8 seater</option>
+                        </optgroup>
+                        <optgroup label="Mattress Types">
+                            <option value="mattress_single">Single bed</option>
+                            <option value="mattress_double">Double bed</option>
+                            <option value="mattress_king">King bed</option>
+                            <option value="mattress_california">California bed</option>
+                        </optgroup>
+                    </select>
+                    
+                    <!-- Quantity Selector (in same card) -->
+                    <div id="sofa-quantity-selector" class="hidden mt-3">
+                        <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                            <span id="sofa-selected-type" class="text-white font-medium"></span>
+                            <div class="flex items-center gap-2">
+                                <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_selected" data-action="decrease">
+                                    <i class="ri-subtract-line text-lg"></i>
+                                </button>
+                                <span id="sofa_selected" class="quantity-display">0</span>
+                                <button type="button" class="quantity-btn cursor-pointer" data-target="sofa_selected" data-action="increase">
+                                    <i class="ri-add-line text-lg"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <h2 class="font-semibold mt-8 mb-4 text-center">Mattress Deep Cleaning</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Single bed</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_single" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="mattress_single" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_single" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Double bed</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_double" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="mattress_double" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_double" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">King bed</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_king" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="mattress_king" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_king" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">California bed</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_california" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="mattress_california" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="mattress_california" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-            </div>
+
+                <!-- Additional Selections Container -->
+                <div id="sofa-additional-container" class="hidden">
+                    <div id="sofa-additional-items"></div>
+                    <button type="button" id="sofa-add-more-btn" class="w-full mt-3 p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-medium transition-colors">
+                        + Add Another Type
+                    </button>
+                </div>
             </div>
 
             <!-- Carpet -->
             <div data-form="carpet" class="hidden">
                 <h2 class="font-semibold text-center mb-4">Carpet Deep Cleaning</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square Foot</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_qty" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="carpet_qty" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_qty" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
+                
+                <!-- Quantity Selector -->
+                <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                    <span class="text-white font-medium">Square Foot</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_qty" data-action="decrease">
+                            <i class="ri-subtract-line text-lg"></i>
+                        </button>
+                        <span id="carpet_qty" class="quantity-display">0</span>
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="carpet_qty" data-action="increase">
+                            <i class="ri-add-line text-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -200,73 +99,59 @@
             <!-- Car Interior -->
             <div data-form="carInterior" class="hidden">
                 <h2 class="font-semibold text-center mb-4">Home Service Car Interior Detailing</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Sedan</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_sedan" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="car_sedan" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_sedan" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
+                
+                <!-- Vehicle Type Dropdown -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Select Vehicle Type</label>
+                    <select id="car-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30">
+                        <option value="">Choose vehicle type...</option>
+                        <option value="car_sedan">Sedan</option>
+                        <option value="car_suv">SUV</option>
+                        <option value="car_van">Van</option>
+                        <option value="car_coaster">Hatchback</option>
+                    </select>
+                    
+                    <!-- Quantity Selector (in same card) -->
+                    <div id="car-quantity-selector" class="hidden mt-3">
+                        <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                            <span id="car-selected-type" class="text-white font-medium"></span>
+                            <div class="flex items-center gap-2">
+                                <button type="button" class="quantity-btn cursor-pointer" data-target="car_selected" data-action="decrease">
+                                    <i class="ri-subtract-line text-lg"></i>
+                                </button>
+                                <span id="car_selected" class="quantity-display">0</span>
+                                <button type="button" class="quantity-btn cursor-pointer" data-target="car_selected" data-action="increase">
+                                    <i class="ri-add-line text-lg"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">SUV</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_suv" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="car_suv" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_suv" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Van</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_van" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="car_van" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_van" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Hatchback</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_coaster" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="car_coaster" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="car_coaster" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
-                    </div>
+                </div>
+
+                <!-- Additional Selections Container -->
+                <div id="car-additional-container" class="hidden">
+                    <div id="car-additional-items"></div>
+                    <button type="button" id="car-add-more-btn" class="w-full mt-3 p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-medium transition-colors">
+                        + Add Another Type
+                    </button>
                 </div>
             </div>
 
             <!-- Post Construction -->
             <div data-form="postConstruction" class="hidden">
                 <h2 class="font-semibold text-center mb-4">Post Construction Cleaning</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square Meter</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_qty" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="pcc_qty" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_qty" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
+                
+                <!-- Quantity Selector -->
+                <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                    <span class="text-white font-medium">Square Meter</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_qty" data-action="decrease">
+                            <i class="ri-subtract-line text-lg"></i>
+                        </button>
+                        <span id="pcc_qty" class="quantity-display">0</span>
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="pcc_qty" data-action="increase">
+                            <i class="ri-add-line text-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -274,18 +159,18 @@
             <!-- Enhanced Disinfection -->
             <div data-form="disinfection" class="hidden">
                 <h2 class="font-semibold text-center mb-4">Home/Office Disinfection</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square Meter</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_qty" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="disinfect_qty" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_qty" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
+                
+                <!-- Quantity Selector -->
+                <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                    <span class="text-white font-medium">Square Meter</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_qty" data-action="decrease">
+                            <i class="ri-subtract-line text-lg"></i>
+                        </button>
+                        <span id="disinfect_qty" class="quantity-display">0</span>
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="disinfect_qty" data-action="increase">
+                            <i class="ri-add-line text-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -293,18 +178,18 @@
             <!-- Glass -->
             <div data-form="glass" class="hidden">
                 <h2 class="font-semibold text-center mb-4">Glass Cleaning</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square Foot</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="glass_qty" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
+                
+                <!-- Quantity Selector -->
+                <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                    <span class="text-white font-medium">Square Foot</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="decrease">
+                            <i class="ri-subtract-line text-lg"></i>
+                        </button>
+                        <span id="glass_qty" class="quantity-display">0</span>
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="glass_qty" data-action="increase">
+                            <i class="ri-add-line text-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -312,18 +197,18 @@
             <!-- House Cleaning -->
             <div data-form="houseCleaning" class="hidden">
                 <h2 class="font-semibold text-center mb-4">House Cleaning</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Square Meter</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="house_qty" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="house_qty" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="house_qty" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
+                
+                <!-- Quantity Selector -->
+                <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                    <span class="text-white font-medium">Square Meter</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="house_qty" data-action="decrease">
+                            <i class="ri-subtract-line text-lg"></i>
+                        </button>
+                        <span id="house_qty" class="quantity-display">0</span>
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="house_qty" data-action="increase">
+                            <i class="ri-add-line text-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -331,18 +216,18 @@
             <!-- Curtain Cleaning -->
             <div data-form="curtainCleaning" class="hidden">
                 <h2 class="font-semibold text-center mb-4">Curtain Cleaning</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                        <span class="text-white font-medium">Yard</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="curtain_qty" data-action="decrease">
-                                <i class="ri-subtract-line text-lg"></i>
-                            </button>
-                            <span id="curtain_qty" class="quantity-display">0</span>
-                            <button type="button" class="quantity-btn cursor-pointer" data-target="curtain_qty" data-action="increase">
-                                <i class="ri-add-line text-lg"></i>
-                            </button>
-                        </div>
+                
+                <!-- Quantity Selector -->
+                <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                    <span class="text-white font-medium">Yard</span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="curtain_qty" data-action="decrease">
+                            <i class="ri-subtract-line text-lg"></i>
+                        </button>
+                        <span id="curtain_qty" class="quantity-display">0</span>
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="curtain_qty" data-action="increase">
+                            <i class="ri-add-line text-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -494,6 +379,169 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Setup dropdown event handlers for all services
+function setupDropdownHandlers() {
+    // Setup handlers for services with multiple types (sofa and car)
+    setupServiceHandlers('sofa', 'sofa-type-select', 'sofa-quantity-selector', 'sofa-selected-type', 'sofa_selected', 'sofa-additional-container', 'sofa-add-more-btn');
+    setupServiceHandlers('car', 'car-type-select', 'car-quantity-selector', 'car-selected-type', 'car_selected', 'car-additional-container', 'car-add-more-btn');
+}
+
+// Generic function to setup handlers for any service
+function setupServiceHandlers(serviceName, typeSelectId, quantitySelectorId, selectedTypeId, quantityDisplayId, additionalContainerId, addMoreBtnId) {
+    const typeSelect = document.getElementById(typeSelectId);
+    const quantitySelector = document.getElementById(quantitySelectorId);
+    const selectedType = document.getElementById(selectedTypeId);
+    const additionalContainer = document.getElementById(additionalContainerId);
+    const addMoreBtn = document.getElementById(addMoreBtnId);
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            if (selectedValue) {
+                const selectedText = this.options[this.selectedIndex].text;
+                selectedType.textContent = selectedText;
+                quantitySelector.classList.remove('hidden');
+            } else {
+                quantitySelector.classList.add('hidden');
+                additionalContainer.classList.add('hidden');
+            }
+        });
+    }
+
+    // Monitor quantity changes to show additional container
+    const quantityDisplay = document.getElementById(quantityDisplayId);
+    if (quantityDisplay) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                    const quantity = parseInt(quantityDisplay.textContent) || 0;
+                    if (quantity > 0) {
+                        additionalContainer.classList.remove('hidden');
+                    } else {
+                        additionalContainer.classList.add('hidden');
+                    }
+                }
+            });
+        });
+        observer.observe(quantityDisplay, { childList: true, characterData: true, subtree: true });
+    }
+
+    // Handle "Add Another Type" button
+    if (addMoreBtn) {
+        addMoreBtn.addEventListener('click', function() {
+            addAdditionalItem(serviceName);
+        });
+    }
+}
+
+// Function to add additional items dynamically
+function addAdditionalItem(serviceName) {
+    const additionalItemsContainer = document.getElementById(`${serviceName}-additional-items`);
+    const itemCount = additionalItemsContainer.children.length;
+    const itemId = `${serviceName}_additional_${itemCount}`;
+    
+    // Get the options for the dropdown based on service type
+    let optionsHtml = '';
+    if (serviceName === 'sofa') {
+        optionsHtml = `
+            <optgroup label="Sofa Types">
+                <option value="sofa_1">1 seater</option>
+                <option value="sofa_2">2 seater</option>
+                <option value="sofa_3">3 seater</option>
+                <option value="sofa_4">4 seater</option>
+                <option value="sofa_5">5 seater</option>
+                <option value="sofa_6">6 seater</option>
+                <option value="sofa_7">7 seater</option>
+                <option value="sofa_8">8 seater</option>
+            </optgroup>
+            <optgroup label="Mattress Types">
+                <option value="mattress_single">Single bed</option>
+                <option value="mattress_double">Double bed</option>
+                <option value="mattress_king">King bed</option>
+                <option value="mattress_california">California bed</option>
+            </optgroup>
+        `;
+    } else if (serviceName === 'car') {
+        optionsHtml = `
+            <option value="car_sedan">Sedan</option>
+            <option value="car_suv">SUV</option>
+            <option value="car_van">Van</option>
+            <option value="car_coaster">Hatchback</option>
+        `;
+    } else if (serviceName === 'carpet') {
+        optionsHtml = `<option value="square_foot">Square Foot</option>`;
+    } else if (serviceName === 'pcc') {
+        optionsHtml = `<option value="square_meter">Square Meter</option>`;
+    } else if (serviceName === 'disinfect') {
+        optionsHtml = `<option value="square_meter">Square Meter</option>`;
+    } else if (serviceName === 'glass') {
+        optionsHtml = `<option value="square_foot">Square Foot</option>`;
+    } else if (serviceName === 'house') {
+        optionsHtml = `<option value="square_meter">Square Meter</option>`;
+    } else if (serviceName === 'curtain') {
+        optionsHtml = `<option value="yard">Yard</option>`;
+    }
+    
+    const itemHtml = `
+        <div class="mb-4 additional-item" data-item-id="${itemId}">
+            <label class="block text-sm font-medium mb-2">Select Additional Type</label>
+            <select class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 additional-type-select">
+                <option value="">Choose additional type...</option>
+                ${optionsHtml}
+            </select>
+            
+            <!-- Quantity Selector (in same card) -->
+            <div class="additional-quantity-selector hidden mt-3">
+                <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
+                    <span class="additional-selected-type text-white font-medium"></span>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="${itemId}_qty" data-action="decrease">
+                            <i class="ri-subtract-line text-lg"></i>
+                        </button>
+                        <span id="${itemId}_qty" class="quantity-display">0</span>
+                        <button type="button" class="quantity-btn cursor-pointer" data-target="${itemId}_qty" data-action="increase">
+                            <i class="ri-add-line text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" class="remove-item-btn mt-2 px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded transition-colors">
+                Remove
+            </button>
+        </div>
+    `;
+    
+    additionalItemsContainer.insertAdjacentHTML('beforeend', itemHtml);
+    
+    // Add event listeners for the new item
+    const newItem = additionalItemsContainer.lastElementChild;
+    const typeSelect = newItem.querySelector('.additional-type-select');
+    const quantitySelector = newItem.querySelector('.additional-quantity-selector');
+    const selectedType = newItem.querySelector('.additional-selected-type');
+    const removeBtn = newItem.querySelector('.remove-item-btn');
+    
+    typeSelect.addEventListener('change', function() {
+        const selectedValue = this.value;
+        if (selectedValue) {
+            const selectedText = this.options[this.selectedIndex].text;
+            selectedType.textContent = selectedText;
+            quantitySelector.classList.remove('hidden');
+        } else {
+            quantitySelector.classList.add('hidden');
+        }
+    });
+    
+    removeBtn.addEventListener('click', function() {
+        newItem.remove();
+    });
+}
+
+// Initialize dropdown handlers when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    setupDropdownHandlers();
+});
+
 // Service switching with animations
 const forms = document.querySelectorAll('#serviceForms [data-form]');
 const navButtons = document.querySelectorAll('[data-service]');
@@ -632,34 +680,11 @@ function calc(){
   let subtotal = 0;
   let itemCounter = 1;
 
-  // Updated to work with new quantity display elements instead of input values
+  // Updated to work with new dropdown-based quantity display elements
   const u = id => parseInt(document.getElementById(id)?.textContent || 0);
   const s = id => parseFloat(document.getElementById(id)?.textContent || 0);
 
-  // Group Sofa and Mattress services together
-  const sofaItems = [];
-  const sofaInputs = [
-    {id: 'sofa_1', label: '1 seater', qty: u('sofa_1')},
-    {id: 'sofa_2', label: '2 seater', qty: u('sofa_2')},
-    {id: 'sofa_3', label: '3 seater', qty: u('sofa_3')},
-    {id: 'sofa_4', label: '4 seater', qty: u('sofa_4')},
-    {id: 'sofa_5', label: '5 seater', qty: u('sofa_5')},
-    {id: 'sofa_6', label: '6 seater', qty: u('sofa_6')},
-    {id: 'sofa_7', label: '7 seater', qty: u('sofa_7')},
-    {id: 'sofa_8', label: '8 seater', qty: u('sofa_8')},
-    {id: 'sofa_l', label: 'L-shape', qty: u('sofa_l')},
-    {id: 'sofa_cross', label: 'Cross Sectional', qty: u('sofa_cross')}
-  ];
-
-  const mattressItems = [];
-  const mattressInputs = [
-    {id: 'mattress_single', label: 'Single', qty: u('mattress_single')},
-    {id: 'mattress_double', label: 'Double', qty: u('mattress_double')},
-    {id: 'mattress_king', label: 'King', qty: u('mattress_king')},
-    {id: 'mattress_california', label: 'California', qty: u('mattress_california')}
-  ];
-
-  // Collect sofa items with new pricing structure
+  // Sofa pricing
   const sofaPrices = {
     'sofa_1': 750,   // Single chair (1 seater)
     'sofa_2': 1250,  // 2-seater
@@ -668,283 +693,266 @@ function calc(){
     'sofa_5': 2750,  // 5-seater
     'sofa_6': 3250,  // 6-seater
     'sofa_7': 3750,  // 7-seater
-    'sofa_8': 4250,  // 8-seater
-    'sofa_l': 0,     // L-shape (removed)
-    'sofa_cross': 0  // Cross Sectional (removed)
+    'sofa_8': 4250   // 8-seater
   };
-
-  sofaInputs.forEach(item => {
-    if (item.qty > 0 && sofaPrices[item.id] > 0) {
-      sofaItems.push({...item, price: sofaPrices[item.id], total: item.qty * sofaPrices[item.id]});
-    }
-  });
-
-  // Collect mattress items with new pricing structure
-  const mattressPrices = {
-    'mattress_single': 950,     // Single
-    'mattress_double': 1100,    // Double
-    'mattress_king': 1450,      // King
-    'mattress_california': 1350 // Queen (old california)
-  };
-
-  mattressInputs.forEach(item => {
-    if (item.qty > 0) {
-      mattressItems.push({...item, price: mattressPrices[item.id], total: item.qty * mattressPrices[item.id]});
-    }
-  });
-
-  // Create combined Sofa/Mattress card if any items exist
-  if (sofaItems.length > 0 || mattressItems.length > 0) {
-    const allItems = [...sofaItems, ...mattressItems];
-    const totalAmount = allItems.reduce((sum, item) => sum + item.total, 0);
-    
-    let itemsHtml = '';
-    allItems.forEach(item => {
-      itemsHtml += `
-        <div class="flex justify-between items-center py-1">
-          <div class="flex-1">
-            <span class="text-xs text-gray-600">${item.label}</span>
-            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
-          </div>
-          <span class="text-xs font-semibold">${peso(item.total)}</span>
-        </div>
-      `;
-    });
-
-    receipt.push(`
-      <div class="border border-gray-200 rounded-lg p-3">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
-            <div class="mt-2 space-y-1">
-              ${itemsHtml}
-            </div>
-          </div>
-          <button onclick="removeSofaMattressGroup()" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
-        </div>
-        <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-          <span class="text-xs text-gray-500">Total</span>
-          <span class="font-semibold">${peso(totalAmount)}</span>
-        </div>
-      </div>
-    `);
-    subtotal += totalAmount;
-    itemCounter++;
-  }
-
-  // Car Interior Detailing - group by type
-  const carItems = [];
-  const carInputs = [
-    {id: 'car_sedan', label: 'Sedan', qty: u('car_sedan')},
-    {id: 'car_suv', label: 'SUV', qty: u('car_suv')},
-    {id: 'car_van', label: 'Van', qty: u('car_van')},
-    {id: 'car_coaster', label: 'Hatchback', qty: u('car_coaster')}
-  ];
-
-  // Car detailing pricing structure
-  const carPrices = {
-    'car_sedan': 2900,     // Sedan
-    'car_suv': 3900,       // SUV
-    'car_van': 6900,       // Van
-    'car_coaster': 3000    // Hatchback
-  };
-
-  carInputs.forEach(item => {
-    if (item.qty > 0) {
-      carItems.push({...item, price: carPrices[item.id], total: item.qty * carPrices[item.id]});
-    }
-  });
-
-  if (carItems.length > 0) {
-    const totalAmount = carItems.reduce((sum, item) => sum + item.total, 0);
-    
-    let itemsHtml = '';
-    carItems.forEach(item => {
-      itemsHtml += `
-        <div class="flex justify-between items-center py-1">
-          <div class="flex-1">
-            <span class="text-xs text-gray-600">${item.label}</span>
-            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
-          </div>
-          <span class="text-xs font-semibold">${peso(item.total)}</span>
-        </div>
-      `;
-    });
-
-    receipt.push(`
-      <div class="border border-gray-200 rounded-lg p-3">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
-            <div class="mt-2 space-y-1">
-              ${itemsHtml}
-            </div>
-          </div>
-          <button onclick="removeCarGroup()" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
-        </div>
-        <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-          <span class="text-xs text-gray-500">Total</span>
-          <span class="font-semibold">${peso(totalAmount)}</span>
-        </div>
-      </div>
-    `);
-    subtotal += totalAmount;
-    itemCounter++;
-  }
-
-  // Individual service categories (no "Other Services" grouping)
   
-  // Carpet Deep Cleaning
+  // Mattress pricing
+  const mattressPrices = {
+    'mattress_single': 1200,     // Single bed
+    'mattress_double': 1500,     // Double bed
+    'mattress_king': 1800,       // King bed
+    'mattress_california': 2000  // California bed
+  };
+  
+  // Primary selection
+  const sofaSelectedQty = u('sofa_selected');
+  if (sofaSelectedQty > 0) {
+    const sofaTypeSelect = document.getElementById('sofa-type-select');
+    if (sofaTypeSelect && sofaTypeSelect.value) {
+      const selectedType = sofaTypeSelect.value;
+      const selectedLabel = sofaTypeSelect.options[sofaTypeSelect.selectedIndex].text;
+      const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+      
+      if (price > 0) {
+        receipt.push({
+          id: itemCounter++,
+          label: selectedLabel,
+          qty: sofaSelectedQty,
+          price: price,
+          total: sofaSelectedQty * price
+        });
+        subtotal += sofaSelectedQty * price;
+      }
+    }
+  }
+  
+  // Additional selections (dynamic)
+  const additionalItems = document.querySelectorAll('#sofa-additional-items .additional-item');
+  additionalItems.forEach(item => {
+    const typeSelect = item.querySelector('.additional-type-select');
+    const quantityDisplay = item.querySelector('.quantity-display');
+    
+    if (typeSelect && typeSelect.value && quantityDisplay) {
+      const selectedType = typeSelect.value;
+      const selectedLabel = typeSelect.options[typeSelect.selectedIndex].text;
+      const quantity = parseInt(quantityDisplay.textContent) || 0;
+      const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+      
+      if (quantity > 0 && price > 0) {
+        receipt.push({
+          id: itemCounter++,
+          label: selectedLabel,
+          qty: quantity,
+          price: price,
+          total: quantity * price
+        });
+        subtotal += quantity * price;
+      }
+    }
+  });
+
+  // Generic function to handle service calculations (primary and dynamic additional)
+  function calculateServiceItems(serviceName, primaryQtyId, primarySelectId, priceMap) {
+    const primaryQty = u(primaryQtyId);
+    
+    // Primary selection
+    if (primaryQty > 0) {
+      const primarySelect = document.getElementById(primarySelectId);
+      if (primarySelect && primarySelect.value) {
+        const selectedLabel = primarySelect.options[primarySelect.selectedIndex].text;
+        const price = priceMap[primarySelect.value] || 0;
+        
+        if (price > 0) {
+          receipt.push({
+            id: itemCounter++,
+            label: selectedLabel,
+            qty: primaryQty,
+            price: price,
+            total: primaryQty * price
+          });
+          subtotal += primaryQty * price;
+        }
+      }
+    }
+    
+    // Additional selections (dynamic)
+    const additionalItems = document.querySelectorAll(`#${serviceName}-additional-items .additional-item`);
+    additionalItems.forEach(item => {
+      const typeSelect = item.querySelector('.additional-type-select');
+      const quantityDisplay = item.querySelector('.quantity-display');
+      
+      if (typeSelect && typeSelect.value && quantityDisplay) {
+        const selectedType = typeSelect.value;
+        const selectedLabel = typeSelect.options[typeSelect.selectedIndex].text;
+        const quantity = parseInt(quantityDisplay.textContent) || 0;
+        const price = priceMap[selectedType] || 0;
+        
+        if (quantity > 0 && price > 0) {
+          receipt.push({
+            id: itemCounter++,
+            label: selectedLabel,
+            qty: quantity,
+            price: price,
+            total: quantity * price
+          });
+          subtotal += quantity * price;
+        }
+      }
+    });
+  }
+
+  // Carpet service (simple)
   const carpetQty = s('carpet_qty');
   if (carpetQty > 0) {
-    const amt = carpetQty * 30; // ₱30 per square foot
-    receipt.push(`
-      <div class="border border-gray-200 rounded-lg p-3">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. Carpet Deep Cleaning</div>
-            <div class="text-xs text-gray-600">Square Foot</div>
-            <div class="text-xs text-gray-500 text-right">${carpetQty}</div>
-          </div>
-          <button onclick="removeSimplifiedItem('carpet_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-500">${carpetQty} Square Foot × ₱30</span>
-          <span class="font-semibold">${peso(amt)}</span>
-        </div>
-      </div>
-    `);
+    const amt = carpetQty * 25; // ₱25 per square foot
+    receipt.push({
+      id: itemCounter++,
+      label: 'Square Foot',
+      qty: carpetQty,
+      price: 25,
+      total: amt
+    });
     subtotal += amt;
-    itemCounter++;
   }
 
-  // Post Construction Cleaning
+  // Car Interior service (with multiple types)
+  calculateServiceItems('car', 'car_selected', 'car-type-select', {
+    'car_sedan': 2900,
+    'car_suv': 3900,
+    'car_van': 6900,
+    'car_coaster': 3000
+  });
+
+  // Post Construction service (simple)
   const pccQty = s('pcc_qty');
   if (pccQty > 0) {
     const amt = pccQty * 101.67; // ₱101.67 per sqm
-    receipt.push(`
-      <div class="border border-gray-200 rounded-lg p-3">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. Post Construction Cleaning</div>
-            <div class="text-xs text-gray-600">Square Meter</div>
-            <div class="text-xs text-gray-500 text-right">${pccQty}</div>
-          </div>
-          <button onclick="removeSimplifiedItem('pcc_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-500">${pccQty} Square Meter × ₱101.67</span>
-          <span class="font-semibold">${peso(amt)}</span>
-        </div>
-      </div>
-    `);
+    receipt.push({
+      id: itemCounter++,
+      label: 'Square Meter',
+      qty: pccQty,
+      price: 101.67,
+      total: amt
+    });
     subtotal += amt;
-    itemCounter++;
   }
 
-  // Home/Office Disinfection (updated name)
+  // Disinfection service (simple)
   const disinfectQty = s('disinfect_qty');
   if (disinfectQty > 0) {
     const amt = disinfectQty * 90; // ₱90 per sqm
-    receipt.push(`
-      <div class="border border-gray-200 rounded-lg p-3">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. Home/Office Disinfection</div>
-            <div class="text-xs text-gray-600">Square Meter</div>
-            <div class="text-xs text-gray-500 text-right">${disinfectQty}</div>
-          </div>
-          <button onclick="removeSimplifiedItem('disinfect_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-500">${disinfectQty} Square Meter × ₱90</span>
-          <span class="font-semibold">${peso(amt)}</span>
-        </div>
-      </div>
-    `);
+    receipt.push({
+      id: itemCounter++,
+      label: 'Square Meter',
+      qty: disinfectQty,
+      price: 90,
+      total: amt
+    });
     subtotal += amt;
-    itemCounter++;
   }
 
-  // Glass Cleaning
+  // Glass Cleaning service (simple)
   const glassQty = s('glass_qty');
   if (glassQty > 0) {
     const amt = glassQty * 50; // ₱50 per square foot
-    receipt.push(`
-      <div class="border border-gray-200 rounded-lg p-3">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. Glass Cleaning</div>
-            <div class="text-xs text-gray-600">Square Foot</div>
-            <div class="text-xs text-gray-500 text-right">${glassQty}</div>
-          </div>
-          <button onclick="removeSimplifiedItem('glass_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-500">${glassQty} Square Foot × ₱50</span>
-          <span class="font-semibold">${peso(amt)}</span>
-        </div>
-      </div>
-    `);
+    receipt.push({
+      id: itemCounter++,
+      label: 'Square Foot',
+      qty: glassQty,
+      price: 50,
+      total: amt
+    });
     subtotal += amt;
-    itemCounter++;
   }
 
-  // House Cleaning
+  // House Cleaning service (simple)
   const houseQty = s('house_qty');
   if (houseQty > 0) {
     const amt = houseQty * 91; // ₱91 per sqm
-    receipt.push(`
-      <div class="border border-gray-200 rounded-lg p-3">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. House Cleaning</div>
-            <div class="text-xs text-gray-600">Square Meter</div>
-            <div class="text-xs text-gray-500 text-right">${houseQty}</div>
-          </div>
-          <button onclick="removeSimplifiedItem('house_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-500">${houseQty} Square Meter × ₱91</span>
-          <span class="font-semibold">${peso(amt)}</span>
-        </div>
-      </div>
-    `);
+    receipt.push({
+      id: itemCounter++,
+      label: 'Square Meter',
+      qty: houseQty,
+      price: 91,
+      total: amt
+    });
     subtotal += amt;
-    itemCounter++;
   }
 
-  // Curtain Cleaning
+  // Curtain Cleaning service (simple)
   const curtainQty = s('curtain_qty');
   if (curtainQty > 0) {
     const amt = curtainQty * 50; // ₱50 per yard
-    receipt.push(`
+    receipt.push({
+      id: itemCounter++,
+      label: 'Yard',
+      qty: curtainQty,
+      price: 50,
+      total: amt
+    });
+    subtotal += amt;
+  }
+
+  // Display receipt items
+  let receiptHtml = '';
+  receipt.forEach(item => {
+    receiptHtml += `
       <div class="border border-gray-200 rounded-lg p-3">
         <div class="flex items-start justify-between mb-2">
           <div class="flex-1">
-            <div class="font-semibold text-sm">${itemCounter}. Curtain Cleaning</div>
-            <div class="text-xs text-gray-600">Yard</div>
-            <div class="text-xs text-gray-500 text-right">${curtainQty}</div>
+            <div class="font-semibold text-sm">${item.id}. ${item.label}</div>
+            <div class="text-xs text-gray-600">${item.qty} × ${peso(item.price)}</div>
           </div>
-          <button onclick="removeSimplifiedItem('curtain_qty')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
+          <button onclick="removeSelectedItem('${item.label}')" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 cursor-pointer">Remove</button>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-xs text-gray-500">${curtainQty} Yard × ₱50</span>
-          <span class="font-semibold">${peso(amt)}</span>
+          <span class="text-xs text-gray-500">Total</span>
+          <span class="font-semibold">${peso(item.total)}</span>
         </div>
       </div>
-    `);
-    subtotal += amt;
-    itemCounter++;
-  }
-
-  document.getElementById('receipt_lines').innerHTML = receipt.join('');
+    `;
+  });
+  
+  document.getElementById('receipt_lines').innerHTML = receiptHtml;
   document.getElementById('estimate_subtotal').textContent = peso(subtotal);
   document.getElementById('estimate_total').textContent = peso(subtotal);
   return subtotal;
 }
 // Updated event listener to work with new quantity controls
 document.addEventListener('input', function(e){ if(e.target.closest('input')) calc(); });
+
+// Remove selected item function for dropdown-based system
+function removeSelectedItem(itemLabel) {
+  // Find the corresponding quantity element and reset it
+  const quantityElements = document.querySelectorAll('.quantity-display');
+  quantityElements.forEach(element => {
+    if (parseInt(element.textContent) > 0) {
+      element.textContent = '0';
+    }
+  });
+  
+  // Reset all dropdowns
+  const dropdowns = document.querySelectorAll('select');
+  dropdowns.forEach(dropdown => {
+    dropdown.selectedIndex = 0;
+  });
+  
+  // Hide all quantity selectors
+  const quantitySelectors = document.querySelectorAll('[id$="-quantity-selector"]');
+  quantitySelectors.forEach(selector => {
+    selector.classList.add('hidden');
+  });
+  
+  // Hide sub-dropdowns for sofa/mattress
+  const sofaTypes = document.getElementById('sofa-types');
+  const mattressTypes = document.getElementById('mattress-types');
+  if (sofaTypes) sofaTypes.classList.add('hidden');
+  if (mattressTypes) mattressTypes.classList.add('hidden');
+  
+  // Check and show/hide receipt card based on quantities
+  checkAndShowReceiptCard();
+  calc();
+}
 
 // Remove item functions - updated for new quantity display elements
 function removeItem(inputId) {
