@@ -1129,10 +1129,7 @@ class NotificationService
     {
         $changes = [];
         
-        // Check for position changes
-        if (isset($originalData['position']) && $originalData['position'] != $employee->position) {
-            $changes[] = "position from '{$originalData['position']}' to '{$employee->position}'";
-        }
+        // Position field has been removed from employee table
         
         // Check for contact number changes
         if (isset($originalData['contact_number']) && $originalData['contact_number'] != $employee->contact_number) {

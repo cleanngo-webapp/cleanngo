@@ -1053,38 +1053,115 @@ function openBookingForm(){
   
   // Build items payload to persist line items
   const items = [];
-  const addItem = (type, qty, unitPrice, areaSqm) => {
-    qty = parseInt(qty||0); if(!qty && !areaSqm) return; items.push({ type, qty, unitPrice, areaSqm }); };
-  // Sofa/Mattress with new pricing
-  addItem('sofa_1_seater', document.getElementById('sofa_1').textContent, 750);
-  addItem('sofa_2_seater', document.getElementById('sofa_2').textContent, 1250);
-  addItem('sofa_3_seater', document.getElementById('sofa_3').textContent, 1750);
-  addItem('sofa_4_seater', document.getElementById('sofa_4').textContent, 2250);
-  addItem('sofa_5_seater', document.getElementById('sofa_5').textContent, 2750);
-  addItem('sofa_6_seater', document.getElementById('sofa_6').textContent, 3250);
-  addItem('sofa_7_seater', document.getElementById('sofa_7').textContent, 3750);
-  addItem('sofa_8_seater', document.getElementById('sofa_8').textContent, 4250);
-  // L-shape and cross sectional removed
-  addItem('mattress_single', document.getElementById('mattress_single').textContent, 950);
-  addItem('mattress_double', document.getElementById('mattress_double').textContent, 1100);
-  addItem('mattress_king', document.getElementById('mattress_king').textContent, 1450);
-  addItem('mattress_california', document.getElementById('mattress_california').textContent, 1350);
-  // Simplified services with updated pricing
-  const addSimplified = (label, qtyId, pricePerUnit) => {
-    const qty = parseInt(document.getElementById(qtyId)?.textContent||0);
-    if (qty>0) items.push({ type: label, qty, unitPrice: pricePerUnit });
+  
+  // Helper function to add items
+  const addItem = (type, qty, unitPrice) => {
+    qty = parseInt(qty||0); 
+    if(qty > 0) items.push({ type, qty, unitPrice }); 
   };
-  addSimplified('carpet_sqft', 'carpet_qty', 30); // ₱30 per square foot
-  addSimplified('post_construction_sqm', 'pcc_qty', 101.67); // ₱101.67 per sqm
-  addSimplified('disinfect_sqm', 'disinfect_qty', 90); // ₱90 per sqm
-  addSimplified('glass_sqft', 'glass_qty', 50); // ₱50 per square foot
-  addSimplified('house_cleaning_sqm', 'house_qty', 91); // ₱91 per sqm
-  addSimplified('curtain_cleaning_yard', 'curtain_qty', 50); // ₱50 per yard
-  // Car detailing with new pricing
-  addItem('car_sedan', document.getElementById('car_sedan').textContent, 2900);
-  addItem('car_suv', document.getElementById('car_suv').textContent, 3900);
-  addItem('car_van', document.getElementById('car_van').textContent, 6900);
-  addItem('car_coaster', document.getElementById('car_coaster').textContent, 3000);
+  
+  // Sofa/Mattress service - primary selection
+  const sofaSelectedQty = parseInt(document.getElementById('sofa_selected')?.textContent || 0);
+  if (sofaSelectedQty > 0) {
+    const sofaTypeSelect = document.getElementById('sofa-type-select');
+    if (sofaTypeSelect && sofaTypeSelect.value) {
+      const selectedType = sofaTypeSelect.value;
+      const selectedLabel = sofaTypeSelect.options[sofaTypeSelect.selectedIndex].text;
+      
+      // Sofa pricing
+      const sofaPrices = {
+        'sofa_1': 750, 'sofa_2': 1250, 'sofa_3': 1750, 'sofa_4': 2250,
+        'sofa_5': 2750, 'sofa_6': 3250, 'sofa_7': 3750, 'sofa_8': 4250
+      };
+      
+      // Mattress pricing
+      const mattressPrices = {
+        'mattress_single': 1200, 'mattress_double': 1500, 
+        'mattress_king': 1800, 'mattress_california': 2000
+      };
+      
+      const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+      if (price > 0) {
+        addItem(selectedType, sofaSelectedQty, price);
+      }
+    }
+  }
+  
+  // Sofa/Mattress service - additional selections
+  const additionalItems = document.querySelectorAll('#sofa-additional-items .additional-item');
+  additionalItems.forEach(item => {
+    const typeSelect = item.querySelector('.additional-type-select');
+    const quantityDisplay = item.querySelector('.quantity-display');
+    
+    if (typeSelect && typeSelect.value && quantityDisplay) {
+      const selectedType = typeSelect.value;
+      const quantity = parseInt(quantityDisplay.textContent) || 0;
+      
+      // Sofa pricing
+      const sofaPrices = {
+        'sofa_1': 750, 'sofa_2': 1250, 'sofa_3': 1750, 'sofa_4': 2250,
+        'sofa_5': 2750, 'sofa_6': 3250, 'sofa_7': 3750, 'sofa_8': 4250
+      };
+      
+      // Mattress pricing
+      const mattressPrices = {
+        'mattress_single': 1200, 'mattress_double': 1500, 
+        'mattress_king': 1800, 'mattress_california': 2000
+      };
+      
+      const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+      if (quantity > 0 && price > 0) {
+        addItem(selectedType, quantity, price);
+      }
+    }
+  });
+  
+  // Car Interior service - primary selection
+  const carSelectedQty = parseInt(document.getElementById('car_selected')?.textContent || 0);
+  if (carSelectedQty > 0) {
+    const carTypeSelect = document.getElementById('car-type-select');
+    if (carTypeSelect && carTypeSelect.value) {
+      const selectedType = carTypeSelect.value;
+      
+      const carPrices = {
+        'car_sedan': 2900, 'car_suv': 3900, 'car_van': 6900, 'car_coaster': 3000
+      };
+      
+      const price = carPrices[selectedType] || 0;
+      if (price > 0) {
+        addItem(selectedType, carSelectedQty, price);
+      }
+    }
+  }
+  
+  // Car Interior service - additional selections
+  const carAdditionalItems = document.querySelectorAll('#car-additional-items .additional-item');
+  carAdditionalItems.forEach(item => {
+    const typeSelect = item.querySelector('.additional-type-select');
+    const quantityDisplay = item.querySelector('.quantity-display');
+    
+    if (typeSelect && typeSelect.value && quantityDisplay) {
+      const selectedType = typeSelect.value;
+      const quantity = parseInt(quantityDisplay.textContent) || 0;
+      
+      const carPrices = {
+        'car_sedan': 2900, 'car_suv': 3900, 'car_van': 6900, 'car_coaster': 3000
+      };
+      
+      const price = carPrices[selectedType] || 0;
+      if (quantity > 0 && price > 0) {
+        addItem(selectedType, quantity, price);
+      }
+    }
+  });
+  
+  // Simple services (single choice)
+  addItem('carpet_sqft', document.getElementById('carpet_qty')?.textContent, 25);
+  addItem('post_construction_sqm', document.getElementById('pcc_qty')?.textContent, 101.67);
+  addItem('disinfect_sqm', document.getElementById('disinfect_qty')?.textContent, 90);
+  addItem('glass_sqft', document.getElementById('glass_qty')?.textContent, 50);
+  addItem('house_cleaning_sqm', document.getElementById('house_qty')?.textContent, 91);
+  addItem('curtain_cleaning_yard', document.getElementById('curtain_qty')?.textContent, 50);
 
   window.dispatchEvent(new CustomEvent('openBookingModal', {detail: {total, items}}));
 }

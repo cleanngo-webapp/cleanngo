@@ -90,11 +90,12 @@ class Employee extends Model
         // Trigger notification when employee profile is updated
         static::updated(function ($employee) {
             // Only trigger notifications for profile-related fields
+            // Removed employment fields: department, employment_type, employment_status, work_schedule
+            // Removed additional fields: position, hire_date, hourly_rate_cents, notes
             $profileFields = [
-                'position', 'date_of_birth', 'gender', 'contact_number', 'email_address', 
+                'date_of_birth', 'gender', 'contact_number', 'email_address', 
                 'home_address', 'emergency_contact_name', 'emergency_contact_number',
-                'department', 'employment_type', 'date_hired', 'employment_status', 
-                'work_schedule', 'jobs_completed', 'recent_job', 'attendance_summary', 
+                'date_hired', 'jobs_completed', 'recent_job', 'attendance_summary', 
                 'performance_rating'
             ];
             $hasProfileChanges = false;

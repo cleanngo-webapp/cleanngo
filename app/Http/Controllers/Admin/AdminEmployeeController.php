@@ -144,7 +144,6 @@ class AdminEmployeeController extends Controller
             'is_active' => true,
             'contact_number' => $user->phone,
             'email_address' => $user->email,
-            'employment_status' => 'active',
             'date_hired' => now()->toDateString(),
             'employee_code' => 'E' . now()->format('Y') . str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT),
         ]);
@@ -204,12 +203,9 @@ class AdminEmployeeController extends Controller
         }
 
         // Validate only the fields that admin can edit
+        // Removed employment fields: department, employment_type, employment_status, work_schedule
         $request->validate([
-            'department' => 'nullable|string|max:255',
-            'employment_type' => 'nullable|in:full-time,part-time,contract',
             'date_hired' => 'nullable|date',
-            'employment_status' => 'nullable|in:active,inactive,terminated',
-            'work_schedule' => 'nullable|string|max:255',
             'recent_job' => 'nullable|string|max:255',
             'attendance_summary' => 'nullable|string|max:255',
             'performance_rating' => 'nullable|string|max:255',
@@ -222,11 +218,8 @@ class AdminEmployeeController extends Controller
             $employee->user_id = $user->id;
         }
 
-        $employee->department = $request->department;
-        $employee->employment_type = $request->employment_type;
+        // Only update fields that still exist in the database
         $employee->date_hired = $request->date_hired;
-        $employee->employment_status = $request->employment_status;
-        $employee->work_schedule = $request->work_schedule;
         $employee->recent_job = $request->recent_job;
         $employee->attendance_summary = $request->attendance_summary;
         $employee->performance_rating = $request->performance_rating;

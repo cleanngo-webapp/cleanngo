@@ -26,10 +26,6 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label class="block text-sm font-medium">Position</label>
-                    <input type="text" name="position" value="{{ old('position', $employee?->position) }}" class="mt-1 w-full border border-gray-200 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                </div>
-                <div>
                     <label class="block text-sm font-medium">Date of Birth</label>
                     <input type="date" name="date_of_birth" value="{{ old('date_of_birth', $employee?->date_of_birth ? (\Carbon\Carbon::parse($employee->date_of_birth)->format('Y-m-d')) : null) }}" class="mt-1 w-full border border-gray-200 rounded px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
                 </div>
@@ -72,35 +68,6 @@
 
     <!-- Employment Details - Read Only for Employee -->
     <div class="mt-6 space-y-6">
-        <div class="bg-white rounded-xl p-4 shadow-sm">
-            <h2 class="text-xl font-semibold flex items-center">
-                <i class="ri-briefcase-line mr-2 text-emerald-700"></i>
-                Employment Details
-                <span class="ml-2 text-sm text-gray-500 font-normal">(View Only - Admin can edit)</span>
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-500">Department</label>
-                    <div class="mt-1 p-3 bg-gray-50 border rounded text-gray-700">{{ $employee?->department ?? 'Not specified' }}</div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-500">Employment Type</label>
-                    <div class="mt-1 p-3 bg-gray-50 border rounded text-gray-700">{{ ucfirst(str_replace('-', ' ', $employee?->employment_type ?? 'Not specified')) }}</div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-500">Date Hired</label>
-                    <div class="mt-1 p-3 bg-gray-50 border rounded text-gray-700">{{ optional($employee?->date_hired)->format('M d, Y') ?? 'Not specified' }}</div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-500">Employment Status</label>
-                    <div class="mt-1 p-3 bg-gray-50 border rounded text-gray-700">{{ ucfirst($employee?->employment_status ?? 'Not specified') }}</div>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-500">Work Schedule</label>
-                    <div class="mt-1 p-3 bg-gray-50 border rounded text-gray-700">{{ $employee?->work_schedule ?? 'Not specified' }}</div>
-                </div>
-            </div>
-        </div>
 
         <div class="bg-white rounded-xl p-4 shadow-sm">
             <h2 class="text-xl font-semibold flex items-center">

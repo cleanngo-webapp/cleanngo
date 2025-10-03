@@ -24,8 +24,7 @@ class EmployeeProfileController extends Controller
         }
 
         $data = $request->validate([
-            // Personal info
-            'position' => ['nullable','string','max:255'],
+            // Personal info - removed position field
             'date_of_birth' => ['nullable','date'],
             'gender' => ['nullable','in:male,female,other'],
             'contact_number' => ['nullable','string','max:100'],
@@ -33,12 +32,8 @@ class EmployeeProfileController extends Controller
             'home_address' => ['nullable','string','max:255'],
             'emergency_contact_name' => ['nullable','string','max:255'],
             'emergency_contact_number' => ['nullable','string','max:100'],
-            // Employment details
-            'department' => ['nullable','string','max:255'],
-            'employment_type' => ['nullable','in:full-time,part-time,contract'],
+            // Employment details - only date_hired remains
             'date_hired' => ['nullable','date'],
-            'employment_status' => ['nullable','in:active,inactive,terminated'],
-            'work_schedule' => ['nullable','string','max:255'],
             // Work history records
             'jobs_completed' => ['nullable','integer','min:0'],
             'recent_job' => ['nullable','string','max:255'],
