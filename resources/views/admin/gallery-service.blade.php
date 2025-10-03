@@ -35,7 +35,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Upload New Image</h2>
         
-        <form action="{{ route('admin.gallery.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <form id="upload-form" action="{{ route('admin.gallery.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <input type="hidden" name="service_type" value="{{ $serviceType }}">
             
@@ -53,10 +53,10 @@
                     <div class="space-y-1 text-center">
                         <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
                         <div class="flex text-sm text-gray-600">
-                            <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500">
-                                <span>Upload Image</span>
+                            <span class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500">
+                                Upload Image
                                 <input id="image" name="image" type="file" class="sr-only" accept="image/*" onchange="previewImage(this)" required>
-                            </label>
+                            </span>
                             <p class="pl-1">or drag and drop</p>
                         </div>
                         <p class="text-xs text-gray-500">JPEG, PNG, JPG, GIF, WebP up to 10MB</p>
@@ -444,12 +444,34 @@
          confirmButtonText: 'Yes, Upload Image',
          cancelButtonText: 'Cancel',
          reverseButtons: true
-     }).then((result) => {
-         if (result.isConfirmed) {
-             // Submit the form
-             document.querySelector('form[action*="/gallery/store"]').submit();
-         }
-     });
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+                title: 'Uploading...',
+                text: 'Please wait while your image is being uploaded.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Submit the form using the form ID
+            const form = document.getElementById('upload-form');
+            if (form) {
+                form.submit();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Form not found. Please try again.',
+                    confirmButtonColor: '#10b981'
+                });
+            }
+        }
+    });
  }
 
  // Delete Modal Functions
