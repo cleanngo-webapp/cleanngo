@@ -102,32 +102,32 @@
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
+        <div class="overflow-x-auto lg:overflow-x-visible">
+            <table class="w-full min-w-full">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">Booking ID</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Date & Time</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">Customer Name</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="jobs-table-body" class="bg-white divide-y divide-gray-200">
                     @forelse($bookings as $b)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">
                                 {{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y g:i A') : '—' }}
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $b->customer_name ?? '—' }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4 whitespace-nowrap">
                             @php
                                 $statusColors = [
                                     'pending' => 'bg-yellow-100 text-yellow-800',
@@ -142,29 +142,29 @@
                                 {{ $b->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $b->status)) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center gap-2">
+                        <td class="px-4 py-4">
+                            <div class="flex items-center gap-1 flex-wrap">
                                 @if($b->status === 'in_progress')
                                     @if($b->payment_approved)
-                                        <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ $b->code }}')" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                        <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ $b->code }}')" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
                                             <i class="ri-check-line mr-1"></i>
-                                            Complete
+                                            <span class="hidden sm:inline">Complete</span>
                                         </button>
                                     @else
-                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof required" disabled>
+                                        <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof required" disabled>
                                             <i class="ri-check-line mr-1"></i>
-                                            Complete
+                                            <span class="hidden sm:inline">Complete</span>
                                         </button>
                                     @endif
                                     @if($b->payment_status === 'declined' || !$b->payment_proof_id)
-                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openPaymentModal({{ $b->id }})" title="Attach Payment Proof">
+                                        <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openPaymentModal({{ $b->id }})" title="Attach Payment Proof">
                                             <i class="ri-attachment-line mr-1"></i>
-                                            Attach Payment
+                                            <span class="hidden sm:inline">Attachments</span>
                                         </button>
                                     @else
-                                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof already uploaded - waiting for admin review" disabled>
+                                        <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof already uploaded - waiting for admin review" disabled>
                                             <i class="ri-attachment-line mr-1"></i>
-                                            Attach Payment
+                                            <span class="hidden sm:inline">Attachments</span>
                                         </button>
                                     @endif
                                 @elseif($b->status === 'pending' || $b->status === 'confirmed')
@@ -173,33 +173,33 @@
                                         $canStartJob = $isScheduledToday || $b->status === 'in_progress';
                                     @endphp
                                     @if($canStartJob)
-                                        <button type="button" onclick="confirmStartJob({{ $b->id }})" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
+                                        <button type="button" onclick="confirmStartJob({{ $b->id }})" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
                                             <i class="ri-play-line mr-1"></i>
-                                            Start Job
+                                            <span class="hidden sm:inline">Start Job</span>
                                         </button>
                                     @else
-                                        <button type="button" disabled class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y') }}">
+                                        <button type="button" disabled class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y') }}">
                                             <i class="ri-play-line mr-1"></i>
-                                            Start Job
+                                            <span class="hidden sm:inline">Start Job</span>
                                         </button>
                                     @endif
                                 @endif
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Service Summary">
+                                <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Service Summary">
                                     <i class="ri-receipt-line mr-1"></i>
-                                    Service Summary
+                                    <span class="hidden sm:inline">Summary</span>
                                 </button>
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpLocation({ id: {{ $b->id }}, lat: {{ $b->latitude ?? 0 }}, lng: {{ $b->longitude ?? 0 }} })" title="View Location">
+                                <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpLocation({ id: {{ $b->id }}, lat: {{ $b->latitude ?? 0 }}, lng: {{ $b->longitude ?? 0 }} })" title="View Location">
                                     <i class="ri-map-pin-line mr-1"></i>
-                                    Location
+                                    <span class="hidden sm:inline">Location</span>
                                 </button>
                                 @php
                                     $bookingPhotos = $b->booking_photos ? json_decode($b->booking_photos, true) : [];
                                     $hasPhotos = is_array($bookingPhotos) && count($bookingPhotos) > 0;
                                 @endphp
                                 @if($hasPhotos)
-                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpBookingPhotos({{ $b->id }})" title="View Booking Photos">
+                                    <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpBookingPhotos({{ $b->id }})" title="View Booking Photos">
                                         <i class="ri-image-line mr-1"></i>
-                                        Photos
+                                        <span class="hidden sm:inline">Photos</span>
                                     </button>
                                 @endif
                             </div>
