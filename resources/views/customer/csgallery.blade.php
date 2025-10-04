@@ -9,7 +9,16 @@
         <p class="text-gray-600">See the quality of our cleaning services</p>
     </div>
 
-    {{-- Display success/error messages --}}
+    <div class="flex items-center justify-center min-h-[400px]">
+        <p class="text-4xl font-medium text-gray-600 text-center max-w-2xl mx-auto px-6">
+            This feature is currently under development and will be available soon!
+        </p>
+    </div>
+
+    {{-- Gallery Feature is Temporarily Disabled --}}
+    
+    {{--
+    <!-- Display success/error messages -->
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             {{ session('success') }}
@@ -22,31 +31,31 @@
         </div>
     @endif
 
-    {{-- Services Grid --}}
+    <!-- Services Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($services as $service)
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
                 
-                {{-- Service Image --}}
+                <!-- Service Image -->
                 <div class="aspect-[4/3] bg-white relative">
                     <img src="{{ asset('assets/' . $service['image']) }}" 
                          alt="{{ $service['name'] }}" 
                          class="w-full h-full object-cover">
                     
-                    {{-- Image Count Badge --}}
+                    <!-- Image Count Badge -->
                     <div class="absolute top-3 right-3 bg-emerald-600 text-white px-2 py-1 rounded-full text-sm font-semibold">
                         {{ $service['image_count'] }} {{ $service['image_count'] == 1 ? 'image' : 'images' }}
                     </div>
                 </div>
                 
-                {{-- Service Info --}}
+                <!-- Service Info -->
                 <div class="bg-emerald-700 text-white p-4 flex-1 flex flex-col justify-between">
                     <div>
                         <div class="text-lg font-semibold">{{ $service['name'] }}</div>
                         <p class="text-white/90 text-sm mt-2">{{ $service['description'] }}</p>
                     </div>
                     
-                    {{-- Action Buttons --}}
+                    <!-- Action Buttons -->
                     <div class="mt-4 flex justify-center gap-2">
                         <a href="{{ route('customer.gallery.service', $service['type']) }}" 
                            class="inline-block bg-white text-emerald-700 font-semibold px-4 py-2 rounded-full shadow hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
@@ -63,10 +72,10 @@
     </div>
 </div>
 
-{{-- Comments Modal --}}
+<!-- Comments Modal -->
 <div id="commentsModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display: none;">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-        {{-- Modal Header --}}
+        <!-- Modal Header -->
         <div class="bg-emerald-600 text-white p-4 flex items-center justify-between">
             <h3 class="text-lg font-semibold" id="modalServiceName">Service Comments</h3>
             <button onclick="closeCommentsModal()" class="text-white hover:text-gray-200 text-xl font-bold cursor-pointer">
@@ -74,15 +83,15 @@
             </button>
         </div>
 
-        {{-- Modal Body --}}
+        <!-- Modal Body -->
         <div class="p-4 max-h-[60vh] overflow-y-auto">
-            {{-- Add Comment Form --}}
+            <!-- Add Comment Form -->
             <div class="mb-6 p-4 bg-gray-50 rounded-lg h-80 flex flex-col">
                 <h4 class="text-md font-semibold text-gray-900 mb-3">Add Your Comment</h4>
                 <form id="commentForm" class="space-y-3 flex-1 flex flex-col">
                     <input type="hidden" id="serviceType" name="service_type">
                     
-                    {{-- Rating --}}
+                    <!-- Rating -->
                     <div class="flex-shrink-0">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rating (Optional)</label>
                         <div class="flex space-x-1" id="ratingStars">
@@ -95,7 +104,7 @@
                         <input type="hidden" id="rating" name="rating">
                       </div>
 
-                    {{-- Comment Text --}}
+                    <!-- Comment Text -->
                     <div class="flex-1 flex flex-col">
                         <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Your Comment</label>
                         <textarea id="comment" name="comment" rows="3" 
@@ -105,7 +114,7 @@
                         <p class="text-xs text-gray-500 mt-1">Minimum 1 character, maximum 1000 characters</p>
                     </div>
 
-                    {{-- Submit Button --}}
+                    <!-- Submit Button -->
                     <div class="flex justify-end flex-shrink-0">
                         <button type="submit" id="submitCommentBtn"
                                 class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200 cursor-pointer">
@@ -115,15 +124,15 @@
                 </form>
             </div>
 
-            {{-- Comments List --}}
+            <!-- Comments List -->
             <div id="commentsList" class="space-y-4">
-                {{-- Preloader will be shown here while loading --}}
+                <!-- Preloader will be shown here while loading -->
             </div>
         </div>
     </div>
 </div>
 
-{{-- Edit Comment Modal --}}
+<!-- Edit Comment Modal -->
 <div id="editCommentModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display: none;">
     <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
         <div class="p-6 h-full flex flex-col">
@@ -132,7 +141,7 @@
             <form id="editCommentForm" class="space-y-4 flex-1 flex flex-col">
                 <input type="hidden" id="editCommentId">
                 
-                {{-- Rating --}}
+                <!-- Rating -->
                 <div class="flex-shrink-0">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
                     <div class="flex space-x-1" id="editRatingStars">
@@ -145,7 +154,7 @@
                     <input type="hidden" id="editRating" name="rating">
                 </div>
 
-                {{-- Comment Text --}}
+                <!-- Comment Text -->
                 <div class="flex-1 flex flex-col">
                     <label for="editComment" class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
                     <textarea id="editComment" name="comment" rows="3" 
@@ -153,7 +162,7 @@
                               required></textarea>
                 </div>
 
-                {{-- Buttons --}}
+                <!-- Buttons -->
                 <div class="flex space-x-3 justify-end flex-shrink-0">
                     <button type="button" 
                             onclick="closeEditCommentModal()"
@@ -171,7 +180,7 @@
     </div>
 </div>
 
-{{-- Delete Confirmation Modal --}}
+<!-- Delete Confirmation Modal -->
 <div id="deleteCommentModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4" style="display: none;">
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div class="p-6">
@@ -205,7 +214,7 @@
     </div>
 </div>
 
-{{-- Preloader Template --}}
+<!-- Preloader Template -->
 <div id="preloaderTemplate" class="hidden">
     <div class="space-y-4">
         <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
@@ -808,6 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+--}}
 @endsection
 
 
