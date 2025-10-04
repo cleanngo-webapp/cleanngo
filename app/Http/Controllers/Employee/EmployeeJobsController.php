@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\InventoryItem;
+use App\Models\InventoryTransaction;
+use App\Models\Booking;
+use Illuminate\Support\Facades\Log;
 
 class EmployeeJobsController extends Controller
 {
@@ -56,6 +60,8 @@ class EmployeeJobsController extends Controller
                 DB::raw("CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END as payment_approved"),
                 DB::raw('pp.id as payment_proof_id'),
                 DB::raw('pp.status as payment_status'),
+                // Check if equipment has been borrowed for this booking by this employee
+                DB::raw("CASE WHEN EXISTS(SELECT 1 FROM inventory_transactions it JOIN inventory_items ii ON it.inventory_item_id = ii.id WHERE it.employee_id = a.employee_id AND it.booking_id = b.id AND it.transaction_type = 'borrow') THEN 1 ELSE 0 END as equipment_borrowed"),
             ]);
 
         // Apply search logic - search across relevant fields
@@ -273,6 +279,406 @@ class EmployeeJobsController extends Controller
             'success' => true,
             'photos' => $photos
         ]);
+    }
+
+    /**
+     * Get available inventory items for equipment borrowing
+     */
+    public function getAvailableInventory()
+    {
+        $employeeId = Auth::user()?->employee?->id;
+        if (!$employeeId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee not found'
+            ], 404);
+        }
+
+        try {
+            // Get active inventory items with their available quantities
+            $items = InventoryItem::active()
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'category' => $item->category,
+                        'item_code' => $item->item_code,
+                        'available_quantity' => $item->available_quantity,
+                        'is_returnable' => $item->isReturnableItem(),
+                        'is_consumable' => $item->isConsumableItem(),
+                    ];
+                })
+                ->filter(function ($item) {
+                    return $item['available_quantity'] > 0; // Only show items with available stock
+                });
+
+            return response()->json([
+                'success' => true,
+                'items' => $items->values(), // Reset array keys
+                'message' => $items->count() . ' equipment items available'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load inventory: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Borrow equipment for a booking
+     */
+    public function borrowEquipment(Request $request, $bookingId)
+    {
+        $employeeId = Auth::user()?->employee?->id;
+        if (!$employeeId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee not found'
+            ], 404);
+        }
+
+        try {
+            // Validate booking ownership
+            $booking = Booking::find($bookingId);
+            if (!$booking) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found'
+                ], 404);
+            }
+
+            // Ensure this employee is assigned to the booking
+            $assigned = $booking->staffAssignments()
+                ->where('employee_id', $employeeId)
+                ->exists();
+            if (!$assigned) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not assigned to this booking'
+                ], 403);
+            }
+
+            // Parse equipment JSON data
+            $equipmentJson = $request->input('equipment');
+            if (is_string($equipmentJson)) {
+                $equipmentData = json_decode($equipmentJson, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new \Illuminate\Validation\ValidationException(
+                        validator([], []),
+                        ['equipment' => ['Invalid equipment data format']]
+                    );
+                }
+            } else {
+                $equipmentData = $equipmentJson;
+            }
+
+            $request->validate([
+                'equipment' => 'required',
+            ], [
+                'equipment.required' => 'Equipment data is required',
+            ]);
+
+            // Manual validation of equipment array structure
+            if (!is_array($equipmentData) || empty($equipmentData)) {
+                throw new \Illuminate\Validation\ValidationException(
+                    validator([], []),
+                    ['equipment' => ['Equipment list must not be empty']]
+                );
+            }
+
+            foreach ($equipmentData as $index => $item) {
+                if (!isset($item['id']) || !is_numeric($item['id'])) {
+                    throw new \Illuminate\Validation\ValidationException(
+                        validator([], []),
+                        ["equipment.{$index}.id" => ['Equipment ID is required and must be numeric']]
+                    );
+                }
+                
+                if (!isset($item['quantity']) || !is_numeric($item['quantity']) || $item['quantity'] < 1) {
+                    throw new \Illuminate\Validation\ValidationException(
+                        validator([], []),
+                        ["equipment.{$index}.quantity" => ['Quantity must be at least 1']]
+                    );
+                }
+
+                // Check if inventory item exists
+                if (!InventoryItem::where('id', $item['id'])->exists()) {
+                    throw new \Illuminate\Validation\ValidationException(
+                        validator([], []),
+                        ["equipment.{$index}.id" => ['Selected equipment item not found']]
+                    );
+                }
+            }
+            $borrowedItems = [];
+            $errors = [];
+
+            DB::beginTransaction();
+
+            foreach ($equipmentData as $equipmentItem) {
+                $inventoryItem = InventoryItem::find($equipmentItem['id']);
+                $quantity = (int) $equipmentItem['quantity'];
+
+                // Check if enough inventory is available
+                if ($inventoryItem->available_quantity < $quantity) {
+                    $errors[] = "Not enough {$inventoryItem->name} available. Only {$inventoryItem->available_quantity} left.";
+                    continue;
+                }
+
+                // Create inventory transaction record
+                $transaction = InventoryTransaction::create([
+                    'inventory_item_id' => $inventoryItem->id,
+                    'employee_id' => $employeeId,
+                    'booking_id' => $bookingId,
+                    'transaction_type' => 'borrow',
+                    'quantity' => $quantity,
+                    'transaction_at' => now(),
+                    'expected_return_date' => $inventoryItem->isReturnableItem() ? $booking->scheduled_end : null,
+                    'notes' => "Borrowed for booking #{$booking->code}"
+                ]);
+
+                // Update the actual inventory quantity
+                $originalQuantity = $inventoryItem->quantity;
+                $inventoryItem->quantity = $inventoryItem->quantity - $quantity;
+                $inventoryItem->save(); // This will trigger status update via the model's boot method
+                
+                Log::info("Equipment borrowed: {$inventoryItem->name} - {$originalQuantity} to {$inventoryItem->quantity} (borrowed: {$quantity})");
+
+                $borrowedItems[] = [
+                    'item' => $inventoryItem->name,
+                    'category' => $inventoryItem->category,
+                    'quantity' => $quantity,
+                    'transaction_id' => $transaction->id,
+                    'is_returnable' => $inventoryItem->isReturnableItem(),
+                ];
+            }
+
+            if (!empty($errors)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some items could not be borrowed',
+                    'errors' => $errors
+                ], 422);
+            }
+
+            DB::commit();
+
+            // Send one consolidated notification for all borrowed items
+            if (!empty($borrowedItems)) {
+                $employee = \App\Models\Employee::find($employeeId);
+                $notificationService = app(\App\Services\NotificationService::class);
+                $notificationService->notifyEquipmentBorrowedBatch($booking, $employee, $borrowedItems);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Equipment borrowed successfully for booking #' . $booking->code,
+                'borrowed_items' => $borrowedItems,
+                'booking_id' => $bookingId
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to borrow equipment: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Return equipment when booking is completed
+     * This will be called automatically from the Booking model's boot method
+     */
+    public function returnEquipment($bookingId, $employeeId = null)
+    {
+        try {
+            $booking = Booking::find($bookingId);
+            if (!$booking) {
+                return false;
+            }
+
+            // If employee ID is not provided, get all employees assigned to this booking
+            $employeesQuery = $booking->staffAssignments();
+            if ($employeeId) {
+                $employeesQuery = $employeesQuery->where('employee_id', $employeeId);
+            }
+            
+            $employeeIds = $employeesQuery->pluck('employee_id');
+
+            $returnedItems = [];
+            DB::beginTransaction();
+
+            foreach ($employeeIds as $empId) {
+                // Find all borrowed equipment for this employee and booking
+                $borrowedTransactions = InventoryTransaction::where('employee_id', $empId)
+                    ->where('booking_id', $bookingId)
+                    ->borrow()
+                    ->with('inventoryItem')
+                    ->get();
+
+                foreach ($borrowedTransactions as $transaction) {
+                    // Check if this item needs to be returned (only returnable items)
+                    if (!$transaction->inventoryItem->isReturnableItem()) {
+                        continue; // Skip consumables
+                    }
+
+                    // Check the current borrowed quantity vs returned quantity for this transaction pattern
+                    $currentBorrowed = InventoryTransaction::where('employee_id', $empId)
+                        ->where('booking_id', $bookingId)
+                        ->where('inventory_item_id', $transaction->inventory_item_id)
+                        ->borrow()
+                        ->sum('quantity');
+
+                    $currentReturned = InventoryTransaction::where('employee_id', $empId)
+                        ->where('booking_id', $bookingId)
+                        ->where('inventory_item_id', $transaction->inventory_item_id)
+                        ->return()
+                        ->sum('quantity');
+
+                    $remainingToReturn = $currentBorrowed - $currentReturned;
+
+                    if ($remainingToReturn > 0) {
+                        $returnedItem = InventoryItem::find($transaction->inventory_item_id);
+                        
+                        // Create return transaction
+                        InventoryTransaction::create([
+                            'inventory_item_id' => $transaction->inventory_item_id,
+                            'employee_id' => $empId,
+                            'booking_id' => $bookingId,
+                            'transaction_type' => 'return',
+                            'quantity' => $remainingToReturn,
+                            'transaction_at' => now(),
+                            'notes' => "Automatically returned when booking #{$booking->code} was completed"
+                        ]);
+
+                        // Update the actual inventory quantity (add back to inventory)
+                        $originalQuantity = $returnedItem->quantity;
+                        $returnedItem->quantity = $returnedItem->quantity + $remainingToReturn;
+                        $returnedItem->save(); // This will trigger status update via the model's boot method
+                        
+                        Log::info("Equipment returned: {$transaction->inventoryItem->name} - {$originalQuantity} to {$returnedItem->quantity} (returned: {$remainingToReturn})");
+
+                        $returnedItems[] = [
+                            'employee_id' => $empId,
+                            'item' => $transaction->inventoryItem->name,
+                            'quantity' => $remainingToReturn,
+                        ];
+                    }
+                }
+            }
+
+            DB::commit();
+            return $returnedItems;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error returning equipment for booking ' . $bookingId . ': ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get borrowed items for a specific booking
+     */
+    public function getBorrowedItems($bookingId)
+    {
+        try {
+            // Check employee authentication first - use Auth::user() to get the authenticated user
+            $user = Auth::user();
+            if (!$user || !$user->employee) {
+                Log::error('Employee not authenticated for borrowed items request');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Employee authentication required'
+                ], 401);
+            }
+            
+            $employeeId = $user->employee->id;
+            Log::info("Employee {$employeeId} requesting borrowed items for booking {$bookingId}");
+            
+            // Check if employee is assigned to this booking
+            $booking = Booking::find($bookingId);
+            if (!$booking) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found'
+                ], 404);
+            }
+            
+            $isAssigned = $booking->staffAssignments()
+                ->where('employee_id', $employeeId)
+                ->exists();
+                
+            if (!$isAssigned) {
+                Log::warning("Employee {$employeeId} not assigned to booking {$bookingId}");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not assigned to this booking'
+                ], 403);
+            }
+            
+            // Get all borrow transactions for this booking by this employee
+            $transactions = InventoryTransaction::where('employee_id', $employeeId)
+                ->where('booking_id', $bookingId)
+                ->where('transaction_type', 'borrow')
+                ->with(['inventoryItem'])
+                ->get();
+            
+            $borrowedItems = [];
+            foreach ($transactions as $transaction) {
+                $itemData = $transaction->inventoryItem;
+                $borrowedItems[] = [
+                    'name' => $itemData->name,
+                    'category' => $itemData->category,
+                    'item_code' => $itemData->item_code,
+                    'quantity' => $transaction->quantity,
+                    'is_returnable' => $itemData->isReturnableItem(),
+                    'notes' => $transaction->notes,
+                    'borrowed_at' => $transaction->transaction_at
+                ];
+            }
+            
+            return response()->json([
+                'success' => true,
+                'items' => $borrowedItems,
+                'booking_code' => $booking->code,
+                'borrowed_count' => count($borrowedItems)
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Employee borrowed items error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // Get employee ID safely for debug info
+            $employeeId = null;
+            $user = Auth::user();
+            if ($user && $user->employee) {
+                $employeeId = $user->employee->id;
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch borrowed items: ' . $e->getMessage(),
+                'debug' => [
+                    'booking_id' => $bookingId,
+                    'employee_id' => $employeeId,
+                    'line' => $e->getLine(),
+                    'file' => basename($e->getFile())
+                ]
+            ], 500);
+        }
     }
 }
 

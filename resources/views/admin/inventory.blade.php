@@ -62,10 +62,16 @@
                     <h2 class="text-xl font-semibold text-gray-900">Inventory Records</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage inventory items and track stock levels</p>
                 </div>
-                <button onclick="openAddModal()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
-                    <i class="ri-add-line mr-2"></i>
-                    Add Item
-                </button>
+                <div class="flex items-center gap-3">
+                    <button onclick="openTransactionHistoryModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer">
+                        <i class="ri-history-line mr-2"></i>
+                        Transaction History
+                    </button>
+                    <button onclick="openAddModal()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+                        <i class="ri-add-line mr-2"></i>
+                        Add Item
+                    </button>
+                </div>
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -310,6 +316,33 @@
             </div>
             <div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
                 <button onclick="closeViewModal()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Transaction History Modal --}}
+<div id="transactionModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-4 mx-auto p-0 border w-full max-w-6xl shadow-2xl rounded-lg bg-white" style="max-h: calc(100vh - 2rem);">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+                <h3 class="text-xl font-semibold text-gray-900">Inventory Transaction History</h3>
+                <button onclick="closeTransactionHistoryModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Scrollable content area -->
+            <div id="transaction-content" class="flex-1 overflow-y-auto p-6">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex justify-end pt-4 border-t border-gray-200 p-6 flex-shrink-0 bg-gray-50">
+                <button onclick="closeTransactionHistoryModal()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
                     Close
                 </button>
             </div>
@@ -835,6 +868,233 @@ function showInventoryErrorAlert(message) {
         confirmButtonColor: '#dc2626',
         confirmButtonText: 'OK'
     });
+}
+
+// Transaction History Modal Functions
+function openTransactionHistoryModal() {
+    const modal = document.getElementById('transactionModal');
+    const content = document.getElementById('transaction-content');
+    
+    // Show loading state
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="flex justify-center items-center space-x-2 mb-4">
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+            </div>
+            <p class="text-gray-500 text-sm">Loading transaction history...</p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Fetch transaction history
+    fetch('/admin/inventory/transactions', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Process transactions if any exist
+                if (data.transactions && data.transactions.length > 0) {
+                    let transactionHtml = '<div class="overflow-x-auto"><table class="w-full">';
+                transactionHtml += `
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                `;
+                
+                data.transactions.forEach(transaction => {
+                    const dateTime = new Date(transaction.transaction_at).toLocaleString();
+                    const typeClass = transaction.transaction_type === 'borrow' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+                    const typeText = transaction.transaction_type === 'borrow' ? 'Borrowed' : 'Returned';
+                    
+                    transactionHtml += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${dateTime}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="flex items-center">
+                                    <div class="text-sm font-medium text-gray-900">${transaction.employee_name}</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="flex items-center">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">${transaction.item_name}</div>
+                                        <div class="text-sm text-gray-500">${transaction.item_category} • ${transaction.item_code}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${typeClass}">
+                                    ${typeText}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${parseInt(transaction.quantity)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${transaction.booking_code ? `<span class="text-blue-600 font-medium">#${transaction.booking_code}</span>` : '-'}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                                <div class="truncate">${transaction.notes || '-'}</div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                transactionHtml += '</tbody></table></div>';
+                
+                // Add statistics summary
+                const statsHtml = `
+                    <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                                    <i class="ri-download-line text-blue-600 text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-blue-600">Total Borrowed</p>
+                                    <p class="text-xl font-bold text-gray-900">${data.stats.total_borrowed}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-green-100 rounded-lg mr-3">
+                                    <i class="ri-upload-line text-green-600 text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-green-600">Total Returned</p>
+                                    <p class="text-xl font-bold text-gray-900">${data.stats.total_returned}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-gray-100 rounded-lg mr-3">
+                                    <i class="ri-user-line text-gray-600 text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Active Employees</p>
+                                    <p class="text-xl font-bold text-gray-900">${data.stats.active_employees}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-orange-100 rounded-lg mr-3">
+                                    <i class="ri-calendar-line text-orange-600 text-lg"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-orange-600">This Month</p>
+                                    <p class="text-xl font-bold text-gray-900">${data.stats.this_month}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                    content.innerHTML = statsHtml + transactionHtml;
+                    
+                } else {
+                    // No transactions found
+                    const statsHtml = `
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                                        <i class="ri-download-line text-blue-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-600">Total Borrowed</p>
+                                        <p class="text-xl font-bold text-gray-900">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-green-100 rounded-lg mr-3">
+                                        <i class="ri-upload-line text-green-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-green-600">Total Returned</p>
+                                        <p class="text-xl font-bold text-gray-900">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-gray-100 rounded-lg mr-3">
+                                        <i class="ri-user-line text-gray-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-600">Active Employees</p>
+                                        <p class="text-xl font-bold text-gray-900">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-orange-50 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-orange-100 rounded-lg mr-3">
+                                        <i class="ri-calendar-line text-orange-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-orange-600">This Month</p>
+                                        <p class="text-xl font-bold text-gray-900">0</p>
+                                    </div>
+                                </div>
+;">
+                    `;
+                    
+                    content.innerHTML = statsHtml + `
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="ri-history-line text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Transaction History</h3>
+                            <p class="text-sm text-gray-500">No equipment borrowing or returning transactions have been recorded yet.</p>
+                        </div>
+                    `;
+                    
+                }
+                
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="ri-history-line text-2xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Transaction History</h3>
+                        <p class="text-sm text-gray-500">No equipment borrowing or returning transactions have been recorded yet.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading transaction history:', error);
+            content.innerHTML = '<div class="text-center py-4 text-red-500">Error loading transaction history.</div>';
+        });
+}
+
+function closeTransactionHistoryModal() {
+    const modal = document.getElementById('transactionModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 </script>
 @endsection

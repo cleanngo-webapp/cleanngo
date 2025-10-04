@@ -69,6 +69,11 @@ class Booking extends Model
                 
                 $notificationService = app(NotificationService::class);
                 $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
+                
+                // If booking was just completed, automatically return borrowed equipment
+                if ($oldStatus !== 'completed' && $newStatus === 'completed') {
+                    $booking->returnBorrowedEquipment();
+                }
             }
             
             // Check if this booking just became a payroll record (completed + paid)
@@ -126,6 +131,23 @@ class Booking extends Model
         }
         
         return $count;
+    }
+
+    /**
+     * Automatically return borrowed equipment when booking is completed
+     */
+    public function returnBorrowedEquipment(): array
+    {
+        $controller = app(\App\Http\Controllers\Employee\EmployeeJobsController::class);
+        $returnedItems = $controller->returnEquipment($this->id);
+        
+        // Trigger notifications for returned equipment
+        if ($returnedItems && !empty($returnedItems)) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            $notificationService->notifyEquipmentReturnedCompleted($this, $returnedItems);
+        }
+        
+        return $returnedItems ?: [];
     }
 }
 

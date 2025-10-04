@@ -122,12 +122,12 @@
 								$canStartJob = $isScheduledToday || $job->status === 'in_progress';
 							@endphp
 							@if($canStartJob)
-								<button type="button" onclick="confirmStartJob({{ $job->id }})" class="bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
-									Start Job
+								<button type="button" onclick="goToJobs()" class="bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+									Prepare
 								</button>
 							@else
 								<button type="button" disabled class="bg-gray-400 text-white px-3 py-1.5 rounded text-xs font-medium cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($job->scheduled_start)->format('M j, Y') }}">
-									Start Job
+									Prepare
 								</button>
 							@endif
 						@endif
@@ -362,6 +362,11 @@ document.getElementById('emp-payment-qr-modal').addEventListener('click', functi
         closeEmpPaymentQRModal();
     }
 });
+
+// Go to Jobs page function
+function goToJobs() {
+    window.location.href = '{{ route("employee.jobs") }}';
+}
 
 // Start Job confirmation function
 function confirmStartJob(jobId) {

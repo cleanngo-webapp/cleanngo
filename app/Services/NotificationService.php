@@ -8,8 +8,10 @@ use App\Models\PaymentProof;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\InventoryItem;
+use App\Models\InventoryTransaction;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * NotificationService handles all notification creation and management
@@ -1300,5 +1302,226 @@ class NotificationService
             'is_read' => false,
             'created_at' => now(),
         ]);
+    }
+
+    /**
+     * Create notifications for equipment borrowing (batch version)
+     * Notifies admin and employee when equipment is borrowed for a job
+     * This method accepts a list of items that were just borrowed in a single action
+     */
+    public function notifyEquipmentBorrowedBatch(Booking $booking, Employee $employee, array $borrowedItems): void
+    {
+        $employee->load('user');
+        $employeeName = $employee->user->first_name . ' ' . $employee->user->last_name;
+        
+        $itemsList = [];
+        foreach ($borrowedItems as $item) {
+            $itemsList[] = $item['quantity'] . 'x ' . $item['item'] . ' (' . $item['category'] . ')';
+        }
+        
+        $itemsText = implode(', ', $itemsList);
+        
+        // Notify admin
+        $this->createNotification([
+            'type' => 'equipment_borrowed',
+            'title' => 'Equipment Borrowed',
+            'message' => sprintf(
+                '%s got the following items for booking #%s: %s',
+                $employeeName,
+                $booking->code,
+                $itemsText
+            ),
+            'data' => [
+                'employee_id' => $employee->id,
+                'employee_name' => $employeeName,
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'items_borrowed' => $itemsList,
+                'borrowed_items_details' => $borrowedItems,
+                'borrowed_at' => now(),
+            ],
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+        ]);
+        
+        // Notify employee
+        $this->createNotification([
+            'type' => 'equipment_borrowed',
+            'title' => 'Equipment Borrowed',
+            'message' => sprintf(
+                'You borrowed the following for booking #%s: %s',
+                $booking->code,
+                $itemsText
+            ),
+            'data' => [
+                'employee_id' => $employee->id,
+                'employee_name' => $employeeName,
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'items_borrowed' => $itemsList,
+                'borrowed_items_details' => $borrowedItems,
+                'borrowed_at' => now(),
+            ],
+            'recipient_type' => 'employee',
+            'recipient_id' => $employee->id,
+        ]);
+    }
+
+    /**
+     * Create notifications for equipment borrowing (single transaction - deprecated)
+     * This method was causing duplicate notifications and should not be used
+     * @deprecated Use notifyEquipmentBorrowedBatch instead
+     */
+    public function notifyEquipmentBorrowed(InventoryTransaction $transaction): void
+    {
+        // This method was causing duplicates because it was triggered for each individual transaction
+        // but each call would fetch ALL items for that booking, creating multiple notifications
+        Log::warning('Deprecated notifyEquipmentBorrowed called - use notifyEquipmentBorrowedBatch instead');
+        
+        // Disable this method to prevent duplicate notifications
+        return;
+    }
+
+    /**
+     * Create notifications for equipment returns
+     * Notifies admin and employee when equipment is returned
+     */
+    public function notifyEquipmentReturned(InventoryTransaction $transaction): void
+    {
+        $transaction->load(['inventoryItem', 'employee.user', 'booking']);
+        
+        $item = $transaction->inventoryItem;
+        $employee = $transaction->employee;
+        $booking = $transaction->booking;
+        $employeeName = $employee->user->first_name . ' ' . $employee->user->last_name;
+        
+        // Notify admin
+        $this->createNotification([
+            'type' => 'equipment_returned',
+            'title' => 'Equipment Returned',
+            'message' => sprintf(
+                '%s returned %dx %s (%s) for booking #%s',
+                $employeeName,
+                $transaction->quantity,
+                $item->name,
+                $item->category,
+                $booking->code
+            ),
+            'data' => [
+                'employee_id' => $employee->id,
+                'employee_name' => $employeeName,
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'transaction_id' => $transaction->id,
+                'item_name' => $item->name,
+                'item_category' => $item->category,
+                'quantity_returned' => $transaction->quantity,
+                'returned_at' => $transaction->transaction_at,
+            ],
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+        ]);
+        
+        // Notify employee
+        $this->createNotification([
+            'type' => 'equipment_returned',
+            'title' => 'Equipment Returned',
+            'message' => sprintf(
+                'You returned %dx %s (%s) for booking #%s',
+                $transaction->quantity,
+                $item->name,
+                $item->category,
+                $booking->code
+            ),
+            'data' => [
+                'employee_id' => $employee->id,
+                'employee_name' => $employeeName,
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'transaction_id' => $transaction->id,
+                'item_name' => $item->name,
+                'item_category' => $item->category,
+                'quantity_returned' => $transaction->quantity,
+                'returned_at' => $transaction->transaction_at,
+            ],
+            'recipient_type' => 'employee',
+            'recipient_id' => $employee->id,
+        ]);
+    }
+
+    /**
+     * Create notifications for bulk equipment returns when booking is completed
+     * Notifies admin and all employees about equipment returns
+     */
+    public function notifyEquipmentReturnedCompleted(Booking $booking, array $returnedItems): void
+    {
+        $booking->load(['staffAssignments.employee.user']);
+        
+        // Group items by employee
+        $itemsByEmployee = [];
+        foreach ($returnedItems as $item) {
+            if (!isset($itemsByEmployee[$item['employee_id']])) {
+                $itemsByEmployee[$item['employee_id']] = [];
+            }
+            $itemsByEmployee[$item['employee_id']][] = $item;
+        }
+        
+        // Create notifications for each employee and notify admin
+        foreach ($itemsByEmployee as $employeeId => $items) {
+            $employee = \App\Models\Employee::find($employeeId);
+            if (!$employee) continue;
+            
+            $employee->load('user');
+            $employeeName = $employee->user->first_name . ' ' . $employee->user->last_name;
+            
+            $itemsList = [];
+            foreach ($items as $itemData) {
+                $itemsList[] = $itemData['quantity'] . 'x ' . $itemData['item'];
+            }
+            $itemsText = implode(', ', $itemsList);
+            
+            // Notify admin
+            $this->createNotification([
+                'type' => 'equipment_returned_completed',
+                'title' => 'Equipment Returned - Job Completed',
+                'message' => sprintf(
+                    '%s has finished booking #%s and will be returning the following: %s',
+                    $employeeName,
+                    $booking->code,
+                    $itemsText
+                ),
+                'data' => [
+                    'employee_id' => $employee->id,
+                    'employee_name' => $employeeName,
+                    'booking_id' => $booking->id,
+                    'booking_code' => $booking->code,
+                    'items_returned' => $items,
+                    'returned_at' => now(),
+                ],
+                'recipient_type' => 'admin',
+                'recipient_id' => null,
+            ]);
+            
+            // Notify employee
+            $this->createNotification([
+                'type' => 'equipment_returned_completed',
+                'title' => 'Equipment Returned - Job Completed',
+                'message' => sprintf(
+                    'You have finished booking #%s and will be returning the following: %s',
+                    $booking->code,
+                    $itemsText
+                ),
+                'data' => [
+                    'employee_id' => $employee->id,
+                    'employee_name' => $employeeName,
+                    'booking_id' => $booking->id,
+                    'booking_code' => $booking->code,
+                    'items_returned' => $items,
+                    'returned_at' => now(),
+                ],
+                'recipient_type' => 'employee',
+                'recipient_id' => $employee->id,
+            ]);
+        }
     }
 }

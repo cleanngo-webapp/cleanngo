@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InventoryItem extends Model
 {
@@ -59,6 +60,13 @@ class InventoryItem extends Model
     protected static function boot()
     {
         parent::boot();
+
+        // Auto-generate item code for new items
+        static::creating(function ($item) {
+            if (empty($item->item_code)) {
+                $item->item_code = $item->generateItemCode();
+            }
+        });
 
         // Store original data before saving for comparison
         static::saving(function ($item) {
@@ -120,6 +128,66 @@ class InventoryItem extends Model
     public function scopeOutOfStock($query)
     {
         return $query->where('status', 'Out of Stock');
+    }
+
+    /**
+     * Get all transactions related to this inventory item
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(InventoryTransaction::class);
+    }
+
+    /**
+     * Get the current available quantity for borrowing
+     * Since we are now properly updating the actual quantity when borrowing/returning,
+     * the available quantity is just the current quantity
+     */
+    public function getAvailableQuantityAttribute()
+    {
+        return max(0, $this->quantity);
+    }
+
+    /**
+     * Check if this item is returnable (Machine or Tools)
+     */
+    public function isReturnableItem()
+    {
+        return in_array($this->category, ['Machine', 'Tools']);
+    }
+
+    /**
+     * Check if this item is consumable (Cleaning Agent or Consumables)
+     */
+    public function isConsumableItem()
+    {
+        return in_array($this->category, ['Cleaning Agent', 'Consumables']);
+    }
+
+    /**
+     * Generate a unique item code in format: I2025XXX
+     */
+    public function generateItemCode()
+    {
+        $year = now()->format('Y');
+        $prefix = 'I' . $year;
+        
+        // Get the highest existing code for this year
+        $lastItem = static::where('item_code', 'like', $prefix . '%')
+            ->orderBy('item_code', 'desc')
+            ->first();
+        
+        if ($lastItem) {
+            // Extract the number part and increment
+            $lastNumber = (int) substr($lastItem->item_code, -3);
+            $newNumber = $lastNumber + 1;
+        } else {
+            // First item for this year
+            $newNumber = 1;
+        }
+        
+        // Ensure the number is 3 digits with leading zeros
+        return $prefix . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
     }
 }
 

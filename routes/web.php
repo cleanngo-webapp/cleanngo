@@ -70,6 +70,30 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Role redirector
 Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->name('dashboard.redirect');
 
+// Debug route to test inventory transactions
+Route::get('/debug/inventory-transactions', function() {
+    $count = \App\Models\InventoryTransaction::count();
+    $transactions = \App\Models\InventoryTransaction::with(['inventoryItem', 'employee.user', 'booking'])
+        ->limit(5)
+        ->get();
+    
+    return response()->json([
+        'total_count' => $count,
+        'recent_transactions' => $transactions->map(function($t) {
+            return [
+                'id' => $t->id,
+                'type' => $t->transaction_type,
+                'quantity' => $t->quantity,
+                'item_name' => $t->inventoryItem ? $t->inventoryItem->name : 'NULL',
+                'employee_name' => ($t->employee && $t->employee->user) 
+                    ? $t->employee->user->first_name . ' ' . $t->employee->user->last_name 
+                    : 'NULL',
+                'booking_code' => $t->booking ? $t->booking->code : 'NULL'
+            ];
+        })
+    ]);
+});
+
 // Simple preview routes for role dashboards (no auth/guards yet)
 // Employee routes
 Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('employee.')->group(function () {
@@ -79,6 +103,9 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
     Route::post('/payment-proof/{bookingId}/upload', [App\Http\Controllers\Admin\PaymentProofController::class, 'upload'])->name('payment-proof.upload');
     Route::get('/bookings/{bookingId}/photos', [EmployeeJobsController::class, 'getPhotos'])->name('bookings.photos');
+    Route::get('/inventory/available', [EmployeeJobsController::class, 'getAvailableInventory'])->name('inventory.available');
+    Route::post('/jobs/{bookingId}/equipment/borrow', [EmployeeJobsController::class, 'borrowEquipment'])->name('jobs.equipment.borrow');
+    Route::get('/jobs/{bookingId}/borrowed-items', [EmployeeJobsController::class, 'getBorrowedItems'])->name('jobs.borrowed-items');
     Route::get('/payroll', [EmployeePayrollController::class, 'index'])->name('payroll');
     Route::get('/notifications', [EmployeeNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/api', [EmployeeNotificationController::class, 'getNotifications'])->name('notifications.api');
@@ -167,10 +194,11 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/employees/update-job-counts', [AdminEmployeeController::class, 'updateAllJobCounts'])->name('employees.update-job-counts');
     Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory');
     Route::post('/inventory', [AdminInventoryController::class, 'store'])->name('inventory.store');
+    Route::get('/inventory-stats', [AdminInventoryController::class, 'getStats'])->name('inventory.stats');
+    Route::get('/inventory/transactions', [AdminInventoryController::class, 'getTransactions'])->name('inventory.transactions');
     Route::get('/inventory/{id}', [AdminInventoryController::class, 'show'])->name('inventory.show');
     Route::put('/inventory/{id}', [AdminInventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/{id}', [AdminInventoryController::class, 'destroy'])->name('inventory.destroy');
-    Route::get('/inventory-stats', [AdminInventoryController::class, 'getStats'])->name('inventory.stats');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers');
     Route::delete('/customers/{userId}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
     Route::get('/gallery', [AdminGalleryController::class, 'index'])->name('gallery');

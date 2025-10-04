@@ -172,17 +172,35 @@
                                         $isScheduledToday = \Carbon\Carbon::parse($b->scheduled_start)->isToday();
                                         $canStartJob = $isScheduledToday || $b->status === 'in_progress';
                                     @endphp
-                                    @if($canStartJob)
-                                        <button type="button" onclick="confirmStartJob({{ $b->id }})" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
-                                            <i class="ri-play-line mr-1"></i>
-                                            <span class="hidden sm:inline">Start Job</span>
-                                        </button>
-                                    @else
-                                        <button type="button" disabled class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y') }}">
-                                            <i class="ri-play-line mr-1"></i>
-                                            <span class="hidden sm:inline">Start Job</span>
-                                        </button>
-                                    @endif
+                                        @if($canStartJob)
+                                            @if($b->equipment_borrowed == 1)
+                                                <!-- Equipment already borrowed - show Items and Start Job buttons -->
+                                                <button type="button" onclick="getEquipment({{ $b->id }})" class="hidden" title="Get Equipment">
+                                                    <i class="ri-tools-line mr-1"></i>
+                                                    <span class="hidden sm:inline">Get Equipment</span>
+                                                </button>
+                                                <button type="button" onclick="openBorrowedItemsModal({{ $b->id }})" class="inline-flex items-center px-2 py-1 border border-purple-300 shadow-sm text-xs font-medium rounded text-purple-600 bg-purple-50 hover:bg-purple-100 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer" title="View Borrowed Items">
+                                                    <i class="ri-list-check mr-1"></i>
+                                                    <span class="hidden sm:inline">Items</span>
+                                                </button>
+                                                <button type="button" onclick="confirmStartJob({{ $b->id }})" id="start-job-btn-{{ $b->id }}" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
+                                                    <i class="ri-play-line mr-1"></i>
+                                                    <span class="hidden sm:inline">Start Job</span>
+                                                </button>
+                                            @else
+                                                <!-- No equipment borrowed yet - show Get Equipment button -->
+                                                <button type="button" onclick="getEquipment({{ $b->id }})" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Get Equipment">
+                                                    <i class="ri-tools-line mr-1"></i>
+                                                    <span class="hidden sm:inline">Get Equipment</span>
+                                                </button>
+                                                <!-- Start Job button - hidden until equipment is borrowed -->
+                                            @endif
+                                        @else
+                                            <button type="button" disabled class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y') }}">
+                                                <i class="ri-play-line mr-1"></i>
+                                                <span class="hidden sm:inline">Start Job</span>
+                                            </button>
+                                        @endif
                                 @endif
                                 <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Service Summary">
                                     <i class="ri-receipt-line mr-1"></i>
@@ -1069,5 +1087,662 @@ function openEmpPhotoViewer(imageUrl, filename) {
     };
     document.addEventListener('keydown', handleEscape);
 }
+
+// Equipment Modal Section
+function getEquipment(bookingId) {
+    const modal = document.getElementById('equipment-modal');
+    const content = document.getElementById('equipment-content');
+    const bookingIdField = document.getElementById('equipment-booking-id');
+    
+    // Set the booking ID
+    bookingIdField.value = bookingId;
+    
+    // Show loading state
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="flex justify-center items-center space-x-2 mb-4">
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+            </div>
+            <p class="text-gray-500 text-sm">Loading available equipment...</p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Fetch available inventory items
+    fetch('/employee/inventory/available')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.items && data.items.length > 0) {
+                let equipmentHtml = '<div class="space-y-4 relative equipment-content">';
+                equipmentHtml += '<p class="text-sm text-gray-600 mb-4">Select equipment you need for this job. Items marked as returnable will be automatically returned when the job is completed.</p>';
+                
+                data.items.forEach(item => {
+                    const isReturnable = item.is_returnable;
+                    const badgeClass = isReturnable ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800';
+                    const badgeText = isReturnable ? 'Returnable' : 'Consumable';
+                    
+                    equipmentHtml += `
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow bg-white relative z-10 equipment-item">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-3">
+                                        <h4 class="font-medium text-gray-900">${item.name}</h4>
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badgeClass}">
+                                            ${badgeText}
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-500 mt-1">
+                                        <span class="font-medium">${item.category}</span> • Code: ${item.item_code}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        Available: <span class="font-medium text-green-600">${item.available_quantity}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <input type="number" 
+                                           class="equipment-quantity w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                           data-item-id="${item.id}"
+                                           data-max="${item.available_quantity}"
+                                           min="0" 
+                                           max="${item.available_quantity}"
+                                           oninput="validateEquipmentQuantity(this)">
+                                    <button type="button" 
+                                            onclick="addEquipmentToList(${item.id}, '${item.name}', '${item.category}', '${item.item_code}', ${isReturnable})"
+                                            class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors">
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                equipmentHtml += '</div>';
+                
+                // Add selected equipment list area
+                equipmentHtml += `
+                    <div class="mt-6 pt-6 border-t border-gray-200 bg-white relative z-10 selected-equipment-section">
+                        <h4 class="font-medium text-gray-900 mb-4">Selected Equipment</h4>
+                        <div id="selected-equipment-list" class="space-y-2">
+                            <p class="text-sm text-gray-500 italic">No equipment selected yet.</p>
+                        </div>
+                    </div>
+                `;
+                
+                content.innerHTML = equipmentHtml;
+                
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="ri-tools-line text-2xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Equipment Available</h3>
+                        <p class="text-sm text-gray-500">No equipment is available for borrowing at the moment.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading equipment:', error);
+            content.innerHTML = '<div class="text-center py-4 text-red-500">Error loading available equipment.</div>';
+        });
+}
+
+let selectedEquipmentList = [];
+
+function validateEquipmentQuantity(input) {
+    const maxAvailable = parseInt(input.getAttribute('data-max')) || 0;
+    const currentValue = parseInt(input.value) || 0;
+    const itemId = input.getAttribute('data-item-id');
+    
+    // Find if this item is already selected
+    const existingItem = selectedEquipmentList.find(item => item.id == itemId);
+    const alreadySelected = existingItem ? existingItem.quantity : 0;
+    const totalRequested = alreadySelected + currentValue;
+    
+    // Reset styling  
+    input.classList.remove('border-red-500', 'bg-red-50', 'border-yellow-500', 'bg-yellow-50');
+    
+    // Validate against stock
+    if (currentValue > maxAvailable) {
+        input.classList.remove('border-gray-300', 'bg-white', 'border-yellow-500', 'bg-yellow-50');
+        input.classList.add('border-red-500', 'bg-red-50');
+        input.title = `⚠️ Cannot exceed available stock: ${maxAvailable} units`;
+    } else if (totalRequested > maxAvailable && existingItem) {
+        input.classList.remove('border-gray-300', 'bg-white', 'border-yellow-500', 'bg-yellow-50');
+        input.classList.add('border-red-500', 'bg-red-50');
+        input.title = `⚠️ Total would exceed stock! Max you can add: ${maxAvailable - alreadySelected} units`;
+    } else if (currentValue > maxAvailable * 0.8) {
+        // Warning when approaching 80% of available stock
+        input.classList.remove('border-gray-300', 'bg-white', 'border-red-500', 'bg-red-50');
+        input.classList.add('border-yellow-500', 'bg-yellow-50');
+        input.title = `⚠️ High quantity requested! Available: ${maxAvailable} units`;
+    } else {
+        input.classList.remove('border-red-500', 'bg-red-50', 'border-yellow-500', 'bg-yellow-50');
+        input.classList.add('border-gray-300', 'bg-white');
+        if (currentValue > 0) {
+            input.title = `Available: ${maxAvailable} units`;
+        } else {
+            input.title = '';
+        }
+    }
+}
+
+function addEquipmentToList(itemId, itemName, category, itemCode, isReturnable) {
+    const quantityInput = document.querySelector(`input[data-item-id="${itemId}"]`);
+    const quantity = parseInt(quantityInput.value) || 0;
+    const maxAvailable = parseInt(quantityInput.getAttribute('data-max')) || 0;
+    
+    // Validation: Check if quantity is valid
+    if (quantity <= 0) {
+        Swal.fire({
+            title: 'Invalid Quantity',
+            text: 'Please enter a valid quantity (greater than 0).',
+            icon: 'warning',
+           confirmButtonColor: '#3b82f6',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Validation: Check if quantity exceeds available amount
+    if (quantity > maxAvailable) {
+        Swal.fire({
+            title: 'Insufficient Stock',
+            html: `
+                <div class="text-left">
+                    <p class="mb-3"><strong>Cannot add more than available stock!</strong></p>
+                    <div class="bg-gray-50 p-4 rounded-lg text-sm space-y-2">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Equipment:</span>
+                            <span class="text-gray-900">${itemName}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">You requested:</span>
+                            <span class="text-red-600 font-bold">${quantity}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Available stock:</span>
+                            <span class="text-green-600 font-bold">${maxAvailable}</span>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-600">Please reduce the quantity to ${maxAvailable} or less.</p>
+                </div>
+            `,
+            icon: 'error',
+            confirmButtonColor: '#3b82f6',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Check if item is already selected and would exceed total available
+    const existingItem = selectedEquipmentList.find(item => item.id === itemId);
+    if (existingItem) {
+        const totalQuantity = existingItem.quantity + quantity;
+        if (totalQuantity > maxAvailable) {
+            Swal.fire({
+                title: 'Total Quantity Exceeds Stock',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-3"><strong>Cannot add more than available stock!</strong></p>
+                        <div class="bg-gray-50 p-4 rounded-lg text-sm space-y-2">
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Equipment:</span>
+                                <span class="text-gray-900">${itemName}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Already selected:</span>
+                                <span class="text-blue-600 font-bold">${existingItem.quantity}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">New request:</span>
+                                <span class="text-blue-600 font-bold">${quantity}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Total would be:</span>
+                                <span class="text-red-600 font-bold">${totalQuantity}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium text-gray-700">Available stock:</span>
+                                <span class="text-green-600 font-bold">${maxAvailable}</span>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-sm text-gray-600">Maximum you can add: <strong>${maxAvailable - existingItem.quantity}</strong></p>
+                    </div>
+                `,
+                icon: 'error',
+                confirmButtonColor: '#3b82f6',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        existingItem.quantity += quantity;
+    } else {
+        selectedEquipmentList.push({
+            id: itemId,
+            name: itemName,
+            category: category,
+            item_code: itemCode,
+            quantity: quantity,
+            is_returnable: isReturnable
+        });
+    }
+    
+    // Reset quantity input
+    quantityInput.value = '';
+    
+    // Update selected equipment list display
+    updateSelectedEquipmentList();
+}
+
+function updateSelectedEquipmentList() {
+    const listContainer = document.getElementById('selected-equipment-list');
+    
+    if (selectedEquipmentList.length === 0) {
+        listContainer.innerHTML = '<p class="text-sm text-gray-500 italic">No equipment selected yet.</p>';
+        return;
+    }
+    
+    let listHtml = '';
+    selectedEquipmentList.forEach((item, index) => {
+        const badgeClass = item.is_returnable ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800';
+        const badgeText = item.is_returnable ? 'Returnable' : 'Consumable';
+        
+        listHtml += `
+            <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded border">
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm font-medium text-gray-900">${item.name}</span>
+                    <span class="text-xs text-gray-500">${item.category}</span>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badgeClass}">
+                        ${badgeText}
+                    </span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-medium text-gray-900">Quantity: ${item.quantity}</span>
+                    <button type="button" onclick="removeEquipmentFromList(${index})" class="text-red-500 hover:text-red-700">
+                        <i class="ri-close-line"></i>
+
+</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    listContainer.innerHTML = listHtml;
+}
+
+function removeEquipmentFromList(index) {
+    selectedEquipmentList.splice(index, 1);
+    updateSelectedEquipmentList();
+}
+
+function confirmGetEquipment() {
+    if (selectedEquipmentList.length === 0) {
+        Swal.fire({
+            title: 'No Equipment Selected',
+            text: 'Please select at least one equipment item to proceed.',
+            icon: 'warning',
+            confirmButtonColor: '#3b82f6',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Show confirmation dialog with equipment details
+    let confirmationHtml = '<div class="text-left"><p class="mb-3"><strong>Are you sure you want to borrow this equipment?</strong></p><div class="bg-gray-50 p-4 rounded-lg text-sm space-y-2">';
+    
+    selectedEquipmentList.forEach(item => {
+        const badgeClass = item.is_returnable ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800';
+        const badgeText = item.is_returnable ? 'Returnable' : 'Consumable';
+        
+        confirmationHtml += `
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="font-medium text-gray-700">${item.name}</span>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${badgeClass}">
+                        ${badgeText}
+                    </span>
+                </div>
+                <span class="text-gray-900 ">Qty: ${item.quantity}</span>
+            </div>
+        `;
+        });
+        
+        confirmationHtml += '</div><p class="mt-3 text-sm text-gray-600">Returnable items will be automatically returned when the job is completed.</p></div>';
+    
+    Swal.fire({
+        title: 'Confirm Equipment Borrowing?',
+        html: confirmationHtml,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Borrow Equipment',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            submitEquipmentRequest();
+        }
+    });
+}
+
+function submitEquipmentRequest() {
+    const bookingId = document.getElementById('equipment-booking-id').value;
+    
+    // Prepare clean equipment data with only required fields
+    const cleanEquipmentData = selectedEquipmentList.map(item => ({
+        id: parseInt(item.id),
+        quantity: parseInt(item.quantity)
+    }));
+    
+    console.log('Sending equipment data:', cleanEquipmentData); // Debug log
+    
+    const formData = new FormData();
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+    formData.append('equipment', JSON.stringify(cleanEquipmentData));
+    
+    // Show loading state on submit button
+    const submitButton = document.querySelector('#equipment-form .bg-blue-600');
+    const originalButtonContent = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Processing...';
+    
+    fetch(`/employee/jobs/${bookingId}/equipment/borrow`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success alert
+            showEquipmentSuccessAlert(data.message);
+            
+            // Close modal and reset
+            closeEquipmentModal();
+            
+            // Refresh the page after a short delay to show updated data and correct button states
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            // Handle validation errors with specific details
+            let errorMessage = 'An error occurred while borrowing equipment.';
+            
+            if (data.message) {
+                errorMessage = data.message;
+            } else if (data.errors) {
+                const errorList = Object.values(data.errors).flat();
+                errorMessage = errorList.join('\n');
+            }
+            
+            showEquipmentErrorAlert(errorMessage);
+            
+            // Reset button
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonContent;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showEquipmentErrorAlert('An error occurred while borrowing equipment. Please try again.');
+        
+        // Reset button
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonContent;
+    });
+}
+
+function closeEquipmentModal() {
+    const modal = document.getElementById('equipment-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
+    // Reset selected equipment
+    selectedEquipmentList = [];
+}
+
+function showEquipmentSuccessAlert(message) {
+    const alert = document.createElement('div');
+    alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+    alert.style.top = '80px';
+    alert.style.transform = 'translateX(100%)';
+    
+    alert.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <i class="ri-check-line text-xl"></i>
+            <div>
+                <div class="font-medium">${message}</div>
+                <div class="text-sm opacity-90">Equipment Borrowed Successfully</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animate in
+    setTimeout(() => {
+        alert.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    }, 3000);
+}
+
+function showEquipmentErrorAlert(message) {
+    Swal.fire({
+        title: 'Equipment Error',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'OK'
+    });
+}
+
+// Borrowed Items Modal Functions
+function openBorrowedItemsModal(bookingId) {
+    const modal = document.getElementById('borrowed-items-modal');
+    const content = document.getElementById('borrowed-items-content');
+    
+    // Show loading state
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="flex justify-center items-center space-x-2 mb-4">
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+                <div class="w-3 h-3 bg-blue-500 rounded-full loading-dots"></div>
+            </div>
+            <p class="text-gray-500 text-sm">Loading borrowed equipment...</p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Fetch borrowed items for this booking
+    fetch(`/employee/jobs/${bookingId}/borrowed-items`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.items && data.items.length > 0) {
+                let itemsHtml = `
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600">Equipment borrowed for this booking:</p>
+                    </div>
+                    <div class="space-y-3">
+                `;
+                
+                data.items.forEach(item => {
+                    const isReturnable = item.is_returnable;
+                    const badgeClass = isReturnable ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800';
+                    const badgeText = isReturnable ? 'Returnable' : 'Consumable';
+                    const returnStatus = isReturnable ? 'Will be returned when job is completed' : 'Used/depleted item';
+                    
+                    itemsHtml += `
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-3">
+                                    <h4 class="font-medium text-gray-900">${item.name}</h4>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badgeClass}">
+                                        ${badgeText}
+                                    </span>
+                                </div>
+                                <div class="text-lg font-bold text-blue-600">${item.quantity}x</div>
+                            </div>
+                            <div class="text-sm text-gray-500 mb-2">
+                                <span class="font-medium">${item.category}</span> • Code: ${item.item_code}
+                            </div>
+                            <div class="text-sm ${isReturnable ? 'text-blue-600' : 'text-orange-600'} font-medium">
+                                ${returnStatus}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                itemsHtml += '</div>';
+                content.innerHTML = itemsHtml;
+                
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="ri-box-3-line text-2xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Borrowed Equipment</h3>
+                        <p class="text-sm text-gray-500">This booking does not have any borrowed equipment.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading borrowed items:', error);
+            content.innerHTML = '<div class="text-center py-4 text-red-500">Error loading borrowed equipment.</div>';
+        });
+}
+
+function closeBorrowedItemsModal() {
+    const modal = document.getElementById('borrowed-items-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
 </script>
+
+{{-- Add CSS for proper modal containment --}}
+<style>
+    #equipment-modal .modal-content-container {
+        position: relative;
+        overflow: hidden;
+        contain: layout style;
+    }
+    
+    #equipment-modal .equipment-item {
+        position: relative;
+        z-index: 10;
+    }
+    
+    #equipment-modal .selected-equipment-section {
+        position: relative;
+        z-index: 10;
+        background: white;
+    }
+    
+    #equipment-modal .equipment-content {
+        overflow: hidden;
+    }
+    
+    /* Prevent content from overlapping */
+    #equipment-modal * {
+        position: relative;
+        z-index: auto;
+    }
+    
+    #equipment-modal .bg-white {
+        background: white !important;
+    }
+</style>
+
+{{-- Employee Equipment Modal --}}
+<div id="equipment-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-4 mx-auto p-0 border w-full max-w-4xl shadow-2xl rounded-lg bg-white" style="max-height: calc(100vh - 2rem);">
+        <div class="flex flex-col h-full">
+            <!-- Header - Fixed at top -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0 bg-white relative z-10">
+                <h3 class="text-xl font-semibold text-gray-900">Get Equipment for Job</h3>
+                <button onclick="closeEquipmentModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            
+            <form id="equipment-form" class="flex flex-col flex-1">
+                <input type="hidden" id="equipment-booking-id" name="booking_id">
+                
+                <!-- Scrollable content area - Takes remaining space -->
+                <div id="equipment-content" class="flex-1 overflow-y-auto p-6 bg-white relative z-10 modal-content-container">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+                
+                <!-- Footer - Fixed at bottom -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 p-6 flex-shrink-0 bg-gray-50 relative z-10">
+                    <button type="button" onclick="closeEquipmentModal()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="confirmGetEquipment()" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors cursor-pointer">
+                        <i class="ri-tools-line mr-2"></i>
+                        Borrow Equipment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Borrowed Items Modal --}}
+<div id="borrowed-items-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-4 mx-auto p-0 border w-full max-w-4xl shadow-2xl rounded-lg bg-white" style="max-height: calc(100vh - 2rem);">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+                <h3 class="text-xl font-semibold text-gray-900">Borrowed Equipment</h3>
+                <button onclick="closeBorrowedItemsModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            
+            <!-- Scrollable content area -->
+            <div id="borrowed-items-content" class="flex-1 overflow-y-auto p-6">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex justify-end pt-4 border-t border-gray-200 p-6 flex-shrink-0 bg-gray-50">
+                <button onclick="closeBorrowedItemsModal()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endpush
