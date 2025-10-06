@@ -130,6 +130,25 @@ class AdminBookingController extends Controller
             ->whereDate('updated_at', today())
             ->count();
 
+        // Handle AJAX requests for table refresh
+        if ($request->ajax()) {
+            return view('admin.bookings', [
+                'bookings' => $bookings,
+                'customers' => $customers,
+                'employees' => $employees,
+                'itemSummaries' => $itemsByBooking,
+                'locationsData' => $locationsData,
+                'receiptData' => $receiptData,
+                'totalBookings' => $totalBookings,
+                'todayBookings' => $todayBookings,
+                'activeServices' => $activeServices,
+                'completedJobsToday' => $completedJobsToday,
+                'search' => $search,
+                'sort' => $sort,
+                'sortOrder' => $sortOrder,
+            ]);
+        }
+
         return view('admin.bookings', [
             'bookings' => $bookings,
             'customers' => $customers,
@@ -272,6 +291,15 @@ class AdminBookingController extends Controller
                 'line_total_cents' => ($line * 100),
                 'created_at' => now(),
                 'updated_at' => now(),
+            ]);
+        }
+
+        // Handle AJAX requests
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking created successfully',
+                'booking_id' => $bookingId
             ]);
         }
 

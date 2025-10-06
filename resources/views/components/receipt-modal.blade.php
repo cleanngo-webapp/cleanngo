@@ -34,14 +34,14 @@ const serviceCategories = {
     'sofa': {
         name: 'Sofa Deep Cleaning',
         items: {
-            'sofa_1_seater': '1-Seater Sofa',
-            'sofa_2_seater': '2-Seater Sofa', 
-            'sofa_3_seater': '3-Seater Sofa',
-            'sofa_4_seater': '4-Seater Sofa',
-            'sofa_5_seater': '5-Seater Sofa',
-            'sofa_6_seater': '6-Seater Sofa',
-            'sofa_7_seater': '7-Seater Sofa',
-            'sofa_8_seater': '8-Seater Sofa'
+            'sofa_1': '1-Seater Sofa',
+            'sofa_2': '2-Seater Sofa', 
+            'sofa_3': '3-Seater Sofa',
+            'sofa_4': '4-Seater Sofa',
+            'sofa_5': '5-Seater Sofa',
+            'sofa_6': '6-Seater Sofa',
+            'sofa_7': '7-Seater Sofa',
+            'sofa_8': '8-Seater Sofa'
         }
     },
     'mattress': {

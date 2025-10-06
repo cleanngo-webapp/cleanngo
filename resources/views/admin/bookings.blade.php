@@ -177,7 +177,7 @@
                 </button>
             </div>
         </div>
-        <div class="overflow-x-auto">
+        <div id="bookings-table-container" class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -692,10 +692,13 @@
                             <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer hover:bg-gray-600 transition-colors duration-200" onclick="closeAdminBookingModal()">
                                 Cancel
                             </button>
-                            <button type="submit" class="px-4 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-800 transition-colors duration-200">
-                                Create Booking
+                            <button type="submit" id="admin-create-booking-btn" class="px-4 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-800 transition-colors duration-200 flex items-center justify-center min-w-[140px]">
+                                <span id="admin-booking-btn-text">Create Booking</span>
+                                <div id="admin-booking-spinner" class="hidden ml-2">
+                                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                </div>
                             </button>
-                </div>
+                        </div>
             </form>
                 </aside>
             </div>
@@ -2779,12 +2782,147 @@
             cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Submit the form
-                event.target.submit();
+                // Show preloader
+                showAdminBookingPreloader();
+                
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('input[name="_token"]').value);
+                formData.append('user_id', document.querySelector('select[name="user_id"]').value);
+                formData.append('employee_user_id', document.querySelector('select[name="employee_user_id"]').value);
+                formData.append('date', document.getElementById('admin-date-picker').value);
+                formData.append('time', document.getElementById('admin-time-picker').value);
+                formData.append('summary', document.getElementById('admin_booking_summary').value);
+                formData.append('total', document.getElementById('admin_booking_total').value);
+                formData.append('items_json', document.getElementById('admin_items_json').value);
+                formData.append('status', 'confirmed');
+                
+                // Submit via AJAX
+                fetch('{{ url("/admin/bookings") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideAdminBookingPreloader();
+                    
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Booking created successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
+                            closeAdminBookingModal();
+                            // Refresh bookings table without page reload
+                            refreshBookingsTable();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Failed to create booking. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                })
+                .catch(error => {
+                    hideAdminBookingPreloader();
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while creating the booking. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#ef4444'
+                    });
+                });
             }
         });
         
         return false;
+    }
+
+    // Preloader functions for admin booking
+    function showAdminBookingPreloader() {
+        const btn = document.getElementById('admin-create-booking-btn');
+        const btnText = document.getElementById('admin-booking-btn-text');
+        const spinner = document.getElementById('admin-booking-spinner');
+        
+        if (btn && btnText && spinner) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btnText.textContent = 'Creating...';
+            spinner.classList.remove('hidden');
+        }
+    }
+
+    function hideAdminBookingPreloader() {
+        const btn = document.getElementById('admin-create-booking-btn');
+        const btnText = document.getElementById('admin-booking-btn-text');
+        const spinner = document.getElementById('admin-booking-spinner');
+        
+        if (btn && btnText && spinner) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            btnText.textContent = 'Create Booking';
+            spinner.classList.add('hidden');
+        }
+    }
+
+    // Function to refresh bookings table via AJAX
+    function refreshBookingsTable() {
+        const tableContainer = document.getElementById('bookings-table-container');
+        if (!tableContainer) return;
+
+        // Show loading state
+        tableContainer.innerHTML = `
+            <div class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+                <span class="ml-2 text-gray-600">Loading bookings...</span>
+            </div>
+        `;
+
+        // Fetch updated bookings
+        fetch('{{ url("/admin/bookings") }}?ajax=1', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Extract table content from response
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTableContainer = doc.getElementById('bookings-table-container');
+            
+            if (newTableContainer) {
+                tableContainer.innerHTML = newTableContainer.innerHTML;
+                // Re-initialize any event listeners if needed
+                initializeBookingsTableEvents();
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing table:', error);
+            tableContainer.innerHTML = `
+                <div class="text-center py-8 text-red-600">
+                    <p>Error loading bookings. Please refresh the page.</p>
+                </div>
+            `;
+        });
+    }
+
+    // Initialize bookings table event listeners
+    function initializeBookingsTableEvents() {
+        // Re-attach any event listeners that might have been lost during refresh
+        // This can be expanded based on what interactive elements exist in the table
+        console.log('Bookings table events re-initialized');
     }
 
     // Admin Date and Time Picker Variables
