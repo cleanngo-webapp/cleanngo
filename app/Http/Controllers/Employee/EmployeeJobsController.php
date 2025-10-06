@@ -680,6 +680,128 @@ class EmployeeJobsController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get updated table data for AJAX table updates
+     */
+    public function getTableData()
+    {
+        $employeeId = Auth::user()?->employee?->id;
+        if (!$employeeId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee not found'
+            ], 404);
+        }
+
+        try {
+            // Get all bookings assigned to this employee with equipment borrowed status
+            $bookings = Booking::with(['customer', 'staffAssignments.employee'])
+                ->whereHas('staffAssignments', function ($query) use ($employeeId) {
+                    $query->where('employee_id', $employeeId);
+                })
+                ->selectRaw('
+                    bookings.*,
+                    CASE WHEN EXISTS(
+                        SELECT 1 FROM inventory_transactions 
+                        WHERE inventory_transactions.booking_id = bookings.id 
+                        AND inventory_transactions.transaction_type = "borrow"
+                    ) THEN 1 ELSE 0 END as equipment_borrowed
+                ')
+                ->orderBy('scheduled_start', 'desc')
+                ->get();
+
+            // Calculate statistics
+            $today = \Carbon\Carbon::now()->setTimezone('Asia/Manila')->startOfDay();
+            $jobsAssignedToday = $bookings->filter(function ($booking) use ($today) {
+                $scheduledDate = \Carbon\Carbon::parse($booking->scheduled_start, 'Asia/Manila');
+                return $scheduledDate->isSameDay($today) || $booking->status === 'in_progress';
+            })->count();
+
+            $jobsCompletedOverall = $bookings->where('status', 'completed')->count();
+            $pendingJobs = $bookings->whereIn('status', ['pending', 'confirmed'])->count();
+
+            // Generate the table HTML
+            $tableHtml = view('employee.partials.jobs-table-body', [
+                'bookings' => $bookings
+            ])->render();
+
+            return response()->json([
+                'success' => true,
+                'tableHtml' => $tableHtml,
+                'statistics' => [
+                    'jobsAssignedToday' => $jobsAssignedToday,
+                    'jobsCompletedOverall' => $jobsCompletedOverall,
+                    'pendingJobs' => $pendingJobs
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get table data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Check payment status for all jobs (for periodic updates)
+     */
+    public function checkPaymentStatus()
+    {
+        $employeeId = Auth::user()?->employee?->id;
+        if (!$employeeId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee not found'
+            ], 404);
+        }
+
+        try {
+            // Get all bookings assigned to this employee with payment status
+            $bookings = Booking::with(['customer', 'staffAssignments.employee'])
+                ->whereHas('staffAssignments', function ($query) use ($employeeId) {
+                    $query->where('employee_id', $employeeId);
+                })
+                ->selectRaw('
+                    bookings.*,
+                    CASE WHEN EXISTS(
+                        SELECT 1 FROM inventory_transactions 
+                        WHERE inventory_transactions.booking_id = bookings.id 
+                        AND inventory_transactions.transaction_type = "borrow"
+                    ) THEN 1 ELSE 0 END as equipment_borrowed
+                ')
+                ->where('status', 'in_progress')
+                ->whereNotNull('payment_proof_id')
+                ->get();
+
+            // Return payment status for each booking
+            $paymentStatus = $bookings->map(function ($booking) {
+                // Check if there's an approved payment proof for this booking
+                $hasApprovedPayment = \App\Models\PaymentProof::where('booking_id', $booking->id)
+                    ->where('status', 'approved')
+                    ->exists();
+                
+                return [
+                    'booking_id' => $booking->id,
+                    'payment_approved' => $hasApprovedPayment ? 1 : 0,
+                    'payment_status' => $booking->payment_status,
+                    'status' => $booking->status
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'payment_status' => $paymentStatus
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check payment status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
 

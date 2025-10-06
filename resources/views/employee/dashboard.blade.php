@@ -417,10 +417,10 @@ function submitStartJobViaAjax(jobId) {
             // Show success alert
             showJobActionSuccessAlert(data.message, 'started');
             
-            // Refresh the page after a short delay to show updated data
+            // Redirect to jobs page to see updated table
             setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+                window.location.href = '{{ route("employee.jobs") }}';
+            }, 1500);
         } else {
             // Handle errors
             showJobActionErrorAlert(data.message || 'An error occurred while starting the job.');

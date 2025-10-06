@@ -106,6 +106,8 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::get('/inventory/available', [EmployeeJobsController::class, 'getAvailableInventory'])->name('inventory.available');
     Route::post('/jobs/{bookingId}/equipment/borrow', [EmployeeJobsController::class, 'borrowEquipment'])->name('jobs.equipment.borrow');
     Route::get('/jobs/{bookingId}/borrowed-items', [EmployeeJobsController::class, 'getBorrowedItems'])->name('jobs.borrowed-items');
+    Route::get('/jobs/table-data', [EmployeeJobsController::class, 'getTableData'])->name('jobs.table-data');
+    Route::get('/jobs/payment-status', [EmployeeJobsController::class, 'checkPaymentStatus'])->name('jobs.payment-status');
     Route::get('/payroll', [EmployeePayrollController::class, 'index'])->name('payroll');
     Route::get('/notifications', [EmployeeNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/api', [EmployeeNotificationController::class, 'getNotifications'])->name('notifications.api');

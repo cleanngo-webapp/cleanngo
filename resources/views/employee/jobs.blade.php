@@ -115,7 +115,7 @@
                 </thead>
                 <tbody id="jobs-table-body" class="bg-white divide-y divide-gray-200">
                     @forelse($bookings as $b)
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-gray-50 transition-colors" data-booking-id="{{ $b->id }}">
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</div>
                         </td>
@@ -683,10 +683,23 @@ function submitPaymentProofViaAjax(form) {
     const formData = new FormData(form);
     const submitButton = document.querySelector('button[onclick="confirmAttachPayment()"]');
     
-    // Show loading state on the button
+    // Show loading state on the button with enhanced preloader
     if (submitButton) {
         submitButton.disabled = true;
-        submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Attaching Payment...';
+        submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+        submitButton.innerHTML = `
+            <div class="flex items-center justify-center">
+                <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <span>Attaching Payment...</span>
+            </div>
+        `;
+    }
+    
+    // Also disable the Attachments button in the main table to prevent multiple clicks
+    const attachmentsButton = document.querySelector(`button[onclick="openPaymentModal(${currentBookingId})"]`);
+    if (attachmentsButton) {
+        attachmentsButton.disabled = true;
+        attachmentsButton.classList.add('opacity-50', 'cursor-not-allowed');
     }
     
     fetch(form.action, {
@@ -706,26 +719,46 @@ function submitPaymentProofViaAjax(form) {
             // Close modal and reset form
             closePaymentModal();
             
-            // Refresh the page after a short delay to show updated data
+            // Update the table via AJAX instead of page reload
             setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+                refreshJobTable();
+            }, 1500);
+            
+            // Note: No need to reset button states here as modal closes and table refreshes
         } else {
             // Handle validation errors
             showPaymentErrorAlert(data.message || 'An error occurred while uploading the payment proof.');
+            
+            // Reset button states
+            resetPaymentButtonStates(submitButton, attachmentsButton);
         }
     })
     .catch(error => {
         console.error('Error:', error);
         showPaymentErrorAlert('An error occurred while uploading the payment proof. Please try again.');
+        
+        // Reset button states
+        resetPaymentButtonStates(submitButton, attachmentsButton);
     })
     .finally(() => {
-        // Re-enable submit button
-        if (submitButton) {
-            submitButton.disabled = false;
-            submitButton.innerHTML = 'Attach Payment';
-        }
+        // This will be handled by resetPaymentButtonStates in success/error cases
     });
+}
+
+// Helper function to reset payment button states after error
+function resetPaymentButtonStates(submitButton, attachmentsButton) {
+    // Reset submit button
+    if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-75', 'cursor-not-allowed');
+        submitButton.innerHTML = 'Attach Payment';
+    }
+    
+    // Reset attachments button if it exists
+    if (attachmentsButton) {
+        attachmentsButton.disabled = false;
+        attachmentsButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
 }
 
 // Show payment success alert that auto-disappears
@@ -840,10 +873,10 @@ function submitStartJobViaAjax(jobId) {
             // Show success alert
             showJobActionSuccessAlert(data.message, 'started');
             
-            // Refresh the page after a short delay to show updated data
+            // Update the table via AJAX instead of page reload
             setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+                refreshJobTable();
+            }, 1500);
         } else {
             // Handle errors
             showJobActionErrorAlert(data.message || 'An error occurred while starting the job.');
@@ -894,10 +927,10 @@ function submitCompleteJobViaAjax(jobId, jobCode) {
             // Show success alert
             showJobActionSuccessAlert(data.message, 'completed');
             
-            // Refresh the page after a short delay to show updated data
+            // Update the table via AJAX instead of page reload
             setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+                refreshJobTable();
+            }, 1500);
         } else {
             // Handle errors
             showJobActionErrorAlert(data.message || 'An error occurred while completing the job.');
@@ -1452,11 +1485,24 @@ function submitEquipmentRequest() {
     formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
     formData.append('equipment', JSON.stringify(cleanEquipmentData));
     
-    // Show loading state on submit button
+    // Show enhanced loading state on submit button with preloader
     const submitButton = document.querySelector('#equipment-form .bg-blue-600');
     const originalButtonContent = submitButton.innerHTML;
     submitButton.disabled = true;
-    submitButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Processing...';
+    submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+    submitButton.innerHTML = `
+        <div class="flex items-center justify-center">
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            <span>Processing...</span>
+        </div>
+    `;
+    
+    // Also disable the Get Equipment button in the main table to prevent multiple clicks
+    const getEquipmentButton = document.querySelector(`button[onclick="getEquipment(${bookingId})"]`);
+    if (getEquipmentButton) {
+        getEquipmentButton.disabled = true;
+        getEquipmentButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
     
     fetch(`/employee/jobs/${bookingId}/equipment/borrow`, {
         method: 'POST',
@@ -1475,10 +1521,10 @@ function submitEquipmentRequest() {
             // Close modal and reset
             closeEquipmentModal();
             
-            // Refresh the page after a short delay to show updated data and correct button states
+            // Update the table via AJAX instead of page reload
             setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+                refreshJobTable();
+            }, 1500);
         } else {
             // Handle validation errors with specific details
             let errorMessage = 'An error occurred while borrowing equipment.';
@@ -1492,18 +1538,16 @@ function submitEquipmentRequest() {
             
             showEquipmentErrorAlert(errorMessage);
             
-            // Reset button
-            submitButton.disabled = false;
-            submitButton.innerHTML = originalButtonContent;
+            // Reset button states
+            resetButtonStates(submitButton, originalButtonContent, getEquipmentButton);
         }
     })
     .catch(error => {
         console.error('Error:', error);
         showEquipmentErrorAlert('An error occurred while borrowing equipment. Please try again.');
         
-        // Reset button
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonContent;
+        // Reset button states
+        resetButtonStates(submitButton, originalButtonContent, getEquipmentButton);
     });
 }
 
@@ -1558,6 +1602,88 @@ function showEquipmentErrorAlert(message) {
         confirmButtonColor: '#dc2626',
         confirmButtonText: 'OK'
     });
+}
+
+// Helper function to reset button states after error
+function resetButtonStates(submitButton, originalButtonContent, getEquipmentButton) {
+    // Reset submit button
+    submitButton.disabled = false;
+    submitButton.classList.remove('opacity-75', 'cursor-not-allowed');
+    submitButton.innerHTML = originalButtonContent;
+    
+    // Reset get equipment button if it exists
+    if (getEquipmentButton) {
+        getEquipmentButton.disabled = false;
+        getEquipmentButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// Function to refresh the entire job table via AJAX
+function refreshJobTable() {
+    // Show loading indicator on the table
+    const tableBody = document.getElementById('jobs-table-body');
+    const originalContent = tableBody.innerHTML;
+    
+    // Add loading overlay to the table
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="px-4 py-8 text-center">
+                <div class="flex items-center justify-center space-x-3">
+                    <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span class="text-gray-500 text-sm">Updating job assignments...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+    
+    // Fetch updated table data
+    fetch('/employee/jobs/table-data', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the table body with new data
+            tableBody.innerHTML = data.tableHtml;
+            
+            // Update statistics cards
+            updateStatisticsCards(data.statistics);
+        } else {
+            // If AJAX fails, fallback to page reload
+            console.warn('Failed to refresh table via AJAX, reloading page');
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error refreshing table:', error);
+        // If AJAX fails, fallback to page reload
+        window.location.reload();
+    });
+}
+
+// Function to update statistics cards
+function updateStatisticsCards(statistics) {
+    // Update Assigned Jobs card
+    const assignedJobsElement = document.querySelector('.bg-white.rounded-xl.p-6.shadow-sm.border.border-gray-100.hover\\:shadow-md.transition-shadow .text-3xl.font-bold.text-gray-900');
+    if (assignedJobsElement && statistics.jobsAssignedToday !== undefined) {
+        assignedJobsElement.textContent = statistics.jobsAssignedToday.toLocaleString();
+    }
+    
+    // Update Completed Jobs card
+    const completedJobsElements = document.querySelectorAll('.bg-white.rounded-xl.p-6.shadow-sm.border.border-gray-100.hover\\:shadow-md.transition-shadow .text-3xl.font-bold.text-gray-900');
+    if (completedJobsElements.length >= 2 && statistics.jobsCompletedOverall !== undefined) {
+        completedJobsElements[1].textContent = statistics.jobsCompletedOverall.toLocaleString();
+    }
+    
+    // Update Pending Jobs card
+    if (completedJobsElements.length >= 3 && statistics.pendingJobs !== undefined) {
+        completedJobsElements[2].textContent = statistics.pendingJobs.toLocaleString();
+    }
 }
 
 // Borrowed Items Modal Functions
@@ -1749,4 +1875,135 @@ function closeBorrowedItemsModal() {
         </div>
     </div>
 </div>
+
+{{-- Payment Status Polling Script --}}
+<script>
+// Payment status polling functionality
+let paymentStatusInterval = null;
+let lastPaymentStatus = {};
+
+// Function to start payment status polling
+function startPaymentStatusPolling() {
+    // Only poll if there are jobs in progress with payment proofs
+    const hasJobsWithPayments = document.querySelectorAll('button[onclick*="openPaymentModal"]').length > 0;
+    if (!hasJobsWithPayments) {
+        return; // No need to poll if no jobs with payments
+    }
+    
+    // Check payment status every 3 seconds
+    paymentStatusInterval = setInterval(checkPaymentStatus, 3000);
+    
+    // Also check immediately when page loads
+    setTimeout(checkPaymentStatus, 5000); // Check after 5 seconds
+}
+
+// Function to stop payment status polling
+function stopPaymentStatusPolling() {
+    if (paymentStatusInterval) {
+        clearInterval(paymentStatusInterval);
+        paymentStatusInterval = null;
+    }
+}
+
+// Function to check payment status
+function checkPaymentStatus() {
+    fetch('/employee/jobs/payment-status', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.payment_status) {
+            // Check if any payment status has changed
+            let hasChanges = false;
+            
+            data.payment_status.forEach(payment => {
+                const bookingId = payment.booking_id;
+                const currentStatus = `${payment.payment_approved}-${payment.payment_status}`;
+                const lastStatus = lastPaymentStatus[bookingId];
+                
+                console.log(`Booking ${bookingId}: payment_approved=${payment.payment_approved}, payment_status=${payment.payment_status}, currentStatus=${currentStatus}, lastStatus=${lastStatus}`);
+                
+                if (lastStatus && lastStatus !== currentStatus) {
+                    hasChanges = true;
+                    console.log(`Payment status changed for booking ${bookingId}: ${lastStatus} → ${currentStatus}`);
+                }
+                
+                lastPaymentStatus[bookingId] = currentStatus;
+            });
+            
+            // If there are changes, refresh the table
+            if (hasChanges) {
+                console.log('Payment status changes detected, refreshing table...');
+                refreshJobTable();
+                
+                // Show notification
+                showPaymentStatusUpdateNotification();
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error checking payment status:', error);
+        // Don't show error to user, just log it
+    });
+}
+
+// Function to show payment status update notification
+function showPaymentStatusUpdateNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'fixed right-4 bg-blue-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+    notification.style.top = '80px';
+    notification.style.transform = 'translateX(100%)';
+    
+    notification.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <i class="ri-notification-line text-xl"></i>
+            <div>
+                <div class="font-medium">Payment Status Updated</div>
+                <div class="text-sm opacity-90">Your job assignments have been refreshed</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
+}
+
+// Start polling when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startPaymentStatusPolling();
+});
+
+// Stop polling when page is hidden (to save resources)
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        stopPaymentStatusPolling();
+    } else {
+        startPaymentStatusPolling();
+    }
+});
+
+// Stop polling when user navigates away
+window.addEventListener('beforeunload', function() {
+    stopPaymentStatusPolling();
+});
+</script>
 @endpush
