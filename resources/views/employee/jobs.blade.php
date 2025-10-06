@@ -1881,6 +1881,8 @@ function closeBorrowedItemsModal() {
 // Payment status polling functionality
 let paymentStatusInterval = null;
 let lastPaymentStatus = {};
+let lastJobAssignments = {};
+let lastTotalJobs = 0;
 
 // Function to start payment status polling
 function startPaymentStatusPolling() {
@@ -1933,6 +1935,7 @@ function checkPaymentStatus() {
             // Check if any payment status has changed
             let hasChanges = false;
             
+            // Check payment status changes
             data.payment_status.forEach(payment => {
                 const bookingId = payment.booking_id;
                 const currentStatus = `${payment.payment_approved}-${payment.payment_status}-${payment.has_payment_proof}`;
@@ -1950,15 +1953,50 @@ function checkPaymentStatus() {
                 lastPaymentStatus[bookingId] = currentStatus;
             });
             
+            // Check for new job assignments
+            if (data.job_assignments) {
+                const currentTotalJobs = data.total_jobs || 0;
+                console.log(`Total jobs: ${currentTotalJobs}, Last total: ${lastTotalJobs}`);
+                
+                // Check if total number of jobs has changed
+                if (lastTotalJobs > 0 && currentTotalJobs !== lastTotalJobs) {
+                    hasChanges = true;
+                    console.log(`Job count changed: ${lastTotalJobs} → ${currentTotalJobs}`);
+                }
+                
+                // Check for new or updated job assignments
+                data.job_assignments.forEach(job => {
+                    const bookingId = job.booking_id;
+                    const currentJobStatus = `${job.status}-${job.updated_at}`;
+                    const lastJobStatus = lastJobAssignments[bookingId];
+                    
+                    console.log(`Job ${bookingId}: status=${job.status}, updated_at=${job.updated_at}, currentJobStatus=${currentJobStatus}, lastJobStatus=${lastJobStatus}`);
+                    
+                    // Detect new jobs or status changes
+                    if (lastJobStatus === undefined) {
+                        hasChanges = true;
+                        console.log(`New job assigned: ${bookingId}`);
+                    } else if (lastJobStatus !== currentJobStatus) {
+                        hasChanges = true;
+                        console.log(`Job status changed for booking ${bookingId}: ${lastJobStatus} → ${currentJobStatus}`);
+                    }
+                    
+                    // Always update the last job status for future comparisons
+                    lastJobAssignments[bookingId] = currentJobStatus;
+                });
+                
+                lastTotalJobs = currentTotalJobs;
+            }
+            
             // If there are changes, refresh the table
             if (hasChanges) {
-                console.log('Payment status changes detected, refreshing table...');
+                console.log('Changes detected (payment status or job assignments), refreshing table...');
                 refreshJobTable();
                 
                 // Show notification
                 showPaymentStatusUpdateNotification();
             } else {
-                console.log('No payment status changes detected');
+                console.log('No changes detected');
             }
         }
     })
@@ -1979,7 +2017,7 @@ function showPaymentStatusUpdateNotification() {
         <div class="flex items-center space-x-3">
             <i class="ri-notification-line text-xl"></i>
             <div>
-                <div class="font-medium">Payment Status Updated</div>
+                <div class="font-medium">Job Updates Available</div>
                 <div class="text-sm opacity-90">Your job assignments have been refreshed</div>
             </div>
         </div>

@@ -758,18 +758,22 @@ class EmployeeJobsController extends Controller
         }
 
         try {
-            // Get all bookings assigned to this employee that are in progress
-            $bookings = Booking::with(['customer', 'staffAssignments.employee'])
+            // Get all bookings assigned to this employee (all statuses, not just in_progress)
+            $allBookings = Booking::with(['customer', 'staffAssignments.employee'])
                 ->whereHas('staffAssignments', function ($query) use ($employeeId) {
                     $query->where('employee_id', $employeeId);
                 })
-                ->where('status', 'in_progress')
                 ->get();
 
-            \Log::info('Payment status check for employee ' . $employeeId . ': Found ' . $bookings->count() . ' bookings');
+            \Log::info('Job assignment check for employee ' . $employeeId . ': Found ' . $allBookings->count() . ' total bookings');
 
-            // Return payment status for each booking
-            $paymentStatus = $bookings->map(function ($booking) {
+            // Get only in-progress bookings for payment status checking
+            $inProgressBookings = $allBookings->where('status', 'in_progress');
+
+            \Log::info('Payment status check for employee ' . $employeeId . ': Found ' . $inProgressBookings->count() . ' in-progress bookings');
+
+            // Return payment status for in-progress bookings
+            $paymentStatus = $inProgressBookings->map(function ($booking) {
                 // Check if there's an approved payment proof for this booking
                 $hasApprovedPayment = \App\Models\PaymentProof::where('booking_id', $booking->id)
                     ->where('status', 'approved')
@@ -789,9 +793,22 @@ class EmployeeJobsController extends Controller
                 ];
             });
 
+            // Return job assignment info for all bookings
+            $jobAssignments = $allBookings->map(function ($booking) {
+                return [
+                    'booking_id' => $booking->id,
+                    'status' => $booking->status,
+                    'scheduled_start' => $booking->scheduled_start,
+                    'created_at' => $booking->created_at,
+                    'updated_at' => $booking->updated_at
+                ];
+            });
+
             return response()->json([
                 'success' => true,
-                'payment_status' => $paymentStatus
+                'payment_status' => $paymentStatus,
+                'job_assignments' => $jobAssignments,
+                'total_jobs' => $allBookings->count()
             ]);
 
         } catch (\Exception $e) {
