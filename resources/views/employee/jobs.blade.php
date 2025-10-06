@@ -1884,12 +1884,18 @@ let lastPaymentStatus = {};
 
 // Function to start payment status polling
 function startPaymentStatusPolling() {
-    // Only poll if there are jobs in progress with payment proofs
-    const hasJobsWithPayments = document.querySelectorAll('button[onclick*="openPaymentModal"]').length > 0;
-    if (!hasJobsWithPayments) {
-        return; // No need to poll if no jobs with payments
+    console.log('Starting payment status polling...');
+    
+    // Always poll if there are jobs in progress (regardless of payment proof status)
+    const hasJobsInProgress = document.querySelectorAll('tr[data-booking-id]').length > 0;
+    console.log('Jobs in progress found:', hasJobsInProgress);
+    
+    if (!hasJobsInProgress) {
+        console.log('No jobs found, skipping polling');
+        return; // No need to poll if no jobs at all
     }
     
+    console.log('Setting up polling interval...');
     // Check payment status every 3 seconds
     paymentStatusInterval = setInterval(checkPaymentStatus, 3000);
     
@@ -1907,6 +1913,8 @@ function stopPaymentStatusPolling() {
 
 // Function to check payment status
 function checkPaymentStatus() {
+    console.log('Checking payment status...');
+    
     fetch('/employee/jobs/payment-status', {
         method: 'GET',
         headers: {
@@ -1915,24 +1923,30 @@ function checkPaymentStatus() {
             'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Payment status response:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Payment status data:', data);
         if (data.success && data.payment_status) {
             // Check if any payment status has changed
             let hasChanges = false;
             
             data.payment_status.forEach(payment => {
                 const bookingId = payment.booking_id;
-                const currentStatus = `${payment.payment_approved}-${payment.payment_status}`;
+                const currentStatus = `${payment.payment_approved}-${payment.payment_status}-${payment.has_payment_proof}`;
                 const lastStatus = lastPaymentStatus[bookingId];
                 
-                console.log(`Booking ${bookingId}: payment_approved=${payment.payment_approved}, payment_status=${payment.payment_status}, currentStatus=${currentStatus}, lastStatus=${lastStatus}`);
+                console.log(`Booking ${bookingId}: payment_approved=${payment.payment_approved}, payment_status=${payment.payment_status}, has_payment_proof=${payment.has_payment_proof}, currentStatus=${currentStatus}, lastStatus=${lastStatus}`);
                 
-                if (lastStatus && lastStatus !== currentStatus) {
+                // Only detect changes if we have a previous status AND it's different
+                if (lastStatus !== undefined && lastStatus !== currentStatus) {
                     hasChanges = true;
                     console.log(`Payment status changed for booking ${bookingId}: ${lastStatus} → ${currentStatus}`);
                 }
                 
+                // Always update the last status for future comparisons
                 lastPaymentStatus[bookingId] = currentStatus;
             });
             
@@ -1943,6 +1957,8 @@ function checkPaymentStatus() {
                 
                 // Show notification
                 showPaymentStatusUpdateNotification();
+            } else {
+                console.log('No payment status changes detected');
             }
         }
     })
@@ -2000,6 +2016,15 @@ document.addEventListener('visibilitychange', function() {
         startPaymentStatusPolling();
     }
 });
+
+// Test function to manually refresh the table (for debugging)
+function testTableRefresh() {
+    console.log('Manually testing table refresh...');
+    refreshJobTable();
+}
+
+// Make test function available globally for console testing
+window.testTableRefresh = testTableRefresh;
 
 // Stop polling when user navigates away
 window.addEventListener('beforeunload', function() {

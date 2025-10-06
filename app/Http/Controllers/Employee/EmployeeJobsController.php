@@ -758,22 +758,15 @@ class EmployeeJobsController extends Controller
         }
 
         try {
-            // Get all bookings assigned to this employee with payment status
+            // Get all bookings assigned to this employee that are in progress
             $bookings = Booking::with(['customer', 'staffAssignments.employee'])
                 ->whereHas('staffAssignments', function ($query) use ($employeeId) {
                     $query->where('employee_id', $employeeId);
                 })
-                ->selectRaw('
-                    bookings.*,
-                    CASE WHEN EXISTS(
-                        SELECT 1 FROM inventory_transactions 
-                        WHERE inventory_transactions.booking_id = bookings.id 
-                        AND inventory_transactions.transaction_type = "borrow"
-                    ) THEN 1 ELSE 0 END as equipment_borrowed
-                ')
                 ->where('status', 'in_progress')
-                ->whereNotNull('payment_proof_id')
                 ->get();
+
+            \Log::info('Payment status check for employee ' . $employeeId . ': Found ' . $bookings->count() . ' bookings');
 
             // Return payment status for each booking
             $paymentStatus = $bookings->map(function ($booking) {
@@ -782,11 +775,17 @@ class EmployeeJobsController extends Controller
                     ->where('status', 'approved')
                     ->exists();
                 
+                // Check if there's any payment proof for this booking
+                $hasPaymentProof = \App\Models\PaymentProof::where('booking_id', $booking->id)->exists();
+                
+                \Log::info('Booking ' . $booking->id . ': payment_approved=' . ($hasApprovedPayment ? 1 : 0) . ', payment_status=' . $booking->payment_status . ', has_payment_proof=' . ($hasPaymentProof ? 1 : 0));
+                
                 return [
                     'booking_id' => $booking->id,
                     'payment_approved' => $hasApprovedPayment ? 1 : 0,
                     'payment_status' => $booking->payment_status,
-                    'status' => $booking->status
+                    'status' => $booking->status,
+                    'has_payment_proof' => $hasPaymentProof ? 1 : 0
                 ];
             });
 
@@ -796,6 +795,8 @@ class EmployeeJobsController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Payment status check error: ' . $e->getMessage());
+            \Log::error('Payment status check stack trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to check payment status: ' . $e->getMessage()
