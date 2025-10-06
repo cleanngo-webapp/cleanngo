@@ -605,13 +605,68 @@
                         
                         <!-- Date and Time Selection -->
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
+                            <div class="relative">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                                <input type="date" name="date" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                                <input type="text" id="admin-date-picker" name="date" readonly placeholder="Select date" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
+                                <i class="ri-calendar-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
+                                <!-- Custom Date Picker -->
+                                <div id="admin-date-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden" style="width: 240px;">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <button type="button" id="admin-prev-month" class="p-1 hover:bg-gray-100 rounded cursor-pointer">
+                                            <i class="ri-arrow-left-s-line text-gray-600"></i>
+                                        </button>
+                                        <h3 id="admin-current-month" class="font-semibold text-gray-800"></h3>
+                                        <button type="button" id="admin-next-month" class="p-1 hover:bg-gray-100 rounded cursor-pointer">
+                                            <i class="ri-arrow-right-s-line text-gray-600"></i>
+                                        </button>
                             </div>
-                            <div>
+                                    <div class="grid grid-cols-7 gap-1 mb-2">
+                                        <div class="text-center text-xs font-medium text-gray-500 py-1">Su</div>
+                                        <div class="text-center text-xs font-medium text-gray-500 py-1">Mo</div>
+                                        <div class="text-center text-xs font-medium text-gray-500 py-1">Tu</div>
+                                        <div class="text-center text-xs font-medium text-gray-500 py-1">We</div>
+                                        <div class="text-center text-xs font-medium text-gray-500 py-1">Th</div>
+                                        <div class="text-center text-xs font-medium text-gray-500 py-1">Fr</div>
+                                        <div class="text-center text-xs font-medium text-gray-500 py-1">Sa</div>
+                                    </div>
+                                    <div id="admin-calendar-days" class="grid grid-cols-7 gap-1"></div>
+                                    <div class="flex justify-between mt-3 pt-3 border-t">
+                                        <button type="button" id="admin-today-btn" class="text-sm text-emerald-600 hover:text-emerald-700 cursor-pointer">Today</button>
+                                        <button type="button" id="admin-clear-date" class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                                <input type="time" name="time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                                <input type="text" id="admin-time-picker" name="time" readonly placeholder="Select time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
+                                <i class="ri-time-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
+                                <!-- Custom Time Picker -->
+                                <div id="admin-time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-4 hidden" style="width: 200px;">
+                                    <div class="flex items-center justify-center gap-2 mb-3">
+                                        <select id="admin-hour-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+                                            <option value="">--</option>
+                                            @for($i = 1; $i <= 12; $i++)
+                                                <option value="{{ $i }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                                            @endfor
+                                        </select>
+                                        <span class="text-gray-500">:</span>
+                                        <select id="admin-minute-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+                                            <option value="">--</option>
+                                            @for($i = 0; $i < 60; $i += 15)
+                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                                            @endfor
+                                        </select>
+                                        <select id="admin-ampm-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+                                            <option value="">--</option>
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <button type="button" id="admin-apply-time" class="px-3 py-1 bg-emerald-600 text-white rounded text-sm hover:bg-emerald-700 cursor-pointer">Apply</button>
+                                        <button type="button" id="admin-clear-time" class="px-3 py-1 text-gray-500 hover:text-gray-700 text-sm cursor-pointer">Clear</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -2147,15 +2202,15 @@
             if (sofaTypeSelect && sofaTypeSelect.value) {
                 const selectedType = sofaTypeSelect.value;
                 const selectedLabel = sofaTypeSelect.options[sofaTypeSelect.selectedIndex].text;
-                
-                // Sofa pricing
-                const sofaPrices = {
+
+        // Sofa pricing
+        const sofaPrices = {
                     'sofa_1': 750, 'sofa_2': 1250, 'sofa_3': 1750, 'sofa_4': 2250,
                     'sofa_5': 2750, 'sofa_6': 3250, 'sofa_7': 3750, 'sofa_8': 4250
                 };
-                
-                // Mattress pricing
-                const mattressPrices = {
+
+        // Mattress pricing
+        const mattressPrices = {
                     'mattress_single': 1200, 'mattress_double': 1500, 
                     'mattress_king': 1800, 'mattress_california': 2000
                 };
@@ -2169,13 +2224,13 @@
                                 <div class="flex-1">
                                     <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
                                     <div class="mt-2 space-y-1">
-                                        <div class="flex justify-between items-center py-1">
-                                            <div class="flex-1">
+                    <div class="flex justify-between items-center py-1">
+                        <div class="flex-1">
                                                 <span class="text-xs text-gray-600">${selectedLabel}</span>
                                                 <span class="text-xs text-gray-500 ml-2">x ${sofaSelectedQty}</span>
-                                            </div>
+                        </div>
                                             <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
-                                        </div>
+                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -2213,27 +2268,27 @@
                 const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
                 if (quantity > 0 && price > 0) {
                     const totalAmount = quantity * price;
-                    receipt.push(`
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex-1">
-                                    <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
-                                    <div class="mt-2 space-y-1">
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
+                            <div class="mt-2 space-y-1">
                                         <div class="flex justify-between items-center py-1">
                                             <div class="flex-1">
                                                 <span class="text-xs text-gray-600">${selectedLabel}</span>
                                                 <span class="text-xs text-gray-500 ml-2">x ${quantity}</span>
-                                            </div>
-                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
+                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
                         </div>
-                    `);
-                    subtotal += totalAmount;
-                    itemCounter++;
-                }
+                    </div>
+                                </div>
+                    </div>
+                </div>
+            `);
+            subtotal += totalAmount;
+            itemCounter++;
+        }
             }
         });
 
@@ -2244,8 +2299,8 @@
             if (carTypeSelect && carTypeSelect.value) {
                 const selectedType = carTypeSelect.value;
                 const selectedLabel = carTypeSelect.options[carTypeSelect.selectedIndex].text;
-                
-                const carPrices = {
+
+        const carPrices = {
                     'car_sedan': 2900, 'car_suv': 3900, 'car_van': 6900, 'car_coaster': 3000
                 };
                 
@@ -2258,13 +2313,13 @@
                                 <div class="flex-1">
                                     <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
                                     <div class="mt-2 space-y-1">
-                                        <div class="flex justify-between items-center py-1">
-                                            <div class="flex-1">
+                    <div class="flex justify-between items-center py-1">
+                        <div class="flex-1">
                                                 <span class="text-xs text-gray-600">${selectedLabel}</span>
                                                 <span class="text-xs text-gray-500 ml-2">x ${carSelectedQty}</span>
-                                            </div>
+                        </div>
                                             <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
-                                        </div>
+                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -2294,27 +2349,27 @@
                 const price = carPrices[selectedType] || 0;
                 if (quantity > 0 && price > 0) {
                     const totalAmount = quantity * price;
-                    receipt.push(`
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex-1">
-                                    <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
-                                    <div class="mt-2 space-y-1">
+            receipt.push(`
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
+                            <div class="mt-2 space-y-1">
                                         <div class="flex justify-between items-center py-1">
                                             <div class="flex-1">
                                                 <span class="text-xs text-gray-600">${selectedLabel}</span>
                                                 <span class="text-xs text-gray-500 ml-2">x ${quantity}</span>
-                                            </div>
-                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
+                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
                         </div>
-                    `);
-                    subtotal += totalAmount;
-                    itemCounter++;
-                }
+                    </div>
+                                </div>
+                    </div>
+                </div>
+            `);
+            subtotal += totalAmount;
+            itemCounter++;
+        }
             }
         });
 
@@ -2490,6 +2545,16 @@
         if (form) {
             form.reset();
         }
+        
+        // Reset admin date and time pickers
+        adminSelectedDate = null;
+        adminSelectedTime = null;
+        document.getElementById('admin-date-picker').value = '';
+        document.getElementById('admin-time-picker').value = '';
+        document.getElementById('admin-date-picker').placeholder = 'Select date';
+        document.getElementById('admin-time-picker').placeholder = 'Select time';
+        document.getElementById('admin-date-picker-dropdown').classList.add('hidden');
+        document.getElementById('admin-time-picker-dropdown').classList.add('hidden');
         
         // Reset to first service
         adminShowForm('sofa');
@@ -2696,7 +2761,7 @@
 
         // Generate service summary
         const serviceSummary = generateAdminServiceSummary(items);
-        
+
         // Set hidden fields
         document.getElementById('admin_booking_total').value = total;
         document.getElementById('admin_items_json').value = JSON.stringify(items);
@@ -2722,6 +2787,248 @@
         return false;
     }
 
+    // Admin Date and Time Picker Variables
+    let adminSelectedDate = null;
+    let adminSelectedTime = null;
+
+    // Admin Date Picker Functions
+    function initAdminDatePicker() {
+        const dateInput = document.getElementById('admin-date-picker');
+        const dateDropdown = document.getElementById('admin-date-picker-dropdown');
+        const prevBtn = document.getElementById('admin-prev-month');
+        const nextBtn = document.getElementById('admin-next-month');
+        const todayBtn = document.getElementById('admin-today-btn');
+        const clearBtn = document.getElementById('admin-clear-date');
+
+        // Check if elements exist
+        if (!dateInput || !dateDropdown) {
+            console.log('Admin date picker elements not found');
+            return;
+        }
+
+        // Remove existing event listeners to prevent duplicates
+        dateInput.removeEventListener('click', dateInput._adminDateClickHandler);
+        
+        // Create new event handler
+        dateInput._adminDateClickHandler = (e) => {
+            e.stopPropagation();
+            dateDropdown.classList.toggle('hidden');
+            if (!dateDropdown.classList.contains('hidden')) {
+                // Position calendar directly below the input
+                const rect = dateInput.getBoundingClientRect();
+                dateDropdown.style.left = rect.left + 'px';
+                dateDropdown.style.top = (rect.bottom + 5) + 'px';
+                adminRenderCalendar();
+            }
+        };
+
+        dateInput.addEventListener('click', dateInput._adminDateClickHandler);
+
+        // Navigation buttons
+        if (prevBtn) prevBtn.addEventListener('click', () => {
+            adminCurrentMonth.setMonth(adminCurrentMonth.getMonth() - 1);
+            adminRenderCalendar();
+        });
+
+        if (nextBtn) nextBtn.addEventListener('click', () => {
+            adminCurrentMonth.setMonth(adminCurrentMonth.getMonth() + 1);
+            adminRenderCalendar();
+        });
+
+        // Today button
+        if (todayBtn) todayBtn.addEventListener('click', () => {
+            adminSelectDate(new Date());
+            dateDropdown.classList.add('hidden');
+        });
+
+        // Clear button
+        if (clearBtn) clearBtn.addEventListener('click', () => {
+            adminSelectedDate = null;
+            dateInput.value = '';
+            dateInput.placeholder = 'Select date';
+            adminRenderCalendar();
+            dateDropdown.classList.add('hidden');
+        });
+    }
+
+    let adminCurrentMonth = new Date();
+
+    function adminRenderCalendar() {
+        const calendarDays = document.getElementById('admin-calendar-days');
+        const currentMonthElement = document.getElementById('admin-current-month');
+        
+        if (!calendarDays || !currentMonthElement) return;
+
+        // Update month display
+        currentMonthElement.textContent = adminCurrentMonth.toLocaleDateString('en-US', { 
+            month: 'long', 
+            year: 'numeric' 
+        });
+
+        // Clear previous days
+        calendarDays.innerHTML = '';
+
+        // Get first day of month and number of days
+        const firstDay = new Date(adminCurrentMonth.getFullYear(), adminCurrentMonth.getMonth(), 1);
+        const lastDay = new Date(adminCurrentMonth.getFullYear(), adminCurrentMonth.getMonth() + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+
+        // Add empty cells for days before the first day of the month
+        for (let i = 0; i < startingDayOfWeek; i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'h-8';
+            calendarDays.appendChild(emptyDay);
+        }
+
+        // Add days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'h-8 flex items-center justify-center text-sm cursor-pointer hover:bg-gray-100 rounded';
+            dayElement.textContent = day;
+
+            const currentDay = new Date(adminCurrentMonth.getFullYear(), adminCurrentMonth.getMonth(), day);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Style past days
+            if (currentDay < today) {
+                dayElement.classList.add('text-gray-400', 'cursor-not-allowed');
+                dayElement.style.pointerEvents = 'none';
+            } else {
+                dayElement.classList.add('text-gray-700');
+            }
+
+            // Style today
+            if (currentDay.getTime() === today.getTime()) {
+                dayElement.classList.add('bg-emerald-100', 'text-emerald-700', 'font-semibold');
+            }
+
+            // Style selected date
+            if (adminSelectedDate && currentDay.getTime() === adminSelectedDate.getTime()) {
+                dayElement.classList.add('bg-emerald-600', 'text-white', 'font-semibold');
+            }
+
+            // Style hover for future dates
+            if (currentDay >= today) {
+                dayElement.addEventListener('mouseenter', () => {
+                    if (!adminSelectedDate || currentDay.getTime() !== adminSelectedDate.getTime()) {
+                        dayElement.classList.add('bg-gray-100');
+                    }
+                });
+                dayElement.addEventListener('mouseleave', () => {
+                    if (!adminSelectedDate || currentDay.getTime() !== adminSelectedDate.getTime()) {
+                        dayElement.classList.remove('bg-gray-100');
+                    }
+                });
+            }
+
+            dayElement.addEventListener('click', () => {
+                if (currentDay >= today) {
+                    adminSelectDate(currentDay);
+                    dateDropdown.classList.add('hidden');
+                }
+            });
+
+            calendarDays.appendChild(dayElement);
+        }
+    }
+
+    function adminSelectDate(date) {
+        adminSelectedDate = date;
+        const dateInput = document.getElementById('admin-date-picker');
+        const formattedDate = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+        dateInput.value = formattedDate;
+        dateInput.placeholder = date.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        adminRenderCalendar(); // Re-render to update selection
+    }
+
+    // Admin Time Picker Functions
+    function initAdminTimePicker() {
+        const timeInput = document.getElementById('admin-time-picker');
+        const timeDropdown = document.getElementById('admin-time-picker-dropdown');
+        const hourSelect = document.getElementById('admin-hour-select');
+        const minuteSelect = document.getElementById('admin-minute-select');
+        const ampmSelect = document.getElementById('admin-ampm-select');
+        const applyBtn = document.getElementById('admin-apply-time');
+        const clearBtn = document.getElementById('admin-clear-time');
+
+        // Check if elements exist
+        if (!timeInput || !timeDropdown) {
+            console.log('Admin time picker elements not found');
+            return;
+        }
+
+        // Remove existing event listeners to prevent duplicates
+        timeInput.removeEventListener('click', timeInput._adminTimeClickHandler);
+        
+        // Create new event handler
+        timeInput._adminTimeClickHandler = (e) => {
+            e.stopPropagation();
+            timeDropdown.classList.toggle('hidden');
+            if (!timeDropdown.classList.contains('hidden')) {
+                // Position time picker directly below the input
+                const rect = timeInput.getBoundingClientRect();
+                timeDropdown.style.left = rect.left + 'px';
+                timeDropdown.style.top = (rect.bottom + 5) + 'px';
+            }
+        };
+
+        timeInput.addEventListener('click', timeInput._adminTimeClickHandler);
+
+        // Apply button
+        if (applyBtn) applyBtn.addEventListener('click', () => {
+            const hour = hourSelect.value;
+            const minute = minuteSelect.value;
+            const ampm = ampmSelect.value;
+
+            if (hour && minute && ampm) {
+                adminSelectTime(hour, minute, ampm);
+                timeDropdown.classList.add('hidden');
+            }
+        });
+
+        // Clear button
+        if (clearBtn) clearBtn.addEventListener('click', () => {
+            adminSelectedTime = null;
+            timeInput.value = '';
+            timeInput.placeholder = 'Select time';
+            hourSelect.value = '';
+            minuteSelect.value = '';
+            ampmSelect.value = '';
+            timeDropdown.classList.add('hidden');
+        });
+    }
+
+    function adminSelectTime(hour, minute, ampm) {
+        adminSelectedTime = { hour, minute, ampm };
+        const timeInput = document.getElementById('admin-time-picker');
+        const formattedTime = `${hour}:${minute} ${ampm}`;
+        timeInput.value = formattedTime;
+        timeInput.placeholder = formattedTime;
+    }
+
+    // Close admin pickers when clicking outside
+    document.addEventListener('click', function(e) {
+        const adminDateInput = document.getElementById('admin-date-picker');
+        const adminDateDropdown = document.getElementById('admin-date-picker-dropdown');
+        const adminTimeInput = document.getElementById('admin-time-picker');
+        const adminTimeDropdown = document.getElementById('admin-time-picker-dropdown');
+
+        if (adminDateDropdown && !adminDateInput.contains(e.target) && !adminDateDropdown.contains(e.target)) {
+            adminDateDropdown.classList.add('hidden');
+        }
+
+        if (adminTimeDropdown && !adminTimeInput.contains(e.target) && !adminTimeDropdown.contains(e.target)) {
+            adminTimeDropdown.classList.add('hidden');
+        }
+    });
+
     // Initialize admin modal when opened
     document.addEventListener('DOMContentLoaded', function() {
         // Override the original modal opening to initialize admin functionality
@@ -2734,6 +3041,12 @@
                 
                 // Initialize with first service active
                 adminShowForm('sofa');
+                
+                // Initialize admin date and time pickers
+                setTimeout(() => {
+                    initAdminDatePicker();
+                    initAdminTimePicker();
+                }, 100);
             };
         }
     });
