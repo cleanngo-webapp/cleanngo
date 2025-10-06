@@ -169,7 +169,11 @@
                                     @endif
                                 @elseif($b->status === 'pending' || $b->status === 'confirmed')
                                     @php
-                                        $isScheduledToday = \Carbon\Carbon::parse($b->scheduled_start)->isToday();
+                                        // Fix timezone issue: Check if job is scheduled for today in local timezone
+                                        // Parse scheduled_start as Manila time and compare with Manila time
+                                        $scheduledDate = \Carbon\Carbon::parse($b->scheduled_start, 'Asia/Manila');
+                                        $today = \Carbon\Carbon::now('Asia/Manila');
+                                        $isScheduledToday = $scheduledDate->isSameDay($today);
                                         $canStartJob = $isScheduledToday || $b->status === 'in_progress';
                                     @endphp
                                         @if($canStartJob)

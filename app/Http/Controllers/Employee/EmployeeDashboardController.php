@@ -30,7 +30,7 @@ class EmployeeDashboardController extends Controller
             ]);
         }
         
-        $today = Carbon::today();
+        $today = Carbon::now()->setTimezone('Asia/Manila')->startOfDay();
         
         // Get jobs assigned to this employee today or currently in progress (excluding completed jobs)
         // This includes jobs scheduled for today OR currently in progress, but excludes completed jobs

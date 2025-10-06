@@ -127,7 +127,7 @@ class EmployeeJobsController extends Controller
         }
 
         // Calculate job statistics for the cards
-        $today = Carbon::today();
+        $today = Carbon::now()->setTimezone('Asia/Manila')->startOfDay();
         
         // Get jobs assigned to this employee today or currently in progress (excluding completed jobs)
         $jobsAssignedToday = DB::table('booking_staff_assignments')
