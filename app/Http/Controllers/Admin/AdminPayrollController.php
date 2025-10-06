@@ -138,20 +138,30 @@ class AdminPayrollController extends Controller
             }
         }
 
-        // Calculate monthly earnings summary for all employees
-        $monthlyEarnings = $payrollRecords
-            ->where('completed_at', '>=', now()->startOfMonth())
-            ->sum('total_due_cents') / 100;
-
+        // Calculate monthly earnings summary for admin
+        // Admin receives total amount minus 600 per job (employee payment)
         $monthlyJobsCompleted = $payrollRecords
             ->where('completed_at', '>=', now()->startOfMonth())
             ->count();
+        
+        // Calculate total earnings from payment_amount or total_due_cents
+        $monthlyTotalEarnings = $payrollRecords
+            ->where('completed_at', '>=', now()->startOfMonth())
+            ->reduce(function($carry, $record) {
+                // Use payment_amount if available, otherwise use total_due_cents
+                $amount = $record->payment_amount ?? ($record->total_due_cents / 100);
+                return $carry + $amount;
+            }, 0);
+        
+        // Admin earnings = total earnings - (600 * number of jobs)
+        $monthlyEarnings = $monthlyTotalEarnings - (600 * $monthlyJobsCompleted);
 
         return view('admin.payroll', [
             'payrollRecords' => $payrollRecords,
             'serviceSummaries' => $serviceSummaries,
             'receiptData' => $receiptData,
             'monthlyEarnings' => $monthlyEarnings,
+            'monthlyTotalEarnings' => $monthlyTotalEarnings,
             'monthlyJobsCompleted' => $monthlyJobsCompleted,
         ]);
     }

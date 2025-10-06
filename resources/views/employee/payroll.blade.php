@@ -11,7 +11,7 @@
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total Earnings</p>
+                    <p class="text-sm font-medium text-gray-600">My Earnings</p>
                     <p class="text-3xl font-bold text-gray-900">₱{{ number_format($monthlyEarnings, 2) }}</p>
                     <p class="text-xs text-gray-500 mt-1">This month</p>
                 </div>
@@ -26,7 +26,7 @@
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total Payroll</p>
+                    <p class="text-sm font-medium text-gray-600">Jobs Completed</p>
                     <p class="text-3xl font-bold text-gray-900">{{ $monthlyJobsCompleted }}</p>
                     <p class="text-xs text-gray-500 mt-1">This month</p>
                 </div>
@@ -86,7 +86,7 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Booking ID</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Customer</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Pay Amount</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">My Payment</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payment Method</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
@@ -107,7 +107,7 @@
                             <div class="text-sm text-gray-900">{{ $record->customer_name }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">₱{{ number_format($record->total_due_cents / 100, 2) }}</div>
+                            <div class="text-sm text-gray-900">₱600.00</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ ucfirst($record->payment_method ?? 'N/A') }}</div>

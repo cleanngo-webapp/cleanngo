@@ -145,14 +145,13 @@ class EmployeePayrollController extends Controller
         }
 
         // Calculate earnings summary for this month
-        $currentMonth = now()->format('Y-m');
-        $monthlyEarnings = $payrollRecords
-            ->where('completed_at', '>=', now()->startOfMonth())
-            ->sum('total_due_cents') / 100;
-
+        // Employee receives fixed 600 per completed job
         $monthlyJobsCompleted = $payrollRecords
             ->where('completed_at', '>=', now()->startOfMonth())
             ->count();
+        
+        // Employee earnings = 600 per job
+        $monthlyEarnings = 600 * $monthlyJobsCompleted;
 
         return view('employee.payroll', [
             'payrollRecords' => $payrollRecords,

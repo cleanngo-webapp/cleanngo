@@ -7,13 +7,13 @@
     <h1 class="text-3xl font-extrabold text-center">Payroll</h1>
 
     {{-- Earnings Summary Section --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total Earnings</p>
+                    <p class="text-sm font-medium text-gray-600">Admin Earnings</p>
                     <p class="text-3xl font-bold text-gray-900">₱{{ number_format($monthlyEarnings, 2) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">This month</p>
+                    <p class="text-xs text-gray-500 mt-1">This month (after employee payments)</p>
                 </div>
                 <div class="bg-green-100 p-3 rounded-lg">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,12 +26,27 @@
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total Payroll</p>
-                    <p class="text-3xl font-bold text-gray-900">{{ $monthlyJobsCompleted }}</p>
-                    <p class="text-xs text-gray-500 mt-1">This month</p>
+                    <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                    <p class="text-3xl font-bold text-gray-900">₱{{ number_format($monthlyTotalEarnings, 2) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">This month (before deductions)</p>
                 </div>
                 <div class="bg-blue-100 p-3 rounded-lg">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Jobs Completed</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ $monthlyJobsCompleted }}</p>
+                    <p class="text-xs text-gray-500 mt-1">This month</p>
+                </div>
+                <div class="bg-purple-100 p-3 rounded-lg">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
@@ -95,7 +110,7 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Booking ID</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Customer</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Employee</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Pay Amount</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Total Amount</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payment Method</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
@@ -119,7 +134,7 @@
                             <div class="text-sm text-gray-900">{{ $record->employee_name }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">₱{{ number_format($record->total_due_cents / 100, 2) }}</div>
+                            <div class="text-sm text-gray-900">₱{{ number_format(($record->payment_amount ?? ($record->total_due_cents / 100)), 2) }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ ucfirst($record->payment_method ?? 'N/A') }}</div>
