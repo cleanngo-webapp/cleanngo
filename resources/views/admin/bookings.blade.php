@@ -3029,6 +3029,7 @@
         }
     });
 
+
     // Initialize admin modal when opened
     document.addEventListener('DOMContentLoaded', function() {
         // Override the original modal opening to initialize admin functionality
