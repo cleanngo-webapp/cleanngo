@@ -155,6 +155,8 @@ class AdminBookingController extends Controller
             'date' => 'required|date',
             'time' => 'required',
             'summary' => 'nullable|string',
+            'total' => 'nullable|numeric|min:0',
+            'items_json' => 'nullable|string',
         ]);
 
         $customerId = DB::table('customers')->where('user_id', $data['user_id'])->value('id');
@@ -171,6 +173,10 @@ class AdminBookingController extends Controller
 
         $start = \Carbon\Carbon::parse($data['date'].' '.$data['time']);
         $code = $this->generateCode('B');
+        
+        // Calculate total amount
+        $totalCents = isset($data['total']) ? (int) round($data['total'] * 100) : 0;
+        
         $bookingId = DB::table('bookings')->insertGetId([
             'code' => $code,
             'customer_id' => $customerId,
@@ -179,10 +185,10 @@ class AdminBookingController extends Controller
                 'name' => 'General', 'description' => 'Manual entry', 'base_price_cents' => 0, 'duration_minutes' => 60, 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()
             ]),
             'scheduled_start' => $start,
-            'status' => 'pending',
+            'status' => 'confirmed', // Admin bookings are automatically confirmed
             'notes' => $data['summary'] ?? null,
-            'base_price_cents' => 0,
-            'total_due_cents' => 0,
+            'base_price_cents' => $totalCents,
+            'total_due_cents' => $totalCents,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -195,6 +201,78 @@ class AdminBookingController extends Controller
                     ['role' => 'cleaner', 'assigned_at' => now(), 'assigned_by' => Auth::id()]
                 );
             }
+        }
+
+        // Create booking items if provided
+        $items = [];
+        if (!empty($data['items_json'])) {
+            $decoded = json_decode($data['items_json'], true);
+            if (is_array($decoded)) { 
+                $items = $decoded; 
+            }
+        }
+        
+        // Map item types to service IDs (same as customer controller)
+        $serviceMapping = [
+            // Sofa items
+            'sofa_1' => 'Sofa Mattress Deep Cleaning',
+            'sofa_2' => 'Sofa Mattress Deep Cleaning',
+            'sofa_3' => 'Sofa Mattress Deep Cleaning',
+            'sofa_4' => 'Sofa Mattress Deep Cleaning',
+            'sofa_5' => 'Sofa Mattress Deep Cleaning',
+            'sofa_6' => 'Sofa Mattress Deep Cleaning',
+            'sofa_7' => 'Sofa Mattress Deep Cleaning',
+            'sofa_8' => 'Sofa Mattress Deep Cleaning',
+            
+            // Mattress items
+            'mattress_single' => 'Mattress Deep Cleaning',
+            'mattress_double' => 'Mattress Deep Cleaning',
+            'mattress_king' => 'Mattress Deep Cleaning',
+            'mattress_california' => 'Mattress Deep Cleaning',
+            
+            // Car items
+            'car_sedan' => 'Home Service Car Interior Detailing',
+            'car_suv' => 'Home Service Car Interior Detailing',
+            'car_van' => 'Home Service Car Interior Detailing',
+            'car_coaster' => 'Home Service Car Interior Detailing',
+            
+            // Area-based services
+            'carpet_sqft' => 'Carpet Deep Cleaning',
+            'post_construction_sqm' => 'Post Construction Cleaning',
+            'disinfect_sqm' => 'Home/Office Disinfection',
+            'glass_sqft' => 'Glass Cleaning',
+            'house_cleaning_sqm' => 'House Cleaning',
+            'curtain_cleaning_yard' => 'Curtain Cleaning',
+        ];
+        
+        foreach ($items as $item) {
+            $qty = (int)($item['qty'] ?? 0);
+            $unit = (int)($item['unitPrice'] ?? 0);
+            $sqm = isset($item['areaSqm']) ? (float)$item['areaSqm'] : null;
+            $line = (int)round(($sqm ? $sqm * $qty * $unit : $qty * $unit) * 100 / 100);
+            
+            // Get the correct service ID for this item type
+            $itemType = $item['type'] ?? null;
+            $serviceName = $serviceMapping[$itemType] ?? 'General';
+            $itemService = DB::table('services')->where('name', $serviceName)->first();
+            
+            // Fallback to General service if specific service not found
+            if (!$itemService) {
+                $itemService = DB::table('services')->where('name', 'General')->first();
+            }
+            
+            // Create booking item
+            DB::table('booking_items')->insert([
+                'booking_id' => $bookingId,
+                'service_id' => $itemService->id,
+                'item_type' => $itemType,
+                'quantity' => $qty,
+                'area_sqm' => $sqm,
+                'unit_price_cents' => ($unit * 100),
+                'line_total_cents' => ($line * 100),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         return back()->with('status', 'Booking created');

@@ -382,162 +382,54 @@
                 <section class="bg-brand-green rounded-xl text-white p-4 md:col-span-1" id="adminServiceForms">
                     <!-- Sofa/Mattress -->
                     <div data-form="sofa" class="">
-                        <h2 class="font-semibold text-center mb-4">Sofa Deep Cleaning</h2>
-                        <div class="space-y-3">
+                        <h2 class="font-semibold text-center mb-4">Sofa / Mattress Deep Cleaning</h2>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Select Type</label>
+                            <select id="admin-sofa-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30">
+                                <option value="">Choose type...</option>
+                                <optgroup label="Sofa Types">
+                                    <option value="sofa_1">1 seater</option>
+                                    <option value="sofa_2">2 seater</option>
+                                    <option value="sofa_3">3 seater</option>
+                                    <option value="sofa_4">4 seater</option>
+                                    <option value="sofa_5">5 seater</option>
+                                    <option value="sofa_6">6 seater</option>
+                                    <option value="sofa_7">7 seater</option>
+                                    <option value="sofa_8">8 seater</option>
+                                </optgroup>
+                                <optgroup label="Mattress Types">
+                                    <option value="mattress_single">Single bed</option>
+                                    <option value="mattress_double">Double bed</option>
+                                    <option value="mattress_king">King bed</option>
+                                    <option value="mattress_california">California bed</option>
+                                </optgroup>
+                            </select>
+                            <div id="admin-sofa-quantity-selector" class="hidden mt-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">1 seater</span>
+                                    <span id="admin-sofa-selected-type" class="text-white font-medium"></span>
                                 <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_1" data-action="decrease">
+                                        <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_selected" data-action="decrease">
                                         <i class="ri-subtract-line text-lg"></i>
                                     </button>
-                                    <span id="admin_sofa_1" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_1" data-action="increase">
+                                        <span id="admin_sofa_selected" class="quantity-display">0</span>
+                                        <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_selected" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">2 seater</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_2" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_sofa_2" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_2" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">3 seater</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_3" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
+                        <div id="admin-sofa-additional-container" class="hidden">
+                            <div id="admin-sofa-additional-items"></div>
+                            <button type="button" id="admin-sofa-add-more-btn" class="w-full mt-3 p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-medium transition-colors">
+                                + Add Another Type
                                     </button>
-                                    <span id="admin_sofa_3" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_3" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">4 seater</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_4" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_sofa_4" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_4" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">5 seater</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_5" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_sofa_5" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_5" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">6 seater</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_6" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_sofa_6" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_6" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">7 seater</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_7" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_sofa_7" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_7" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">8 seater</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_8" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_sofa_8" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_sofa_8" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <h2 class="font-semibold mt-8 mb-4 text-center">Mattress Deep Cleaning</h2>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">Single bed</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_single" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_mattress_single" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_single" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">Double bed</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_double" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_mattress_double" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_double" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">King bed</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_king" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_mattress_king" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_king" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">California bed</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_california" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_mattress_california" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_mattress_california" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
                     <!-- Carpet -->
                     <div data-form="carpet" class="hidden">
                         <h2 class="font-semibold text-center mb-4">Carpet Deep Cleaning</h2>
-                        <div class="space-y-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
                                 <span class="text-white font-medium">Square Foot</span>
                                 <div class="flex items-center gap-2">
@@ -548,7 +440,6 @@
                                     <button type="button" class="quantity-btn cursor-pointer" data-target="admin_carpet_qty" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -556,62 +447,41 @@
                     <!-- Car Interior -->
                     <div data-form="carInterior" class="hidden">
                         <h2 class="font-semibold text-center mb-4">Home Service Car Interior Detailing</h2>
-                        <div class="space-y-3">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Select Type</label>
+                            <select id="admin-car-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30">
+                                <option value="">Choose type...</option>
+                                <option value="car_sedan">Sedan</option>
+                                <option value="car_suv">SUV</option>
+                                <option value="car_van">Van</option>
+                                <option value="car_coaster">Hatchback</option>
+                            </select>
+                            <div id="admin-car-quantity-selector" class="hidden mt-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">Sedan</span>
+                                    <span id="admin-car-selected-type" class="text-white font-medium"></span>
                                 <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_sedan" data-action="decrease">
+                                        <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_selected" data-action="decrease">
                                         <i class="ri-subtract-line text-lg"></i>
                                     </button>
-                                    <span id="admin_car_sedan" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_sedan" data-action="increase">
+                                        <span id="admin_car_selected" class="quantity-display">0</span>
+                                        <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_selected" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">SUV</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_suv" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_car_suv" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_suv" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">Van</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_van" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
+                        <div id="admin-car-additional-container" class="hidden">
+                            <div id="admin-car-additional-items"></div>
+                            <button type="button" id="admin-car-add-more-btn" class="w-full mt-3 p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-medium transition-colors">
+                                + Add Another Type
                                     </button>
-                                    <span id="admin_car_van" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_van" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                                <span class="text-white font-medium">Hatchback</span>
-                                <div class="flex items-center gap-2">
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_coaster" data-action="decrease">
-                                        <i class="ri-subtract-line text-lg"></i>
-                                    </button>
-                                    <span id="admin_car_coaster" class="quantity-display">0</span>
-                                    <button type="button" class="quantity-btn cursor-pointer" data-target="admin_car_coaster" data-action="increase">
-                                        <i class="ri-add-line text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
                     <!-- Post Construction -->
                     <div data-form="postConstruction" class="hidden">
                         <h2 class="font-semibold text-center mb-4">Post Construction Cleaning</h2>
-                        <div class="space-y-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
                                 <span class="text-white font-medium">Square Meter</span>
                                 <div class="flex items-center gap-2">
@@ -622,7 +492,6 @@
                                     <button type="button" class="quantity-btn cursor-pointer" data-target="admin_pcc_qty" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -630,7 +499,6 @@
                     <!-- Enhanced Disinfection -->
                     <div data-form="disinfection" class="hidden">
                         <h2 class="font-semibold text-center mb-4">Home/Office Disinfection</h2>
-                        <div class="space-y-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
                                 <span class="text-white font-medium">Square Meter</span>
                                 <div class="flex items-center gap-2">
@@ -641,7 +509,6 @@
                                     <button type="button" class="quantity-btn cursor-pointer" data-target="admin_disinfect_qty" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -649,7 +516,6 @@
                     <!-- Glass -->
                     <div data-form="glass" class="hidden">
                         <h2 class="font-semibold text-center mb-4">Glass Cleaning</h2>
-                        <div class="space-y-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
                                 <span class="text-white font-medium">Square Foot</span>
                                 <div class="flex items-center gap-2">
@@ -660,7 +526,6 @@
                                     <button type="button" class="quantity-btn cursor-pointer" data-target="admin_glass_qty" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -668,7 +533,6 @@
                     <!-- House Cleaning -->
                     <div data-form="houseCleaning" class="hidden">
                         <h2 class="font-semibold text-center mb-4">House Cleaning</h2>
-                        <div class="space-y-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
                                 <span class="text-white font-medium">Square Meter</span>
                                 <div class="flex items-center gap-2">
@@ -679,7 +543,6 @@
                                     <button type="button" class="quantity-btn cursor-pointer" data-target="admin_house_qty" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -687,7 +550,6 @@
                     <!-- Curtain Cleaning -->
                     <div data-form="curtainCleaning" class="hidden">
                         <h2 class="font-semibold text-center mb-4">Curtain Cleaning</h2>
-                        <div class="space-y-3">
                             <div class="flex items-center justify-between bg-white/10 rounded-lg p-3">
                                 <span class="text-white font-medium">Yard</span>
                                 <div class="flex items-center gap-2">
@@ -698,7 +560,6 @@
                                     <button type="button" class="quantity-btn cursor-pointer" data-target="admin_curtain_qty" data-action="increase">
                                         <i class="ri-add-line text-lg"></i>
                                     </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -768,6 +629,7 @@
                         <!-- Hidden fields for booking data -->
                         <input type="hidden" name="total" id="admin_booking_total">
                         <input type="hidden" name="items_json" id="admin_items_json">
+                        <input type="hidden" name="summary" id="admin_booking_summary">
                         <input type="hidden" name="status" value="confirmed">
                         
                         <!-- Action Buttons -->
@@ -2083,11 +1945,150 @@
                     if (newValue !== currentValue) {
                         display.textContent = newValue;
                         adminCalc();
+                        
+                        // Show/hide additional container based on primary quantity
+                        if (targetId === 'admin_sofa_selected') {
+                            const additionalContainer = document.getElementById('admin-sofa-additional-container');
+                            if (newValue > 0) {
+                                additionalContainer.classList.remove('hidden');
+                            } else {
+                                additionalContainer.classList.add('hidden');
+                            }
+                        } else if (targetId === 'admin_car_selected') {
+                            const additionalContainer = document.getElementById('admin-car-additional-container');
+                            if (newValue > 0) {
+                                additionalContainer.classList.remove('hidden');
+                            } else {
+                                additionalContainer.classList.add('hidden');
+                            }
+                        }
                     }
                 }
             }
         });
+        
+        // Setup admin dropdown handlers
+        setupAdminDropdownHandlers();
     });
+
+    // Admin dropdown handlers - similar to customer version but with admin prefixes
+    function setupAdminDropdownHandlers() {
+        // Setup handlers for services with "Add Another Type" feature
+        setupAdminServiceHandlers('sofa', 'admin-sofa-type-select', 'admin-sofa-quantity-selector', 'admin-sofa-selected-type', 'admin_sofa_selected', 'admin-sofa-additional-container', 'admin-sofa-add-more-btn');
+        setupAdminServiceHandlers('car', 'admin-car-type-select', 'admin-car-quantity-selector', 'admin-car-selected-type', 'admin_car_selected', 'admin-car-additional-container', 'admin-car-add-more-btn');
+    }
+
+    function setupAdminServiceHandlers(serviceName, typeSelectId, quantitySelectorId, selectedTypeId, quantityDisplayId, additionalContainerId, addMoreBtnId) {
+        const typeSelect = document.getElementById(typeSelectId);
+        const quantitySelector = document.getElementById(quantitySelectorId);
+        const selectedTypeSpan = document.getElementById(selectedTypeId);
+        const quantityDisplay = document.getElementById(quantityDisplayId);
+        const additionalContainer = document.getElementById(additionalContainerId);
+        const addMoreBtn = document.getElementById(addMoreBtnId);
+
+        if (typeSelect && quantitySelector && selectedTypeSpan && quantityDisplay && additionalContainer && addMoreBtn) {
+            // Handle type selection
+            typeSelect.addEventListener('change', function() {
+                if (this.value) {
+                    const selectedOption = this.options[this.selectedIndex];
+                    selectedTypeSpan.textContent = selectedOption.text;
+                    quantitySelector.classList.remove('hidden');
+                    quantityDisplay.textContent = '0';
+                    additionalContainer.classList.add('hidden');
+                    adminCalc();
+                } else {
+                    quantitySelector.classList.add('hidden');
+                    additionalContainer.classList.add('hidden');
+                    adminCalc();
+                }
+            });
+
+            // Handle "Add Another Type" button
+            addMoreBtn.addEventListener('click', function() {
+                addAdminAdditionalItem(serviceName);
+            });
+        }
+    }
+
+    function addAdminAdditionalItem(serviceName) {
+        const additionalItemsContainer = document.getElementById(`admin-${serviceName}-additional-items`);
+        const itemCount = additionalItemsContainer.children.length;
+        const itemId = `admin-${serviceName}-additional-${itemCount + 1}`;
+        
+        // Define options based on service
+        let options = '';
+        if (serviceName === 'sofa') {
+            options = `
+                <option value="">Choose type...</option>
+                <optgroup label="Sofa Types">
+                    <option value="sofa_1">1 seater</option>
+                    <option value="sofa_2">2 seater</option>
+                    <option value="sofa_3">3 seater</option>
+                    <option value="sofa_4">4 seater</option>
+                    <option value="sofa_5">5 seater</option>
+                    <option value="sofa_6">6 seater</option>
+                    <option value="sofa_7">7 seater</option>
+                    <option value="sofa_8">8 seater</option>
+                </optgroup>
+                <optgroup label="Mattress Types">
+                    <option value="mattress_single">Single bed</option>
+                    <option value="mattress_double">Double bed</option>
+                    <option value="mattress_king">King bed</option>
+                    <option value="mattress_california">California bed</option>
+                </optgroup>
+            `;
+        } else if (serviceName === 'car') {
+            options = `
+                <option value="">Choose type...</option>
+                <option value="car_sedan">Sedan</option>
+                <option value="car_suv">SUV</option>
+                <option value="car_van">Van</option>
+                <option value="car_coaster">Hatchback</option>
+            `;
+        }
+        
+        const additionalItem = document.createElement('div');
+        additionalItem.className = 'additional-item mt-3 p-3 bg-white/10 rounded-lg';
+        additionalItem.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-white font-medium text-sm">Additional Type ${itemCount + 1}</span>
+                <button type="button" onclick="removeAdminSelectedItem(this)" class="text-red-400 hover:text-red-300 cursor-pointer">
+                    <i class="ri-close-line text-lg"></i>
+                </button>
+            </div>
+            <select class="additional-type-select w-full p-2 rounded bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 mb-2">
+                ${options}
+            </select>
+            <div class="flex items-center justify-between bg-white/10 rounded-lg p-2">
+                <span class="text-white font-medium text-sm">Quantity</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="quantity-btn cursor-pointer" data-target="${itemId}" data-action="decrease">
+                        <i class="ri-subtract-line text-sm"></i>
+                    </button>
+                    <span id="${itemId}" class="quantity-display">0</span>
+                    <button type="button" class="quantity-btn cursor-pointer" data-target="${itemId}" data-action="increase">
+                        <i class="ri-add-line text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        additionalItemsContainer.appendChild(additionalItem);
+        
+        // Add event listener for the new select
+        const newSelect = additionalItem.querySelector('.additional-type-select');
+        newSelect.addEventListener('change', function() {
+            adminCalc();
+        });
+        
+        adminCalc();
+    }
+
+    function removeAdminSelectedItem(button) {
+        const additionalItem = button.closest('.additional-item');
+        additionalItem.remove();
+        adminCalc();
+    }
 
     // Admin Service switching functionality
     const adminForms = document.querySelectorAll('#adminServiceForms [data-form]');
@@ -2130,7 +2131,7 @@
         });
     });
 
-    // Admin calculation function - simplified version
+    // Admin calculation function - updated for new dropdown structure
     function adminCalc() {
         const receipt = [];
         let subtotal = 0;
@@ -2139,159 +2140,188 @@
         const u = id => parseInt(document.getElementById(id)?.textContent || 0);
         const s = id => parseFloat(document.getElementById(id)?.textContent || 0);
 
-        // Sofa/Mattress services
-        const sofaItems = [];
-        const sofaInputs = [
-            {id: 'admin_sofa_1', label: '1 seater', qty: u('admin_sofa_1')},
-            {id: 'admin_sofa_2', label: '2 seater', qty: u('admin_sofa_2')},
-            {id: 'admin_sofa_3', label: '3 seater', qty: u('admin_sofa_3')},
-            {id: 'admin_sofa_4', label: '4 seater', qty: u('admin_sofa_4')},
-            {id: 'admin_sofa_5', label: '5 seater', qty: u('admin_sofa_5')},
-            {id: 'admin_sofa_6', label: '6 seater', qty: u('admin_sofa_6')},
-            {id: 'admin_sofa_7', label: '7 seater', qty: u('admin_sofa_7')},
-            {id: 'admin_sofa_8', label: '8 seater', qty: u('admin_sofa_8')}
-        ];
-
-        const mattressItems = [];
-        const mattressInputs = [
-            {id: 'admin_mattress_single', label: 'Single', qty: u('admin_mattress_single')},
-            {id: 'admin_mattress_double', label: 'Double', qty: u('admin_mattress_double')},
-            {id: 'admin_mattress_king', label: 'King', qty: u('admin_mattress_king')},
-            {id: 'admin_mattress_california', label: 'California', qty: u('admin_mattress_california')}
-        ];
-
-        // Sofa pricing
-        const sofaPrices = {
-            'admin_sofa_1': 750,
-            'admin_sofa_2': 1250,
-            'admin_sofa_3': 1750,
-            'admin_sofa_4': 2250,
-            'admin_sofa_5': 2750,
-            'admin_sofa_6': 3250,
-            'admin_sofa_7': 3750,
-            'admin_sofa_8': 4250
-        };
-
-        sofaInputs.forEach(item => {
-            if (item.qty > 0 && sofaPrices[item.id] > 0) {
-                sofaItems.push({...item, price: sofaPrices[item.id], total: item.qty * sofaPrices[item.id]});
-            }
-        });
-
-        // Mattress pricing
-        const mattressPrices = {
-            'admin_mattress_single': 950,
-            'admin_mattress_double': 1100,
-            'admin_mattress_king': 1450,
-            'admin_mattress_california': 1350
-        };
-
-        mattressInputs.forEach(item => {
-            if (item.qty > 0) {
-                mattressItems.push({...item, price: mattressPrices[item.id], total: item.qty * mattressPrices[item.id]});
-            }
-        });
-
-        // Create combined Sofa/Mattress card if any items exist
-        if (sofaItems.length > 0 || mattressItems.length > 0) {
-            const allItems = [...sofaItems, ...mattressItems];
-            const totalAmount = allItems.reduce((sum, item) => sum + item.total, 0);
-            
-            let itemsHtml = '';
-            allItems.forEach(item => {
-                itemsHtml += `
-                    <div class="flex justify-between items-center py-1">
-                        <div class="flex-1">
-                            <span class="text-xs text-gray-600">${item.label}</span>
-                            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
-                        </div>
-                        <span class="text-xs font-semibold">${adminPeso(item.total)}</span>
-                    </div>
-                `;
-            });
-
-            receipt.push(`
-                <div class="border border-gray-200 rounded-lg p-3">
-                    <div class="flex items-start justify-between mb-2">
-                        <div class="flex-1">
-                            <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
-                            <div class="mt-2 space-y-1">
-                                ${itemsHtml}
+        // Sofa/Mattress service - primary selection
+        const sofaSelectedQty = u('admin_sofa_selected');
+        if (sofaSelectedQty > 0) {
+            const sofaTypeSelect = document.getElementById('admin-sofa-type-select');
+            if (sofaTypeSelect && sofaTypeSelect.value) {
+                const selectedType = sofaTypeSelect.value;
+                const selectedLabel = sofaTypeSelect.options[sofaTypeSelect.selectedIndex].text;
+                
+                // Sofa pricing
+                const sofaPrices = {
+                    'sofa_1': 750, 'sofa_2': 1250, 'sofa_3': 1750, 'sofa_4': 2250,
+                    'sofa_5': 2750, 'sofa_6': 3250, 'sofa_7': 3750, 'sofa_8': 4250
+                };
+                
+                // Mattress pricing
+                const mattressPrices = {
+                    'mattress_single': 1200, 'mattress_double': 1500, 
+                    'mattress_king': 1800, 'mattress_california': 2000
+                };
+                
+                const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+                if (price > 0) {
+                    const totalAmount = sofaSelectedQty * price;
+                    receipt.push(`
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
+                                    <div class="mt-2 space-y-1">
+                                        <div class="flex justify-between items-center py-1">
+                                            <div class="flex-1">
+                                                <span class="text-xs text-gray-600">${selectedLabel}</span>
+                                                <span class="text-xs text-gray-500 ml-2">x ${sofaSelectedQty}</span>
+                                            </div>
+                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-                        <span class="text-xs text-gray-500">Total</span>
-                        <span class="font-semibold">${adminPeso(totalAmount)}</span>
-                    </div>
-                </div>
-            `);
-            subtotal += totalAmount;
-            itemCounter++;
+                    `);
+                    subtotal += totalAmount;
+                    itemCounter++;
+                }
+            }
         }
 
-        // Car Interior Detailing
-        const carItems = [];
-        const carInputs = [
-            {id: 'admin_car_sedan', label: 'Sedan', qty: u('admin_car_sedan')},
-            {id: 'admin_car_suv', label: 'SUV', qty: u('admin_car_suv')},
-            {id: 'admin_car_van', label: 'Van', qty: u('admin_car_van')},
-            {id: 'admin_car_coaster', label: 'Hatchback', qty: u('admin_car_coaster')}
-        ];
-
-        const carPrices = {
-            'admin_car_sedan': 2900,
-            'admin_car_suv': 3900,
-            'admin_car_van': 6900,
-            'admin_car_coaster': 3000
-        };
-
-        carInputs.forEach(item => {
-            if (item.qty > 0) {
-                carItems.push({...item, price: carPrices[item.id], total: item.qty * carPrices[item.id]});
+        // Sofa/Mattress service - additional selections
+        const additionalItems = document.querySelectorAll('#admin-sofa-additional-items .additional-item');
+        additionalItems.forEach(item => {
+            const typeSelect = item.querySelector('.additional-type-select');
+            const quantityDisplay = item.querySelector('.quantity-display');
+            
+            if (typeSelect && typeSelect.value && quantityDisplay) {
+                const selectedType = typeSelect.value;
+                const quantity = parseInt(quantityDisplay.textContent) || 0;
+                const selectedLabel = typeSelect.options[typeSelect.selectedIndex].text;
+                
+                // Sofa pricing
+                const sofaPrices = {
+                    'sofa_1': 750, 'sofa_2': 1250, 'sofa_3': 1750, 'sofa_4': 2250,
+                    'sofa_5': 2750, 'sofa_6': 3250, 'sofa_7': 3750, 'sofa_8': 4250
+                };
+                
+                // Mattress pricing
+                const mattressPrices = {
+                    'mattress_single': 1200, 'mattress_double': 1500, 
+                    'mattress_king': 1800, 'mattress_california': 2000
+                };
+                
+                const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+                if (quantity > 0 && price > 0) {
+                    const totalAmount = quantity * price;
+                    receipt.push(`
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-sm">${itemCounter}. Sofa / Mattress Deep Cleaning</div>
+                                    <div class="mt-2 space-y-1">
+                                        <div class="flex justify-between items-center py-1">
+                                            <div class="flex-1">
+                                                <span class="text-xs text-gray-600">${selectedLabel}</span>
+                                                <span class="text-xs text-gray-500 ml-2">x ${quantity}</span>
+                                            </div>
+                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    subtotal += totalAmount;
+                    itemCounter++;
+                }
             }
         });
 
-        if (carItems.length > 0) {
-            const totalAmount = carItems.reduce((sum, item) => sum + item.total, 0);
-            
-            let itemsHtml = '';
-            carItems.forEach(item => {
-                itemsHtml += `
-                    <div class="flex justify-between items-center py-1">
-                        <div class="flex-1">
-                            <span class="text-xs text-gray-600">${item.label}</span>
-                            <span class="text-xs text-gray-500 ml-2">x ${item.qty}</span>
-                        </div>
-                        <span class="text-xs font-semibold">${adminPeso(item.total)}</span>
-                    </div>
-                `;
-            });
-
-            receipt.push(`
-                <div class="border border-gray-200 rounded-lg p-3">
-                    <div class="flex items-start justify-between mb-2">
-                        <div class="flex-1">
-                            <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
-                            <div class="mt-2 space-y-1">
-                                ${itemsHtml}
+        // Car Interior service - primary selection
+        const carSelectedQty = u('admin_car_selected');
+        if (carSelectedQty > 0) {
+            const carTypeSelect = document.getElementById('admin-car-type-select');
+            if (carTypeSelect && carTypeSelect.value) {
+                const selectedType = carTypeSelect.value;
+                const selectedLabel = carTypeSelect.options[carTypeSelect.selectedIndex].text;
+                
+                const carPrices = {
+                    'car_sedan': 2900, 'car_suv': 3900, 'car_van': 6900, 'car_coaster': 3000
+                };
+                
+                const price = carPrices[selectedType] || 0;
+                if (price > 0) {
+                    const totalAmount = carSelectedQty * price;
+                    receipt.push(`
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
+                                    <div class="mt-2 space-y-1">
+                                        <div class="flex justify-between items-center py-1">
+                                            <div class="flex-1">
+                                                <span class="text-xs text-gray-600">${selectedLabel}</span>
+                                                <span class="text-xs text-gray-500 ml-2">x ${carSelectedQty}</span>
+                                            </div>
+                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-                        <span class="text-xs text-gray-500">Total</span>
-                        <span class="font-semibold">${adminPeso(totalAmount)}</span>
-                    </div>
-                </div>
-            `);
-            subtotal += totalAmount;
-            itemCounter++;
+                    `);
+                    subtotal += totalAmount;
+                    itemCounter++;
+                }
+            }
         }
 
-        // Individual service categories
+        // Car Interior service - additional selections
+        const carAdditionalItems = document.querySelectorAll('#admin-car-additional-items .additional-item');
+        carAdditionalItems.forEach(item => {
+            const typeSelect = item.querySelector('.additional-type-select');
+            const quantityDisplay = item.querySelector('.quantity-display');
+            
+            if (typeSelect && typeSelect.value && quantityDisplay) {
+                const selectedType = typeSelect.value;
+                const quantity = parseInt(quantityDisplay.textContent) || 0;
+                const selectedLabel = typeSelect.options[typeSelect.selectedIndex].text;
+                
+                const carPrices = {
+                    'car_sedan': 2900, 'car_suv': 3900, 'car_van': 6900, 'car_coaster': 3000
+                };
+                
+                const price = carPrices[selectedType] || 0;
+                if (quantity > 0 && price > 0) {
+                    const totalAmount = quantity * price;
+                    receipt.push(`
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <div class="font-semibold text-sm">${itemCounter}. Car Interior Detailing</div>
+                                    <div class="mt-2 space-y-1">
+                                        <div class="flex justify-between items-center py-1">
+                                            <div class="flex-1">
+                                                <span class="text-xs text-gray-600">${selectedLabel}</span>
+                                                <span class="text-xs text-gray-500 ml-2">x ${quantity}</span>
+                                            </div>
+                                            <span class="text-xs font-semibold">${adminPeso(totalAmount)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    subtotal += totalAmount;
+                    itemCounter++;
+                }
+            }
+        });
+
+        // Simple services (single choice)
         const carpetQty = s('admin_carpet_qty');
         if (carpetQty > 0) {
-            const amt = carpetQty * 30;
+            const amt = carpetQty * 25;
             receipt.push(`
                 <div class="border border-gray-200 rounded-lg p-3">
                     <div class="flex items-start justify-between mb-2">
@@ -2302,7 +2332,7 @@
                         </div>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">${carpetQty} Square Foot × ₱30</span>
+                        <span class="text-xs text-gray-500">${carpetQty} Square Foot × ₱25</span>
                         <span class="font-semibold">${adminPeso(amt)}</span>
                     </div>
                 </div>
@@ -2439,6 +2469,22 @@
             display.textContent = '0';
         });
         
+        // Reset dropdowns
+        const dropdowns = document.querySelectorAll('#adminServiceForms select');
+        dropdowns.forEach(dropdown => {
+            dropdown.value = '';
+        });
+        
+        // Hide quantity selectors and additional containers
+        document.getElementById('admin-sofa-quantity-selector')?.classList.add('hidden');
+        document.getElementById('admin-sofa-additional-container')?.classList.add('hidden');
+        document.getElementById('admin-car-quantity-selector')?.classList.add('hidden');
+        document.getElementById('admin-car-additional-container')?.classList.add('hidden');
+        
+        // Clear additional items
+        document.getElementById('admin-sofa-additional-items').innerHTML = '';
+        document.getElementById('admin-car-additional-items').innerHTML = '';
+        
         // Reset form
         const form = modal.querySelector('form');
         if (form) {
@@ -2447,6 +2493,76 @@
         
         // Reset to first service
         adminShowForm('sofa');
+    }
+
+    // Function to generate service summary for admin bookings
+    function generateAdminServiceSummary(items) {
+        if (!items || items.length === 0) {
+            return 'No services selected';
+        }
+        
+        const serviceGroups = {};
+        
+        // Group items by service type
+        items.forEach(item => {
+            const type = item.type;
+            const qty = item.qty;
+            const price = item.unitPrice;
+            
+            // Map item types to readable service names
+            const serviceNames = {
+                'sofa_1': '1 Seater Sofa',
+                'sofa_2': '2 Seater Sofa', 
+                'sofa_3': '3 Seater Sofa',
+                'sofa_4': '4 Seater Sofa',
+                'sofa_5': '5 Seater Sofa',
+                'sofa_6': '6 Seater Sofa',
+                'sofa_7': '7 Seater Sofa',
+                'sofa_8': '8 Seater Sofa',
+                'mattress_single': 'Single Bed Mattress',
+                'mattress_double': 'Double Bed Mattress',
+                'mattress_king': 'King Bed Mattress',
+                'mattress_california': 'California Bed Mattress',
+                'car_sedan': 'Sedan Car Interior',
+                'car_suv': 'SUV Car Interior',
+                'car_van': 'Van Car Interior',
+                'car_coaster': 'Hatchback Car Interior',
+                'carpet_sqft': 'Carpet Deep Cleaning',
+                'post_construction_sqm': 'Post Construction Cleaning',
+                'disinfect_sqm': 'Home/Office Disinfection',
+                'glass_sqft': 'Glass Cleaning',
+                'house_cleaning_sqm': 'House Cleaning',
+                'curtain_cleaning_yard': 'Curtain Cleaning'
+            };
+            
+            const serviceName = serviceNames[type] || type;
+            const totalPrice = qty * price;
+            
+            if (!serviceGroups[serviceName]) {
+                serviceGroups[serviceName] = {
+                    totalQty: 0,
+                    totalPrice: 0,
+                    unitPrice: price
+                };
+            }
+            
+            serviceGroups[serviceName].totalQty += qty;
+            serviceGroups[serviceName].totalPrice += totalPrice;
+        });
+        
+        // Build summary string
+        const summaryParts = [];
+        Object.keys(serviceGroups).forEach(serviceName => {
+            const group = serviceGroups[serviceName];
+            const unitText = serviceName.includes('Sofa') || serviceName.includes('Mattress') || serviceName.includes('Car') ? 'pcs' : 
+                            serviceName.includes('Sqm') ? 'sqm' : 
+                            serviceName.includes('Sqft') ? 'sqft' : 
+                            serviceName.includes('Yard') ? 'yards' : 'units';
+            
+            summaryParts.push(`${serviceName}: ${group.totalQty} ${unitText} (₱${group.totalPrice.toLocaleString()})`);
+        });
+        
+        return summaryParts.join('; ');
     }
 
     // Function to handle admin booking form submission
@@ -2467,49 +2583,124 @@
             return false;
         }
         
-        // Build items payload
+        // Build items payload to persist line items
         const items = [];
+        
+        // Helper function to add items
         const addItem = (type, qty, unitPrice) => {
             qty = parseInt(qty||0); 
-            if(!qty) return; 
-            items.push({ type, qty, unitPrice }); 
+            if(qty > 0) items.push({ type, qty, unitPrice }); 
         };
         
-        // Sofa/Mattress
-        addItem('sofa_1_seater', document.getElementById('admin_sofa_1').textContent, 750);
-        addItem('sofa_2_seater', document.getElementById('admin_sofa_2').textContent, 1250);
-        addItem('sofa_3_seater', document.getElementById('admin_sofa_3').textContent, 1750);
-        addItem('sofa_4_seater', document.getElementById('admin_sofa_4').textContent, 2250);
-        addItem('sofa_5_seater', document.getElementById('admin_sofa_5').textContent, 2750);
-        addItem('sofa_6_seater', document.getElementById('admin_sofa_6').textContent, 3250);
-        addItem('sofa_7_seater', document.getElementById('admin_sofa_7').textContent, 3750);
-        addItem('sofa_8_seater', document.getElementById('admin_sofa_8').textContent, 4250);
-        addItem('mattress_single', document.getElementById('admin_mattress_single').textContent, 950);
-        addItem('mattress_double', document.getElementById('admin_mattress_double').textContent, 1100);
-        addItem('mattress_king', document.getElementById('admin_mattress_king').textContent, 1450);
-        addItem('mattress_california', document.getElementById('admin_mattress_california').textContent, 1350);
+        // Sofa/Mattress service - primary selection
+        const sofaSelectedQty = parseInt(document.getElementById('admin_sofa_selected')?.textContent || 0);
+        if (sofaSelectedQty > 0) {
+            const sofaTypeSelect = document.getElementById('admin-sofa-type-select');
+            if (sofaTypeSelect && sofaTypeSelect.value) {
+                const selectedType = sofaTypeSelect.value;
+                
+                // Sofa pricing
+                const sofaPrices = {
+                    'sofa_1': 750, 'sofa_2': 1250, 'sofa_3': 1750, 'sofa_4': 2250,
+                    'sofa_5': 2750, 'sofa_6': 3250, 'sofa_7': 3750, 'sofa_8': 4250
+                };
+                
+                // Mattress pricing
+                const mattressPrices = {
+                    'mattress_single': 1200, 'mattress_double': 1500, 
+                    'mattress_king': 1800, 'mattress_california': 2000
+                };
+                
+                const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+                if (price > 0) {
+                    addItem(selectedType, sofaSelectedQty, price);
+                }
+            }
+        }
         
-        // Simplified services
-        const addSimplified = (label, qtyId, pricePerUnit) => {
-            const qty = parseInt(document.getElementById(qtyId)?.textContent||0);
-            if (qty>0) items.push({ type: label, qty, unitPrice: pricePerUnit });
-        };
-        addSimplified('carpet_sqft', 'admin_carpet_qty', 30);
-        addSimplified('post_construction_sqm', 'admin_pcc_qty', 101.67);
-        addSimplified('disinfect_sqm', 'admin_disinfect_qty', 90);
-        addSimplified('glass_sqft', 'admin_glass_qty', 50);
-        addSimplified('house_cleaning_sqm', 'admin_house_qty', 91);
-        addSimplified('curtain_cleaning_yard', 'admin_curtain_qty', 50);
+        // Sofa/Mattress service - additional selections
+        const additionalItems = document.querySelectorAll('#admin-sofa-additional-items .additional-item');
+        additionalItems.forEach(item => {
+            const typeSelect = item.querySelector('.additional-type-select');
+            const quantityDisplay = item.querySelector('.quantity-display');
+            
+            if (typeSelect && typeSelect.value && quantityDisplay) {
+                const selectedType = typeSelect.value;
+                const quantity = parseInt(quantityDisplay.textContent) || 0;
+                
+                // Sofa pricing
+                const sofaPrices = {
+                    'sofa_1': 750, 'sofa_2': 1250, 'sofa_3': 1750, 'sofa_4': 2250,
+                    'sofa_5': 2750, 'sofa_6': 3250, 'sofa_7': 3750, 'sofa_8': 4250
+                };
+                
+                // Mattress pricing
+                const mattressPrices = {
+                    'mattress_single': 1200, 'mattress_double': 1500, 
+                    'mattress_king': 1800, 'mattress_california': 2000
+                };
+                
+                const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
+                if (quantity > 0 && price > 0) {
+                    addItem(selectedType, quantity, price);
+                }
+            }
+        });
         
-        // Car detailing
-        addItem('car_sedan', document.getElementById('admin_car_sedan').textContent, 2900);
-        addItem('car_suv', document.getElementById('admin_car_suv').textContent, 3900);
-        addItem('car_van', document.getElementById('admin_car_van').textContent, 6900);
-        addItem('car_coaster', document.getElementById('admin_car_coaster').textContent, 3000);
+        // Car Interior service - primary selection
+        const carSelectedQty = parseInt(document.getElementById('admin_car_selected')?.textContent || 0);
+        if (carSelectedQty > 0) {
+            const carTypeSelect = document.getElementById('admin-car-type-select');
+            if (carTypeSelect && carTypeSelect.value) {
+                const selectedType = carTypeSelect.value;
+                
+                const carPrices = {
+                    'car_sedan': 2900, 'car_suv': 3900, 'car_van': 6900, 'car_coaster': 3000
+                };
+                
+                const price = carPrices[selectedType] || 0;
+                if (price > 0) {
+                    addItem(selectedType, carSelectedQty, price);
+                }
+            }
+        }
+        
+        // Car Interior service - additional selections
+        const carAdditionalItems = document.querySelectorAll('#admin-car-additional-items .additional-item');
+        carAdditionalItems.forEach(item => {
+            const typeSelect = item.querySelector('.additional-type-select');
+            const quantityDisplay = item.querySelector('.quantity-display');
+            
+            if (typeSelect && typeSelect.value && quantityDisplay) {
+                const selectedType = typeSelect.value;
+                const quantity = parseInt(quantityDisplay.textContent) || 0;
+                
+                const carPrices = {
+                    'car_sedan': 2900, 'car_suv': 3900, 'car_van': 6900, 'car_coaster': 3000
+                };
+                
+                const price = carPrices[selectedType] || 0;
+                if (quantity > 0 && price > 0) {
+                    addItem(selectedType, quantity, price);
+                }
+            }
+        });
+        
+        // Simple services (single choice)
+        addItem('carpet_sqft', document.getElementById('admin_carpet_qty')?.textContent, 25);
+        addItem('post_construction_sqm', document.getElementById('admin_pcc_qty')?.textContent, 101.67);
+        addItem('disinfect_sqm', document.getElementById('admin_disinfect_qty')?.textContent, 90);
+        addItem('glass_sqft', document.getElementById('admin_glass_qty')?.textContent, 50);
+        addItem('house_cleaning_sqm', document.getElementById('admin_house_qty')?.textContent, 91);
+        addItem('curtain_cleaning_yard', document.getElementById('admin_curtain_qty')?.textContent, 50);
 
+        // Generate service summary
+        const serviceSummary = generateAdminServiceSummary(items);
+        
         // Set hidden fields
         document.getElementById('admin_booking_total').value = total;
         document.getElementById('admin_items_json').value = JSON.stringify(items);
+        document.getElementById('admin_booking_summary').value = serviceSummary;
         
         // Show confirmation
         Swal.fire({

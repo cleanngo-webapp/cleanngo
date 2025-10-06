@@ -87,14 +87,15 @@ class CustomerBookingController extends Controller
         // Map item types to service IDs
         $serviceMapping = [
         
-            'sofa_1_seater' => 'Sofa Mattress Deep Cleaning',
-            'sofa_2_seater' => 'Sofa Mattress Deep Cleaning',
-            'sofa_3_seater' => 'Sofa Mattress Deep Cleaning',
-            'sofa_4_seater' => 'Sofa Mattress Deep Cleaning',
-            'sofa_5_seater' => 'Sofa Mattress Deep Cleaning',
-            'sofa_6_seater' => 'Sofa Mattress Deep Cleaning',
-            'sofa_7_seater' => 'Sofa Mattress Deep Cleaning',
-            'sofa_8_seater' => 'Sofa Mattress Deep Cleaning',
+            // Sofa items (updated to match new dropdown values)
+            'sofa_1' => 'Sofa Mattress Deep Cleaning',
+            'sofa_2' => 'Sofa Mattress Deep Cleaning',
+            'sofa_3' => 'Sofa Mattress Deep Cleaning',
+            'sofa_4' => 'Sofa Mattress Deep Cleaning',
+            'sofa_5' => 'Sofa Mattress Deep Cleaning',
+            'sofa_6' => 'Sofa Mattress Deep Cleaning',
+            'sofa_7' => 'Sofa Mattress Deep Cleaning',
+            'sofa_8' => 'Sofa Mattress Deep Cleaning',
             
             // Mattress items
             'mattress_single' => 'Mattress Deep Cleaning',
