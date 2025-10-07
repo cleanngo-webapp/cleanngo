@@ -236,13 +236,26 @@ class AdminBookingController extends Controller
             'updated_at' => now(),
         ]);
 
+        // Handle employee assignment if provided
         if (!empty($data['employee_user_id'])) {
             $employeeId = DB::table('employees')->where('user_id', $data['employee_user_id'])->value('id');
             if ($employeeId) {
-                DB::table('booking_staff_assignments')->updateOrInsert(
-                    ['booking_id' => $bookingId, 'employee_id' => $employeeId],
-                    ['role' => 'cleaner', 'assigned_at' => now(), 'assigned_by' => Auth::id()]
-                );
+                // Check if assignment already exists (prevent duplicates)
+                $existingAssignment = DB::table('booking_staff_assignments')
+                    ->where('booking_id', $bookingId)
+                    ->where('employee_id', $employeeId)
+                    ->first();
+                
+                if (!$existingAssignment) {
+                    // Insert new assignment - this will make the employee appear in the table
+                    DB::table('booking_staff_assignments')->insert([
+                        'booking_id' => $bookingId,
+                        'employee_id' => $employeeId,
+                        'role' => 'cleaner',
+                        'assigned_at' => now(),
+                        'assigned_by' => Auth::id()
+                    ]);
+                }
             }
         }
 
@@ -323,7 +336,9 @@ class AdminBookingController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Booking created successfully',
-                'booking_id' => $bookingId
+                'booking_id' => $bookingId,
+                'booking_code' => $code,
+                'employee_assigned' => !empty($data['employee_user_id']) ? true : false
             ]);
         }
 
