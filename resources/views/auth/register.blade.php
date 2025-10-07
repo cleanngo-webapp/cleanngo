@@ -72,7 +72,7 @@
 				</div>
 			</div>
 			<div class="flex justify-between items-center">
-				<a href="{{ route('login') }}" class="text-emerald-700 cursor-pointer hover:text-brand-highlight">Cancel</a>
+				<a href="{{ route('landing') }}" class="text-emerald-700 cursor-pointer hover:text-brand-highlight">Cancel</a>
 				<button id="registerButton" class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-highlight" type="submit">Sign Up</button>
 			</div>
 		</form>
