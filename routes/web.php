@@ -107,7 +107,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::post('/jobs/{bookingId}/equipment/borrow', [EmployeeJobsController::class, 'borrowEquipment'])->name('jobs.equipment.borrow');
     Route::get('/jobs/{bookingId}/borrowed-items', [EmployeeJobsController::class, 'getBorrowedItems'])->name('jobs.borrowed-items');
     Route::get('/jobs/table-data', [EmployeeJobsController::class, 'getTableData'])->name('jobs.table-data');
-    Route::get('/jobs/payment-status', [EmployeeJobsController::class, 'checkPaymentStatus'])->name('jobs.payment-status');
+    // Payment status polling route removed - no longer needed
     Route::get('/payroll', [EmployeePayrollController::class, 'index'])->name('payroll');
     Route::get('/notifications', [EmployeeNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/api', [EmployeeNotificationController::class, 'getNotifications'])->name('notifications.api');
