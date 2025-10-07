@@ -186,9 +186,33 @@ class AdminBookingController extends Controller
             ]);
         }
 
+        // Check if the customer has an address before creating the booking
         $addressId = DB::table('addresses')
             ->where('user_id', $data['user_id'])
-            ->orderByDesc('is_primary')->orderBy('id')->value('id');
+            ->orderByDesc('is_primary')
+            ->orderBy('id')
+            ->value('id');
+            
+        // If no address exists for this customer, return an error
+        if (!$addressId) {
+            $customerName = DB::table('users')
+                ->where('id', $data['user_id'])
+                ->selectRaw("CONCAT(first_name, ' ', last_name) as name")
+                ->value('name');
+                
+            $errorMessage = "Cannot create booking for {$customerName}. The customer does not have an address yet. Please ask the customer to add an address first.";
+            
+            // Handle AJAX requests with JSON response for SweetAlert
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage,
+                    'error_type' => 'no_address'
+                ], 422);
+            }
+            
+            return back()->withErrors(['address' => $errorMessage]);
+        }
 
         $start = \Carbon\Carbon::parse($data['date'].' '.$data['time']);
         $code = $this->generateCode('B');
