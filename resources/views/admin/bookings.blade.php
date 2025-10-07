@@ -65,7 +65,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Bookings</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($totalBookings ?? 0) }}</p>
+                            <p id="total-bookings-count" class="text-2xl font-bold text-gray-900">{{ number_format($totalBookings ?? 0) }}</p>
                             <p class="text-xs text-gray-500 mt-1">All time bookings</p>
                         </div>
                         <div class="bg-blue-100 p-3 rounded-lg">
@@ -81,7 +81,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Today's Bookings</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($todayBookings ?? 0) }}</p>
+                            <p id="today-bookings-count" class="text-2xl font-bold text-gray-900">{{ number_format($todayBookings ?? 0) }}</p>
                             <p class="text-xs text-gray-500 mt-1">Scheduled for today</p>
                         </div>
                         <div class="bg-green-100 p-3 rounded-lg">
@@ -97,7 +97,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Active Services</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($activeServices ?? 0) }}</p>
+                            <p id="active-services-count" class="text-2xl font-bold text-gray-900">{{ number_format($activeServices ?? 0) }}</p>
                             <p class="text-xs text-gray-500 mt-1">Currently in progress</p>
                         </div>
                         <div class="bg-yellow-100 p-3 rounded-lg">
@@ -113,7 +113,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Completed Today</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($completedJobsToday ?? 0) }}</p>
+                            <p id="completed-jobs-today-count" class="text-2xl font-bold text-gray-900">{{ number_format($completedJobsToday ?? 0) }}</p>
                             <p class="text-xs text-gray-500 mt-1">Jobs finished today</p>
                         </div>
                         <div class="bg-emerald-100 p-3 rounded-lg">
@@ -1314,6 +1314,24 @@
     
     function approvePaymentProof(proofId) {
         currentProofId = proofId;
+        
+        // Show loading state on the approve button
+        const approveButton = document.querySelector(`button[onclick="approvePaymentProof(${proofId})"]`);
+        if (approveButton) {
+            const originalContent = approveButton.innerHTML;
+            approveButton.disabled = true;
+            approveButton.classList.add('opacity-75', 'cursor-not-allowed');
+            approveButton.innerHTML = `
+                <div class="flex items-center justify-center">
+                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <span>Processing...</span>
+                </div>
+            `;
+            
+            // Store original content for potential reset
+            approveButton._originalContent = originalContent;
+        }
+        
         // Close the payment proof modal
         closePaymentProofModal();
         
@@ -1325,6 +1343,24 @@
     
     function declinePaymentProof(proofId) {
         currentProofId = proofId;
+        
+        // Show loading state on the decline button
+        const declineButton = document.querySelector(`button[onclick="declinePaymentProof(${proofId})"]`);
+        if (declineButton) {
+            const originalContent = declineButton.innerHTML;
+            declineButton.disabled = true;
+            declineButton.classList.add('opacity-75', 'cursor-not-allowed');
+            declineButton.innerHTML = `
+                <div class="flex items-center justify-center">
+                    <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <span>Processing...</span>
+                </div>
+            `;
+            
+            // Store original content for potential reset
+            declineButton._originalContent = originalContent;
+        }
+        
         // Close the payment proof modal
         closePaymentProofModal();
         
@@ -1346,6 +1382,16 @@
         const declineModal = document.getElementById('decline-payment-modal');
         declineModal.classList.add('hidden');
         declineModal.classList.remove('flex');
+        
+        // Reset decline button state if it exists
+        if (currentProofId) {
+            const declineButton = document.querySelector(`button[onclick="declinePaymentProof(${currentProofId})"]`);
+            if (declineButton && declineButton._originalContent) {
+                declineButton.disabled = false;
+                declineButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                declineButton.innerHTML = declineButton._originalContent;
+            }
+        }
     }
     
     // Booking Photos Modal Functions
@@ -1522,6 +1568,17 @@
         const approveModal = document.getElementById('approve-confirmation-modal');
         approveModal.classList.add('hidden');
         approveModal.classList.remove('flex');
+        
+        // Reset approve button state if it exists
+        if (currentProofId) {
+            const approveButton = document.querySelector(`button[onclick="approvePaymentProof(${currentProofId})"]`);
+            if (approveButton && approveButton._originalContent) {
+                approveButton.disabled = false;
+                approveButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                approveButton.innerHTML = approveButton._originalContent;
+            }
+        }
+        
         currentProofId = null;
     }
     
@@ -1529,6 +1586,17 @@
         const declineModal = document.getElementById('decline-confirmation-modal');
         declineModal.classList.add('hidden');
         declineModal.classList.remove('flex');
+        
+        // Reset decline button state if it exists
+        if (currentProofId) {
+            const declineButton = document.querySelector(`button[onclick="declinePaymentProof(${currentProofId})"]`);
+            if (declineButton && declineButton._originalContent) {
+                declineButton.disabled = false;
+                declineButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                declineButton.innerHTML = declineButton._originalContent;
+            }
+        }
+        
         currentProofId = null;
     }
     
@@ -1667,9 +1735,9 @@
                 // Show success alert
                 showAdminSuccessAlert(data.message, data.booking_code);
                 
-                // Refresh the page to show updated data
+                // Refresh the table via AJAX instead of page reload
                 setTimeout(() => {
-                    window.location.reload();
+                    refreshBookingsTable();
                 }, 1500);
             } else {
                 // Handle errors
@@ -1741,9 +1809,9 @@
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
                 
-                // Refresh the page to show updated data
+                // Refresh the table via AJAX instead of page reload
                 setTimeout(() => {
-                    window.location.reload();
+                    refreshBookingsTable();
                 }, 1500);
             } else {
                 // Handle errors
@@ -1867,9 +1935,9 @@
                 // Close the approval modal
                 closeApproveConfirmationModal();
                 
-                // Refresh the page to show updated data
+                // Refresh the table via AJAX instead of page reload
                 setTimeout(() => {
-                    window.location.reload();
+                    refreshBookingsTable();
                 }, 1500);
             } else {
                 // Handle errors
@@ -1912,9 +1980,9 @@
                 // Close the decline modal
                 closeDeclineConfirmationModal();
                 
-                // Refresh the page to show updated data
+                // Refresh the table via AJAX instead of page reload
                 setTimeout(() => {
-                    window.location.reload();
+                    refreshBookingsTable();
                 }, 1500);
             } else {
                 // Handle errors
@@ -2878,6 +2946,8 @@
     // Function to refresh bookings table via AJAX
     function refreshBookingsTable() {
         const tableContainer = document.getElementById('bookings-table-container');
+        const paginationContainer = document.getElementById('pagination-container');
+        
         if (!tableContainer) return;
 
         // Show loading state
@@ -2887,42 +2957,124 @@
                 <span class="ml-2 text-gray-600">Loading bookings...</span>
             </div>
         `;
+        paginationContainer.innerHTML = '';
 
-        // Fetch updated bookings
-        fetch('{{ url("/admin/bookings") }}?ajax=1', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            // Extract table content from response
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newTableContainer = doc.getElementById('bookings-table-container');
-            
-            if (newTableContainer) {
-                tableContainer.innerHTML = newTableContainer.innerHTML;
+        // Fetch updated bookings with current search/sort parameters
+        const searchTerm = document.getElementById('search-bookings').value;
+        const url = new URL('{{ route("admin.bookings") }}', window.location.origin);
+        
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        }
+        url.searchParams.set('sort', currentSort);
+        url.searchParams.set('sortOrder', currentSortOrder);
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                // Parse the response HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Extract table container content
+                const newTableContainer = doc.getElementById('bookings-table-container');
+                const newPagination = doc.getElementById('pagination-container');
+                
+                if (newTableContainer) {
+                    tableContainer.innerHTML = newTableContainer.innerHTML;
+                }
+                if (newPagination) {
+                    paginationContainer.innerHTML = newPagination.innerHTML;
+                }
+                
+                // Update statistics cards with fresh data
+                updateStatisticsCards(doc);
+                
                 // Re-initialize any event listeners if needed
                 initializeBookingsTableEvents();
-            }
-        })
-        .catch(error => {
-            console.error('Error refreshing table:', error);
-            tableContainer.innerHTML = `
-                <div class="text-center py-8 text-red-600">
-                    <p>Error loading bookings. Please refresh the page.</p>
-                </div>
-            `;
-        });
+            })
+            .catch(error => {
+                console.error('Error refreshing table:', error);
+                tableContainer.innerHTML = `
+                    <div class="text-center py-8 text-red-600">
+                        <p>Error loading bookings. Please refresh the page.</p>
+                    </div>
+                `;
+            });
     }
 
     // Initialize bookings table event listeners
     function initializeBookingsTableEvents() {
-        // Re-attach any event listeners that might have been lost during refresh
-        // This can be expanded based on what interactive elements exist in the table
+        // Re-attach assignment dropdown event listeners
+        document.querySelectorAll('.assign-form .assign-select').forEach(function(sel){
+            // Remove existing listeners to prevent duplicates
+            sel.removeEventListener('change', sel._assignChangeHandler);
+            
+            // Create new event handler
+            sel._assignChangeHandler = function(){
+                if (!sel.value) return;
+                const form = sel.closest('.assign-form');
+                const name = sel.options[sel.selectedIndex].textContent.trim();
+                
+                // Trigger the assignment modal using the existing pattern
+                const modal = document.getElementById('assign-modal');
+                const txt = document.getElementById('assignModalText');
+                const code = form.getAttribute('data-booking-code');
+                
+                // Set up the modal
+                window.pendingAssignForm = form;
+                window.pendingAssignSelect = sel;
+                txt.textContent = 'Assign '+(name||'this employee')+' to '+code+'? This cannot be changed later.';
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            };
+            
+            // Add the new listener
+            sel.addEventListener('change', sel._assignChangeHandler);
+        });
+        
         console.log('Bookings table events re-initialized');
+    }
+
+    // Function to update statistics cards with fresh data
+    function updateStatisticsCards(doc) {
+        // Update Total Bookings card
+        const totalBookingsElement = doc.getElementById('total-bookings-count');
+        if (totalBookingsElement) {
+            const currentElement = document.getElementById('total-bookings-count');
+            if (currentElement) {
+                currentElement.textContent = totalBookingsElement.textContent;
+            }
+        }
+        
+        // Update Today's Bookings card
+        const todayBookingsElement = doc.getElementById('today-bookings-count');
+        if (todayBookingsElement) {
+            const currentElement = document.getElementById('today-bookings-count');
+            if (currentElement) {
+                currentElement.textContent = todayBookingsElement.textContent;
+            }
+        }
+        
+        // Update Active Services card
+        const activeServicesElement = doc.getElementById('active-services-count');
+        if (activeServicesElement) {
+            const currentElement = document.getElementById('active-services-count');
+            if (currentElement) {
+                currentElement.textContent = activeServicesElement.textContent;
+            }
+        }
+        
+        // Update Completed Jobs Today card
+        const completedJobsElement = doc.getElementById('completed-jobs-today-count');
+        if (completedJobsElement) {
+            const currentElement = document.getElementById('completed-jobs-today-count');
+            if (currentElement) {
+                currentElement.textContent = completedJobsElement.textContent;
+            }
+        }
+        
+        console.log('Statistics cards updated successfully');
     }
 
     // Admin Date and Time Picker Variables
