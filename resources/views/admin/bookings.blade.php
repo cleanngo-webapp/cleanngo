@@ -659,7 +659,7 @@
                                         <span class="text-gray-500">:</span>
                                         <select id="admin-minute-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
                                             <option value="">--</option>
-                                            @for($i = 0; $i < 60; $i += 15)
+                                            @for($i = 0; $i < 60; $i += 10)
                                                 <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
                                             @endfor
                                         </select>
