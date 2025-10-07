@@ -59,7 +59,6 @@ class AdminEmployeeController extends Controller
                 'employees.id as employee_id',
                 'employees.employee_code',
                 'employees.contact_number',
-                'employees.employment_status',
                 'employees.is_active',
             ])
             ->selectSub(function ($q) {

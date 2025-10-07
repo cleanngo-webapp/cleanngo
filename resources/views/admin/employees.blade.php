@@ -143,13 +143,11 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @php
-                                $status = $emp->employment_status ? ucfirst($emp->employment_status) : (($emp->is_active ?? true) ? 'Active' : 'Inactive');
+                                // Use is_active field to determine status since employment_status was removed
+                                $status = ($emp->is_active ?? true) ? 'Active' : 'Inactive';
                                 $statusColors = [
                                     'Active' => 'bg-green-100 text-green-800',
                                     'Inactive' => 'bg-red-100 text-red-800',
-                                    'Employed' => 'bg-blue-100 text-blue-800',
-                                    'Terminated' => 'bg-gray-100 text-gray-800',
-                                    'On Leave' => 'bg-yellow-100 text-yellow-800'
                                 ];
                             @endphp
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$status] ?? 'bg-gray-100 text-gray-800' }}">
@@ -382,6 +380,32 @@
     </div>
 </div>
 
+@push('styles')
+<style>
+/* Loading dots animation for AJAX operations */
+.loading-dots {
+    animation: loading-dots 1.4s infinite ease-in-out both;
+}
+
+.loading-dots:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.loading-dots:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes loading-dots {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+</style>
+@endpush
+
 @push('scripts')
 <script>
 // Global variables for search and sort
@@ -485,6 +509,62 @@ function performSearch() {
         .catch(error => {
             console.error('Search error:', error);
             tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+        });
+}
+
+// Refresh employees table after adding new employee
+function refreshEmployeesTable() {
+    const url = new URL('{{ route("admin.employees") }}', window.location.origin);
+    
+    // Preserve current search and sort parameters
+    const searchTerm = document.getElementById('search-employees').value;
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    }
+    url.searchParams.set('sort', currentSort);
+    url.searchParams.set('sort_order', currentSortOrder);
+    
+    // Show loading state
+    const tableBody = document.getElementById('employees-table-body');
+    const paginationContainer = document.getElementById('pagination-container');
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="px-6 py-8 text-center">
+                <div class="flex justify-center items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                </div>
+                <p class="text-gray-500 text-sm">Refreshing...</p>
+            </td>
+        </tr>
+    `;
+    paginationContainer.innerHTML = '';
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract table body content
+            const newTableBody = doc.getElementById('employees-table-body');
+            const newPagination = doc.getElementById('pagination-container');
+            
+            if (newTableBody) {
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+            if (newPagination) {
+                paginationContainer.innerHTML = newPagination.innerHTML;
+            }
+            
+            // Update URL without page refresh
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => {
+            console.error('Refresh error:', error);
+            tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-red-500">Error refreshing table</td></tr>';
         });
 }
 
@@ -630,9 +710,9 @@ function submitFormViaAjax(form) {
             // Close modal and reset form
             closeAddEmployeeModal();
             
-            // Refresh the page to show the new employee
+            // Refresh the table data via AJAX instead of page reload
             setTimeout(() => {
-                window.location.reload();
+                refreshEmployeesTable();
             }, 1000);
         } else {
             // Handle validation errors

@@ -378,13 +378,13 @@ function openEditModal(itemId) {
                 document.getElementById('edit_reorder_level').value = parseInt(item.reorder_level);
                 document.getElementById('edit_notes').value = item.notes || '';
                 
-                // Store original values for change detection
+                // Store original values for change detection with proper data types
                 window.originalEditValues = {
                     name: item.name,
                     category: item.category,
-                    quantity: parseInt(item.quantity),
-                    unit_price: item.unit_price,
-                    reorder_level: parseInt(item.reorder_level),
+                    quantity: parseInt(item.quantity) || 0,
+                    unit_price: parseFloat(item.unit_price) || 0,
+                    reorder_level: parseInt(item.reorder_level) || 0,
                     notes: item.notes || ''
                 };
                 
@@ -457,11 +457,13 @@ function checkForChanges() {
         updateButton.disabled = false;
         updateButton.classList.remove('opacity-50', 'cursor-not-allowed');
         updateButton.title = 'Update item with current changes';
+        updateButton.innerHTML = 'Update Item';
     } else {
         // Disable button
         updateButton.disabled = true;
         updateButton.classList.add('opacity-50', 'cursor-not-allowed');
         updateButton.title = 'No changes detected. Please modify at least one field to enable update.';
+        updateButton.innerHTML = 'Update Item';
     }
 }
 
@@ -629,15 +631,15 @@ document.getElementById('addForm').addEventListener('submit', function(e) {
             .then(data => {
                 if (data.success) {
                     // Show success alert that auto-disappears
-                    showInventorySuccessAlert(data.message);
+                    showInventorySuccessAlert(data.message, 'Added');
                     
                     // Close modal and reset form
                     closeAddModal();
                     
-                    // Refresh the page after a short delay to show updated data
+                    // Refresh the table data via AJAX instead of page reload
                     setTimeout(() => {
-                        location.reload();
-                    }, 2000);
+                        refreshInventoryTable();
+                    }, 1000);
                 } else {
                     // Handle validation errors
                     showInventoryErrorAlert(data.message || 'An error occurred while creating the inventory item.');
@@ -674,6 +676,30 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
     const unitPrice = formData.get('unit_price');
     const reorderLevel = formData.get('reorder_level');
     const notes = formData.get('notes');
+    
+    // Check if there are actual changes before showing loading state
+    if (!window.originalEditValues) {
+        showInventoryErrorAlert('No changes detected. Please modify at least one field to enable update.');
+        return;
+    }
+    
+    const currentValues = {
+        name: formData.get('name'),
+        category: formData.get('category'),
+        quantity: parseInt(formData.get('quantity')) || 0,
+        unit_price: parseFloat(formData.get('unit_price')) || 0,
+        reorder_level: parseInt(formData.get('reorder_level')) || 0,
+        notes: formData.get('notes') || ''
+    };
+    
+    const hasChanges = Object.keys(currentValues).some(key => {
+        return currentValues[key] !== window.originalEditValues[key];
+    });
+    
+    if (!hasChanges) {
+        showInventoryErrorAlert('No changes detected. Please modify at least one field to enable update.');
+        return;
+    }
     
     // Show loading state on the submit button before confirmation
     const submitButton = document.querySelector('#editForm button[type="submit"]');
@@ -743,15 +769,15 @@ document.getElementById('editForm').addEventListener('submit', function(e) {
             .then(data => {
                 if (data.success) {
                     // Show success alert that auto-disappears
-                    showInventorySuccessAlert(data.message);
+                    showInventorySuccessAlert(data.message, 'Updated');
                     
                     // Close modal and reset form
                     closeEditModal();
                     
-                    // Refresh the page after a short delay to show updated data
+                    // Refresh the table data via AJAX instead of page reload
                     setTimeout(() => {
-                        location.reload();
-                    }, 2000);
+                        refreshInventoryTable();
+                    }, 1000);
                 } else {
                     // Handle validation errors
                     showInventoryErrorAlert(data.message || 'An error occurred while updating the inventory item.');
@@ -804,9 +830,19 @@ function deleteItem(itemId, buttonElement) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    Swal.fire('Deleted!', data.message, 'success').then(() => {
-                        location.reload();
-                    });
+                    // Show success alert that auto-disappears
+                    showInventorySuccessAlert(data.message, 'Deleted');
+                    
+                    // Remove the table row immediately for better UX
+                    const tableRow = deleteButton.closest('tr');
+                    if (tableRow) {
+                        tableRow.remove();
+                    }
+                    
+                    // Refresh the table data via AJAX to update statistics
+                    setTimeout(() => {
+                        refreshInventoryTable();
+                    }, 1000);
                 } else {
                     Swal.fire('Error', data.message, 'error');
                     // Reset button on error
@@ -825,7 +861,7 @@ function deleteItem(itemId, buttonElement) {
 }
 
 // Show inventory success alert that auto-disappears
-function showInventorySuccessAlert(message) {
+function showInventorySuccessAlert(message, action = 'Added') {
     const alert = document.createElement('div');
     alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
     alert.style.top = '80px'; // Position below the navigation bar
@@ -836,7 +872,7 @@ function showInventorySuccessAlert(message) {
             <i class="ri-check-line text-xl"></i>
             <div>
                 <div class="font-medium">${message}</div>
-                <div class="text-sm opacity-90">Item Added Successfully</div>
+                <div class="text-sm opacity-90">Item ${action} Successfully</div>
             </div>
         </div>
     `;
@@ -868,6 +904,63 @@ function showInventoryErrorAlert(message) {
         confirmButtonColor: '#dc2626',
         confirmButtonText: 'OK'
     });
+}
+
+// Refresh inventory table after operations
+function refreshInventoryTable() {
+    const url = new URL('{{ route("admin.inventory") }}', window.location.origin);
+    
+    // Show loading state
+    const tableBody = document.querySelector('tbody');
+    const paginationContainer = document.querySelector('.px-6.py-4.border-t.border-gray-100');
+    
+    if (tableBody) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="10" class="px-6 py-8 text-center">
+                    <div class="flex justify-center items-center space-x-2 mb-4">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    </div>
+                    <p class="text-gray-500 text-sm">Refreshing inventory...</p>
+                </td>
+            </tr>
+        `;
+    }
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract table body content
+            const newTableBody = doc.querySelector('tbody');
+            const newStatsCards = doc.querySelector('.grid.grid-cols-1.md\\:grid-cols-4.gap-6.mt-6');
+            
+            if (newTableBody && tableBody) {
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+            
+            // Update statistics cards
+            if (newStatsCards) {
+                const currentStatsCards = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-4.gap-6.mt-6');
+                if (currentStatsCards) {
+                    currentStatsCards.innerHTML = newStatsCards.innerHTML;
+                }
+            }
+            
+            // Update URL without page refresh
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => {
+            console.error('Refresh error:', error);
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-sm text-red-500">Error refreshing table</td></tr>';
+            }
+        });
 }
 
 // Transaction History Modal Functions
@@ -1097,6 +1190,32 @@ function closeTransactionHistoryModal() {
     modal.classList.remove('flex');
 }
 </script>
+@push('styles')
+<style>
+/* Loading dots animation for AJAX operations */
+.loading-dots {
+    animation: loading-dots 1.4s infinite ease-in-out both;
+}
+
+.loading-dots:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.loading-dots:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes loading-dots {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+</style>
+@endpush
+
 @endsection
 
 

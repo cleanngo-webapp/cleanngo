@@ -125,6 +125,16 @@ class AdminInventoryController extends Controller
     {
         try {
             $item = InventoryItem::findOrFail($id);
+            
+            // Check if item has any transactions
+            $hasTransactions = $item->transactions()->exists();
+            
+            if ($hasTransactions) {
+                // Delete all related transactions first
+                $item->transactions()->delete();
+            }
+            
+            // Now delete the item
             $item->delete();
             
             return response()->json([
