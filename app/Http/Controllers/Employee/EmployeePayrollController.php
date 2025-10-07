@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,15 +25,20 @@ class EmployeePayrollController extends Controller
      * - Monthly earnings summary
      * - Monthly jobs completed count
      */
-    public function index()
+    public function index(Request $request)
     {
         $employeeId = Auth::user()?->employee?->id;
         if (!$employeeId) {
             return redirect()->route('employee.dashboard')->withErrors(['error' => 'Employee profile not found.']);
         }
 
-        // Get completed and paid bookings for this employee only
-        $payrollRecords = DB::table('bookings as b')
+        // Get search and sort parameters from request
+        $search = $request->get('search');
+        $sort = $request->get('sort', 'completed_at');
+        $sortOrder = $request->get('sortOrder', 'desc');
+
+        // Build the base query for payroll records (employee's own records only)
+        $query = DB::table('bookings as b')
             ->join('booking_staff_assignments as bsa', 'b.id', '=', 'bsa.booking_id')
             ->join('employees as e', 'bsa.employee_id', '=', 'e.id')
             ->join('users as eu', 'e.user_id', '=', 'eu.id')
@@ -57,9 +63,31 @@ class EmployeePayrollController extends Controller
                 DB::raw("CONCAT(cu.first_name, ' ', cu.last_name) as customer_name"),
                 's.name as service_name',
                 'pp.amount as payment_amount'
-            ])
-            ->orderByDesc('b.completed_at')
-            ->get();
+            ]);
+        
+        // Apply search functionality - search across booking code and customer name
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('b.code', 'like', "%{$search}%")
+                  ->orWhere('cu.first_name', 'like', "%{$search}%")
+                  ->orWhere('cu.last_name', 'like', "%{$search}%")
+                  ->orWhereRaw("CONCAT(cu.first_name, ' ', cu.last_name) LIKE ?", ["%{$search}%"]);
+            });
+        }
+        
+        // Apply sorting with proper order
+        $validSortFields = ['completed_at', 'total_due_cents'];
+        $validSortOrders = ['asc', 'desc'];
+        
+        if (in_array($sort, $validSortFields) && in_array($sortOrder, $validSortOrders)) {
+            $query->orderBy($sort, $sortOrder);
+        } else {
+            // Default sorting by completion date descending
+            $query->orderByDesc('b.completed_at');
+        }
+        
+        // Execute the query
+        $payrollRecords = $query->get();
 
         // Build service summaries for better service display
         $serviceSummaries = [];
@@ -159,6 +187,9 @@ class EmployeePayrollController extends Controller
             'receiptData' => $receiptData,
             'monthlyEarnings' => $monthlyEarnings,
             'monthlyJobsCompleted' => $monthlyJobsCompleted,
+            'search' => $search,
+            'sort' => $sort,
+            'sortOrder' => $sortOrder,
         ]);
     }
 }
