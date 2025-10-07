@@ -279,13 +279,23 @@
     // Delete customer function
     function deleteCustomer(userId, buttonElement) {
         Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this! This will permanently delete the customer and all their data including booking history.",
+            title: 'Delete Customer?',
+            html: `
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i class="ri-delete-bin-line text-2xl text-orange-600"></i>
+                    </div>
+                    <p class="text-gray-700 mb-2">This will permanently delete the customer and all their data.</p>
+                    <p class="text-sm text-gray-500 mb-4">Note: Customers with booking history cannot be deleted to preserve business records.</p>
+                </div>
+            `,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete customer!'
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, Delete Customer',
+            cancelButtonText: 'Cancel',
+            focusCancel: true
         }).then((result) => {
             if (result.isConfirmed) {
                 // Show loading state on the delete button
@@ -372,11 +382,21 @@
     // Show error alert
     function showCustomerErrorAlert(message) {
         Swal.fire({
-            title: 'Error',
-            text: message,
+            title: 'Cannot Delete Customer',
+            html: `
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="ri-error-warning-line text-2xl text-red-600"></i>
+                    </div>
+                    <p class="text-gray-700 mb-2">${message}</p>
+                    <p class="text-sm text-gray-500">This helps maintain data integrity and business records.</p>
+                </div>
+            `,
             icon: 'error',
             confirmButtonColor: '#dc2626',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'I Understand',
+            showCloseButton: true,
+            focusConfirm: true
         });
     }
 

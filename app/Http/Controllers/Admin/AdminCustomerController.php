@@ -105,46 +105,25 @@ class AdminCustomerController extends Controller
             $customerCode = $customer->customer_code ?? 'N/A';
             $username = $user->username;
 
-            // Check if customer has any active bookings
+            // Check if customer has any bookings at all
             if ($customer) {
-                $activeBookings = DB::table('bookings')
+                $totalBookings = DB::table('bookings')
                     ->where('customer_id', $customer->id)
-                    ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
                     ->count();
 
-                if ($activeBookings > 0) {
+                if ($totalBookings > 0) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Cannot delete customer with active bookings. Please complete or cancel their bookings first.'
-                    ], 400);
-                }
-
-                // Check if customer has any pending payments
-                $pendingPayments = DB::table('bookings')
-                    ->where('customer_id', $customer->id)
-                    ->where('status', 'completed')
-                    ->where('payment_status', 'pending')
-                    ->count();
-
-                if ($pendingPayments > 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Cannot delete customer with pending payments. Please resolve all payment issues first.'
+                        'message' => 'Cannot delete customer with existing bookings. This customer has booking history that must be preserved for business records.'
                     ], 400);
                 }
             }
 
             // Delete related records first (cascade delete)
             if ($customer) {
-                // Delete customer addresses
+                // Delete customer addresses (safe because no bookings exist)
                 DB::table('addresses')
                     ->where('user_id', $userId)
-                    ->delete();
-                
-                // Delete customer bookings (completed ones only for safety)
-                DB::table('bookings')
-                    ->where('customer_id', $customer->id)
-                    ->whereIn('status', ['completed', 'cancelled'])
                     ->delete();
                 
                 // Delete customer record
