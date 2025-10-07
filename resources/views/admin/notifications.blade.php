@@ -83,7 +83,7 @@
                             
                             <!-- Time and Status -->
                             <div class="flex items-center gap-2 ml-4">
-                                <span class="text-xs text-gray-500 whitespace-nowrap">{{ $notification->created_at->format('M d, g:i A') }}</span>
+                                <span class="text-xs text-gray-500 whitespace-nowrap">{{ $notification->created_at->setTimezone(config('app.timezone', 'Asia/Manila'))->format('M d, g:i A') }}</span>
                                 @if(!$notification->is_read)
                                     <div class="w-2 h-2 bg-emerald-500 rounded-full flex-shrink-0"></div>
                                 @endif
