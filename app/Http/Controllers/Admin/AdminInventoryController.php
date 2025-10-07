@@ -14,13 +14,47 @@ use Illuminate\Support\Facades\Log;
 class AdminInventoryController extends Controller
 {
     /**
-     * Display the inventory management page
+     * Display the inventory management page with search and sort functionality
      */
-    public function index()
+    public function index(Request $request)
     {
-        $items = InventoryItem::active()->orderBy('created_at', 'desc')->get();
+        // Get search and sort parameters from request
+        $search = $request->get('search');
+        $sort = $request->get('sort', 'name');
+        $sortOrder = $request->get('sortOrder', 'asc');
         
-        return view('admin.inventory', compact('items'));
+        // Build the base query for inventory items
+        $query = InventoryItem::active();
+        
+        // Apply search functionality - search across item code, name, and category
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('item_code', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%");
+            });
+        }
+        
+        // Apply sorting with proper order
+        $validSortFields = ['name', 'category', 'quantity', 'updated_at'];
+        $validSortOrders = ['asc', 'desc'];
+        
+        if (in_array($sort, $validSortFields) && in_array($sortOrder, $validSortOrders)) {
+            $query->orderBy($sort, $sortOrder);
+        } else {
+            // Default sorting by name ascending
+            $query->orderBy('name', 'asc');
+        }
+        
+        // Execute the query
+        $items = $query->get();
+        
+        return view('admin.inventory', [
+            'items' => $items,
+            'search' => $search,
+            'sort' => $sort,
+            'sortOrder' => $sortOrder,
+        ]);
     }
 
     /**

@@ -54,6 +54,51 @@
         </div>
     </div>
 
+    {{-- Search and Sort Section --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <input type="text" 
+                           id="search-inventory" 
+                           value="{{ $search ?? '' }}"
+                           placeholder="Search inventory by Item Code, Item Name, or Category" 
+                           class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('name')">
+                        <i class="ri-text mr-2"></i>
+                        Sort by Name
+                        <i class="ri-arrow-{{ ($sort ?? 'name') === 'name' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'category' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('category')">
+                        <i class="ri-folder-line mr-2"></i>
+                        Sort by Category
+                        <i class="ri-arrow-{{ ($sort ?? 'name') === 'category' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'quantity' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('quantity')">
+                        <i class="ri-number-1 mr-2"></i>
+                        Sort by Quantity
+                        <i class="ri-arrow-{{ ($sort ?? 'name') === 'quantity' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                    <button type="button" 
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'updated_at' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            onclick="toggleSort('updated_at')">
+                        <i class="ri-calendar-line mr-2"></i>
+                        Sort by Date
+                        <i class="ri-arrow-{{ ($sort ?? 'name') === 'updated_at' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Inventory Records Section --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
         <div class="p-6 border-b border-gray-100">
@@ -90,7 +135,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody id="inventory-table-body" class="bg-white divide-y divide-gray-200">
                     @forelse($items as $item)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -161,15 +206,30 @@
                                 <div class="text-center">
                                     <h3 class="text-lg font-medium text-gray-900 mb-2">No Inventory Items Found</h3>
                                     <p class="text-sm text-gray-500 mb-4">
-                                        No inventory items have been added yet. Click "Add Item" to start managing your inventory.
+                                        @if(request()->has('search') || request()->has('sort'))
+                                            No inventory items match your current filters. Try adjusting your search criteria.
+                                        @else
+                                            No inventory items have been added yet. Click "Add Item" to start managing your inventory.
+                                        @endif
                                     </p>
                                     
                                     <!-- Action Buttons -->
                                     <div class="flex items-center justify-center space-x-3">
+                                        @if(request()->has('search') || request()->has('sort'))
+                                            <button onclick="clearInventoryFilters()" 
+                                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                                <i class="ri-refresh-line mr-2"></i>
+                                                Clear Filters
+                                            </button>
+                                        @endif
                                         <button onclick="openAddModal()" 
                                                 class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
                                             <i class="ri-add-line mr-2"></i>
-                                            Add First Item
+                                            @if(request()->has('search') || request()->has('sort'))
+                                                Add New Item
+                                            @else
+                                                Add First Item
+                                            @endif
                                         </button>
                                     </div>
                                 </div>
@@ -353,6 +413,128 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Search and Sort functionality
+let currentSort = '{{ $sort ?? "name" }}';
+let currentSortOrder = '{{ $sortOrder ?? "asc" }}';
+let searchTimeout;
+
+// Search functionality with AJAX
+document.getElementById('search-inventory').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        performInventorySearch();
+    }, 300);
+});
+
+// Sort functionality
+function toggleSort(sortField) {
+    if (currentSort === sortField) {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort = sortField;
+        currentSortOrder = 'asc';
+    }
+    
+    // Update button styles and icons
+    updateSortButtons();
+    
+    // Perform search/sort
+    performInventorySearch();
+}
+
+function updateSortButtons() {
+    const buttons = document.querySelectorAll('[onclick^="toggleSort"]');
+    buttons.forEach(btn => {
+        btn.classList.remove('bg-emerald-600', 'text-white');
+        btn.classList.add('bg-gray-100', 'text-gray-700');
+        
+        // Update arrow icons
+        const icon = btn.querySelector('i:last-child');
+        if (btn.onclick.toString().includes(currentSort)) {
+            btn.classList.remove('bg-gray-100', 'text-gray-700');
+            btn.classList.add('bg-emerald-600', 'text-white');
+            icon.className = `ri-arrow-${currentSortOrder === 'desc' ? 'down' : 'up'}-line ml-2`;
+        } else {
+            icon.className = 'ri-arrow-up-line ml-2';
+        }
+    });
+}
+
+// AJAX search function for inventory
+function performInventorySearch() {
+    const searchTerm = document.getElementById('search-inventory').value;
+    const url = new URL('{{ route("admin.inventory") }}', window.location.origin);
+    
+    if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+    }
+    url.searchParams.set('sort', currentSort);
+    url.searchParams.set('sortOrder', currentSortOrder);
+    
+    // Show loading state
+    const tableBody = document.getElementById('inventory-table-body');
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="10" class="px-6 py-8 text-center">
+                <div class="flex justify-center items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                </div>
+                <p class="text-gray-500 text-sm">Searching...</p>
+            </td>
+        </tr>
+    `;
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract table body content
+            const newTableBody = doc.getElementById('inventory-table-body');
+            
+            if (newTableBody) {
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+            
+            // Update statistics cards
+            const newStatsCards = doc.querySelector('.grid.grid-cols-1.md\\:grid-cols-4.gap-6.mt-6');
+            if (newStatsCards) {
+                const currentStatsCards = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-4.gap-6.mt-6');
+                if (currentStatsCards) {
+                    currentStatsCards.innerHTML = newStatsCards.innerHTML;
+                }
+            }
+            
+            // Update URL without page refresh
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            tableBody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+        });
+}
+
+// Clear all filters function
+function clearInventoryFilters() {
+    // Clear search input
+    const searchInput = document.getElementById('search-inventory');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Reset sort
+    currentSort = 'name';
+    currentSortOrder = 'asc';
+    updateSortButtons();
+    
+    // Perform search to refresh results
+    performInventorySearch();
+}
+
 // Modal functions
 function openAddModal() {
     document.getElementById('addModal').classList.remove('hidden');
