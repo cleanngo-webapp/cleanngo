@@ -154,7 +154,7 @@ class PaymentProofController extends Controller
             'payment_method' => $proof->payment_method,
             'status' => $proof->status,
             'admin_notes' => $proof->admin_notes,
-            'image_url' => Storage::url($proof->image_path),
+            'image_url' => asset('storage/' . $proof->image_path),
             'employee_name' => $proof->employee->user->first_name . ' ' . $proof->employee->user->last_name,
             'reviewed_by' => $proof->reviewer ? $proof->reviewer->first_name . ' ' . $proof->reviewer->last_name : null,
             'reviewed_at' => $proof->reviewed_at?->format('M j, Y g:i A'),
