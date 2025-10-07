@@ -179,6 +179,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::view('/bookings', 'admin.bookings')->name('bookings');
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings');
+    Route::get('/completed-bookings', [AdminBookingController::class, 'completed'])->name('completed-bookings');
     Route::post('/bookings', [AdminBookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{bookingId}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{bookingId}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');

@@ -46,7 +46,8 @@ class AdminBookingController extends Controller
                 DB::raw('pp.id as payment_proof_id'),
                 DB::raw('pp.status as payment_status'),
                 DB::raw("CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END as payment_approved"),
-            ]);
+            ])
+            ->whereNotIn('b.status', ['completed', 'cancelled']); // Exclude completed and cancelled bookings
 
         // Apply search filter
         if ($search) {
@@ -117,10 +118,11 @@ class AdminBookingController extends Controller
             ];
         })->all();
 
-        // Dashboard statistics for the cards
-        $totalBookings = DB::table('bookings')->count();
+        // Dashboard statistics for the cards (only active bookings)
+        $totalBookings = DB::table('bookings')->whereNotIn('status', ['completed', 'cancelled'])->count();
         $todayBookings = DB::table('bookings')
             ->whereDate('scheduled_start', today())
+            ->whereNotIn('status', ['completed', 'cancelled'])
             ->count();
         $activeServices = DB::table('bookings')
             ->where('status', 'in_progress')
@@ -582,6 +584,162 @@ class AdminBookingController extends Controller
         return response()->json([
             'success' => true,
             'photos' => $photos
+        ]);
+    }
+
+    /**
+     * Display completed and cancelled bookings
+     */
+    public function completed(Request $request)
+    {
+        $search = $request->get('search');
+        $status = $request->get('status'); // Filter by completed or cancelled
+        $sort = $request->get('sort', 'scheduled_start');
+        $sortOrder = $request->get('sortOrder', 'desc');
+
+        $query = DB::table('bookings as b')
+            ->leftJoin('customers as c', 'c.id', '=', 'b.customer_id')
+            ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
+            ->leftJoin('services as s', 's.id', '=', 'b.service_id')
+            ->leftJoin('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
+            ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
+            ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
+            ->leftJoin('addresses as a', function($join) {
+                $join->on('a.user_id', '=', 'u.id')
+                     ->where('a.is_primary', '=', 1);
+            })
+            ->leftJoin('payment_proofs as pp', function($join) {
+                $join->on('pp.booking_id', '=', 'b.id')
+                     ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');
+            })
+            ->select([
+                'b.id', 'b.code', 'b.scheduled_start', 'b.status', 'b.address_id', 'b.booking_photos', 'b.completed_at', 'b.updated_at',
+                's.name as service_name',
+                DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
+                DB::raw('u.phone as customer_phone'),
+                DB::raw("CONCAT(eu.first_name,' ',eu.last_name) as employee_name"),
+                DB::raw('e.user_id as employee_user_id'),
+                DB::raw('bsa.employee_id as assigned_employee_id'),
+                DB::raw("COALESCE(a.line1,'') as address_line1"),
+                DB::raw("COALESCE(a.city,'') as address_city"),
+                DB::raw("COALESCE(a.province,'') as address_province"),
+                DB::raw('a.latitude as address_latitude'),
+                DB::raw('a.longitude as address_longitude'),
+                DB::raw('pp.id as payment_proof_id'),
+                DB::raw('pp.status as payment_status'),
+                DB::raw("CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END as payment_approved"),
+            ])
+               ->where(function($query) use ($status) {
+                   if ($status && in_array($status, ['completed', 'cancelled'])) {
+                       $query->where('b.status', $status);
+                   } else {
+                       $query->where('b.status', 'completed'); // Default to completed if no status filter
+                   }
+               });
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('b.code', 'like', "%{$search}%")
+                  ->orWhere(DB::raw("CONCAT(u.first_name,' ',u.last_name)"), 'like', "%{$search}%")
+                  ->orWhere(DB::raw("CONCAT(eu.first_name,' ',eu.last_name)"), 'like', "%{$search}%");
+            });
+        }
+
+        // Apply sorting
+        $allowedSorts = ['scheduled_start', 'customer_name', 'status'];
+        if (in_array($sort, $allowedSorts)) {
+            $sortColumn = $sort === 'customer_name' ? DB::raw("CONCAT(u.first_name,' ',u.last_name)") : "b.{$sort}";
+            $query->orderBy($sortColumn, $sortOrder);
+        } else {
+            $query->orderByDesc('b.scheduled_start');
+        }
+
+        $bookings = $query->paginate(15)->appends($request->query());
+
+        // Pull booking item summaries and detailed lines for receipts
+        $bookingIds = collect($bookings->items())->pluck('id')->all();
+        $itemsByBooking = collect();
+        $receiptData = [];
+        if (!empty($bookingIds)) {
+            $rows = DB::table('booking_items')
+                ->whereIn('booking_id', $bookingIds)
+                ->orderBy('booking_id')
+                ->get(['booking_id','item_type','quantity','area_sqm','unit_price_cents','line_total_cents']);
+            $grouped = [];
+            foreach ($rows as $r) {
+                // Summary label
+                $label = trim(($r->item_type ?? 'item') . ' x ' . (int)($r->quantity ?? 0));
+                $itemsByBooking[$r->booking_id] = isset($itemsByBooking[$r->booking_id])
+                    ? ($itemsByBooking[$r->booking_id] . ', ' . $label)
+                    : $label;
+                // Detailed lines
+                $grouped[$r->booking_id][] = [
+                    'item_type' => $r->item_type,
+                    'quantity' => (int)($r->quantity ?? 0),
+                    'area_sqm' => $r->area_sqm !== null ? (float)$r->area_sqm : null,
+                    'unit_price' => $r->unit_price_cents !== null ? ((int)$r->unit_price_cents)/100 : null,
+                    'line_total' => $r->line_total_cents !== null ? ((int)$r->line_total_cents)/100 : null,
+                ];
+            }
+            foreach ($grouped as $bid => $lines) {
+                $total = 0.0;
+                foreach ($lines as $ln) { $total += (float)($ln['line_total'] ?? 0); }
+                $receiptData[$bid] = [ 'lines' => $lines, 'total' => $total ];
+            }
+        }
+
+        // Build locations payload for map modal
+        $locationsData = collect($bookings->items())->mapWithKeys(function($b){
+            $addrParts = array_filter([$b->address_line1 ?? null, $b->address_city ?? null, $b->address_province ?? null]);
+            return [
+                $b->id => [
+                    'address' => implode(', ', $addrParts),
+                    'lat' => $b->address_latitude,
+                    'lng' => $b->address_longitude,
+                    'phone' => $b->customer_phone,
+                ]
+            ];
+        })->all();
+
+        // Statistics for completed bookings page
+        $totalCompleted = DB::table('bookings')->where('status', 'completed')->count();
+        $monthlyCompleted = DB::table('bookings')
+            ->where('status', 'completed')
+            ->whereYear('completed_at', now()->year)
+            ->whereMonth('completed_at', now()->month)
+            ->count();
+        $totalCancelled = DB::table('bookings')->where('status', 'cancelled')->count();
+
+        // Handle AJAX requests for table refresh
+        if ($request->ajax()) {
+            return view('admin.completedbookings', [
+                'bookings' => $bookings,
+                'itemSummaries' => $itemsByBooking,
+                'locationsData' => $locationsData,
+                'receiptData' => $receiptData,
+                'totalCompleted' => $totalCompleted,
+                'monthlyCompleted' => $monthlyCompleted,
+                'totalCancelled' => $totalCancelled,
+                'search' => $search,
+                'status' => $status,
+                'sort' => $sort,
+                'sortOrder' => $sortOrder,
+            ]);
+        }
+
+        return view('admin.completedbookings', [
+            'bookings' => $bookings,
+            'itemSummaries' => $itemsByBooking,
+            'locationsData' => $locationsData,
+            'receiptData' => $receiptData,
+            'totalCompleted' => $totalCompleted,
+            'monthlyCompleted' => $monthlyCompleted,
+            'totalCancelled' => $totalCancelled,
+            'search' => $search,
+            'status' => $status,
+            'sort' => $sort,
+            'sortOrder' => $sortOrder,
         ]);
     }
 }
