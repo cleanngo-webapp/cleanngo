@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Customer\CustomerNotificationController;
 use App\Http\Controllers\Employee\EmployeeNotificationController;
+use App\Http\Controllers\ServicesController;
 
 // Public landing page route
 Route::get('/', function () {
@@ -60,6 +61,9 @@ Route::get('/privacy-policy', function () {
 Route::get('/terms-of-service', function () {
     return view('terms-of-service');
 })->name('terms-of-service');
+
+// Public pages (no authentication required)
+Route::get('/services', [ServicesController::class, 'index'])->name('services');
 
 // Auth routes
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');

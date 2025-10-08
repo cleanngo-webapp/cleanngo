@@ -17,8 +17,10 @@
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="CleanSaver Naga Logo" class="h-12">
             </div>
     
-            <!-- Simplified Nav Links - Only About Us and Sign In/Up -->
+            <!-- Simplified Nav Links - Overview, Services, About Us and Sign In/Up -->
             <div class="flex items-center gap-4">
+                <a href="#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">Overview</a>
+                <a href="{{ route('services') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">Services</a>
                 <a href="#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">About Us</a>
                 
                 {{-- Sign In Button --}}
@@ -100,6 +102,7 @@
             </div>
         </div>
     </footer>
+
 
     {{-- Smooth scrolling script for About Us link --}}
     <script>

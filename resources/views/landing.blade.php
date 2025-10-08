@@ -10,45 +10,50 @@
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
         <div class="absolute inset-0 flex flex-col justify-end px-6 md:px-10 pb-8 gap-4">
             <h1 class="text-white text-2xl md:text-4xl font-extrabold max-w-2xl">Fresh Spaces, Happy Faces</h1>
-            <div>
-                <a href="{{ route('login') }}" class="inline-block bg-brand-green text-white font-semibold px-5 py-3 rounded-lg shadow hover:bg-emerald-700">Get Started Today</a>
+            <div class="flex gap-3">
+                <a href="{{ route('login') }}" class="inline-block bg-brand-green text-white font-semibold px-5 py-3 rounded-lg shadow hover:bg-emerald-700">Book Now</a>
             </div>
         </div>
     </section>
 
     {{-- Our Services --}}
     <section class="mt-10">
-        <h2 class="text-xl md:text-2xl font-extrabold text-emerald-900">Our Services</h2>
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-xl md:text-2xl font-extrabold text-emerald-900">Our Services</h2>
+            <a href="{{ route('services') }}" class="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                View All Services & Pricing →
+            </a>
+        </div>
         <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-4">
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-dashboard-carpet-cleaning.webp') }}" alt="Carpet Deep Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Carpet Deep Cleaning</div>
             </a>
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-dashboard-home-dis.webp') }}" alt="Enhanced Disinfection" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Home/Office Disinfection</div>
             </a>
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-services-sofa-mattress-cleaning.webp') }}" alt="Sofa / Mattress Deep Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Sofa / Mattress Deep Cleaning</div>
             </a>
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-dashboard-car-detailing.webp') }}" alt="Car Interior Detailing" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Car Interior Detailing</div>
             </a>
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-services-glass-cleaning.webp') }}" alt="Glass Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Glass Cleaning</div>
             </a>
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-services-post-cons-cleaning.webp') }}" alt="Post Construction Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Post Construction Cleaning</div>
             </a>
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/home-cleaning.webp') }}" alt="House Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">House Cleaning</div>
             </a>
-            <a href="{{ route('login') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
+            <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/curtain-cleaning.webp') }}" alt="Curtain Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Curtain Cleaning</div>
             </a>
@@ -65,7 +70,7 @@
                     <h3 class="text-white text-3xl md:text-5xl font-extrabold mt-2">Cleansaver Naga</h3>
                 </div>
                 <div class="absolute right-4 bottom-3 md:right-10 md:bottom-6">
-                    <a href="{{ route('login') }}" class="inline-block bg-white text-gray-900 font-semibold px-5 py-2 rounded-full shadow hover:bg-gray-100">Get Started Today</a>
+                    <a href="{{ route('login') }}" class="inline-block bg-white text-gray-900 font-semibold px-5 py-2 rounded-full shadow hover:bg-gray-100">Book Now</a>
                 </div>
             </div>
         </div>
@@ -142,5 +147,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 250);
     }, 5000);
 });
+
 </script>
 @endpush
