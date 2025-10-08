@@ -291,8 +291,8 @@
                                 <span class="text-xs text-gray-400">—</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center gap-2">
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap items-center gap-2 max-w-[120px]">
                                 @if($b->status === 'confirmed')
                                     <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openStatusChangeModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" title="Change Status">
                                         <i class="ri-arrow-up-down-line"></i>
