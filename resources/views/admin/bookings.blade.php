@@ -2454,7 +2454,7 @@
         // Simple services (single choice)
         const carpetQty = s('admin_carpet_qty');
         if (carpetQty > 0) {
-            const amt = carpetQty * 25;
+            const amt = carpetQty * 30;
             receipt.push(`
                 <div class="border border-gray-200 rounded-lg p-3">
                     <div class="flex items-start justify-between mb-2">
@@ -2465,7 +2465,7 @@
                         </div>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">${carpetQty} Square Foot × ₱25</span>
+                        <span class="text-xs text-gray-500">${carpetQty} Square Foot × ₱30</span>
                         <span class="font-semibold">${adminPeso(amt)}</span>
                     </div>
                 </div>
@@ -2830,7 +2830,7 @@
         });
         
         // Simple services (single choice)
-        addItem('carpet_sqft', document.getElementById('admin_carpet_qty')?.textContent, 25);
+        addItem('carpet_sqft', document.getElementById('admin_carpet_qty')?.textContent, 30);
         addItem('post_construction_sqm', document.getElementById('admin_pcc_qty')?.textContent, 101.67);
         addItem('disinfect_sqm', document.getElementById('admin_disinfect_qty')?.textContent, 90);
         addItem('glass_sqft', document.getElementById('admin_glass_qty')?.textContent, 50);

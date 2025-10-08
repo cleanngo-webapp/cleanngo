@@ -131,18 +131,14 @@ class ServicesController extends Controller
     {
         $name = strtolower($service->name);
         
-        // Services with tiered pricing
-        $tieredServices = [
-            'sofa',
-            'mattress', 
-            'car',
-            'home service car'
-        ];
-
-        foreach ($tieredServices as $keyword) {
-            if (strpos($name, $keyword) !== false) {
-                return true;
-            }
+        // Services with tiered pricing - use more specific checks to avoid false matches
+        if (strpos($name, 'sofa') !== false) {
+            return true;
+        } elseif (strpos($name, 'mattress') !== false) {
+            return true;
+        } elseif (strpos($name, 'home service car') !== false || strpos($name, 'car interior') !== false) {
+            // More specific check for car services to avoid matching "carpet"
+            return true;
         }
 
         return false;
@@ -173,7 +169,8 @@ class ServicesController extends Controller
                 ['type' => 'Queen', 'price' => '₱1,350'],
                 ['type' => 'King', 'price' => '₱1,450']
             ];
-        } elseif (strpos($name, 'car') !== false) {
+        } elseif (strpos($name, 'home service car') !== false || strpos($name, 'car interior') !== false) {
+            // More specific check for car services to avoid matching "carpet"
             return [
                 ['type' => 'Sedan', 'price' => '₱2,900'],
                 ['type' => 'Hatchback', 'price' => '₱3,000'],

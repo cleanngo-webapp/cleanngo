@@ -804,12 +804,12 @@ function calc(){
   // Carpet service (simple)
   const carpetQty = s('carpet_qty');
   if (carpetQty > 0) {
-    const amt = carpetQty * 25; // ₱25 per square foot
+    const amt = carpetQty * 30; // ₱30 per square foot
     receipt.push({
       id: itemCounter++,
       label: 'Square Foot',
       qty: carpetQty,
-      price: 25,
+      price: 30,
       total: amt
     });
     subtotal += amt;
@@ -1156,7 +1156,7 @@ function openBookingForm(){
   });
   
   // Simple services (single choice)
-  addItem('carpet_sqft', document.getElementById('carpet_qty')?.textContent, 25);
+  addItem('carpet_sqft', document.getElementById('carpet_qty')?.textContent, 30);
   addItem('post_construction_sqm', document.getElementById('pcc_qty')?.textContent, 101.67);
   addItem('disinfect_sqm', document.getElementById('disinfect_qty')?.textContent, 90);
   addItem('glass_sqft', document.getElementById('glass_qty')?.textContent, 50);

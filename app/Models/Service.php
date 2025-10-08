@@ -13,10 +13,6 @@ class Service extends Model
 
     protected $guarded = [];
 
-    public function addons()
-    {
-        return $this->hasMany(ServiceAddon::class);
-    }
 }
 
 
