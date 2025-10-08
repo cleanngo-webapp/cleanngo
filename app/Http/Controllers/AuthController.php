@@ -25,7 +25,26 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // Validate registration with unique username and email, plus profile fields
+        // For customer registration, redirect to email verification
+        if ($request->role === 'customer' || !$request->has('role')) {
+            // Validate basic registration data first
+            $data = $request->validate([
+                'username' => ['required','string','alpha_dash','min:3','max:50','unique:users,username'],
+                'email' => ['required','email','max:255','unique:users,email'],
+                'first_name' => ['required','string','max:100'],
+                'last_name' => ['required','string','max:100'],
+                'contact' => ['nullable','string','max:50'],
+                'password' => ['required','string','min:6','confirmed'],
+            ]);
+
+            // Store registration data in session for later use
+            $request->session()->put('pending_registration', $data);
+            
+            // Redirect to email verification
+            return redirect()->route('email.verification.form', ['email' => $data['email']]);
+        }
+
+        // For admin/employee registration (if needed), use the old flow
         $data = $request->validate([
             'username' => ['required','string','alpha_dash','min:3','max:50','unique:users,username'],
             'email' => ['required','email','max:255','unique:users,email'],
@@ -45,6 +64,7 @@ class AuthController extends Controller
             'phone' => $data['contact'] ?? null,
             'role' => $data['role'],
             'password_hash' => Hash::make($data['password']),
+            'email_verified_at' => now(), // Mark as verified for admin/employee
         ]);
 
         // If the registered user is an employee, create the employee profile row immediately
@@ -59,23 +79,6 @@ class AuthController extends Controller
                 'date_hired' => now()->toDateString(),
                 'employee_code' => 'E' . now()->format('Y') . str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT),
             ]);
-        }
-        // If the registered user is a customer, create the customer profile row with a unique code
-        elseif ($user->role === 'customer') {
-            // Generate a unique CYYYYXXX code
-            $year = now()->format('Y');
-            for ($i = 0; $i < 1000; $i++) {
-                $suffix = str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT);
-                $code = 'C' . $year . $suffix;
-                $exists = DB::table('customers')->where('customer_code', $code)->exists();
-                if (!$exists) {
-                    Customer::create([
-                        'user_id' => $user->id,
-                        'customer_code' => $code,
-                    ]);
-                    break;
-                }
-            }
         }
 
         // Redirect to login page instead of auto-login

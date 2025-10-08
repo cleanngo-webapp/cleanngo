@@ -71,6 +71,12 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Email verification routes
+Route::get('/email-verification', [App\Http\Controllers\EmailVerificationController::class, 'showVerificationForm'])->name('email.verification.form');
+Route::post('/email-verification/send-otp', [App\Http\Controllers\EmailVerificationController::class, 'sendOTP'])->name('email.verification.send');
+Route::post('/email-verification/verify', [App\Http\Controllers\EmailVerificationController::class, 'verifyOTP'])->name('email.verification.verify');
+Route::post('/email-verification/resend', [App\Http\Controllers\EmailVerificationController::class, 'resendOTP'])->name('email.verification.resend');
+
 // Role redirector
 Route::get('/dashboard', [AuthController::class, 'redirectByRole'])->name('dashboard.redirect');
 
