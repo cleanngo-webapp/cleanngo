@@ -72,7 +72,7 @@
             </div>
         </div>
     </nav>
-    <main class="py-8 flex-1">
+    <main class="pt-20 pb-8 flex-1">
         @yield('content')
     </main>
     <footer class="bg-brand-green text-white border-t rounded-t-3xl">

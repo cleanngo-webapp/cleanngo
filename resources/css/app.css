@@ -125,6 +125,42 @@
     animation: spin 1s linear infinite;
 }
 
+/* Map component z-index fixes to prevent navbar overlap */
+.leaflet-container {
+    z-index: 1 !important;
+}
+
+.leaflet-control-container {
+    z-index: 2 !important;
+}
+
+.leaflet-popup-pane {
+    z-index: 3 !important;
+}
+
+.leaflet-tooltip-pane {
+    z-index: 4 !important;
+}
+
+/* Ensure map containers don't interfere with fixed navbar */
+#map,
+#bookingAddressMap,
+#addressMap {
+    position: relative !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+    contain: layout !important;
+}
+
+/* Additional safety for map parent containers */
+.map-container,
+.address-form,
+.booking-form {
+    position: relative !important;
+    z-index: auto !important;
+    overflow: hidden !important;
+}
+
 /* Receipt-style jagged borders */
 .receipt-border {
     position: relative;
