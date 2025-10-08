@@ -78,10 +78,9 @@ class AuthController extends Controller
             }
         }
 
-        // Log in to the appropriate role guard to avoid logging out other roles
-        $guard = $user->role;
-        Auth::guard($guard)->login($user);
-        return redirect()->route('dashboard.redirect');
+        // Redirect to login page instead of auto-login
+        // This ensures users must sign in manually after registration
+        return redirect()->route('login')->with('success', 'Registration successful! Please sign in with your credentials.');
     }
 
     public function login(Request $request)
