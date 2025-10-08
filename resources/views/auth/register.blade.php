@@ -1,4 +1,4 @@
-{{-- Simple Register with Role Selection --}}
+{{-- Customer Registration Form - Role defaults to customer --}}
 @extends('layouts.auth')
 
 @section('title','Sign Up')
@@ -46,13 +46,8 @@
 				<label class="block text-sm font-medium">Contact Number</label>
 				<input type="text" name="contact" value="{{ old('contact') }}" class="mt-1 w-full border border-gray-200 rounded px-3 py-2" placeholder="Enter your contact number" />
 			</div>
-			<div>
-				<label class="block text-sm font-medium">Role</label>
-				<select name="role" class="mt-1 w-full border border-gray-200 rounded px-3 py-2 cursor-pointer" required>
-					<option value="customer">Customer</option>
-					<option value="employee">Employee</option>
-				</select>
-			</div>
+			{{-- Hidden field to default role to customer --}}
+			<input type="hidden" name="role" value="customer" />
 			<div>
 				<label class="block text-sm font-medium">Password</label>
 				<div class="relative">
@@ -96,7 +91,6 @@
 				const lastName = formData.get('last_name');
 				const email = formData.get('email');
 				const contact = formData.get('contact');
-				const role = formData.get('role');
 				
 				// Validate password match first
 				if (password !== passwordConfirmation) {
@@ -119,7 +113,7 @@
 							<p class="mb-1"><strong>Name:</strong> ${firstName} ${lastName}</p>
 							<p class="mb-1"><strong>Email:</strong> ${email}</p>
 							<p class="mb-1"><strong>Contact:</strong> ${contact}</p>
-							<p class="mb-1"><strong>Role:</strong> ${role.charAt(0).toUpperCase() + role.slice(1)}</p>
+							<p class="mb-1"><strong>Role:</strong> Customer</p>
 							<p class="mt-3 text-sm text-gray-600">Are you sure these credentials are correct?</p>
 						</div>
 					`,
