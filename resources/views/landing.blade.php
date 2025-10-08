@@ -129,6 +129,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Hero image rotation
     const images = [
         "{{ asset('assets/cs-dashborard-req-1.webp') }}",
         "{{ asset('assets/cs-dashborard-req-2.webp') }}",
@@ -146,6 +147,23 @@ document.addEventListener('DOMContentLoaded', function () {
             imgEl.onload = () => imgEl.classList.remove('opacity-0');
         }, 250);
     }, 5000);
+
+    // Handle hash navigation to About Us section
+    if (window.location.hash === '#about-us') {
+        setTimeout(() => {
+            const aboutSection = document.getElementById('about-us');
+            if (aboutSection) {
+                const headerHeight = 64; // Height of fixed nav
+                const elementPosition = aboutSection.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }, 100); // Small delay to ensure page is fully loaded
+    }
 });
 
 </script>

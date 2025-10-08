@@ -19,7 +19,7 @@
     
             <!-- Simplified Nav Links - Overview, Services, About Us and Sign In/Up -->
             <div class="flex items-center gap-4">
-                <a href="#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">Overview</a>
+                <a href="{{ route('landing') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">Overview</a>
                 <a href="{{ route('services') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">Services</a>
                 <a href="#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">About Us</a>
                 
@@ -108,19 +108,31 @@
     <script>
         // Smooth scrolling for About Us link
         document.addEventListener('DOMContentLoaded', function() {
-            const aboutUsLink = document.querySelector('a[href="#about-us"]');
-            if (aboutUsLink) {
-                aboutUsLink.addEventListener('click', function(e) {
+            // Handle About Us link smooth scrolling
+            const aboutUsLinks = document.querySelectorAll('a[href="#about-us"]');
+            
+            aboutUsLinks.forEach(function(link) {
+                link.addEventListener('click', function(e) {
                     e.preventDefault();
+                    
                     const aboutSection = document.getElementById('about-us');
+                    
                     if (aboutSection) {
-                        aboutSection.scrollIntoView({ 
-                            behavior: 'smooth',
-                            block: 'start'
+                        // About Us section exists on this page - scroll to it
+                        const headerHeight = 64; // Height of fixed nav
+                        const elementPosition = aboutSection.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
                         });
+                    } else {
+                        // About Us section doesn't exist on this page - navigate to landing page
+                        window.location.href = '{{ route("landing") }}#about-us';
                     }
                 });
-            }
+            });
         });
     </script>
 </body>
