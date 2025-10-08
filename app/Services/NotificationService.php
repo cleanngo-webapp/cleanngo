@@ -365,8 +365,19 @@ class NotificationService
         $booking = $paymentProof->booking;
         $customer = $booking->customer;
         $customerName = $customer->user->first_name . ' ' . $customer->user->last_name;
-        $employee = $paymentProof->employee;
-        $employeeName = $employee->user->first_name . ' ' . $employee->user->last_name;
+        
+        // Check if uploaded by employee or customer
+        $uploaderName = '';
+        if ($paymentProof->uploaded_by === 'employee' && $paymentProof->employee) {
+            $employee = $paymentProof->employee;
+            $uploaderName = $employee->user->first_name . ' ' . $employee->user->last_name;
+        } elseif ($paymentProof->uploaded_by === 'customer') {
+            $uploaderName = $customerName;
+        } else {
+            // Fallback for old records without uploaded_by field
+            $employee = $paymentProof->employee;
+            $uploaderName = $employee ? ($employee->user->first_name . ' ' . $employee->user->last_name) : $customerName;
+        }
         
         // Format services text to avoid duplication
         $servicesData = $this->formatServicesText($booking);
@@ -375,8 +386,8 @@ class NotificationService
 
         $title = 'Payment Proof Submitted';
         $message = sprintf(
-            'Employee %s has submitted a payment proof of ₱%s for booking %s (Customer: %s). Please review.',
-            $employeeName,
+            '%s has submitted a payment proof of ₱%s for booking %s (Customer: %s). Please review.',
+            $uploaderName,
             number_format($paymentProof->amount, 2),
             $booking->code,
             $customerName
@@ -390,7 +401,7 @@ class NotificationService
             'data' => [
                 'booking_id' => $booking->id,
                 'payment_proof_id' => $paymentProof->id,
-                'employee_id' => $employee->id,
+                'employee_id' => $paymentProof->employee_id,
                 'customer_id' => $customer->id,
                 'amount' => $paymentProof->amount,
                 'payment_method' => $paymentProof->payment_method,
@@ -472,7 +483,7 @@ class NotificationService
                 'booking_id' => $booking->id,
                 'payment_proof_id' => $paymentProof->id,
                 'customer_id' => $customer->id,
-                'employee_id' => $employee->id,
+                'employee_id' => $employee ? $employee->id : null,
                 'amount' => $paymentProof->amount,
                 'old_status' => $oldStatus,
                 'new_status' => $newStatus,
@@ -482,31 +493,33 @@ class NotificationService
             'recipient_id' => null,
         ]);
 
-        // Notify employee with specific title based on payment status
-        $employeeTitle = $newStatus === 'approved' ? 'Payment Accepted' : 'Payment Declined';
-        $employeeMessage = sprintf(
-            'Payment of ₱%s for booking %s has been %s',
-            number_format($paymentProof->amount, 2),
-            $booking->code,
-            $newStatus
-        );
+        // Notify employee with specific title based on payment status (only if uploaded by employee)
+        if ($employee && $paymentProof->uploaded_by === 'employee') {
+            $employeeTitle = $newStatus === 'approved' ? 'Payment Accepted' : 'Payment Declined';
+            $employeeMessage = sprintf(
+                'Payment of ₱%s for booking %s has been %s',
+                number_format($paymentProof->amount, 2),
+                $booking->code,
+                $newStatus
+            );
 
-        $this->createNotification([
-            'type' => 'payment_status_changed',
-            'title' => $employeeTitle,
-            'message' => $employeeMessage,
-            'data' => [
-                'booking_id' => $booking->id,
-                'payment_proof_id' => $paymentProof->id,
-                'customer_id' => $customer->id,
-                'amount' => $paymentProof->amount,
-                'old_status' => $oldStatus,
-                'new_status' => $newStatus,
-                'services' => $services,
-            ],
-            'recipient_type' => 'employee',
-            'recipient_id' => $employee->user_id,
-        ]);
+            $this->createNotification([
+                'type' => 'payment_status_changed',
+                'title' => $employeeTitle,
+                'message' => $employeeMessage,
+                'data' => [
+                    'booking_id' => $booking->id,
+                    'payment_proof_id' => $paymentProof->id,
+                    'customer_id' => $customer->id,
+                    'amount' => $paymentProof->amount,
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                    'services' => $services,
+                ],
+                'recipient_type' => 'employee',
+                'recipient_id' => $employee->user_id,
+            ]);
+        }
     }
 
     /**

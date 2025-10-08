@@ -145,13 +145,36 @@
 														</button>
 													</div>
 												@elseif($booking->status === 'in_progress')
-													<div class="mt-2">
+													<div class="mt-2 flex flex-col gap-2">
 														@if($paymentSettings && $paymentSettings->qr_code_path)
-														<button onclick="openPaymentQRModal({{ $booking->id }}, '{{ $booking->code }}', {{ $booking->total_due_cents }})" 
+														<button onclick="openPaymentQRModal({{ $booking->id }}, '   {{ $booking->code }}', {{ $booking->total_due_cents }})" 
 																class="px-3 py-1 bg-blue-500 text-white text-xs rounded cursor-pointer hover:bg-blue-600 transition-colors duration-200">
 															<i class="ri-qr-code-line mr-1"></i>
 															View QR Code
 														</button>
+														@endif
+														@if($booking->payment_proof_status === 'declined')
+															<button onclick="viewCustomerPaymentDetails({{ $booking->id }})" 
+																	class="px-3 py-1 bg-red-500 text-white text-xs rounded cursor-pointer hover:bg-red-600 transition-colors duration-200">
+																<i class="ri-error-warning-line mr-1"></i>
+																View Declined Payment
+															</button>
+															<button onclick="openCustomerPaymentModal({{ $booking->id }}, '{{ $booking->code }}', {{ $booking->total_due_cents }})" 
+																	class="px-3 py-1 bg-emerald-600 text-white text-xs rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200">
+																<i class="ri-attachment-line mr-1"></i>
+																Re-upload Payment
+															</button>
+														@elseif(!$booking->payment_proof_id)
+															<button onclick="openCustomerPaymentModal({{ $booking->id }}, '{{ $booking->code }}', {{ $booking->total_due_cents }})" 
+																	class="px-3 py-1 bg-emerald-600 text-white text-xs rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200">
+																<i class="ri-attachment-line mr-1"></i>
+																Attach Payment
+															</button>
+														@else
+															<button class="px-3 py-1 bg-gray-200 text-gray-500 text-xs rounded cursor-not-allowed" disabled title="Payment proof already uploaded - waiting for admin review">
+																<i class="ri-attachment-line mr-1"></i>
+																Payment Uploaded
+															</button>
 														@endif
 													</div>
 												@elseif($booking->status === 'completed' && $booking->payment_proof_status === 'approved')
@@ -406,6 +429,9 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Make payment settings available globally for JavaScript
+window.paymentSettings = @json($paymentSettings ?? null);
+
 document.addEventListener('DOMContentLoaded', function() {
     var map = L.map('map').setView([13.6218, 123.1948], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -968,6 +994,40 @@ document.addEventListener('DOMContentLoaded', function(){
     if (del) del.addEventListener('click', submitPendingForm);
     var save = document.getElementById('confirm-save-address-yes');
     if (save) save.addEventListener('click', submitAddressForm);
+    
+    // Customer payment proof image preview event listeners
+    const customerImageInput = document.getElementById('customer-proof-image-input');
+    const customerRemovePreviewBtn = document.getElementById('customer-remove-image-preview');
+    const customerFileInputText = document.getElementById('customer-file-input-text');
+    
+    // Handle customer file input change
+    if (customerImageInput) {
+        customerImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Update the custom file input text to show selected file name
+                customerFileInputText.textContent = file.name;
+                customerFileInputText.className = 'text-gray-700 font-medium';
+                showCustomerImagePreview(file);
+            } else {
+                // Reset to default text when no file is selected
+                customerFileInputText.textContent = 'Choose File';
+                customerFileInputText.className = 'text-gray-500';
+                hideCustomerImagePreview();
+            }
+        });
+    }
+    
+    // Handle customer remove preview button
+    if (customerRemovePreviewBtn) {
+        customerRemovePreviewBtn.addEventListener('click', function() {
+            document.getElementById('customer-proof-image-input').value = '';
+            // Reset the custom file input text
+            customerFileInputText.textContent = 'Choose File';
+            customerFileInputText.className = 'text-gray-500';
+            hideCustomerImagePreview();
+        });
+    }
 });
 
 // Cancel Booking Modal Functions
@@ -1159,10 +1219,15 @@ function performSearch() {
 }
 
 function updateBookingsList(bookings, serviceSummaries) {
-    const bookingsList = document.getElementById('bookings-list');
+    console.log('updateBookingsList called with:', { bookings, serviceSummaries });
     const bookingsContainer = document.getElementById('bookings-container');
     
-    if (!bookingsList || !bookingsContainer) return;
+    console.log('Found bookingsContainer:', bookingsContainer ? 'found' : 'not found');
+    
+    if (!bookingsContainer) {
+        console.error('bookingsContainer not found');
+        return;
+    }
     
     if (bookings.length === 0) {
         // Show no results message
@@ -1264,13 +1329,55 @@ function getBookingActions(booking) {
             </div>
         `;
     } else if (booking.status === 'in_progress') {
-        actions = `
-            <div class="mt-2">
+        let qrButton = '';
+        let paymentButton = '';
+        
+        // Add QR Code button if payment settings exist
+        if (window.paymentSettings && window.paymentSettings.qr_code_path) {
+            qrButton = `
                 <button onclick="openPaymentQRModal(${booking.id}, '${booking.code}', ${booking.total_due_cents})" 
                         class="px-3 py-1 bg-blue-500 text-white text-xs rounded cursor-pointer hover:bg-blue-600 transition-colors duration-200">
                     <i class="ri-qr-code-line mr-1"></i>
                     View QR Code
                 </button>
+            `;
+        }
+        
+        // Add payment attachment button if needed
+        if (booking.payment_proof_status === 'declined') {
+            paymentButton = `
+                <button onclick="viewCustomerPaymentDetails(${booking.id})" 
+                        class="px-3 py-1 bg-red-500 text-white text-xs rounded cursor-pointer hover:bg-red-600 transition-colors duration-200">
+                    <i class="ri-error-warning-line mr-1"></i>
+                    View Declined Payment
+                </button>
+                <button onclick="openCustomerPaymentModal(${booking.id}, '${booking.code}', ${booking.total_due_cents})" 
+                        class="px-3 py-1 bg-emerald-600 text-white text-xs rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200">
+                    <i class="ri-attachment-line mr-1"></i>
+                    Re-upload Payment
+                </button>
+            `;
+        } else if (!booking.payment_proof_id) {
+            paymentButton = `
+                <button onclick="openCustomerPaymentModal(${booking.id}, '${booking.code}', ${booking.total_due_cents})" 
+                        class="px-3 py-1 bg-emerald-600 text-white text-xs rounded cursor-pointer hover:bg-emerald-700 transition-colors duration-200">
+                    <i class="ri-attachment-line mr-1"></i>
+                    Attach Payment
+                </button>
+            `;
+        } else {
+            paymentButton = `
+                <button class="px-3 py-1 bg-gray-200 text-gray-500 text-xs rounded cursor-not-allowed" disabled title="Payment proof already uploaded - waiting for admin review">
+                    <i class="ri-attachment-line mr-1"></i>
+                    Payment Uploaded
+                </button>
+            `;
+        }
+        
+        actions = `
+            <div class="mt-2 flex flex-col gap-2">
+                ${qrButton}
+                ${paymentButton}
             </div>
         `;
     } else if (booking.status === 'completed' && booking.payment_proof_status === 'approved') {
@@ -1362,11 +1469,406 @@ function openAddressLocation(addressId, latitude, longitude, addressText) {
         }, 100);
     }, 50);
 }
+
+// Customer Payment Proof Modal Functions
+let currentCustomerBookingId = null;
+
+function openCustomerPaymentModal(bookingId, bookingCode, totalAmount) {
+    currentCustomerBookingId = bookingId;
+    const modal = document.getElementById('customer-payment-modal');
+    const form = document.getElementById('customer-payment-form');
+    
+    // Set form action
+    form.action = `/customer/payment-proof/${bookingId}/upload`;
+    
+    // Pre-fill amount with booking total
+    const amountInput = form.querySelector('input[name="amount"]');
+    if (amountInput) {
+        amountInput.value = (totalAmount / 100).toFixed(2);
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeCustomerPaymentModal() {
+    const modal = document.getElementById('customer-payment-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    currentCustomerBookingId = null;
+    
+    // Reset form
+    document.getElementById('customer-payment-form').reset();
+    
+    // Hide image preview
+    hideCustomerImagePreview();
+}
+
+// Customer Image preview functionality
+function showCustomerImagePreview(file) {
+    const previewContainer = document.getElementById('customer-image-preview-container');
+    const previewImage = document.getElementById('customer-image-preview');
+    const imageInfo = document.getElementById('customer-image-info');
+    
+    // Validate file size (2MB limit)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+        alert('File size must be less than 2MB');
+        document.getElementById('customer-proof-image-input').value = '';
+        return;
+    }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        document.getElementById('customer-proof-image-input').value = '';
+        return;
+    }
+    
+    // Create file reader to display image
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        imageInfo.textContent = `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        previewContainer.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function hideCustomerImagePreview() {
+    const previewContainer = document.getElementById('customer-image-preview-container');
+    const previewImage = document.getElementById('customer-image-preview');
+    const imageInfo = document.getElementById('customer-image-info');
+    
+    previewContainer.classList.add('hidden');
+    previewImage.src = '';
+    imageInfo.textContent = '';
+}
+
+// Customer Payment confirmation function
+function confirmCustomerAttachPayment() {
+    // Get form data for validation
+    const form = document.getElementById('customer-payment-form');
+    const amount = form.querySelector('input[name="amount"]').value;
+    const paymentMethod = form.querySelector('select[name="payment_method"]').value;
+    const proofImage = form.querySelector('input[name="proof_image"]').files[0];
+    
+    // Validate required fields
+    if (!amount || !paymentMethod || !proofImage) {
+        Swal.fire({
+            title: 'Missing Information',
+            text: 'Please fill in all required fields: Amount, Payment Method, and Payment Proof Image.',
+            icon: 'warning',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+    
+    // Show confirmation modal with details
+    Swal.fire({
+        title: 'Attach Payment Proof?',
+        html: `
+            <div class="text-left">
+                <p class="mb-2"><strong>Are you sure you want to attach this payment proof?</strong></p>
+                <div class="bg-gray-50 p-3 rounded-lg text-sm">
+                    <p><strong>Amount:</strong> ₱${parseFloat(amount).toFixed(2)}</p>
+                    <p><strong>Payment Method:</strong> ${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}</p>
+                    <p><strong>Proof Image:</strong> ${proofImage.name}</p>
+                </div>
+                <p class="mt-2 text-sm text-gray-600">Please verify all details are correct before proceeding.</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Attach Payment',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Submit the form via AJAX
+            submitCustomerPaymentProofViaAjax(form);
+        }
+    });
+}
+
+// Submit customer payment proof via AJAX and handle response
+function submitCustomerPaymentProofViaAjax(form) {
+    const formData = new FormData(form);
+    const submitButton = document.querySelector('button[onclick="confirmCustomerAttachPayment()"]');
+    
+    // Show loading state on the button with enhanced preloader
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+        submitButton.innerHTML = `
+            <div class="flex items-center justify-center">
+                <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                <span>Attaching Payment...</span>
+            </div>
+        `;
+    }
+    
+    // Also disable the Attach Payment button in the main table to prevent multiple clicks
+    const attachButton = document.querySelector(`button[onclick="openCustomerPaymentModal(${currentCustomerBookingId}"]`);
+    if (attachButton) {
+        attachButton.disabled = true;
+        attachButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success alert that auto-disappears
+            showCustomerPaymentSuccessAlert(data.message);
+            
+            // Close modal and reset form
+            closeCustomerPaymentModal();
+            
+            // Update the table via AJAX instead of page reload
+            setTimeout(() => {
+                refreshCustomerBookingsTable();
+            }, 1500);
+            
+            // Note: No need to reset button states here as modal closes and table refreshes
+        } else {
+            // Handle validation errors
+            showCustomerPaymentErrorAlert(data.message || 'An error occurred while uploading the payment proof.');
+            
+            // Reset button states
+            resetCustomerPaymentButtonStates(submitButton, attachButton);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showCustomerPaymentErrorAlert('An error occurred while uploading the payment proof. Please try again.');
+        
+        // Reset button states
+        resetCustomerPaymentButtonStates(submitButton, attachButton);
+    })
+    .finally(() => {
+        // This will be handled by resetCustomerPaymentButtonStates in success/error cases
+    });
+}
+
+// Helper function to reset customer payment button states after error
+function resetCustomerPaymentButtonStates(submitButton, attachButton) {
+    // Reset submit button
+    if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-75', 'cursor-not-allowed');
+        submitButton.innerHTML = 'Attach Payment';
+    }
+    
+    // Reset attach button if it exists
+    if (attachButton) {
+        attachButton.disabled = false;
+        attachButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+// Show customer payment success alert that auto-disappears
+function showCustomerPaymentSuccessAlert(message) {
+    const alert = document.createElement('div');
+    alert.className = 'fixed right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 flex items-center space-x-3 transform transition-all duration-300 ease-in-out';
+    alert.style.top = '80px'; // Position below the navigation bar
+    alert.style.transform = 'translateX(100%)';
+    
+    alert.innerHTML = `
+        <div class="flex items-center space-x-3">
+            <i class="ri-check-line text-xl"></i>
+            <div>
+                <div class="font-medium">${message}</div>
+                <div class="text-sm opacity-90">Waiting for admin approval</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animate in
+    setTimeout(() => {
+        alert.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Show customer payment error alert
+function showCustomerPaymentErrorAlert(message) {
+    Swal.fire({
+        title: 'Upload Error',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#dc2626',
+        confirmButtonText: 'OK'
+    });
+}
+
+// Function to view customer payment details
+function viewCustomerPaymentDetails(bookingId) {
+    fetch(`/customer/payment-proof/${bookingId}/details`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showCustomerPaymentDetailsModal(data.proof);
+        } else {
+            showCustomerPaymentErrorAlert(data.message || 'Failed to load payment details.');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading payment details:', error);
+        showCustomerPaymentErrorAlert('An error occurred while loading payment details.');
+    });
+}
+
+// Function to show customer payment details modal
+function showCustomerPaymentDetailsModal(proof) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/50 z-[1000] flex items-center justify-center';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="font-semibold text-lg">Payment Details</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700" onclick="this.closest('.fixed').remove()">✕</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Amount:</span>
+                    <span class="text-gray-900">₱${parseFloat(proof.amount).toFixed(2)}</span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Payment Method:</span>
+                    <span class="text-gray-900">${proof.payment_method.charAt(0).toUpperCase() + proof.payment_method.slice(1)}</span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Status:</span>
+                    <span class="px-2 py-1 rounded text-xs font-medium ${proof.status === 'declined' ? 'bg-red-100 text-red-800' : proof.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                        ${proof.status.charAt(0).toUpperCase() + proof.status.slice(1)}
+                    </span>
+                </div>
+                
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Uploaded:</span>
+                    <span class="text-gray-900">${proof.created_at}</span>
+                </div>
+                
+                ${proof.reviewed_at ? `
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-700">Reviewed:</span>
+                    <span class="text-gray-900">${proof.reviewed_at}</span>
+                </div>
+                ` : ''}
+                
+                ${proof.admin_notes ? `
+                <div>
+                    <span class="font-medium text-gray-700 block mb-2">Admin Notes:</span>
+                    <div class="bg-gray-50 p-3 rounded-lg text-sm text-gray-800">
+                        ${proof.admin_notes}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div>
+                    <span class="font-medium text-gray-700 block mb-2">Payment Proof Image:</span>
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <img src="${proof.image_url}" alt="Payment proof" class="w-full h-48 object-contain rounded bg-white">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-2 mt-6">
+                <button class="px-4 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="this.closest('.fixed').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Function to refresh the customer bookings table via AJAX
+function refreshCustomerBookingsTable() {
+    // Show loading indicator on the bookings container
+    const bookingsContainer = document.getElementById('bookings-container');
+    const originalContent = bookingsContainer.innerHTML;
+    
+    // Add loading overlay to the bookings container
+    bookingsContainer.innerHTML = `
+        <div class="text-center py-12">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-gray-500 text-sm">Updating bookings...</span>
+            </div>
+        </div>
+    `;
+    
+    // Fetch updated bookings data
+    fetch('{{ route("customer.bookings.search") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'search=&sort=date_desc'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('AJAX response data:', data);
+        if (data.success) {
+            // Update the bookings list with new data
+            updateBookingsList(data.bookings, data.serviceSummaries);
+        } else {
+            // If AJAX fails, fallback to page reload
+            console.warn('Failed to refresh bookings via AJAX, reloading page');
+            window.location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error refreshing bookings:', error);
+        // If AJAX fails, fallback to page reload
+        window.location.reload();
+    });
+}
 </script>
 @endpush
 
 <!-- Payment QR Code Modal -->
-<div id="payment-qr-modal" class="fixed inset-0 bg-black/50 z-9999 items-center justify-center" style="display: none;">
+<div id="payment-qr-modal" class="fixed inset-0 bg-black/50 z-[9999] items-center justify-center" style="display: none;">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto mt-16">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Payment Information</h3>
@@ -1599,6 +2101,61 @@ function openAddressLocation(addressId, latitude, longitude, addressText) {
                 Close
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Customer Payment Proof Modal -->
+<div id="customer-payment-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+    <div class="bg-white rounded-xl w-full max-w-md p-4">
+        <div class="flex items-center justify-between mb-2">
+            <div class="font-semibold">Attach Proof of Payment</div>
+            <button class="cursor-pointer" onclick="closeCustomerPaymentModal()">✕</button>
+        </div>
+        <form id="customer-payment-form" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Amount</label>
+                <input type="number" name="amount" step="0.01" min="0.01" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500" placeholder="0.00" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                <select name="payment_method" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500 cursor-pointer" required>
+                    <option value="">Select Payment Method</option>
+                    <option value="cash">Cash</option>
+                    <option value="gcash">GCash</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Proof Image</label>
+                
+                <!-- Custom File Input Container -->
+                <div class="relative">
+                    <input type="file" name="proof_image" accept="image/*" id="customer-proof-image-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                    <div id="customer-file-input-display" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white hover:bg-gray-50 transition-colors cursor-pointer">
+                        <span id="customer-file-input-text" class="text-gray-500">Choose File</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Upload Receipt or Cash in hand image (max 2MB)</p>
+                
+                <!-- Image Preview Container -->
+                <div id="customer-image-preview-container" class="mt-3 hidden">
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <p class="text-sm font-medium text-gray-700 mb-2">Image Preview:</p>
+                        <div class="relative">
+                            <img id="customer-image-preview" src="" alt="Payment proof preview" class="w-full h-48 object-contain rounded bg-white">
+                            <button type="button" id="customer-remove-image-preview" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer" title="Remove image">
+                                ✕
+                            </button>
+                        </div>
+                        <p id="customer-image-info" class="text-xs text-gray-500 mt-2"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closeCustomerPaymentModal()">Cancel</button>
+                <button type="button" onclick="confirmCustomerAttachPayment()" class="px-3 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700">Attach Payment</button>
+            </div>
+        </form>
     </div>
 </div>
 

@@ -1275,7 +1275,7 @@
                                         ${data.status.charAt(0).toUpperCase() + data.status.slice(1)}
                                     </span>
                                 </div>
-                                <div><span class="font-medium">Employee:</span> ${data.employee_name}</div>
+                                <div><span class="font-medium">Uploaded by:</span> ${data.uploader_name}</div>
                                 <div><span class="font-medium">Uploaded:</span> ${data.created_at}</div>
                                 ${data.reviewed_by ? `<div><span class="font-medium">Reviewed by:</span> ${data.reviewed_by}</div>` : ''}
                                 ${data.reviewed_at ? `<div><span class="font-medium">Reviewed at:</span> ${data.reviewed_at}</div>` : ''}

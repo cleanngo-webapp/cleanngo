@@ -43,7 +43,7 @@ class CustomerDashboardController extends Controller
                     's.name as service_name', 's.description as service_description',
                     DB::raw("CONCAT(a.line1, ', ', COALESCE(a.barangay, ''), ', ', COALESCE(a.city, ''), ', ', COALESCE(a.province, '')) as full_address"),
                     DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name"),
-                    'pp.payment_method', 'pp.status as payment_proof_status',
+                    'pp.id as payment_proof_id', 'pp.payment_method', 'pp.status as payment_proof_status',
                     'b.created_at'
                 ])
                 ->orderByDesc('b.scheduled_start')
@@ -236,7 +236,7 @@ class CustomerDashboardController extends Controller
             's.name as service_name', 's.description as service_description',
             DB::raw("CONCAT(a.line1, ', ', COALESCE(a.barangay, ''), ', ', COALESCE(a.city, ''), ', ', COALESCE(a.province, '')) as full_address"),
             DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name"),
-            'pp.payment_method', 'pp.status as payment_proof_status',
+            'pp.id as payment_proof_id', 'pp.payment_method', 'pp.status as payment_proof_status',
             'b.created_at'
         ])->get();
 

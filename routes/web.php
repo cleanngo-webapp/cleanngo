@@ -159,6 +159,10 @@ Route::middleware(['auth:customer','role:customer'])->group(function () {
     Route::delete('/customer/addresses/{address}', [CustomerAddressController::class, 'destroy'])->name('customer.address.destroy');
     Route::post('/customer/addresses/{address}/primary', [CustomerAddressController::class, 'setPrimary'])->name('customer.address.primary');
     
+    // Customer Payment Proof routes
+    Route::post('/customer/payment-proof/{bookingId}/upload', [App\Http\Controllers\Customer\CustomerPaymentProofController::class, 'upload'])->name('customer.payment-proof.upload');
+    Route::get('/customer/payment-proof/{bookingId}/details', [App\Http\Controllers\Customer\CustomerPaymentProofController::class, 'getDetails'])->name('customer.payment-proof.details');
+    
     // Service Comments routes
     Route::get('/service-comments/{serviceType}', [CustomerServiceCommentController::class, 'getComments'])->name('service.comments.get');
     Route::post('/service-comments', [CustomerServiceCommentController::class, 'store'])->name('service.comments.store');

@@ -14,6 +14,7 @@ class PaymentProof extends Model
     protected $fillable = [
         'booking_id',
         'employee_id',
+        'customer_id',
         'image_path',
         'amount',
         'payment_method',
@@ -21,6 +22,7 @@ class PaymentProof extends Model
         'admin_notes',
         'reviewed_by',
         'reviewed_at',
+        'uploaded_by',
     ];
 
     protected $casts = [
@@ -42,6 +44,14 @@ class PaymentProof extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    /**
+     * Get the customer who uploaded the payment proof
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     /**

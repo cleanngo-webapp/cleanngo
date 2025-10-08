@@ -145,8 +145,25 @@ class PaymentProofController extends Controller
      */
     public function getDetails($proofId)
     {
-        $proof = PaymentProof::with(['employee.user', 'reviewer'])
+        $proof = PaymentProof::with(['employee.user', 'customer.user', 'reviewer'])
             ->findOrFail($proofId);
+
+        // Determine uploader name based on who uploaded the proof
+        $uploaderName = '';
+        if ($proof->uploaded_by === 'employee' && $proof->employee) {
+            $uploaderName = $proof->employee->user->first_name . ' ' . $proof->employee->user->last_name;
+        } elseif ($proof->uploaded_by === 'customer' && $proof->customer) {
+            $uploaderName = $proof->customer->user->first_name . ' ' . $proof->customer->user->last_name;
+        } else {
+            // Fallback for old records without uploaded_by field
+            if ($proof->employee) {
+                $uploaderName = $proof->employee->user->first_name . ' ' . $proof->employee->user->last_name;
+            } elseif ($proof->customer) {
+                $uploaderName = $proof->customer->user->first_name . ' ' . $proof->customer->user->last_name;
+            } else {
+                $uploaderName = 'Unknown';
+            }
+        }
 
         return response()->json([
             'id' => $proof->id,
@@ -155,7 +172,8 @@ class PaymentProofController extends Controller
             'status' => $proof->status,
             'admin_notes' => $proof->admin_notes,
             'image_url' => asset('storage/' . $proof->image_path),
-            'employee_name' => $proof->employee->user->first_name . ' ' . $proof->employee->user->last_name,
+            'uploader_name' => $uploaderName,
+            'uploaded_by' => $proof->uploaded_by ?? 'employee', // Default to employee for old records
             'reviewed_by' => $proof->reviewer ? $proof->reviewer->first_name . ' ' . $proof->reviewer->last_name : null,
             'reviewed_at' => $proof->reviewed_at?->format('M j, Y g:i A'),
             'created_at' => $proof->created_at->format('M j, Y g:i A'),
