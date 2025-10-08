@@ -120,9 +120,9 @@ class CustomerBookingController extends Controller
         
         foreach ($items as $item) {
             $qty = (int)($item['qty'] ?? 0);
-            $unit = (int)($item['unitPrice'] ?? 0);
+            $unit = (float)($item['unitPrice'] ?? 0); // Keep as float to preserve decimals like 101.67
             $sqm = isset($item['areaSqm']) ? (float)$item['areaSqm'] : null;
-            $line = (int)round(($sqm ? $sqm * $qty * $unit : $qty * $unit) * 100 / 100); // pesos to cents handled by inputs
+            $line = (int)round(($sqm ? $sqm * $qty * $unit : $qty * $unit) * 100); // Convert pesos to cents
             
             // Get the correct service ID for this item type
             $itemType = $item['type'] ?? null;
@@ -142,7 +142,7 @@ class CustomerBookingController extends Controller
                 'quantity' => $qty,
                 'area_sqm' => $sqm,
                 'unit_price_cents' => ($unit * 100),
-                'line_total_cents' => ($line * 100),
+                'line_total_cents' => $line,
             ]);
         }
 

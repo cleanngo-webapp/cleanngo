@@ -193,24 +193,36 @@ function openReceipt(modalId, bookingId, receiptData, options = {}) {
                 // Build item description
                 let itemDesc = item.displayName;
                 
-                // For area-based services, show quantity with proper unit
+                // For area-based services, show quantity with proper unit and unit price
                 if (['carpet', 'post_construction', 'disinfect', 'glass', 'house_cleaning', 'curtain_cleaning'].includes(categoryKey)) {
                     if (quantity > 0) {
                         const unit = categoryKey === 'carpet' || categoryKey === 'glass' ? 'Square Foot' : 
                                    categoryKey === 'curtain_cleaning' ? 'Yard' : 'Square Meter';
                         itemDesc += ` x ${quantity}`;
+                        
+                        // Show unit price breakdown for area-based services
+                        html += `<div class="flex justify-between py-1">`;
+                        html += `<span class="text-gray-700">${itemDesc}</span>`;
+                        html += `<span class="font-medium">${peso(lineTotal)}</span>`;
+                        html += `</div>`;
+                        
+                        // Add unit price breakdown line
+                        html += `<div class="flex justify-between py-1 text-xs text-gray-500 ml-2">`;
+                        html += `<span>${quantity} ${unit} × ${peso(unitPrice)}</span>`;
+                        html += `<span></span>`;
+                        html += `</div>`;
                     }
                 } else {
                     // For other services, show quantity only if > 1
                     if (quantity > 1) {
                         itemDesc += ` x ${quantity}`;
                     }
+                    
+                    html += `<div class="flex justify-between py-1">`;
+                    html += `<span class="text-gray-700">${itemDesc}</span>`;
+                    html += `<span class="font-medium">${peso(lineTotal)}</span>`;
+                    html += `</div>`;
                 }
-                
-                html += `<div class="flex justify-between py-1">`;
-                html += `<span class="text-gray-700">${itemDesc}</span>`;
-                html += `<span class="font-medium">${peso(lineTotal)}</span>`;
-                html += `</div>`;
             });
             
             html += `</div>`;
