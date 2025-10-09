@@ -185,13 +185,13 @@
             </div>
         </div>
         <div id="bookings-table-container" class="overflow-x-auto">
-            <table class="w-full">
+            <table id="bookings-table" class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Employee</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Employees</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proof of Payment</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -216,25 +216,31 @@
                                 <div class="text-sm text-gray-500 italic">Booking cancelled</div>
                             @else
                                 @if($b->status === 'confirmed')
-                                    {{-- Show assigned employee name for confirmed bookings --}}
+                                    {{-- Show assigned employees for confirmed bookings --}}
                                     <div class="text-sm text-gray-700">
-                                        @if(!empty($b->employee_name))
-                                            {{ $b->employee_name }}
+                                        @php
+                                            $bookingEmployees = $assignedEmployees->get($b->id, collect());
+                                        @endphp
+                                        @if($bookingEmployees->isNotEmpty())
+                                            <div class="space-y-1">
+                                                @foreach($bookingEmployees as $employee)
+                                                    <div class="flex items-center gap-1">
+                                                        <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         @else
-                                            <span class="text-gray-500 italic">No employee assigned</span>
+                                            <div class="flex items-center gap-1">
+                                                <span class="text-gray-500 italic">No employee assigned</span>
+                                            </div>
                                         @endif
                                     </div>
                                 @else
-                                    {{-- Show dropdown for non-confirmed bookings --}}
-                                    <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
-                                        @csrf
-                                        <select id="assign-select-{{ $b->id }}" name="employee_user_id" class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
-                                            <option class="cursor-pointer" value="">Assign Employee</option>
-                                            @foreach($employees as $e)
-                                                <option value="{{ $e->id }}" {{ (!empty($b->employee_user_id) && $b->employee_user_id == $e->id) ? 'selected' : '' }}>{{ $e->first_name }} {{ $e->last_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </form>
+                                    {{-- Show assign button for non-confirmed bookings --}}
+                                    <button onclick="openAssignModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', '{{ $b->scheduled_start }}')" 
+                                            class="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors cursor-pointer">
+                                        Assign Employee
+                                    </button>
                                 @endif
                             @endif
                         </td>
@@ -882,6 +888,50 @@
         </div>
     </div>
 
+    <!-- Employee Assignment Modal -->
+    <div id="employee-assign-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-xl w-full max-w-2xl p-6 m-4" style="max-height: 90vh; overflow-y: auto;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Assign Employees</h3>
+                <button onclick="closeEmployeeAssignModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <div class="text-sm text-gray-600 mb-2">
+                    <strong>Booking:</strong> <span id="assign-booking-code"></span>
+                </div>
+                <div class="text-sm text-gray-600 mb-4">
+                    <strong>Scheduled Time:</strong> <span id="assign-booking-time"></span>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Select Employees (at least 1 required)</label>
+                <div id="employee-checkboxes" class="space-y-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                    <!-- Employee checkboxes will be loaded here -->
+                </div>
+                <div id="employee-conflict-warning" class="mt-3 text-sm text-red-600 hidden">
+                    <!-- Conflict warnings will be shown here -->
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeEmployeeAssignModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    Cancel
+                </button>
+                <button id="assign-employees-btn" onclick="assignEmployees()" 
+                        class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 border border-transparent rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    Assign Employees
+                </button>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -1510,6 +1560,214 @@
         modal.classList.remove('flex');
         currentBookingPhotos = null;
     }
+
+    // Employee Assignment Modal Functions
+    let currentAssignBooking = null;
+    let availableEmployees = @json($employees);
+    
+    function openAssignModal(bookingId, bookingCode, scheduledTime) {
+        currentAssignBooking = { bookingId, bookingCode, scheduledTime };
+        
+        // Update modal content
+        document.getElementById('assign-booking-code').textContent = bookingCode;
+        document.getElementById('assign-booking-time').textContent = new Date(scheduledTime).toLocaleString('en-PH', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        
+        // Load employees with conflict checking
+        loadEmployeesForAssignment(bookingId, scheduledTime);
+        
+        // Show modal
+        const modal = document.getElementById('employee-assign-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    
+    function closeEmployeeAssignModal() {
+        const modal = document.getElementById('employee-assign-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        currentAssignBooking = null;
+        
+        // Clear checkboxes
+        document.getElementById('employee-checkboxes').innerHTML = '';
+        document.getElementById('employee-conflict-warning').classList.add('hidden');
+        document.getElementById('assign-employees-btn').disabled = true;
+    }
+    
+    async function loadEmployeesForAssignment(bookingId, scheduledTime) {
+        const checkboxesContainer = document.getElementById('employee-checkboxes');
+        const conflictWarning = document.getElementById('employee-conflict-warning');
+        const assignBtn = document.getElementById('assign-employees-btn');
+        
+        // Show loading state
+        checkboxesContainer.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500 mx-auto"></div></div>';
+        
+        try {
+            // Get employee availability data
+            const response = await fetch(`/admin/bookings/${bookingId}/employee-availability?time=${encodeURIComponent(scheduledTime)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                renderEmployeeCheckboxes(data.employees, data.conflicts);
+            } else {
+                throw new Error(data.message || 'Failed to load employee data');
+            }
+        } catch (error) {
+            console.error('Error loading employees:', error);
+            checkboxesContainer.innerHTML = '<div class="text-center py-4 text-red-600">Error loading employees. Please try again.</div>';
+        }
+    }
+    
+    function renderEmployeeCheckboxes(employees, conflicts) {
+        const checkboxesContainer = document.getElementById('employee-checkboxes');
+        const conflictWarning = document.getElementById('employee-conflict-warning');
+        
+        let html = '';
+        let hasConflicts = false;
+        let conflictMessages = [];
+        
+        employees.forEach(employee => {
+            const isConflict = conflicts.some(conflict => conflict.employee_id === employee.employee_id);
+            const isDisabled = isConflict;
+            
+            if (isConflict) {
+                hasConflicts = true;
+                conflictMessages.push(`${employee.first_name} ${employee.last_name}: ${conflicts.find(c => c.employee_id === employee.employee_id).conflict_reason}`);
+            }
+            
+            html += `
+                <label class="flex items-center space-x-3 p-2 rounded-lg ${isDisabled ? 'bg-gray-100 opacity-60' : 'hover:bg-gray-50'}">
+                    <input type="checkbox" 
+                           value="${employee.user_id}" 
+                           class="employee-checkbox rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                           ${isDisabled ? 'disabled' : ''}
+                           onchange="updateAssignButton()">
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-gray-900">${employee.first_name} ${employee.last_name}</div>
+                        ${isDisabled ? '<div class="text-xs text-red-600">Scheduled conflict</div>' : ''}
+                    </div>
+                </label>
+            `;
+        });
+        
+        checkboxesContainer.innerHTML = html;
+        
+        // Show conflict warnings
+        if (hasConflicts) {
+            conflictWarning.innerHTML = '<strong>Note:</strong> Some employees have scheduling conflicts:<br>' + 
+                conflictMessages.map(msg => `• ${msg}`).join('<br>');
+            conflictWarning.classList.remove('hidden');
+        } else {
+            conflictWarning.classList.add('hidden');
+        }
+        
+        // Update assign button state
+        updateAssignButton();
+    }
+    
+    function updateAssignButton() {
+        const checkboxes = document.querySelectorAll('.employee-checkbox:not(:disabled)');
+        const checkedBoxes = document.querySelectorAll('.employee-checkbox:checked');
+        const assignBtn = document.getElementById('assign-employees-btn');
+        
+        assignBtn.disabled = checkedBoxes.length === 0;
+    }
+    
+    async function assignEmployees() {
+        if (!currentAssignBooking) return;
+        
+        const checkedBoxes = document.querySelectorAll('.employee-checkbox:checked');
+        const selectedEmployeeIds = Array.from(checkedBoxes).map(cb => cb.value);
+        
+        if (selectedEmployeeIds.length === 0) {
+            alert('Please select at least one employee.');
+            return;
+        }
+        
+        // Show SweetAlert confirmation
+        const employeeNames = Array.from(checkedBoxes).map(cb => {
+            const label = cb.closest('label');
+            return label.querySelector('.text-sm.font-medium').textContent;
+        });
+        
+        const { isConfirmed } = await Swal.fire({
+            title: 'Confirm Employee Assignment',
+            html: `Are you sure you want to assign these employees to booking ${currentAssignBooking.bookingCode}?<br><br>
+                   <strong>Selected employees:</strong><br>
+                   ${employeeNames.map(name => `• ${name}`).join('<br>')}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Assign Employees',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#059669',
+            cancelButtonColor: '#6b7280'
+        });
+        
+        if (!isConfirmed) return;
+        
+        // Show loading state
+        const assignBtn = document.getElementById('assign-employees-btn');
+        const originalText = assignBtn.textContent;
+        assignBtn.disabled = true;
+        assignBtn.textContent = 'Assigning...';
+        
+        try {
+            const response = await fetch(`/admin/bookings/${currentAssignBooking.bookingId}/assign-employees`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    employee_ids: selectedEmployeeIds
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Show success message
+                await Swal.fire({
+                    title: 'Success!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#059669'
+                });
+                
+                // Close modal and refresh table
+                closeEmployeeAssignModal();
+                refreshBookingsTable();
+            } else {
+                throw new Error(data.message || 'Failed to assign employees');
+            }
+        } catch (error) {
+            console.error('Error assigning employees:', error);
+            await Swal.fire({
+                title: 'Error',
+                text: 'Failed to assign employees. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#dc2626'
+            });
+        } finally {
+            assignBtn.disabled = false;
+            assignBtn.textContent = originalText;
+        }
+    }
+    
     
     function openPhotoViewer(imageUrl, filename) {
         // Create a simple photo viewer modal

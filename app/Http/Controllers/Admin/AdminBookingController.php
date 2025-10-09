@@ -20,9 +20,6 @@ class AdminBookingController extends Controller
             ->leftJoin('customers as c', 'c.id', '=', 'b.customer_id')
             ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
             ->leftJoin('services as s', 's.id', '=', 'b.service_id')
-            ->leftJoin('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
-            ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
-            ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
             ->leftJoin('addresses as a', function($join) {
                 $join->on('a.user_id', '=', 'u.id')
                      ->where('a.is_primary', '=', 1);
@@ -36,9 +33,6 @@ class AdminBookingController extends Controller
                 's.name as service_name',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw('u.phone as customer_phone'),
-                DB::raw("CONCAT(eu.first_name,' ',eu.last_name) as employee_name"),
-                DB::raw('e.user_id as employee_user_id'),
-                DB::raw('bsa.employee_id as assigned_employee_id'),
                 DB::raw("COALESCE(a.line1,'') as address_line1"),
                 DB::raw("COALESCE(a.city,'') as address_city"),
                 DB::raw("COALESCE(a.province,'') as address_province"),
@@ -69,6 +63,21 @@ class AdminBookingController extends Controller
         }
 
         $bookings = $query->paginate(15)->appends($request->query());
+
+        // Get assigned employees for each booking
+        $bookingIds = collect($bookings->items())->pluck('id')->all();
+        $assignedEmployees = collect();
+        if (!empty($bookingIds)) {
+            $employeeAssignments = DB::table('booking_staff_assignments as bsa')
+                ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+                ->join('users as u', 'u.id', '=', 'e.user_id')
+                ->whereIn('bsa.booking_id', $bookingIds)
+                ->select('bsa.booking_id', 'u.first_name', 'u.last_name', 'u.id as user_id')
+                ->orderBy('u.first_name')
+                ->get();
+            
+            $assignedEmployees = $employeeAssignments->groupBy('booking_id');
+        }
 
         // For modal dropdowns
         $customers = DB::table('users')->where('role','customer')->orderBy('first_name')->orderBy('last_name')->get(['id','first_name','last_name']);
@@ -139,6 +148,7 @@ class AdminBookingController extends Controller
                 'bookings' => $bookings,
                 'customers' => $customers,
                 'employees' => $employees,
+                'assignedEmployees' => $assignedEmployees,
                 'itemSummaries' => $itemsByBooking,
                 'locationsData' => $locationsData,
                 'receiptData' => $receiptData,
@@ -156,6 +166,7 @@ class AdminBookingController extends Controller
             'bookings' => $bookings,
             'customers' => $customers,
             'employees' => $employees,
+            'assignedEmployees' => $assignedEmployees,
             'itemSummaries' => $itemsByBooking,
             'locationsData' => $locationsData,
             'receiptData' => $receiptData,
@@ -623,6 +634,182 @@ class AdminBookingController extends Controller
             
             return back()->withErrors(['assign' => 'An error occurred while assigning employee.']);
         }
+    }
+
+    /**
+     * Get employee availability for assignment modal
+     */
+    public function getEmployeeAvailability(Request $request, $bookingId)
+    {
+        try {
+            $scheduledTime = $request->get('time');
+            if (!$scheduledTime) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Scheduled time is required'
+                ], 400);
+            }
+
+            $bookingTime = \Carbon\Carbon::parse($scheduledTime);
+            
+            // Get all employees
+            $employees = DB::table('employees as e')
+                ->join('users as u', 'u.id', '=', 'e.user_id')
+                ->select('e.id as employee_id', 'u.id as user_id', 'u.first_name', 'u.last_name')
+                ->orderBy('u.first_name')
+                ->orderBy('u.last_name')
+                ->get();
+
+            $conflicts = [];
+            
+            // Check for scheduling conflicts
+            foreach ($employees as $employee) {
+                $conflictReason = $this->checkEmployeeConflict($employee->employee_id, $bookingTime);
+                if ($conflictReason) {
+                    $conflicts[] = [
+                        'employee_id' => $employee->employee_id,
+                        'conflict_reason' => $conflictReason
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'employees' => $employees,
+                'conflicts' => $conflicts
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Employee availability check error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check employee availability: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Assign multiple employees to a booking
+     */
+    public function assignEmployees(Request $request, $bookingId)
+    {
+        try {
+            $request->validate([
+                'employee_ids' => 'required|array|min:1',
+                'employee_ids.*' => 'exists:users,id'
+            ]);
+
+            $booking = \App\Models\Booking::find($bookingId);
+            if (!$booking) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found'
+                ], 404);
+            }
+
+            if ($booking->status !== 'confirmed' && $booking->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking must be confirmed or pending before assigning employees'
+                ], 400);
+            }
+
+            $bookingTime = \Carbon\Carbon::parse($booking->scheduled_start);
+            $assignedEmployees = [];
+            $conflictErrors = [];
+
+            // Check for conflicts before assigning
+            foreach ($request->employee_ids as $userId) {
+                $employee = \App\Models\Employee::where('user_id', $userId)->first();
+                if (!$employee) {
+                    continue;
+                }
+
+                $conflictReason = $this->checkEmployeeConflict($employee->id, $bookingTime);
+                if ($conflictReason) {
+                    $conflictErrors[] = "Employee {$employee->user->first_name} {$employee->user->last_name}: {$conflictReason}";
+                } else {
+                    $assignedEmployees[] = $employee;
+                }
+            }
+
+            if (!empty($conflictErrors)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some employees have scheduling conflicts',
+                    'conflicts' => $conflictErrors
+                ], 400);
+            }
+
+            // Remove existing assignments
+            DB::table('booking_staff_assignments')->where('booking_id', $bookingId)->delete();
+
+            // Create new assignments
+            foreach ($assignedEmployees as $employee) {
+                DB::table('booking_staff_assignments')->insert([
+                    'booking_id' => $bookingId,
+                    'employee_id' => $employee->id,
+                    'role' => 'cleaner',
+                    'assigned_at' => now(),
+                    'assigned_by' => Auth::id(),
+                ]);
+            }
+
+            // If booking was pending, automatically confirm it
+            if ($booking->status === 'pending') {
+                $booking->status = 'confirmed';
+                $booking->save();
+            }
+
+            $employeeNames = array_map(function($emp) {
+                return $emp->user->first_name . ' ' . $emp->user->last_name;
+            }, $assignedEmployees);
+
+            $message = $booking->status === 'confirmed' 
+                ? 'Employees assigned and booking confirmed successfully: ' . implode(', ', $employeeNames)
+                : 'Employees assigned successfully: ' . implode(', ', $employeeNames);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'assigned_employees' => $employeeNames,
+                'booking_confirmed' => $booking->status === 'confirmed'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Multiple employee assignment error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to assign employees: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if an employee has a scheduling conflict
+     */
+    private function checkEmployeeConflict($employeeId, $bookingTime)
+    {
+        // Check for existing assignments at the same time
+        $conflictingBooking = DB::table('booking_staff_assignments as bsa')
+            ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
+            ->where('bsa.employee_id', $employeeId)
+            ->where('b.status', '!=', 'completed')
+            ->where('b.status', '!=', 'cancelled')
+            ->whereDate('b.scheduled_start', $bookingTime->toDateString())
+            ->whereTime('b.scheduled_start', $bookingTime->format('H:i:s'))
+            ->first();
+
+        if ($conflictingBooking) {
+            $conflictTime = \Carbon\Carbon::parse($conflictingBooking->scheduled_start);
+            return "Already assigned to booking {$conflictingBooking->code} at " . 
+                   $conflictTime->format('g:i A') . " on " . 
+                   $conflictTime->format('M j, Y');
+        }
+
+        return null;
     }
 
     private function generateCode(string $prefix): string

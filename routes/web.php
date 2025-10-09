@@ -198,6 +198,8 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/bookings/{bookingId}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{bookingId}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::match(['post','get'], '/bookings/{bookingId}/assign', [AdminBookingController::class, 'assignEmployee'])->name('bookings.assign');
+    Route::get('/bookings/{bookingId}/employee-availability', [AdminBookingController::class, 'getEmployeeAvailability'])->name('bookings.employee-availability');
+    Route::post('/bookings/{bookingId}/assign-employees', [AdminBookingController::class, 'assignEmployees'])->name('bookings.assign-employees');
     Route::get('/bookings/{bookingId}/photos', [AdminBookingController::class, 'getPhotos'])->name('bookings.photos');
     Route::get('/payment-proof/{proofId}/details', [App\Http\Controllers\Admin\PaymentProofController::class, 'getDetails'])->name('payment-proof.details');
     Route::post('/payment-proof/{proofId}/approve', [App\Http\Controllers\Admin\PaymentProofController::class, 'approve'])->name('payment-proof.approve');
