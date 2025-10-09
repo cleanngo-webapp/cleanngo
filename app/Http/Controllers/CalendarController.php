@@ -35,7 +35,7 @@ class CalendarController extends Controller
             // Define colors based on booking status
             $statusColors = [
                 'confirmed' => '#3B82F6', // Blue
-                'in_progress' => '#8B5CF6', // Yellow/Orange
+                'in_progress' => '#A855F7', // Purple
                 'completed' => '#10B981', // Green
                 'pending' => '#F59E0B', // Gold
                 'no_show' => '#8B5CF6', // Purple
@@ -101,7 +101,7 @@ class CalendarController extends Controller
             // Define colors based on booking status
             $statusColors = [
                 'confirmed' => '#3B82F6', // Blue
-                'in_progress' => '#F59E0B', // Yellow/Orange
+                'in_progress' => '#A855F7', // Purple
                 'completed' => '#10B981', // Green
                 'pending' => '#6B7280', // Gray
                 'cancelled' => '#EF4444', // Red

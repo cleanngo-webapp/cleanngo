@@ -181,7 +181,7 @@
 					<span class="text-gray-700">Confirmed/Assigned to You</span>
 				</div>
 				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 rounded" style="background-color: #F59E0B;"></div>
+					<div class="w-4 h-4 rounded" style="background-color: #A855F7;"></div>
 					<span class="text-gray-700">In Progress</span>
 				</div>
 				<div class="flex items-center gap-2">

@@ -29,9 +29,6 @@ class CustomerDashboardController extends Controller
             $bookings = DB::table('bookings as b')
                 ->leftJoin('services as s', 's.id', '=', 'b.service_id')
                 ->leftJoin('addresses as a', 'a.id', '=', 'b.address_id')
-                ->leftJoin('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
-                ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
-                ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
                 ->leftJoin('payment_proofs as pp', function($join) {
                     $join->on('pp.booking_id', '=', 'b.id')
                          ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');
@@ -42,12 +39,39 @@ class CustomerDashboardController extends Controller
                     'b.status', 'b.payment_status', 'b.total_due_cents',
                     's.name as service_name', 's.description as service_description',
                     DB::raw("CONCAT(a.line1, ', ', COALESCE(a.barangay, ''), ', ', COALESCE(a.city, ''), ', ', COALESCE(a.province, '')) as full_address"),
-                    DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name"),
                     'pp.id as payment_proof_id', 'pp.payment_method', 'pp.status as payment_proof_status',
                     'b.created_at'
                 ])
                 ->orderByDesc('b.scheduled_start')
                 ->get();
+
+            // Get employee assignments separately to avoid duplication
+            $bookingIds = $bookings->pluck('id');
+            $employeeAssignments = [];
+            if ($bookingIds->isNotEmpty()) {
+                $assignments = DB::table('booking_staff_assignments as bsa')
+                    ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+                    ->join('users as eu', 'eu.id', '=', 'e.user_id')
+                    ->whereIn('bsa.booking_id', $bookingIds)
+                    ->select([
+                        'bsa.booking_id',
+                        'bsa.role',
+                        DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name")
+                    ])
+                    ->orderBy('bsa.role') // Team lead first, then cleaner, then assistant
+                    ->get()
+                    ->groupBy('booking_id');
+
+                // Add employee names to bookings
+                foreach ($bookings as $booking) {
+                    $booking->employee_name = null;
+                    if (isset($assignments[$booking->id])) {
+                        // Get the team lead first, or the first employee if no team lead
+                        $teamLead = $assignments[$booking->id]->firstWhere('role', 'team_lead');
+                        $booking->employee_name = $teamLead ? $teamLead->employee_name : $assignments[$booking->id]->first()->employee_name;
+                    }
+                }
+            }
         }
 
         // Build receipt data and service summaries for the receipt modal
@@ -144,9 +168,6 @@ class CustomerDashboardController extends Controller
         $query = DB::table('bookings as b')
             ->leftJoin('services as s', 's.id', '=', 'b.service_id')
             ->leftJoin('addresses as a', 'a.id', '=', 'b.address_id')
-            ->leftJoin('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
-            ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
-            ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
             ->leftJoin('payment_proofs as pp', function($join) {
                 $join->on('pp.booking_id', '=', 'b.id')
                      ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');
@@ -161,9 +182,6 @@ class CustomerDashboardController extends Controller
                   ->orWhere('s.name', 'like', "%{$search}%")
                   ->orWhere('s.description', 'like', "%{$search}%")
                   ->orWhere('s.category', 'like', "%{$search}%")
-                  ->orWhere(DB::raw("LOWER(CONCAT(eu.first_name, ' ', eu.last_name))"), 'like', "%{$searchTerm}%")
-                  ->orWhere(DB::raw("LOWER(eu.first_name)"), 'like', "%{$searchTerm}%")
-                  ->orWhere(DB::raw("LOWER(eu.last_name)"), 'like', "%{$searchTerm}%")
                   ->orWhere(DB::raw("LOWER(a.line1)"), 'like', "%{$searchTerm}%")
                   ->orWhere(DB::raw("LOWER(a.city)"), 'like', "%{$searchTerm}%")
                   ->orWhere(DB::raw("LOWER(a.province)"), 'like', "%{$searchTerm}%")
@@ -223,7 +241,8 @@ class CustomerDashboardController extends Controller
                 $query->orderBy('s.name', 'asc');
                 break;
             case 'employee':
-                $query->orderBy(DB::raw("CONCAT(eu.first_name, ' ', eu.last_name)"), 'asc');
+                // For employee sorting, we'll handle this after getting the results
+                $query->orderBy('b.scheduled_start', 'desc');
                 break;
             default: // date_desc
                 $query->orderBy('b.scheduled_start', 'desc');
@@ -235,10 +254,52 @@ class CustomerDashboardController extends Controller
             'b.status', 'b.payment_status', 'b.total_due_cents',
             's.name as service_name', 's.description as service_description',
             DB::raw("CONCAT(a.line1, ', ', COALESCE(a.barangay, ''), ', ', COALESCE(a.city, ''), ', ', COALESCE(a.province, '')) as full_address"),
-            DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name"),
             'pp.id as payment_proof_id', 'pp.payment_method', 'pp.status as payment_proof_status',
             'b.created_at'
         ])->get();
+
+        // Get employee assignments separately to avoid duplication
+        $bookingIds = $bookings->pluck('id');
+        if ($bookingIds->isNotEmpty()) {
+            $assignments = DB::table('booking_staff_assignments as bsa')
+                ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+                ->join('users as eu', 'eu.id', '=', 'e.user_id')
+                ->whereIn('bsa.booking_id', $bookingIds)
+                ->select([
+                    'bsa.booking_id',
+                    'bsa.role',
+                    DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name")
+                ])
+                ->orderBy('bsa.role') // Team lead first, then cleaner, then assistant
+                ->get()
+                ->groupBy('booking_id');
+
+            // Add employee names to bookings
+            foreach ($bookings as $booking) {
+                $booking->employee_name = null;
+                if (isset($assignments[$booking->id])) {
+                    // Get the team lead first, or the first employee if no team lead
+                    $teamLead = $assignments[$booking->id]->firstWhere('role', 'team_lead');
+                    $booking->employee_name = $teamLead ? $teamLead->employee_name : $assignments[$booking->id]->first()->employee_name;
+                }
+            }
+
+            // Handle employee sorting if requested
+            if ($sort === 'employee') {
+                $bookings = $bookings->sortBy(function($booking) {
+                    return $booking->employee_name ?? '';
+                })->values();
+            }
+
+            // Filter by employee name if searching
+            if (!empty($search)) {
+                $searchTerm = strtolower($search);
+                $bookings = $bookings->filter(function($booking) use ($searchTerm) {
+                    return $booking->employee_name && 
+                           (stripos($booking->employee_name, $searchTerm) !== false);
+                })->values();
+            }
+        }
 
         // Build service summaries for the search results
         $serviceSummaries = [];

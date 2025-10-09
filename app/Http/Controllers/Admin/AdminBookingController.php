@@ -932,9 +932,6 @@ class AdminBookingController extends Controller
             ->leftJoin('customers as c', 'c.id', '=', 'b.customer_id')
             ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
             ->leftJoin('services as s', 's.id', '=', 'b.service_id')
-            ->leftJoin('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
-            ->leftJoin('employees as e', 'e.id', '=', 'bsa.employee_id')
-            ->leftJoin('users as eu', 'eu.id', '=', 'e.user_id')
             ->leftJoin('addresses as a', function($join) {
                 $join->on('a.user_id', '=', 'u.id')
                      ->where('a.is_primary', '=', 1);
@@ -948,9 +945,6 @@ class AdminBookingController extends Controller
                 's.name as service_name',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw('u.phone as customer_phone'),
-                DB::raw("CONCAT(eu.first_name,' ',eu.last_name) as employee_name"),
-                DB::raw('e.user_id as employee_user_id'),
-                DB::raw('bsa.employee_id as assigned_employee_id'),
                 DB::raw("COALESCE(a.line1,'') as address_line1"),
                 DB::raw("COALESCE(a.city,'') as address_city"),
                 DB::raw("COALESCE(a.province,'') as address_province"),
@@ -972,8 +966,7 @@ class AdminBookingController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('b.code', 'like', "%{$search}%")
-                  ->orWhere(DB::raw("CONCAT(u.first_name,' ',u.last_name)"), 'like', "%{$search}%")
-                  ->orWhere(DB::raw("CONCAT(eu.first_name,' ',eu.last_name)"), 'like', "%{$search}%");
+                  ->orWhere(DB::raw("CONCAT(u.first_name,' ',u.last_name)"), 'like', "%{$search}%");
             });
         }
 
@@ -987,6 +980,21 @@ class AdminBookingController extends Controller
         }
 
         $bookings = $query->paginate(15)->appends($request->query());
+
+        // Get assigned employees for each booking
+        $bookingIds = collect($bookings->items())->pluck('id')->all();
+        $assignedEmployees = collect();
+        if (!empty($bookingIds)) {
+            $employeeAssignments = DB::table('booking_staff_assignments as bsa')
+                ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+                ->join('users as u', 'u.id', '=', 'e.user_id')
+                ->whereIn('bsa.booking_id', $bookingIds)
+                ->select('bsa.booking_id', 'u.first_name', 'u.last_name', 'u.id as user_id')
+                ->orderBy('u.first_name')
+                ->get();
+            
+            $assignedEmployees = $employeeAssignments->groupBy('booking_id');
+        }
 
         // Pull booking item summaries and detailed lines for receipts
         $bookingIds = collect($bookings->items())->pluck('id')->all();
@@ -1046,6 +1054,7 @@ class AdminBookingController extends Controller
         if ($request->ajax()) {
             return view('admin.completedbookings', [
                 'bookings' => $bookings,
+                'assignedEmployees' => $assignedEmployees,
                 'itemSummaries' => $itemsByBooking,
                 'locationsData' => $locationsData,
                 'receiptData' => $receiptData,
@@ -1061,6 +1070,7 @@ class AdminBookingController extends Controller
 
         return view('admin.completedbookings', [
             'bookings' => $bookings,
+            'assignedEmployees' => $assignedEmployees,
             'itemSummaries' => $itemsByBooking,
             'locationsData' => $locationsData,
             'receiptData' => $receiptData,
