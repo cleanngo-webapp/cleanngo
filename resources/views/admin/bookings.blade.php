@@ -212,30 +212,40 @@
                             <div class="text-sm text-gray-900">{{ $b->customer_name ?? '—' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($b->status === 'pending')
-                                <div class="text-sm text-gray-500 italic">Confirm booking first</div>
-                            @elseif($b->status === 'cancelled')
+                            @if($b->status === 'cancelled')
                                 <div class="text-sm text-gray-500 italic">Booking cancelled</div>
-                            @elseif(!empty($b->assigned_employee_id))
-                                <div class="text-sm text-gray-900">{{ $b->employee_name ?? '—' }}</div>
                             @else
-                                <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
-                                    @csrf
-                                    <select id="assign-select-{{ $b->id }}" name="employee_user_id" class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
-                                        <option class="cursor-pointer" value="">Assign Employee</option>
-                                        @foreach($employees as $e)
-                                            <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </form>
+                                @if($b->status === 'confirmed')
+                                    {{-- Show assigned employee name for confirmed bookings --}}
+                                    <div class="text-sm text-gray-700">
+                                        @if(!empty($b->employee_name))
+                                            {{ $b->employee_name }}
+                                        @else
+                                            <span class="text-gray-500 italic">No employee assigned</span>
+                                        @endif
+                                    </div>
+                                @else
+                                    {{-- Show dropdown for non-confirmed bookings --}}
+                                    <form method="post" action="{{ url('/admin/bookings/'.$b->id.'/assign') }}" class="assign-form inline" data-booking-id="{{ $b->id }}" data-booking-code="{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
+                                        @csrf
+                                        <select id="assign-select-{{ $b->id }}" name="employee_user_id" class="text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 assign-select cursor-pointer">
+                                            <option class="cursor-pointer" value="">Assign Employee</option>
+                                            @foreach($employees as $e)
+                                                <option value="{{ $e->id }}" {{ (!empty($b->employee_user_id) && $b->employee_user_id == $e->id) ? 'selected' : '' }}>{{ $e->first_name }} {{ $e->last_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                @endif
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($b->status === 'pending')
                                 {{-- Show confirmation buttons for pending bookings --}}
                                 <div class="flex gap-2">
-                                    <button id="confirm-btn-{{ $b->id }}" class="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors cursor-pointer" 
-                                            onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'confirm')">
+                                    <button id="confirm-btn-{{ $b->id }}" 
+                                            class="px-3 py-1 text-xs rounded transition-colors {{ !empty($b->employee_user_id) ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer' : 'bg-gray-400 text-gray-200 cursor-not-allowed' }}" 
+                                            onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'confirm')"
+                                            {{ !empty($b->employee_user_id) ? '' : 'disabled title="Please assign an employee first"' }}>
                                         Confirm
                                     </button>
                                     <button id="cancel-btn-{{ $b->id }}" class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer" 
@@ -712,20 +722,6 @@
         </div>
         </div>
 
-    <!-- Assign Confirmation Modal -->
-    <div id="assign-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-md p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Confirm Assignment</div>
-                <button class="cursor-pointer" id="assignModalClose">✕</button>
-            </div>
-            <p id="assignModalText" class="mb-4 text-sm">Are you sure you want to assign this employee? This cannot be changed later.</p>
-            <div class="flex justify-end gap-2">
-                <button id="assignModalCancel" class="px-3 py-2 bg-gray-500 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Cancel</button>
-                <button id="assignModalConfirm" class="px-3 py-2 bg-emerald-700 text-white rounded cursor-pointer hover:bg-emerald-700/80 hover:text-white">Confirm</button>
-            </div>
-        </div>
-        </div>
 
     <!-- Receipt Modal Component -->
     @include('components.receipt-modal', [
@@ -1071,17 +1067,48 @@
     // Booking confirmation modal handlers
     let pendingConfirmAction = null;
     function openConfirmModal(bookingId, bookingCode, action) {
+        console.log('openConfirmModal called with:', bookingId, bookingCode, action);
         pendingConfirmAction = { bookingId, bookingCode, action };
         const modal = document.getElementById('booking-confirm-modal');
         const title = document.getElementById('confirmModalTitle');
         const text = document.getElementById('confirmModalText');
         const actionBtn = document.getElementById('confirmModalAction');
         
+        console.log('Modal elements found:', { modal, title, text, actionBtn });
+        
         if (action === 'confirm') {
             title.textContent = 'Confirm Booking';
-            text.textContent = `Are you sure you want to confirm booking ${bookingCode}? This will allow employee assignment and status changes.`;
-            actionBtn.textContent = 'Confirm Booking';
-            actionBtn.className = 'px-3 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700';
+            
+            // Get the assigned employee name from the table
+            let employeeName = 'No employee assigned';
+            const bookingRow = document.querySelector(`tr[data-booking-id="${bookingId}"]`);
+            if (bookingRow) {
+                // Check if there's a dropdown with selected employee
+                const select = bookingRow.querySelector('select[name="employee_user_id"]');
+                if (select && select.value) {
+                    const selectedOption = select.querySelector(`option[value="${select.value}"]`);
+                    if (selectedOption) {
+                        employeeName = selectedOption.textContent.trim();
+                    }
+                } else {
+                    // Check if there's already an assigned employee (for confirmed bookings)
+                    const employeeCell = bookingRow.querySelector('td:nth-child(4) .text-sm');
+                    if (employeeCell && !employeeCell.textContent.includes('No employee assigned') && !employeeCell.textContent.includes('Assign Employee')) {
+                        employeeName = employeeCell.textContent.trim();
+                    }
+                }
+            }
+            
+            // Check if no employee is selected and show appropriate message
+            if (employeeName === 'No employee assigned') {
+                text.textContent = `Are you sure you want to confirm booking ${bookingCode}? No employee is currently assigned. You can assign an employee after confirmation.`;
+                actionBtn.textContent = 'Confirm Without Employee';
+                actionBtn.className = 'px-3 py-2 bg-orange-600 text-white rounded cursor-pointer hover:bg-orange-700';
+            } else {
+                text.textContent = `Are you sure you want to confirm booking ${bookingCode}? This will assign ${employeeName} to the booking and allow status changes.`;
+                actionBtn.textContent = 'Confirm Booking';
+                actionBtn.className = 'px-3 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700';
+            }
         } else if (action === 'cancel') {
             title.textContent = 'Cancel Booking';
             text.textContent = `Are you sure you want to cancel booking ${bookingCode}? This action cannot be undone.`;
@@ -1091,6 +1118,7 @@
         
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        console.log('Modal should now be visible. Modal classes:', modal.className);
     }
     
     function closeConfirmModal() {
@@ -1675,48 +1703,13 @@
         closeStatusModal();
     });
     (function(){
-        let pendingAssignForm = null;
-        let pendingAssignSelect = null;
-        const modal = document.getElementById('assign-modal');
-        const txt = document.getElementById('assignModalText');
-        function openModal(form, employeeName){
-            pendingAssignForm = form;
-            pendingAssignSelect = form.querySelector('select[name="employee_user_id"]');
-            const code = form.getAttribute('data-booking-code');
-            txt.textContent = 'Assign '+(employeeName||'this employee')+' to '+code+'? This cannot be changed later.';
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-        function closeModal(){
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            // reset selection if cancelled
-            if (pendingAssignSelect) { pendingAssignSelect.value = ''; }
-        }
-        document.getElementById('assignModalClose').addEventListener('click', closeModal);
-        document.getElementById('assignModalCancel').addEventListener('click', closeModal);
-        document.getElementById('assignModalConfirm').addEventListener('click', function(){
-            if (pendingAssignForm) {
-                const bookingId = pendingAssignForm.getAttribute('data-booking-id');
-                const selectId = `assign-select-${bookingId}`;
-                const select = document.getElementById(selectId);
-                const confirmBtn = document.getElementById('assignModalConfirm');
-                
-                // Show loading state on the confirm button
-                confirmBtn.disabled = true;
-                confirmBtn.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
-                
-                // Submit via AJAX
-                submitEmployeeAssignmentViaAjax(pendingAssignForm, select, confirmBtn);
-            }
-        });
-        // Intercept change of assign selects (moved to Assigned Employee column)
+        // Intercept change of assign selects - submit directly without confirmation modal
         document.querySelectorAll('.assign-form .assign-select').forEach(function(sel){
             sel.addEventListener('change', function(){
-                if (!sel.value) return;
                 const form = sel.closest('.assign-form');
-                const name = sel.options[sel.selectedIndex].textContent.trim();
-                openModal(form, name);
+                
+                // Submit assignment directly via AJAX (including empty values for unassignment)
+                submitEmployeeAssignmentViaAjax(form, sel, null);
             });
         });
         // Status selectors are now handled by the status change button in actions column
@@ -1727,6 +1720,17 @@
         const formData = new FormData();
         formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
         formData.append('action', action);
+        
+        // If confirming, get the selected employee from the dropdown
+        if (action === 'confirm') {
+            const bookingRow = document.querySelector(`tr[data-booking-id="${bookingId}"]`);
+            if (bookingRow) {
+                const select = bookingRow.querySelector('select[name="employee_user_id"]');
+                if (select && select.value) {
+                    formData.append('employee_user_id', select.value);
+                }
+            }
+        }
         
         fetch(`/admin/bookings/${bookingId}/confirm`, {
             method: 'POST',
@@ -1781,6 +1785,33 @@
         });
     }
     
+    // Function to update confirm button state based on employee assignment
+    function updateConfirmButtonState(form) {
+        const bookingId = form.dataset.bookingId;
+        const select = form.querySelector('.assign-select');
+        const confirmBtn = document.getElementById(`confirm-btn-${bookingId}`);
+        
+        if (confirmBtn && select) {
+            const hasEmployee = select.value && select.value !== '';
+            
+            if (hasEmployee) {
+                // Enable confirm button
+                confirmBtn.disabled = false;
+                confirmBtn.className = 'px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors cursor-pointer';
+                confirmBtn.title = '';
+                confirmBtn.onclick = function() {
+                    openConfirmModal(bookingId, form.dataset.bookingCode, 'confirm');
+                };
+            } else {
+                // Disable confirm button
+                confirmBtn.disabled = true;
+                confirmBtn.className = 'px-3 py-1 text-xs bg-gray-400 text-gray-200 rounded cursor-not-allowed transition-colors';
+                confirmBtn.title = 'Please assign an employee first';
+                confirmBtn.onclick = null;
+            }
+        }
+    }
+    
     function submitEmployeeAssignmentViaAjax(form, select = null, confirmBtn = null) {
         const formData = new FormData(form);
         
@@ -1791,12 +1822,7 @@
             console.log(key, value);
         }
         
-        // Show loading state on the select dropdown
-        if (select) {
-            select.disabled = true;
-            select.innerHTML = '<option>Assigning...</option>';
-        }
-        
+        // Submit assignment directly without loading state
         fetch(form.action, {
             method: 'POST',
             body: formData,
@@ -1805,21 +1831,18 @@
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                // Show success alert
-                showAdminSuccessAlert(data.message, data.booking_code, data.employee_name);
+                // Update confirm button state based on employee assignment
+                updateConfirmButtonState(form);
                 
-                // Close the modal
-                const modal = document.getElementById('assign-modal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                
-                // Refresh the table via AJAX instead of page reload
-                setTimeout(() => {
-                    refreshBookingsTable();
-                }, 1500);
+                // No need to refresh table since button state updates automatically
             } else {
                 // Handle errors
                 showAdminErrorAlert(data.message || 'An error occurred.');
@@ -3017,23 +3040,12 @@
             // Remove existing listeners to prevent duplicates
             sel.removeEventListener('change', sel._assignChangeHandler);
             
-            // Create new event handler
+            // Create new event handler - submit directly without modal
             sel._assignChangeHandler = function(){
-                if (!sel.value) return;
                 const form = sel.closest('.assign-form');
-                const name = sel.options[sel.selectedIndex].textContent.trim();
                 
-                // Trigger the assignment modal using the existing pattern
-                const modal = document.getElementById('assign-modal');
-                const txt = document.getElementById('assignModalText');
-                const code = form.getAttribute('data-booking-code');
-                
-                // Set up the modal
-                window.pendingAssignForm = form;
-                window.pendingAssignSelect = sel;
-                txt.textContent = 'Assign '+(name||'this employee')+' to '+code+'? This cannot be changed later.';
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+                // Submit assignment directly via AJAX (including empty values for unassignment)
+                submitEmployeeAssignmentViaAjax(form, sel, null);
             };
             
             // Add the new listener

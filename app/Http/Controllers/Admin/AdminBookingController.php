@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminBookingController extends Controller
 {
@@ -444,21 +445,56 @@ class AdminBookingController extends Controller
         }
         
         if ($request->action === 'confirm') {
+            // Get the selected employee from the request
+            $selectedEmployeeUserId = $request->get('employee_user_id');
+            
             // Confirm the booking - change status to confirmed
-            // This will trigger the boot() method and send notifications
             $booking->status = 'confirmed';
             $booking->save();
             
+            // If an employee was selected, create the assignment
+            $employeeName = null;
+            if ($selectedEmployeeUserId) {
+                $employee = \App\Models\Employee::where('user_id', $selectedEmployeeUserId)->first();
+                if ($employee) {
+                    // Check if assignment already exists (prevent duplicates)
+                    $existingAssignment = \App\Models\BookingStaffAssignment::where('booking_id', $bookingId)
+                        ->where('employee_id', $employee->id)
+                        ->first();
+                    
+                    if (!$existingAssignment) {
+                        \App\Models\BookingStaffAssignment::create([
+                            'booking_id'   => $bookingId,
+                            'employee_id'  => $employee->id,
+                            'role'         => 'cleaner',
+                            'assigned_at'  => now(),
+                            'assigned_by'  => Auth::id(),
+                        ]);
+                    }
+                    
+                    $employeeName = $employee->user->first_name . ' ' . $employee->user->last_name;
+                }
+            }
+            
             // Return JSON response for AJAX requests
             if (request()->ajax() || request()->wantsJson()) {
+                $message = $employeeName ? 
+                    "Booking confirmed successfully! ${employeeName} has been assigned." : 
+                    'Booking confirmed successfully!';
+                    
                 return response()->json([
                     'success' => true,
-                    'message' => 'Booking confirmed successfully! You can now assign employees.',
-                    'booking_code' => $booking->code
+                    'message' => $message,
+                    'booking_code' => $booking->code,
+                    'employee_name' => $employeeName
                 ]);
             }
             
-            return back()->with('status', 'Booking confirmed successfully. You can now assign employees and change status.');
+            $statusMessage = $employeeName ? 
+                "Booking confirmed successfully. ${employeeName} has been assigned." : 
+                'Booking confirmed successfully.';
+                
+            return back()->with('status', $statusMessage);
         } else {
             // Cancel the booking - delete it completely
             // Manually trigger notification before deletion since the booking will be deleted
@@ -491,54 +527,102 @@ class AdminBookingController extends Controller
 
     public function assignEmployee(Request $request, $bookingId)
     {
-        $request->validate(['employee_user_id' => 'required|exists:users,id']);
-        
-        // Use Eloquent model to check booking
-        $booking = \App\Models\Booking::find($bookingId);
-        if (!$booking) {
-            return back()->withErrors(['assign' => 'Booking not found.']);
-        }
-        
-        if ($booking->status !== 'confirmed') {
-            if ($booking->status === 'cancelled') {
-                return back()->withErrors(['assign' => 'Cannot assign employees to cancelled bookings.']);
-            }
-            return back()->withErrors(['assign' => 'Booking must be confirmed before assigning employees.']);
-        }
-        
-        // Get employee using Eloquent model
-        $employee = \App\Models\Employee::where('user_id', $request->employee_user_id)->first();
-        if (!$employee) {
-            return back()->withErrors(['assign' => 'Employee not found.']);
-        }
-        
-        // Do not allow reassignment once any employee is assigned to this booking
-        $alreadyAssigned = $booking->staffAssignments()->exists();
-        if ($alreadyAssigned) {
-            return back()->withErrors(['assign' => 'An employee is already assigned to this booking and cannot be changed.']);
-        }
-        
-        // Create the assignment using Eloquent model
-        // The notification will be triggered automatically by the model's boot() method
-        \App\Models\BookingStaffAssignment::create([
-            'booking_id'   => $bookingId,
-            'employee_id'  => $employee->id,
-            'role'         => 'cleaner',
-            'assigned_at'  => now(),
-            'assigned_by'  => Auth::id(),
-        ]);
-        
-        // Return JSON response for AJAX requests
-        if (request()->ajax() || request()->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Employee assigned successfully!',
-                'booking_code' => $booking->code,
-                'employee_name' => $employee->user->first_name . ' ' . $employee->user->last_name
+        try {
+            Log::info('Employee assignment attempt', [
+                'booking_id' => $bookingId,
+                'employee_user_id' => $request->employee_user_id,
+                'user_id' => Auth::id()
             ]);
+            
+            $request->validate([
+                'employee_user_id' => 'nullable|exists:users,id'
+            ]);
+            
+            // Use Eloquent model to check booking
+            $booking = \App\Models\Booking::find($bookingId);
+            if (!$booking) {
+                return back()->withErrors(['assign' => 'Booking not found.']);
+            }
+            
+            if ($booking->status !== 'confirmed' && $booking->status !== 'pending') {
+                if ($booking->status === 'cancelled') {
+                    return back()->withErrors(['assign' => 'Cannot assign employees to cancelled bookings.']);
+                }
+                return back()->withErrors(['assign' => 'Booking must be confirmed or pending before assigning employees.']);
+            }
+            
+            // Get employee using Eloquent model (only if employee_user_id is provided)
+            $employee = null;
+            if (!empty($request->employee_user_id)) {
+                Log::info('Looking up employee', ['user_id' => $request->employee_user_id]);
+                $employee = \App\Models\Employee::with('user')->where('user_id', $request->employee_user_id)->first();
+                Log::info('Employee lookup result', [
+                    'found' => $employee ? true : false,
+                    'employee_id' => $employee ? $employee->id : null,
+                    'has_user' => $employee && $employee->user ? true : false
+                ]);
+                if (!$employee) {
+                    return back()->withErrors(['assign' => 'Employee not found.']);
+                }
+            }
+            
+            // Handle reassignment - update existing assignment or create new one
+            $existingAssignment = $booking->staffAssignments()->first();
+            
+            if ($existingAssignment) {
+                if (empty($request->employee_user_id)) {
+                    // Remove assignment if empty value selected
+                    DB::table('booking_staff_assignments')
+                        ->where('booking_id', $bookingId)
+                        ->where('employee_id', $existingAssignment->employee_id)
+                        ->delete();
+                } else {
+                    // Update existing assignment using DB::table due to composite primary key
+                    DB::table('booking_staff_assignments')
+                        ->where('booking_id', $bookingId)
+                        ->where('employee_id', $existingAssignment->employee_id)
+                        ->update([
+                            'employee_id' => $employee->id,
+                            'assigned_at' => now(),
+                            'assigned_by' => Auth::id(),
+                        ]);
+                }
+            } else if (!empty($request->employee_user_id) && $employee) {
+                // Create new assignment only if employee is selected and found
+                // Use DB::table insert instead of Eloquent create due to composite primary key
+                DB::table('booking_staff_assignments')->insert([
+                    'booking_id'   => $bookingId,
+                    'employee_id'  => $employee->id,
+                    'role'         => 'cleaner',
+                    'assigned_at'  => now(),
+                    'assigned_by'  => Auth::id(),
+                ]);
+            }
+            
+            // Return JSON response for AJAX requests
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Employee assigned successfully!',
+                    'booking_code' => $booking->code,
+                    'employee_name' => ($employee && $employee->user) ? $employee->user->first_name . ' ' . $employee->user->last_name : null
+                ]);
+            }
+            
+            return back()->with('status', 'Employee assigned.');
+            
+        } catch (\Exception $e) {
+            Log::error('Employee assignment error: ' . $e->getMessage());
+            
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while assigning employee: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return back()->withErrors(['assign' => 'An error occurred while assigning employee.']);
         }
-        
-        return back()->with('status', 'Employee assigned.');
     }
 
     private function generateCode(string $prefix): string
