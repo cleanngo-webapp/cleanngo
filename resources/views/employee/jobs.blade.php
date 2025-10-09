@@ -149,13 +149,14 @@
                                         $currentEmployeeId = Auth::user()->employee->id;
                                         $jobStartedBy = $b->job_started_by;
                                         $jobCompletedBy = $b->job_completed_by;
-                                        $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
                                         $jobCompletedByMe = $jobCompletedBy == $currentEmployeeId;
+                                        // Any assigned employee can complete the job if it's started and not completed
+                                        $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
                                     @endphp
                                     
                                     @if($canCompleteJob)
                                         @if($b->payment_approved)
-                                            <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ $b->code }}')" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                            <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ addslashes($b->code ?? 'B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
                                                 <i class="ri-check-line mr-1"></i>
                                                 <span class="hidden sm:inline">Complete</span>
                                             </button>
@@ -178,16 +179,13 @@
                                             <span class="hidden sm:inline">Completed by Another</span>
                                         </span>
                                     @endif
-                                    @if($b->payment_status === 'declined' || !$b->payment_proof_id)
+                                    @if(!$b->payment_approved)
                                         <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openPaymentModal({{ $b->id }})" title="Attach Payment Proof">
                                             <i class="ri-attachment-line mr-1"></i>
                                             <span class="hidden sm:inline">Attachments</span>
                                         </button>
                                     @else
-                                        <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof already uploaded - waiting for admin review" disabled>
-                                            <i class="ri-attachment-line mr-1"></i>
-                                            <span class="hidden sm:inline">Attachments</span>
-                                        </button>
+                                        <!-- Payment approved - hide attachments button -->
                                     @endif
                                 @elseif($b->status === 'pending' || $b->status === 'confirmed')
                                     @php
@@ -205,15 +203,15 @@
                                                 $jobStartedBy = $b->job_started_by;
                                                 $jobCompletedBy = $b->job_completed_by;
                                                 
-                                                // Check if current employee can perform actions
-                                                $canBorrowEquipment = !$equipmentBorrowedBy;
-                                                $canStartJob = !$jobStartedBy && $equipmentBorrowedBy;
-                                                $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
-                                                
                                                 // Check if current employee performed the action
                                                 $equipmentBorrowedByMe = $equipmentBorrowedBy == $currentEmployeeId;
                                                 $jobStartedByMe = $jobStartedBy == $currentEmployeeId;
                                                 $jobCompletedByMe = $jobCompletedBy == $currentEmployeeId;
+                                                
+                                                // Check if current employee can perform actions
+                                                $canBorrowEquipment = !$equipmentBorrowedBy;
+                                                $canStartJob = !$jobStartedBy && $equipmentBorrowedBy;
+                                                $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
                                             @endphp
                                             
                                             @if($equipmentBorrowedBy)
@@ -845,6 +843,7 @@ function showPaymentErrorAlert(message) {
 
 // Complete Job confirmation function
 function confirmCompleteJob(jobId, jobCode) {
+    console.log('confirmCompleteJob called with jobId:', jobId, 'jobCode:', jobCode);
     Swal.fire({
         title: 'Complete Job?',
         html: `
@@ -937,11 +936,12 @@ function submitStartJobViaAjax(jobId) {
 }
 
 function submitCompleteJobViaAjax(jobId, jobCode) {
+    console.log('submitCompleteJobViaAjax called with jobId:', jobId, 'jobCode:', jobCode);
     const formData = new FormData();
     formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
     
     // Find and update the complete job button to show loading state
-    const completeButton = document.querySelector(`button[onclick="confirmCompleteJob(${jobId}, '${jobCode}')"]`);
+    const completeButton = document.querySelector(`button[onclick*="confirmCompleteJob(${jobId}"]`);
     let originalButtonContent = '';
     if (completeButton) {
         originalButtonContent = completeButton.innerHTML;

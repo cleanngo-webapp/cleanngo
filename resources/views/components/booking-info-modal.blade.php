@@ -97,7 +97,7 @@
 {{-- JavaScript for tab switching and modal management --}}
 <script>
     let currentBookingInfoModal = null;
-    let currentBookingId = null;
+    let currentBookingIdModal = null;
     let currentUserType = 'admin';
     let bookingInfoData = {
         summary: null,
@@ -106,7 +106,7 @@
 
     function openBookingInfoModal(modalId, bookingId, userType = 'admin') {
         currentBookingInfoModal = modalId;
-        currentBookingId = bookingId;
+        currentBookingIdModal = bookingId;
         currentUserType = userType;
         
         // Reset data
@@ -137,7 +137,7 @@
         
         // Reset state
         currentBookingInfoModal = null;
-        currentBookingId = null;
+        currentBookingIdModal = null;
         bookingInfoData = {
             summary: null,
             location: null
@@ -171,7 +171,7 @@
         
         // Load data for the tab if not already loaded
         if (tabName === 'location' && !bookingInfoData.location) {
-            loadBookingLocation(currentBookingId, currentUserType);
+            loadBookingLocation(currentBookingIdModal, currentUserType);
         } else if (tabName === 'summary') {
             // Summary is already loaded, no need to reload
         }
