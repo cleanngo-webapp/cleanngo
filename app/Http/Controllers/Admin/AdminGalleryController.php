@@ -195,7 +195,7 @@ class AdminGalleryController extends Controller
      * Get comments for a specific service type (Admin view)
      * This allows admin to view all comments for a service, including pending ones
      */
-    public function getServiceComments($serviceType)
+    public function getServiceComments($serviceType, Request $request)
     {
         // Validate service type
         $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa', 'houseCleaning', 'curtainCleaning'];
@@ -204,11 +204,45 @@ class AdminGalleryController extends Controller
         }
 
         try {
-            // Get all comments for this service (including pending ones for admin)
-            $comments = ServiceComment::forService($serviceType)
-                ->with('customer.user') // Load customer and user relationships
-                ->latest()
-                ->get()
+            // Get filter parameters
+            $ratingFilter = $request->get('rating', 'all'); // 'all', '1', '2', '3', '4', '5'
+            $sortBy = $request->get('sort', 'newest'); // 'newest', 'oldest', 'rating_high', 'rating_low'
+            $statusFilter = $request->get('status', 'all'); // 'all', 'approved', 'pending'
+
+            // Start with all comments for this service (including pending ones for admin)
+            $query = ServiceComment::forService($serviceType)
+                ->with('customer.user'); // Load customer and user relationships
+
+            // Apply status filter
+            if ($statusFilter === 'approved') {
+                $query->approved();
+            } elseif ($statusFilter === 'pending') {
+                $query->where('is_approved', false);
+            }
+
+            // Apply rating filter
+            if ($ratingFilter !== 'all' && is_numeric($ratingFilter)) {
+                $query->where('rating', $ratingFilter);
+            }
+
+            // Apply sorting
+            switch ($sortBy) {
+                case 'oldest':
+                    $query->orderBy('created_at', 'asc');
+                    break;
+                case 'rating_high':
+                    $query->orderBy('rating', 'desc')->orderBy('created_at', 'desc');
+                    break;
+                case 'rating_low':
+                    $query->orderBy('rating', 'asc')->orderBy('created_at', 'desc');
+                    break;
+                case 'newest':
+                default:
+                    $query->latest();
+                    break;
+            }
+
+            $comments = $query->get()
                 ->map(function ($comment) {
                     // Get the customer avatar URL if it exists
                     $customerAvatar = null;

@@ -14,7 +14,7 @@ class CustomerServiceCommentController extends Controller
      * Get comments for a specific service type
      * This returns comments in JSON format for AJAX requests
      */
-    public function getComments($serviceType)
+    public function getComments($serviceType, Request $request)
     {
         // Validate service type
         $validServices = ['carpet', 'disinfection', 'glass', 'carInterior', 'postConstruction', 'sofa'];
@@ -22,21 +22,47 @@ class CustomerServiceCommentController extends Controller
             return response()->json(['error' => 'Invalid service type'], 400);
         }
 
-        // Get approved comments for this service with customer information
-        $allComments = ServiceComment::forService($serviceType)->with('customer.user')->get();
-        $approvedComments = ServiceComment::forService($serviceType)
+        // Get filter parameters
+        $ratingFilter = $request->get('rating', 'all'); // 'all', '1', '2', '3', '4', '5'
+        $sortBy = $request->get('sort', 'newest'); // 'newest', 'oldest', 'rating_high', 'rating_low'
+
+        // Start with approved comments for this service
+        $query = ServiceComment::forService($serviceType)
             ->approved()
-            ->latest()
-            ->with('customer.user')
-            ->get();
+            ->with('customer.user');
+
+        // Apply rating filter
+        if ($ratingFilter !== 'all' && is_numeric($ratingFilter)) {
+            $query->where('rating', $ratingFilter);
+        }
+
+        // Apply sorting
+        switch ($sortBy) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'rating_high':
+                $query->orderBy('rating', 'desc')->orderBy('created_at', 'desc');
+                break;
+            case 'rating_low':
+                $query->orderBy('rating', 'asc')->orderBy('created_at', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $approvedComments = $query->get();
             
         // Debug: Log comment counts
         Log::info('Comments debug', [
             'service_type' => $serviceType,
-            'all_comments_count' => $allComments->count(),
+            'rating_filter' => $ratingFilter,
+            'sort_by' => $sortBy,
             'approved_comments_count' => $approvedComments->count(),
-            'all_comments' => $allComments->map(function($c) {
-                return ['id' => $c->id, 'is_approved' => $c->is_approved, 'comment' => substr($c->comment, 0, 50)];
+            'filtered_comments' => $approvedComments->map(function($c) {
+                return ['id' => $c->id, 'rating' => $c->rating, 'comment' => substr($c->comment, 0, 50)];
             })
         ]);
         

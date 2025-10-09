@@ -9,6 +9,7 @@
         <p class="text-gray-600">See the quality of our cleaning services</p>
     </div>
 
+    {{--}}
     <div class="flex items-center justify-center min-h-[400px]">
         <p class="text-4xl font-medium text-gray-600 text-center max-w-2xl mx-auto px-6">
             This feature is currently under development and will be available soon!
@@ -17,7 +18,6 @@
 
     {{-- Gallery Feature is Temporarily Disabled --}}
     
-    {{--
     <!-- Display success/error messages -->
     @if(session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -122,6 +122,43 @@
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div class="flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex flex-wrap gap-3 items-center">
+                        <!-- Rating Filter -->
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700">Filter by Rating:</label>
+                            <select id="ratingFilter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="all">All Ratings</option>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Sort Filter -->
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700">Sort by:</label>
+                            <select id="sortFilter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="rating_high">Highest Rating</option>
+                                <option value="rating_low">Lowest Rating</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Button -->
+                    <button onclick="applyFilters()" 
+                            class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 transition-colors duration-200 cursor-pointer">
+                        Apply Filters
+                    </button>
+                </div>
             </div>
 
             <!-- Comments List -->
@@ -257,6 +294,10 @@ function showCommentsModal(serviceType, serviceName) {
     document.getElementById('modalServiceName').textContent = serviceName + ' - Comments';
     document.getElementById('serviceType').value = serviceType;
     
+    // Reset filters to default values
+    document.getElementById('ratingFilter').value = 'all';
+    document.getElementById('sortFilter').value = 'newest';
+    
     const modal = document.getElementById('commentsModal');
     modal.style.display = 'flex';
     modal.classList.remove('hidden');
@@ -294,11 +335,19 @@ function showPreloader() {
 }
 
 // Load comments for a service
-async function loadComments(serviceType) {
-    console.log('Loading comments for service:', serviceType);
+async function loadComments(serviceType, ratingFilter = 'all', sortBy = 'newest') {
+    console.log('Loading comments for service:', serviceType, 'with filters:', { ratingFilter, sortBy });
     
     try {
-        const response = await fetch(`/service-comments/${serviceType}`);
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (ratingFilter !== 'all') params.append('rating', ratingFilter);
+        if (sortBy !== 'newest') params.append('sort', sortBy);
+        
+        const url = `/service-comments/${serviceType}${params.toString() ? '?' + params.toString() : ''}`;
+        console.log('Fetching from URL:', url);
+        
+        const response = await fetch(url);
         console.log('Comments response status:', response.status);
         
         const data = await response.json();
@@ -324,6 +373,20 @@ async function loadComments(serviceType) {
             </div>
         `;
     }
+}
+
+// Apply filters and reload comments
+function applyFilters() {
+    const ratingFilter = document.getElementById('ratingFilter').value;
+    const sortFilter = document.getElementById('sortFilter').value;
+    
+    console.log('Applying filters:', { ratingFilter, sortFilter });
+    
+    // Show preloader
+    showPreloader();
+    
+    // Reload comments with new filters
+    loadComments(currentServiceType, ratingFilter, sortFilter);
 }
 
 // Display comments in the modal
@@ -507,7 +570,9 @@ document.addEventListener('DOMContentLoaded', function() {
             showPreloader();
             // Add small delay to make preloader visible
             setTimeout(() => {
-                loadComments(currentServiceType);
+                const ratingFilter = document.getElementById('ratingFilter').value;
+                const sortFilter = document.getElementById('sortFilter').value;
+                loadComments(currentServiceType, ratingFilter, sortFilter);
             }, 300);
             // Reset form
             this.reset();
@@ -640,7 +705,9 @@ async function confirmDeleteComment() {
             showPreloader();
             // Add small delay to make preloader visible
             setTimeout(() => {
-                loadComments(currentServiceType);
+                const ratingFilter = document.getElementById('ratingFilter').value;
+                const sortFilter = document.getElementById('sortFilter').value;
+                loadComments(currentServiceType, ratingFilter, sortFilter);
             }, 300);
             showNotification('Comment deleted successfully!', 'success');
         } else {
@@ -699,7 +766,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     showPreloader();
                     // Add small delay to make preloader visible
                     setTimeout(() => {
-                        loadComments(currentServiceType);
+                        const ratingFilter = document.getElementById('ratingFilter').value;
+                        const sortFilter = document.getElementById('sortFilter').value;
+                        loadComments(currentServiceType, ratingFilter, sortFilter);
                     }, 300);
                     showNotification('Comment updated successfully!', 'success');
                 } else {
@@ -817,7 +886,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
---}}
 @endsection
 
 
