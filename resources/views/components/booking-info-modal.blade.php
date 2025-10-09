@@ -384,7 +384,6 @@
                         <div class="overflow-hidden rounded border border-gray-200 bg-gray-50">
                             <img src="${photo.url}" alt="${photo.filename}" class="w-full h-48 md:h-40 object-cover group-hover:opacity-90 transition" />
                         </div>
-                        <div class="mt-2 text-xs text-gray-600 truncate">${photo.filename}</div>
                     </a>
                 `).join('');
                 

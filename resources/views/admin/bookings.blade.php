@@ -223,7 +223,8 @@
                                     @if($bookingEmployees->isNotEmpty())
                                         <div class="space-y-1">
                                             @foreach($bookingEmployees as $employee)
-                                                <div class="flex items-center gap-1">
+                                                <div class="flex items-center">
+                                                    <i class="ri-user-line text-gray-400 mr-1"></i>
                                                     <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
                                                 </div>
                                             @endforeach
@@ -320,6 +321,7 @@
                                 @if($b->status === 'confirmed')
                                     <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openStatusChangeModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" title="Change Status">
                                         <i class="ri-arrow-up-down-line"></i>
+                                        <span class="hidden sm:inline">Change Status</span>
                                     </button>
                                 @endif
                                 <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingInfoModal('admin-booking-info-modal', {{ $b->id }}, 'admin')" title="View Booking Information">
