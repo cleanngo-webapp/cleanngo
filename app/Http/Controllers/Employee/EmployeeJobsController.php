@@ -278,9 +278,11 @@ class EmployeeJobsController extends Controller
             ->where('booking_id', $bookingId)
             ->get();
 
-        // Get customer information
+        // Get customer information from users table
         $customer = DB::table('customers')
-            ->where('id', $booking->customer_id)
+            ->join('users', 'customers.user_id', '=', 'users.id')
+            ->where('customers.id', $booking->customer_id)
+            ->select('users.first_name', 'users.last_name', 'users.phone')
             ->first();
 
         // Get assigned employees

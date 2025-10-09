@@ -30,14 +30,14 @@
             <div>
                 <h4 class="font-semibold text-gray-900 mb-2">Customer Information</h4>
                 <div class="space-y-1 text-sm">
-                    <p><span class="font-medium text-gray-600">Name:</span> {{ $customer->name ?? 'N/A' }}</p>
+                    <p><span class="font-medium text-gray-600">Name:</span> {{ ($customer->first_name ?? '') . ' ' . ($customer->last_name ?? '') ?: 'N/A' }}</p>
                     <p><span class="font-medium text-gray-600">Phone:</span> {{ $customer->phone ?? 'N/A' }}</p>
                 </div>
             </div>
             <div>
                 <h4 class="font-semibold text-gray-900 mb-2">Service Details</h4>
                 <div class="space-y-1 text-sm">
-                    <p><span class="font-medium text-gray-600">Total Amount:</span> ₱{{ number_format($booking->total_amount ?? 0, 2) }}</p>
+                    <p><span class="font-medium text-gray-600">Total Amount:</span> ₱{{ number_format(($booking->total_due_cents ?? 0) / 100, 2) }}</p>
                     <p><span class="font-medium text-gray-600">Payment Status:</span> 
                         <span class="px-2 py-1 text-xs rounded-full {{ ($booking->payment_status ?? 'pending') === 'approved' ? 'bg-green-100 text-green-800' : (($booking->payment_status ?? 'pending') === 'declined' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
                             {{ ucfirst($booking->payment_status ?? 'pending') }}
