@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verification - Clean N' Go</title>
+    <title>Email Verification - Clean Saver</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -73,7 +73,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">Clean N' Go</div>
+            <div class="logo">Clean Saver</div>
             <h1>Email Verification Required</h1>
         </div>
 
@@ -83,7 +83,7 @@
             <p>Hello,</p>
         @endif
 
-        <p>Thank you for registering with Clean N' Go! To complete your account setup, please verify your email address using the verification code below:</p>
+        <p>Thank you for registering with Clean Saver! To complete your account setup, please verify your email address using the verification code below:</p>
 
         <div class="otp-code">
             <p style="margin: 0 0 10px 0; font-weight: bold;">Your verification code is:</p>
@@ -95,12 +95,12 @@
             <strong>Important:</strong> This code is valid for {{ $expiryMinutes }} minutes only. If you didn't request this verification, please ignore this email.
         </div>
 
-        <p>Please enter this code in the verification form to complete your registration and start using your Clean N' Go account.</p>
+        <p>Please enter this code in the verification form to complete your registration and start using your Clean Saver account.</p>
 
         <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
 
         <div class="footer">
-            <p>Best regards,<br>The Clean N' Go Team</p>
+            <p>Best regards,<br>The Clean Saver Team</p>
             <p style="font-size: 12px; color: #9ca3af;">
                 This is an automated message. Please do not reply to this email.
             </p>

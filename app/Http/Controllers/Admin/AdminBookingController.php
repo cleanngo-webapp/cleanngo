@@ -470,99 +470,67 @@ class AdminBookingController extends Controller
      */
     public function cancel(Request $request, $bookingId)
     {
-        $request->validate([
-            'reason' => 'required|string|max:500'
-        ]);
+        try {
+            $request->validate([
+                'reason' => 'required|string|max:500'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        }
         
         // Use Eloquent model to check booking
         $booking = \App\Models\Booking::find($bookingId);
         if (!$booking) {
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found.'
+                ], 404);
+            }
             return back()->withErrors(['cancel' => 'Booking not found.']);
         }
         
         // Only allow cancellation of confirmed bookings
         if ($booking->status !== 'confirmed') {
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only confirmed bookings can be cancelled.'
+                ], 400);
+            }
             return back()->withErrors(['cancel' => 'Only confirmed bookings can be cancelled.']);
         }
         
-        $oldStatus = $booking->status;
-        $newStatus = 'cancelled';
         $reason = $request->reason;
         
-        // Get assigned employees for notification
-        $assignedEmployees = $booking->staffAssignments()->with('employee.user')->get();
+        // Set the cancellation reason for the model to use in notifications
+        $booking->setCancellationReason($reason);
         
-        // Create custom notifications with cancellation reason and service details
-        $customer = $booking->customer->user;
-        
-        // Load booking relationships to get service details
-        $booking->load(['bookingItems.service']);
-        
-        // Format services text like the NotificationService does
-        $services = $booking->bookingItems->map(function ($item) {
-            return $item->service->name;
-        })->toArray();
-        
-        // If no booking items, fall back to the main service
-        if (empty($services)) {
-            $booking->load('service');
-            $services = [$booking->service->name];
-        }
-        
-        // Group services by name and count occurrences to avoid duplication
-        $serviceCounts = array_count_values($services);
-        $serviceTexts = [];
-        
-        foreach ($serviceCounts as $serviceName => $count) {
-            if ($count > 1) {
-                $serviceTexts[] = $serviceName . " (x{$count})";
-            } else {
-                $serviceTexts[] = $serviceName;
-            }
-        }
-        
-        $servicesText = implode(', ', $serviceTexts);
-        
-        // Create single notification for customer with service details and reason
-        \App\Models\Notification::create([
-            'type' => 'booking_cancelled',
-            'title' => 'Booking Cancelled',
-            'message' => "Your booking for {$servicesText} (Code: {$booking->code}) has been cancelled. Reason: {$reason}",
-            'data' => [
-                'booking_id' => $booking->id,
-                'booking_code' => $booking->code,
-                'cancellation_reason' => $reason,
-                'services' => $services,
-            ],
-            'recipient_type' => 'customer',
-            'recipient_id' => $customer->id,
-            'is_read' => false,
-            'created_at' => now(),
-        ]);
-        
-        // Notify assigned employees with cancellation reason
-        foreach ($assignedEmployees as $assignment) {
-            $employee = $assignment->employee->user;
-            \App\Models\Notification::create([
-                'type' => 'booking_cancelled',
-                'title' => 'Booking Assignment Cancelled',
-                'message' => "Your assigned booking {$booking->code} has been cancelled. Reason: {$reason}",
-                'data' => [
-                    'booking_id' => $booking->id,
-                    'booking_code' => $booking->code,
-                    'cancellation_reason' => $reason,
-                ],
-                'recipient_type' => 'employee',
-                'recipient_id' => $employee->id,
-                'is_read' => false,
-                'created_at' => now(),
-            ]);
-        }
+        // Update status to cancelled to trigger notifications via model boot method
+        $booking->status = 'cancelled';
+        $booking->cancelled_at = now();
+        $booking->save();
         
         // Delete related records first
         $booking->staffAssignments()->delete();
         $booking->bookingItems()->delete();
         $booking->delete();
+        
+        // Return JSON response for AJAX requests
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking cancelled successfully. Customer and assigned employees have been notified.',
+                'booking_code' => $booking->code
+            ]);
+        }
         
         return back()->with('status', 'Booking cancelled successfully. Customer and assigned employees have been notified.');
     }
@@ -634,13 +602,15 @@ class AdminBookingController extends Controller
             return back()->with('status', $statusMessage);
         } else {
             // Cancel the booking - delete it completely
-            // Manually trigger notification before deletion since the booking will be deleted
-            $oldStatus = $booking->status;
-            $newStatus = 'cancelled';
+            $reason = $request->get('reason', 'No reason provided');
             
-            // Manually trigger notification before deletion
-            $notificationService = app(\App\Services\NotificationService::class);
-            $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
+            // Set the cancellation reason for the model to use in notifications
+            $booking->setCancellationReason($reason);
+            
+            // Update status to cancelled to trigger notifications via model boot method
+            $booking->status = 'cancelled';
+            $booking->cancelled_at = now();
+            $booking->save();
             
             $bookingCode = $booking->code;
             
@@ -653,12 +623,12 @@ class AdminBookingController extends Controller
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Booking cancelled and removed successfully.',
+                    'message' => 'Booking cancelled successfully. Customer and assigned employees have been notified.',
                     'booking_code' => $bookingCode
                 ]);
             }
             
-            return back()->with('status', 'Booking cancelled and removed.');
+            return back()->with('status', 'Booking cancelled successfully. Customer and assigned employees have been notified.');
         }
     }
 

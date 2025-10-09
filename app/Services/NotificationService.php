@@ -66,7 +66,7 @@ class NotificationService
      * Create notifications for booking status changes
      * Notifies customer and admin when booking status changes (confirmed, declined, in_progress, completed)
      */
-    public function notifyBookingStatusChanged(Booking $booking, string $oldStatus, string $newStatus): void
+    public function notifyBookingStatusChanged(Booking $booking, string $oldStatus, string $newStatus, string $reason = null): void
     {
         // Load the necessary relationships
         $booking->load(['customer.user', 'bookingItems.service']);
@@ -94,9 +94,10 @@ class NotificationService
             'cancelled' => [
                 'title' => 'Booking Cancelled',
                 'message' => sprintf(
-                    'Your booking for %s (Code: %s) has been cancelled',
+                    'Your booking for %s (Code: %s) has been cancelled%s',
                     $servicesText,
-                    $booking->code
+                    $booking->code,
+                    $reason ? ". Reason: {$reason}" : ''
                 ),
             ],
             'in_progress' => [
@@ -157,9 +158,10 @@ class NotificationService
                 $customerName
             ),
             'cancelled' => sprintf(
-                'Booking %s has been cancelled for customer %s',
+                'Booking %s has been cancelled for customer %s%s',
                 $booking->code,
-                $customerName
+                $customerName,
+                $reason ? ". Reason: {$reason}" : ''
             ),
             'in_progress' => sprintf(
                 'Booking %s has now started by %s for customer %s',
@@ -220,9 +222,10 @@ class NotificationService
                 'cancelled' => [
                     'title' => 'Booking Cancelled',
                     'message' => sprintf(
-                        'Booking %s for customer %s has been cancelled. This job assignment is no longer active',
+                        'Booking %s for customer %s has been cancelled%s. This job assignment is no longer active',
                         $booking->code,
-                        $customerName
+                        $customerName,
+                        $reason ? ". Reason: {$reason}" : ''
                     ),
                 ],
                 'in_progress' => [

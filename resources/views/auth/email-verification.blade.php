@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="min-h-screen flex flex-col items-center justify-center">
-	<img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Clean N' Go" class="h-20 mb-6" />
+	<img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Clean Saver" class="h-20 mb-6" />
 	<div class="bg-white/90 rounded-xl shadow p-6 w-full max-w-md">
 		<h1 class="text-2xl font-bold text-center">Verify Your Email</h1>
 		<p class="text-center text-gray-600 mt-2 mb-6">We've sent a verification code to your email address</p>

@@ -801,6 +801,13 @@
                 <button class="cursor-pointer" onclick="closeConfirmModal()">✕</button>
             </div>
             <p id="confirmModalText" class="mb-4 text-sm">Are you sure you want to confirm this booking?</p>
+            
+            <!-- Cancellation reason input (hidden by default) -->
+            <div id="cancelReasonContainer" class="mb-4 hidden">
+                <label for="confirmCancelReason" class="block text-sm font-medium text-gray-700 mb-2">Cancellation Reason:</label>
+                <textarea id="confirmCancelReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-red-500 focus:ring-red-500" rows="3" placeholder="Enter reason for cancellation..."></textarea>
+            </div>
+            
             <div class="flex justify-end gap-2">
                 <button class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closeConfirmModal()">Cancel</button>
                 <button id="confirmModalAction" class="px-3 py-2 text-white rounded cursor-pointer hover:opacity-90">Confirm</button>
@@ -1150,6 +1157,12 @@
         if (action === 'confirm') {
             title.textContent = 'Confirm Booking';
             
+            // Hide cancellation reason input for confirm action
+            const cancelReasonContainer = document.getElementById('cancelReasonContainer');
+            if (cancelReasonContainer) {
+                cancelReasonContainer.classList.add('hidden');
+            }
+            
             // Get the assigned employee name from the table
             let employeeName = 'No employee assigned';
             const bookingRow = document.querySelector(`tr[data-booking-id="${bookingId}"]`);
@@ -1201,6 +1214,14 @@
             text.textContent = `Are you sure you want to cancel booking ${bookingCode}? This action cannot be undone.`;
             actionBtn.textContent = 'Cancel Booking';
             actionBtn.className = 'px-3 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700';
+            
+            // Show cancellation reason input
+            const cancelReasonContainer = document.getElementById('cancelReasonContainer');
+            const cancelReasonInput = document.getElementById('confirmCancelReason');
+            if (cancelReasonContainer) {
+                cancelReasonContainer.classList.remove('hidden');
+                cancelReasonInput.value = ''; // Clear previous input
+            }
         }
         
         modal.classList.remove('hidden');
@@ -1213,6 +1234,12 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         pendingConfirmAction = null;
+        
+        // Hide cancellation reason input when closing modal
+        const cancelReasonContainer = document.getElementById('cancelReasonContainer');
+        if (cancelReasonContainer) {
+            cancelReasonContainer.classList.add('hidden');
+        }
     }
     
     // Handle confirmation modal action
@@ -1220,6 +1247,20 @@
         if (!pendingConfirmAction) return;
         
         const { bookingId, action } = pendingConfirmAction;
+        
+        // Validate cancellation reason if action is cancel
+        if (action === 'cancel') {
+            const cancelReason = document.getElementById('confirmCancelReason').value.trim();
+            if (!cancelReason) {
+                Swal.fire({
+                    title: 'Reason Required',
+                    text: 'Please provide a reason for cancelling this booking.',
+                    icon: 'warning',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+        }
         
         // Show loading state on the table buttons
         const confirmBtn = document.getElementById(`confirm-btn-${bookingId}`);
@@ -1313,27 +1354,63 @@
             focusCancel: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // Create form and submit
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/admin/bookings/${pendingCancelBooking.bookingId}/cancel`;
+                // Show loading state
+                Swal.fire({
+                    title: 'Cancelling Booking...',
+                    text: 'Please wait while we process your request.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
                 
-                const csrf = document.createElement('input');
-                csrf.type = 'hidden';
-                csrf.name = '_token';
-                csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-                
-                const reasonInput = document.createElement('input');
-                reasonInput.type = 'hidden';
-                reasonInput.name = 'reason';
-                reasonInput.value = reason;
-                
-                form.appendChild(csrf);
-                form.appendChild(reasonInput);
-                document.body.appendChild(form);
-                form.submit();
-                
-                closeCancelBookingModal();
+                // Make AJAX request
+                fetch(`/admin/bookings/${pendingCancelBooking.bookingId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        reason: reason
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Close modal
+                        closeCancelBookingModal();
+                        
+                        // Show success message
+                        Swal.fire({
+                            title: 'Booking Cancelled',
+                            text: data.message || 'Booking has been cancelled successfully.',
+                            icon: 'success',
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
+                            // Refresh the booking table
+                            refreshBookingsTable();
+                        });
+                    } else {
+                        // Show error message
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'Failed to cancel booking. Please try again.',
+                            icon: 'error',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while cancelling the booking. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#ef4444'
+                    });
+                });
             }
         });
     });
@@ -2012,6 +2089,14 @@
                 if (select && select.value) {
                     formData.append('employee_user_id', select.value);
                 }
+            }
+        }
+        
+        // If cancelling, get the cancellation reason from the modal
+        if (action === 'cancel') {
+            const cancelReason = document.getElementById('confirmCancelReason').value.trim();
+            if (cancelReason) {
+                formData.append('reason', cancelReason);
             }
         }
         

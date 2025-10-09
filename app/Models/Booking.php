@@ -28,6 +28,25 @@ class Booking extends Model
         'booking_photos' => 'array',
     ];
 
+    // Temporary property to store cancellation reason for notifications
+    protected $cancellationReason = null;
+
+    /**
+     * Set the cancellation reason for notifications
+     */
+    public function setCancellationReason(string $reason): void
+    {
+        $this->cancellationReason = $reason;
+    }
+
+    /**
+     * Get the cancellation reason for notifications
+     */
+    public function getCancellationReason(): ?string
+    {
+        return $this->cancellationReason;
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);
@@ -68,7 +87,7 @@ class Booking extends Model
                 $newStatus = $booking->status;
                 
                 $notificationService = app(NotificationService::class);
-                $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus);
+                $notificationService->notifyBookingStatusChanged($booking, $oldStatus, $newStatus, $booking->getCancellationReason());
                 
                 // If booking was just completed, automatically return borrowed equipment
                 if ($oldStatus !== 'completed' && $newStatus === 'completed') {
