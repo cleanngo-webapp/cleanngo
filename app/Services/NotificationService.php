@@ -207,11 +207,12 @@ class NotificationService
             // Create employee-specific messages based on status change
             $employeeMessages = [
                 'confirmed' => [
-                    'title' => 'Booking Confirmed',
+                    'title' => 'New Job Assignment',
                     'message' => sprintf(
-                        'Booking %s for customer %s has been confirmed. You are assigned to this job scheduled for %s at %s',
-                        $booking->code,
+                        'You have been assigned to %s for customer %s (Code: %s) scheduled for %s at %s',
+                        $servicesText,
                         $customerName,
+                        $booking->code,
                         $booking->scheduled_start->format('M d, Y'),
                         $booking->scheduled_start->format('g:i A')
                     ),
