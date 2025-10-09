@@ -50,6 +50,9 @@ class EmployeeJobsController extends Controller
             ->where('a.employee_id', $employeeId)
             ->select([
                 'b.id', 'b.code', 'b.status', 'b.scheduled_start', 'b.booking_photos',
+                'b.equipment_borrowed_by', 'b.equipment_borrowed_at',
+                'b.job_started_by', 'b.job_started_at',
+                'b.job_completed_by', 'b.job_completed_at',
                 DB::raw("CONCAT(u.first_name,' ',u.last_name) as customer_name"),
                 DB::raw('u.phone as customer_phone'),
                 DB::raw("COALESCE(primary_addr.line1,'') as address_line1"),
@@ -187,6 +190,8 @@ class EmployeeJobsController extends Controller
         
         // Update booking status using Eloquent model to trigger notifications
         $booking->status = 'in_progress';
+        $booking->job_started_by = $employeeId;
+        $booking->job_started_at = now();
         $booking->save(); // This will trigger the boot() method and send notifications
         
         // Return JSON response for AJAX requests
@@ -228,6 +233,8 @@ class EmployeeJobsController extends Controller
         // Update booking status using Eloquent model to trigger notifications
         $booking->status = 'completed';
         $booking->completed_at = now();
+        $booking->job_completed_by = $employeeId;
+        $booking->job_completed_at = now();
         $booking->save(); // This will trigger the boot() method and send notifications
         
         // Return JSON response for AJAX requests
@@ -466,6 +473,11 @@ class EmployeeJobsController extends Controller
                     'errors' => $errors
                 ], 422);
             }
+
+            // Update booking to track who borrowed equipment
+            $booking->equipment_borrowed_by = $employeeId;
+            $booking->equipment_borrowed_at = now();
+            $booking->save();
 
             DB::commit();
 

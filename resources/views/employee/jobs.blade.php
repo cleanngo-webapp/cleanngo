@@ -145,16 +145,38 @@
                         <td class="px-4 py-4">
                             <div class="flex items-center gap-1 flex-wrap">
                                 @if($b->status === 'in_progress')
-                                    @if($b->payment_approved)
-                                        <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ $b->code }}')" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                    @php
+                                        $currentEmployeeId = Auth::user()->employee->id;
+                                        $jobStartedBy = $b->job_started_by;
+                                        $jobCompletedBy = $b->job_completed_by;
+                                        $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
+                                        $jobCompletedByMe = $jobCompletedBy == $currentEmployeeId;
+                                    @endphp
+                                    
+                                    @if($canCompleteJob)
+                                        @if($b->payment_approved)
+                                            <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ $b->code }}')" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                                <i class="ri-check-line mr-1"></i>
+                                                <span class="hidden sm:inline">Complete</span>
+                                            </button>
+                                        @else
+                                            <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof required" disabled>
+                                                <i class="ri-check-line mr-1"></i>
+                                                <span class="hidden sm:inline">Complete</span>
+                                            </button>
+                                        @endif
+                                    @elseif($jobCompletedByMe)
+                                        <!-- Job completed by current employee - show status -->
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 bg-green-50 rounded">
                                             <i class="ri-check-line mr-1"></i>
-                                            <span class="hidden sm:inline">Complete</span>
-                                        </button>
+                                            <span class="hidden sm:inline">Completed by You</span>
+                                        </span>
                                     @else
-                                        <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof required" disabled>
+                                        <!-- Job completed by another employee - show status -->
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-500 bg-gray-50 rounded">
                                             <i class="ri-check-line mr-1"></i>
-                                            <span class="hidden sm:inline">Complete</span>
-                                        </button>
+                                            <span class="hidden sm:inline">Completed by Another</span>
+                                        </span>
                                     @endif
                                     @if($b->payment_status === 'declined' || !$b->payment_proof_id)
                                         <button class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openPaymentModal({{ $b->id }})" title="Attach Payment Proof">
@@ -177,27 +199,55 @@
                                         $canStartJob = $isScheduledToday || $b->status === 'in_progress';
                                     @endphp
                                         @if($canStartJob)
-                                            @if($b->equipment_borrowed == 1)
-                                                <!-- Equipment already borrowed - show Items and Start Job buttons -->
-                                                <button type="button" onclick="getEquipment({{ $b->id }})" class="hidden" title="Get Equipment">
-                                                    <i class="ri-tools-line mr-1"></i>
-                                                    <span class="hidden sm:inline">Get Equipment</span>
-                                                </button>
+                                            @php
+                                                $currentEmployeeId = Auth::user()->employee->id;
+                                                $equipmentBorrowedBy = $b->equipment_borrowed_by;
+                                                $jobStartedBy = $b->job_started_by;
+                                                $jobCompletedBy = $b->job_completed_by;
+                                                
+                                                // Check if current employee can perform actions
+                                                $canBorrowEquipment = !$equipmentBorrowedBy;
+                                                $canStartJob = !$jobStartedBy && $equipmentBorrowedBy;
+                                                $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
+                                                
+                                                // Check if current employee performed the action
+                                                $equipmentBorrowedByMe = $equipmentBorrowedBy == $currentEmployeeId;
+                                                $jobStartedByMe = $jobStartedBy == $currentEmployeeId;
+                                                $jobCompletedByMe = $jobCompletedBy == $currentEmployeeId;
+                                            @endphp
+                                            
+                                            @if($equipmentBorrowedBy)
+                                                <!-- Equipment already borrowed - show Items button -->
                                                 <button type="button" onclick="openBorrowedItemsModal({{ $b->id }})" class="inline-flex items-center px-2 py-1 border border-purple-300 shadow-sm text-xs font-medium rounded text-purple-600 bg-purple-50 hover:bg-purple-100 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer" title="View Borrowed Items">
                                                     <i class="ri-list-check mr-1"></i>
                                                     <span class="hidden sm:inline">Items</span>
                                                 </button>
-                                                <button type="button" onclick="confirmStartJob({{ $b->id }})" id="start-job-btn-{{ $b->id }}" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
-                                                    <i class="ri-play-line mr-1"></i>
-                                                    <span class="hidden sm:inline">Start Job</span>
-                                                </button>
+                                                
+                                                @if($canStartJob)
+                                                    <!-- Only one employee can start the job -->
+                                                    <button type="button" onclick="confirmStartJob({{ $b->id }})" id="start-job-btn-{{ $b->id }}" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
+                                                        <i class="ri-play-line mr-1"></i>
+                                                        <span class="hidden sm:inline">Start Job</span>
+                                                    </button>
+                                                @elseif($jobStartedByMe)
+                                                    <!-- Job started by current employee - show status -->
+                                                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded">
+                                                        <i class="ri-play-line mr-1"></i>
+                                                        <span class="hidden sm:inline">Started by You</span>
+                                                    </span>
+                                                @else
+                                                    <!-- Job started by another employee - show who started it -->
+                                                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-500 bg-gray-50 rounded">
+                                                        <i class="ri-play-line mr-1"></i>
+                                                        <span class="hidden sm:inline">Started by Another</span>
+                                                    </span>
+                                                @endif
                                             @else
                                                 <!-- No equipment borrowed yet - show Get Equipment button -->
                                                 <button type="button" onclick="getEquipment({{ $b->id }})" class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Get Equipment">
                                                     <i class="ri-tools-line mr-1"></i>
                                                     <span class="hidden sm:inline">Get Equipment</span>
                                                 </button>
-                                                <!-- Start Job button - hidden until equipment is borrowed -->
                                             @endif
                                         @else
                                             <button type="button" disabled class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y') }}">

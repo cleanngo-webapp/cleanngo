@@ -490,7 +490,7 @@ class AdminBookingController extends Controller
             // Return JSON response for AJAX requests
             if (request()->ajax() || request()->wantsJson()) {
                 $message = $employeeName ? 
-                    "Booking confirmed successfully! ${employeeName} has been assigned." : 
+                    "Booking confirmed successfully! {$employeeName} has been assigned." : 
                     'Booking confirmed successfully!';
                     
                 return response()->json([
@@ -502,7 +502,7 @@ class AdminBookingController extends Controller
             }
             
             $statusMessage = $employeeName ? 
-                "Booking confirmed successfully. ${employeeName} has been assigned." : 
+                "Booking confirmed successfully. {$employeeName} has been assigned." : 
                 'Booking confirmed successfully.';
                 
             return back()->with('status', $statusMessage);
