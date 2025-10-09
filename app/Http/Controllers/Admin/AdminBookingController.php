@@ -756,25 +756,14 @@ class AdminBookingController extends Controller
                 ]);
             }
 
-            // If booking was pending, automatically confirm it
-            if ($booking->status === 'pending') {
-                $booking->status = 'confirmed';
-                $booking->save();
-            }
-
             $employeeNames = array_map(function($emp) {
                 return $emp->user->first_name . ' ' . $emp->user->last_name;
             }, $assignedEmployees);
 
-            $message = $booking->status === 'confirmed' 
-                ? 'Employees assigned and booking confirmed successfully: ' . implode(', ', $employeeNames)
-                : 'Employees assigned successfully: ' . implode(', ', $employeeNames);
-
             return response()->json([
                 'success' => true,
-                'message' => $message,
-                'assigned_employees' => $employeeNames,
-                'booking_confirmed' => $booking->status === 'confirmed'
+                'message' => 'Employees assigned successfully: ' . implode(', ', $employeeNames),
+                'assigned_employees' => $employeeNames
             ]);
 
         } catch (\Exception $e) {

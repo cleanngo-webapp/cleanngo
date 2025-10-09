@@ -85,6 +85,9 @@ class EmployeeJobsController extends Controller
             $query->orderBy('b.scheduled_start', $sortOrder);
         }
 
+        // Only show confirmed and in_progress bookings to employees
+        $query->whereIn('b.status', ['confirmed', 'in_progress']);
+
         $bookings = $query->paginate(15);
 
         // Build map payload
@@ -133,7 +136,7 @@ class EmployeeJobsController extends Controller
         $jobsAssignedToday = DB::table('booking_staff_assignments')
             ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
             ->where('booking_staff_assignments.employee_id', $employeeId)
-            ->where('bookings.status', '!=', 'completed') // Exclude completed jobs
+            ->whereIn('bookings.status', ['confirmed', 'in_progress']) // Only confirmed and in_progress jobs
             ->where(function($query) use ($today) {
                 $query->whereDate('bookings.scheduled_start', $today)
                       ->orWhere('bookings.status', 'in_progress');
@@ -147,11 +150,11 @@ class EmployeeJobsController extends Controller
             ->where('bookings.status', 'completed')
             ->count();
         
-        // Get pending jobs assigned to this employee
+        // Get pending jobs assigned to this employee (only confirmed jobs are visible to employees)
         $pendingJobs = DB::table('booking_staff_assignments')
             ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
             ->where('booking_staff_assignments.employee_id', $employeeId)
-            ->whereIn('bookings.status', ['pending', 'confirmed'])
+            ->whereIn('bookings.status', ['confirmed', 'in_progress'])
             ->count();
 
         return view('employee.jobs', [
@@ -719,7 +722,7 @@ class EmployeeJobsController extends Controller
             })->count();
 
             $jobsCompletedOverall = $bookings->where('status', 'completed')->count();
-            $pendingJobs = $bookings->whereIn('status', ['pending', 'confirmed'])->count();
+            $pendingJobs = $bookings->whereIn('status', ['confirmed', 'in_progress'])->count();
 
             // Generate the table HTML
             $tableHtml = view('employee.partials.jobs-table-body', [

@@ -215,43 +215,51 @@
                             @if($b->status === 'cancelled')
                                 <div class="text-sm text-gray-500 italic">Booking cancelled</div>
                             @else
-                                @if($b->status === 'confirmed')
-                                    {{-- Show assigned employees for confirmed bookings --}}
-                                    <div class="text-sm text-gray-700">
-                                        @php
-                                            $bookingEmployees = $assignedEmployees->get($b->id, collect());
-                                        @endphp
-                                        @if($bookingEmployees->isNotEmpty())
-                                            <div class="space-y-1">
-                                                @foreach($bookingEmployees as $employee)
-                                                    <div class="flex items-center gap-1">
-                                                        <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <div class="flex items-center gap-1">
-                                                <span class="text-gray-500 italic">No employee assigned</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @else
-                                    {{-- Show assign button for non-confirmed bookings --}}
-                                    <button onclick="openAssignModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', '{{ $b->scheduled_start }}')" 
-                                            class="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors cursor-pointer">
-                                        Assign Employee
-                                    </button>
-                                @endif
+                                {{-- Show assigned employees for all non-cancelled bookings --}}
+                                <div class="text-sm text-gray-700">
+                                    @php
+                                        $bookingEmployees = $assignedEmployees->get($b->id, collect());
+                                    @endphp
+                                    @if($bookingEmployees->isNotEmpty())
+                                        <div class="space-y-1">
+                                            @foreach($bookingEmployees as $employee)
+                                                <div class="flex items-center gap-1">
+                                                    <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
+                                                </div>
+                                            @endforeach
+                                            @if($b->status === 'pending')
+                                                <button onclick="openAssignModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', '{{ $b->scheduled_start }}')" 
+                                                        class="text-xs text-emerald-600 hover:text-emerald-800 underline">
+                                                    Edit Assignment
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-gray-500 italic">No employee assigned</span>
+                                            @if($b->status === 'pending')
+                                                <button onclick="openAssignModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', '{{ $b->scheduled_start }}')" 
+                                                        class="ml-2 text-xs text-emerald-600 hover:text-emerald-800 underline">
+                                                    Assign
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($b->status === 'pending')
                                 {{-- Show confirmation buttons for pending bookings --}}
                                 <div class="flex gap-2">
+                                    @php
+                                        $bookingEmployees = $assignedEmployees->get($b->id, collect());
+                                        $hasEmployees = $bookingEmployees->isNotEmpty();
+                                    @endphp
                                     <button id="confirm-btn-{{ $b->id }}" 
-                                            class="px-3 py-1 text-xs rounded transition-colors {{ !empty($b->employee_user_id) ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer' : 'bg-gray-400 text-gray-200 cursor-not-allowed' }}" 
+                                            class="px-3 py-1 text-xs rounded transition-colors {{ $hasEmployees ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer' : 'bg-gray-400 text-gray-200 cursor-not-allowed' }}" 
                                             onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'confirm')"
-                                            {{ !empty($b->employee_user_id) ? '' : 'disabled title="Please assign an employee first"' }}>
+                                            {{ $hasEmployees ? '' : 'disabled title="Please assign an employee first"' }}>
                                         Confirm
                                     </button>
                                     <button id="cancel-btn-{{ $b->id }}" class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer" 
