@@ -968,7 +968,15 @@ class AdminBookingController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('b.code', 'like', "%{$search}%")
-                  ->orWhere(DB::raw("CONCAT(u.first_name,' ',u.last_name)"), 'like', "%{$search}%");
+                  ->orWhere(DB::raw("CONCAT(u.first_name,' ',u.last_name)"), 'like', "%{$search}%")
+                  ->orWhereExists(function($subQuery) use ($search) {
+                      $subQuery->select(DB::raw(1))
+                               ->from('booking_staff_assignments as bsa')
+                               ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+                               ->join('users as eu', 'eu.id', '=', 'e.user_id')
+                               ->whereColumn('bsa.booking_id', 'b.id')
+                               ->where(DB::raw("CONCAT(eu.first_name,' ',eu.last_name)"), 'like', "%{$search}%");
+                  });
             });
         }
 

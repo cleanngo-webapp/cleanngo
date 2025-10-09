@@ -110,7 +110,7 @@
                     <input type="text" 
                            id="search-completed-bookings" 
                            value="{{ $search ?? '' }}"
-                           placeholder="Search by booking ID, customer name, or employee" 
+                           placeholder="Search by booking ID, customer name, or assigned employee" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
                 <div class="flex gap-2">
@@ -191,8 +191,15 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($b->status === 'cancelled')
                                 <div class="text-sm text-gray-500 italic">Booking cancelled</div>
-                            @elseif(!empty($b->assigned_employee_id))
-                                <div class="text-sm text-gray-900">{{ $b->employee_name ?? '—' }}</div>
+                            @elseif(isset($assignedEmployees[$b->id]) && $assignedEmployees[$b->id]->isNotEmpty())
+                                <div class="text-sm text-gray-900">
+                                    @foreach($assignedEmployees[$b->id] as $employee)
+                                        <div class="flex items-center">
+                                            <i class="ri-user-line text-gray-400 mr-1"></i>
+                                            {{ $employee->first_name }} {{ $employee->last_name }}
+                                        </div>
+                                    @endforeach
+                                </div>
                             @else
                                 <div class="text-sm text-gray-500 italic">No employee assigned</div>
                             @endif
@@ -245,34 +252,18 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <button type="button" 
                                         class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" 
-                                        onclick="openCompletedReceipt({{ $b->id }})" 
-                                        title="View Service Summary">
-                                    <i class="ri-receipt-line"></i>
+                                        onclick="openBookingInfoModal('completed-booking-info-modal', {{ $b->id }}, 'admin')" 
+                                        title="View Booking Information for {{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
+                                    <i class="ri-information-line mr-1"></i>
+                                    Booking Info
                                 </button>
-                                <button type="button" 
-                                        class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" 
-                                        onclick="openCompletedLocation({{ $b->id }})" 
-                                        title="View Location">
-                                    <i class="ri-map-pin-line"></i>
-                                </button>
-                                @php
-                                    $bookingPhotos = $b->booking_photos ? json_decode($b->booking_photos, true) : [];
-                                    $hasPhotos = is_array($bookingPhotos) && count($bookingPhotos) > 0;
-                                @endphp
-                                @if($hasPhotos)
-                                    <button type="button" 
-                                            class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" 
-                                            onclick="openCompletedBookingPhotos({{ $b->id }})" 
-                                            title="View Booking Photos">
-                                        <i class="ri-image-line"></i>
-                                    </button>
-                                @endif
                                 @if($b->status === 'completed' && $b->payment_proof_id)
                                     <button type="button" 
-                                            class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" 
+                                            class="inline-flex items-center px-3 py-1.5 border border-green-300 shadow-sm text-xs font-medium rounded-md text-green-600 hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" 
                                             onclick="openCompletedPaymentProof({{ $b->payment_proof_id }})" 
-                                            title="View Payment Proof">
-                                        <i class="ri-money-dollar-circle-line"></i>
+                                            title="View Payment Proof - Status: {{ ucfirst($b->payment_status ?? 'pending') }}">
+                                        <i class="ri-money-dollar-circle-line mr-1"></i>
+                                        Payment
                                     </button>
                                 @endif
                             </div>
@@ -347,30 +338,10 @@
         </div>
     </div>
 
-    <!-- Receipt Modal Component -->
-    @include('components.receipt-modal', [
-        'modalId' => 'completed-receipt-modal',
-        'receiptData' => $receiptData ?? [],
-        'bookingId' => null
+    <!-- Booking Info Modal Component -->
+    @include('components.booking-info-modal', [
+        'modalId' => 'completed-booking-info-modal'
     ])
-
-    <!-- Location Modal -->
-    <div id="completed-location-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-xl p-4 m-4">
-            <div class="flex items-center justify-between mb-3">
-                <div class="font-semibold text-lg">Customer Location</div>
-                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeCompletedLocation()">✕</button>
-            </div>
-            <div id="completed-location-address" class="text-sm mb-3 text-gray-700 bg-gray-50 p-2 rounded border"></div>
-            <div id="completed-location-phone" class="text-xs mb-3 text-gray-500"></div>
-            <div id="completed-location-map" class="h-80 rounded border border-gray-300 bg-gray-100"></div>
-            <div class="flex justify-end gap-2 mt-3">
-                <button type="button" onclick="closeCompletedLocation()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Payment Proof Modal -->
     <div id="completed-payment-proof-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
@@ -385,18 +356,6 @@
         </div>
     </div>
 
-    <!-- Booking Photos Modal -->
-    <div id="completed-booking-photos-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-4xl p-4 m-4" style="max-height: 90vh; overflow-y: auto;">
-            <div class="flex items-center justify-between mb-4">
-                <div class="font-semibold text-lg">Booking Photos</div>
-                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeCompletedBookingPhotosModal()">✕</button>
-            </div>
-            <div id="completed-booking-photos-content" class="space-y-4">
-                <!-- Content will be loaded dynamically -->
-            </div>
-        </div>
-    </div>
 
     @push('scripts')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -544,50 +503,6 @@
         performCompletedSearch();
     }
 
-    // Receipt functions for completed bookings
-    const completedReceiptData = @json($receiptData ?? []);
-    const completedLocationsData = @json($locationsData ?? []);
-    
-    function openCompletedReceipt(bookingId){
-        openReceipt('completed-receipt-modal', bookingId, completedReceiptData);
-    }
-
-    // Location modal handlers for completed bookings
-    let completedMap = null; 
-    let completedMarker = null;
-    
-    function openCompletedLocation(bookingId){
-        const data = completedLocationsData[String(bookingId)] || completedLocationsData[bookingId];
-        const modal = document.getElementById('completed-location-modal');
-        const addr = document.getElementById('completed-location-address');
-        const phone = document.getElementById('completed-location-phone');
-        addr.textContent = data?.address || 'No address available';
-        phone.textContent = data?.phone ? ('Contact: ' + data.phone) : '';
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => {
-            if (!completedMap) {
-                completedMap = L.map('completed-location-map').setView([13.0, 122.0], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(completedMap);
-            }
-            const lat = data?.lat ?? 0; 
-            const lng = data?.lng ?? 0;
-            completedMap.setView([lat, lng], (lat && lng) ? 15 : 5);
-            if (!completedMarker) completedMarker = L.marker([lat, lng]).addTo(completedMap);
-            completedMarker.setLatLng([lat, lng]);
-            // Fix tiles not rendering when modal opens
-            setTimeout(() => { if (completedMap) completedMap.invalidateSize(true); }, 100);
-        }, 50);
-    }
-    
-    function closeCompletedLocation(){
-        const modal = document.getElementById('completed-location-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
 
     // Payment proof modal handlers for completed bookings
     function openCompletedPaymentProof(proofId) {
@@ -658,123 +573,6 @@
         modal.classList.remove('flex');
     }
 
-    // Booking Photos Modal Functions for completed bookings
-    function openCompletedBookingPhotos(bookingId) {
-        const modal = document.getElementById('completed-booking-photos-modal');
-        const content = document.getElementById('completed-booking-photos-content');
-        
-        // Show loading state
-        content.innerHTML = `
-            <div class="text-center py-8">
-                <div class="flex justify-center items-center space-x-2 mb-4">
-                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
-                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
-                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
-                </div>
-                <p class="text-gray-500 text-sm">Loading booking photos...</p>
-            </div>
-        `;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        
-        // Fetch booking photos
-        fetch(`/admin/bookings/${bookingId}/photos`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.photos && data.photos.length > 0) {
-                    let photosHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
-                    
-                    data.photos.forEach((photo, index) => {
-                        photosHtml += `
-                            <div class="relative group">
-                                <img src="${photo.url}" alt="Booking Photo ${index + 1}" 
-                                     class="w-full h-64 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                                     data-photo-url="${photo.url}" 
-                                     data-photo-filename="${photo.filename}">
-                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center pointer-events-none">
-                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        <i class="ri-zoom-in-line text-white text-2xl"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-2 text-center">
-                                    <p class="text-sm text-gray-600">${photo.filename}</p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    photosHtml += '</div>';
-                    content.innerHTML = photosHtml;
-                    
-                    // Add event delegation for photo clicks
-                    content.addEventListener('click', function(e) {
-                        if (e.target.tagName === 'IMG' && e.target.dataset.photoUrl) {
-                            openCompletedPhotoViewer(e.target.dataset.photoUrl, e.target.dataset.photoFilename);
-                        }
-                    });
-                } else {
-                    content.innerHTML = `
-                        <div class="text-center py-8">
-                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="ri-image-line text-2xl text-gray-400"></i>
-                            </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Photos Available</h3>
-                            <p class="text-sm text-gray-500">This booking doesn't have any photos uploaded.</p>
-                        </div>
-                    `;
-                }
-            })
-            .catch(error => {
-                console.error('Error loading booking photos:', error);
-                content.innerHTML = '<div class="text-center py-4 text-red-500">Error loading booking photos.</div>';
-            });
-    }
-    
-    function closeCompletedBookingPhotosModal() {
-        const modal = document.getElementById('completed-booking-photos-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-    
-    function openCompletedPhotoViewer(imageUrl, filename) {
-        // Create a simple photo viewer modal
-        const viewer = document.createElement('div');
-        viewer.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[2000]';
-        viewer.innerHTML = `
-            <div class="relative max-w-4xl max-h-full p-4">
-                <button class="photo-viewer-close absolute top-4 right-4 text-white text-2xl hover:text-gray-300 cursor-pointer z-10">
-                    ✕
-                </button>
-                <img src="${imageUrl}" alt="${filename}" class="max-w-full max-h-full object-contain">
-                <div class="absolute bottom-4 left-4 text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-                    ${filename}
-                </div>
-            </div>
-        `;
-        document.body.appendChild(viewer);
-        
-        // Add event listener for close button
-        const closeBtn = viewer.querySelector('.photo-viewer-close');
-        closeBtn.addEventListener('click', () => {
-            viewer.remove();
-        });
-        
-        // Close on click outside image
-        viewer.addEventListener('click', (e) => {
-            if (e.target === viewer) {
-                viewer.remove();
-            }
-        });
-        
-        // Close on Escape key
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                viewer.remove();
-                document.removeEventListener('keydown', handleEscape);
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
-    }
     </script>
     @endpush
 </div>
