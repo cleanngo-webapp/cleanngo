@@ -185,12 +185,15 @@ class AdminBookingController extends Controller
     {
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'employee_user_id' => 'nullable|exists:users,id',
+            'employee_ids' => 'nullable|array',
+            'employee_ids.*' => 'exists:users,id',
             'date' => 'required|date',
             'time' => 'required',
             'summary' => 'nullable|string',
             'total' => 'nullable|numeric|min:0',
             'items_json' => 'nullable|string',
+            'booking_photos' => 'nullable|array|max:10',
+            'booking_photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max per file
         ]);
 
         $customerId = DB::table('customers')->where('user_id', $data['user_id'])->value('id');
@@ -251,26 +254,45 @@ class AdminBookingController extends Controller
             'updated_at' => now(),
         ]);
 
-        // Handle employee assignment if provided
-        if (!empty($data['employee_user_id'])) {
-            $employeeId = DB::table('employees')->where('user_id', $data['employee_user_id'])->value('id');
-            if ($employeeId) {
-                // Check if assignment already exists (prevent duplicates)
-                $existingAssignment = DB::table('booking_staff_assignments')
-                    ->where('booking_id', $bookingId)
-                    ->where('employee_id', $employeeId)
-                    ->first();
-                
-                if (!$existingAssignment) {
-                    // Insert new assignment - this will make the employee appear in the table
-                    DB::table('booking_staff_assignments')->insert([
-                        'booking_id' => $bookingId,
-                        'employee_id' => $employeeId,
-                        'role' => 'cleaner',
-                        'assigned_at' => now(),
-                        'assigned_by' => Auth::id()
-                    ]);
+        // Handle employee assignments if provided
+        if (!empty($data['employee_ids'])) {
+            foreach ($data['employee_ids'] as $employeeUserId) {
+                $employeeId = DB::table('employees')->where('user_id', $employeeUserId)->value('id');
+                if ($employeeId) {
+                    // Check if assignment already exists (prevent duplicates)
+                    $existingAssignment = DB::table('booking_staff_assignments')
+                        ->where('booking_id', $bookingId)
+                        ->where('employee_id', $employeeId)
+                        ->first();
+                    
+                    if (!$existingAssignment) {
+                        // Insert new assignment - this will make the employee appear in the table
+                        DB::table('booking_staff_assignments')->insert([
+                            'booking_id' => $bookingId,
+                            'employee_id' => $employeeId,
+                            'role' => 'cleaner',
+                            'assigned_at' => now(),
+                            'assigned_by' => Auth::id()
+                        ]);
+                    }
                 }
+            }
+        }
+
+        // Handle photo uploads if provided
+        $photoPaths = [];
+        if ($request->hasFile('booking_photos')) {
+            foreach ($request->file('booking_photos') as $photo) {
+                $filename = time() . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+                $path = $photo->storeAs('booking-photos', $filename, 'public');
+                $photoPaths[] = $path;
+            }
+            
+            // Update the booking with photo paths
+            if (!empty($photoPaths)) {
+                DB::table('bookings')
+                    ->where('id', $bookingId)
+                    ->update(['booking_photos' => json_encode($photoPaths)]);
             }
         }
 
@@ -353,7 +375,8 @@ class AdminBookingController extends Controller
                 'message' => 'Booking created successfully',
                 'booking_id' => $bookingId,
                 'booking_code' => $code,
-                'employee_assigned' => !empty($data['employee_user_id']) ? true : false
+                'employees_assigned' => !empty($data['employee_ids']) ? count($data['employee_ids']) : 0,
+                'photos_uploaded' => $request->hasFile('booking_photos') ? count($request->file('booking_photos')) : 0
             ]);
         }
 

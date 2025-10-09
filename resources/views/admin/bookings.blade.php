@@ -611,7 +611,7 @@
                     </div>
                     
                     <!-- Booking Form -->
-                    <form method="POST" action="{{ url('/admin/bookings') }}" class="mt-4 space-y-3" onsubmit="return confirmAdminBookingSubmission(event)">
+                    <form method="POST" action="{{ url('/admin/bookings') }}" enctype="multipart/form-data" class="mt-4 space-y-3" onsubmit="return confirmAdminBookingSubmission(event)">
                 @csrf
                         
                         <!-- Customer Selection -->
@@ -694,13 +694,37 @@
                         
                         <!-- Employee Assignment -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Assign Employee (optional)</label>
-                            <select name="employee_user_id" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                                <option value="">No assignment</option>
-                        @foreach($employees as $e)
-                            <option value="{{ $e->id }}">{{ $e->first_name }} {{ $e->last_name }}</option>
-                        @endforeach
-                    </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Assign Employees (optional)</label>
+                            <div class="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                                @foreach($employees as $e)
+                                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                        <input type="checkbox" name="employee_ids[]" value="{{ $e->id }}" 
+                                               class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 focus:ring-2">
+                                        <span class="text-sm text-gray-700">{{ $e->first_name }} {{ $e->last_name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        
+                        <!-- Photo Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Upload Photos (optional)</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-emerald-400 transition-colors">
+                                <input type="file" name="booking_photos[]" id="booking-photos-input" 
+                                       multiple accept="image/*" 
+                                       class="hidden" 
+                                       onchange="handlePhotoUpload(event)">
+                                <label for="booking-photos-input" class="cursor-pointer">
+                                    <div class="flex flex-col items-center">
+                                        <i class="ri-camera-line text-3xl text-gray-400 mb-2"></i>
+                                        <span class="text-sm text-gray-600">Click to upload photos</span>
+                                        <span class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG up to 10MB each</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="photo-preview-container" class="mt-3 hidden">
+                                <!-- Photo previews will be shown here -->
+                            </div>
                         </div>
                         
                         <!-- Hidden fields for booking data -->
@@ -3004,6 +3028,77 @@
         return summaryParts.join('; ');
     }
 
+    // Function to handle photo upload and preview
+    function handlePhotoUpload(event) {
+        const files = event.target.files;
+        const previewContainer = document.getElementById('photo-preview-container');
+        
+        // Clear previous previews
+        previewContainer.innerHTML = '';
+        
+        if (files.length > 0) {
+            previewContainer.classList.remove('hidden');
+            previewContainer.classList.add('grid', 'grid-cols-2', 'gap-2');
+            
+            Array.from(files).forEach((file, index) => {
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    Swal.fire({
+                        title: 'File Too Large',
+                        text: `File "${file.name}" is larger than 10MB. Please choose a smaller file.`,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#10b981'
+                    });
+                    return;
+                }
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    Swal.fire({
+                        title: 'Invalid File Type',
+                        text: `File "${file.name}" is not an image. Please choose an image file.`,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#10b981'
+                    });
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'relative group';
+                    previewDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}" 
+                             class="w-full h-24 object-cover rounded-lg border border-gray-200">
+                        <button type="button" onclick="removePhotoPreview(this)" 
+                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors">
+                            ×
+                        </button>
+                    `;
+                    previewContainer.appendChild(previewDiv);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            previewContainer.classList.add('hidden');
+        }
+    }
+    
+    // Function to remove photo preview
+    function removePhotoPreview(button) {
+        const previewDiv = button.closest('.relative');
+        previewDiv.remove();
+        
+        // If no more previews, hide the container
+        const previewContainer = document.getElementById('photo-preview-container');
+        if (previewContainer.children.length === 0) {
+            previewContainer.classList.add('hidden');
+            previewContainer.classList.remove('grid', 'grid-cols-2', 'gap-2');
+        }
+    }
+
     // Function to handle admin booking form submission
     function confirmAdminBookingSubmission(event) {
         event.preventDefault();
@@ -3160,13 +3255,27 @@
                 const formData = new FormData();
                 formData.append('_token', document.querySelector('input[name="_token"]').value);
                 formData.append('user_id', document.querySelector('select[name="user_id"]').value);
-                formData.append('employee_user_id', document.querySelector('select[name="employee_user_id"]').value);
+                
+                // Handle multiple employee selection
+                const employeeCheckboxes = document.querySelectorAll('input[name="employee_ids[]"]:checked');
+                employeeCheckboxes.forEach(checkbox => {
+                    formData.append('employee_ids[]', checkbox.value);
+                });
+                
                 formData.append('date', document.getElementById('admin-date-picker').value);
                 formData.append('time', document.getElementById('admin-time-picker').value);
                 formData.append('summary', document.getElementById('admin_booking_summary').value);
                 formData.append('total', document.getElementById('admin_booking_total').value);
                 formData.append('items_json', document.getElementById('admin_items_json').value);
                 formData.append('status', 'confirmed');
+                
+                // Handle photo uploads
+                const photoInput = document.getElementById('booking-photos-input');
+                if (photoInput && photoInput.files.length > 0) {
+                    Array.from(photoInput.files).forEach(file => {
+                        formData.append('booking_photos[]', file);
+                    });
+                }
                 
                 // Submit via AJAX
                 fetch('{{ url("/admin/bookings") }}', {
