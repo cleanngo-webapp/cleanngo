@@ -1152,7 +1152,23 @@
                     // Check if there's already an assigned employee (for confirmed bookings)
                     const employeeCell = bookingRow.querySelector('td:nth-child(4) .text-sm');
                     if (employeeCell && !employeeCell.textContent.includes('No employee assigned') && !employeeCell.textContent.includes('Assign Employee')) {
-                        employeeName = employeeCell.textContent.trim();
+                        // Get only the employee names, excluding the "Edit Assignment" button text
+                        const employeeNames = [];
+                        const employeeDivs = employeeCell.querySelectorAll('.space-y-1 > div');
+                        employeeDivs.forEach(div => {
+                            // Check if this div contains a button (Edit Assignment)
+                            const hasButton = div.querySelector('button');
+                            if (!hasButton) {
+                                const span = div.querySelector('span');
+                                if (span) {
+                                    const name = span.textContent.trim();
+                                    if (name && !name.includes('Edit Assignment')) {
+                                        employeeNames.push(name);
+                                    }
+                                }
+                            }
+                        });
+                        employeeName = employeeNames.length > 0 ? employeeNames.join(', ') : 'No employee assigned';
                     }
                 }
             }
