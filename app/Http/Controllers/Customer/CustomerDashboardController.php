@@ -65,10 +65,20 @@ class CustomerDashboardController extends Controller
                 // Add employee names to bookings
                 foreach ($bookings as $booking) {
                     $booking->employee_name = null;
+                    $booking->employee_names = [];
                     if (isset($assignments[$booking->id])) {
-                        // Get the team lead first, or the first employee if no team lead
+                        // Get all assigned employees, prioritizing team lead first
                         $teamLead = $assignments[$booking->id]->firstWhere('role', 'team_lead');
-                        $booking->employee_name = $teamLead ? $teamLead->employee_name : $assignments[$booking->id]->first()->employee_name;
+                        $otherEmployees = $assignments[$booking->id]->where('role', '!=', 'team_lead');
+                        
+                        $allEmployees = collect();
+                        if ($teamLead) {
+                            $allEmployees->push($teamLead);
+                        }
+                        $allEmployees = $allEmployees->merge($otherEmployees);
+                        
+                        $booking->employee_names = $allEmployees->pluck('employee_name')->toArray();
+                        $booking->employee_name = $allEmployees->first()?->employee_name; // Keep for backward compatibility
                     }
                 }
             }
@@ -277,10 +287,20 @@ class CustomerDashboardController extends Controller
             // Add employee names to bookings
             foreach ($bookings as $booking) {
                 $booking->employee_name = null;
+                $booking->employee_names = [];
                 if (isset($assignments[$booking->id])) {
-                    // Get the team lead first, or the first employee if no team lead
+                    // Get all assigned employees, prioritizing team lead first
                     $teamLead = $assignments[$booking->id]->firstWhere('role', 'team_lead');
-                    $booking->employee_name = $teamLead ? $teamLead->employee_name : $assignments[$booking->id]->first()->employee_name;
+                    $otherEmployees = $assignments[$booking->id]->where('role', '!=', 'team_lead');
+                    
+                    $allEmployees = collect();
+                    if ($teamLead) {
+                        $allEmployees->push($teamLead);
+                    }
+                    $allEmployees = $allEmployees->merge($otherEmployees);
+                    
+                    $booking->employee_names = $allEmployees->pluck('employee_name')->toArray();
+                    $booking->employee_name = $allEmployees->first()?->employee_name; // Keep for backward compatibility
                 }
             }
 

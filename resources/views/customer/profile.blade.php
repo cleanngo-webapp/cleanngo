@@ -111,7 +111,12 @@
 														<i class="ri-time-line"></i>
 														<span>{{ \Carbon\Carbon::parse($booking->scheduled_start)->format('g:i A') }}</span>
 													</div>
-													@if($booking->employee_name)
+													@if(isset($booking->employee_names) && count($booking->employee_names) > 0)
+														<div class="flex items-center gap-1">
+															<i class="ri-user-line"></i>
+															<span>{{ implode(', ', $booking->employee_names) }}</span>
+														</div>
+													@elseif($booking->employee_name)
 														<div class="flex items-center gap-1">
 															<i class="ri-user-line"></i>
 															<span>{{ $booking->employee_name }}</span>
@@ -1283,12 +1288,17 @@ function updateBookingsList(bookings, serviceSummaries) {
                                 <i class="ri-time-line"></i>
                                 <span>${new Date(booking.scheduled_start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                             </div>
-                            ${booking.employee_name ? `
+                            ${(booking.employee_names && booking.employee_names.length > 0) ? `
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-user-line"></i>
+                                    <span>${booking.employee_names.join(', ')}</span>
+                                </div>
+                            ` : (booking.employee_name ? `
                                 <div class="flex items-center gap-1">
                                     <i class="ri-user-line"></i>
                                     <span>${booking.employee_name}</span>
                                 </div>
-                            ` : ''}
+                            ` : '')}
                         </div>
                     </div>
                     
