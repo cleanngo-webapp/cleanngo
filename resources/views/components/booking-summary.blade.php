@@ -39,8 +39,19 @@
                 <div class="space-y-1 text-sm">
                     <p><span class="font-medium text-gray-600">Total Amount:</span> ₱{{ number_format(($booking->total_due_cents ?? 0) / 100, 2) }}</p>
                     <p><span class="font-medium text-gray-600">Payment Status:</span> 
-                        <span class="px-2 py-1 text-xs rounded-full {{ ($booking->payment_status ?? 'pending') === 'approved' ? 'bg-green-100 text-green-800' : (($booking->payment_status ?? 'pending') === 'declined' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                            {{ ucfirst($booking->payment_status ?? 'pending') }}
+                        @php
+                            $paymentStatus = $booking->payment_status ?? 'pending';
+                            $paymentStatusClasses = [
+                                'approved' => 'bg-green-100 text-green-800',
+                                'paid' => 'bg-green-100 text-green-800',
+                                'declined' => 'bg-red-100 text-red-800',
+                                'pending' => 'bg-yellow-100 text-yellow-800',
+                                'unpaid' => 'bg-yellow-100 text-yellow-800'
+                            ];
+                            $paymentStatusClass = $paymentStatusClasses[$paymentStatus] ?? 'bg-yellow-100 text-yellow-800';
+                        @endphp
+                        <span class="px-2 py-1 text-xs rounded-full {{ $paymentStatusClass }}">
+                            {{ ucfirst($paymentStatus) }}
                         </span>
                     </p>
                 </div>
