@@ -921,6 +921,40 @@ class AdminBookingController extends Controller
     }
 
     /**
+     * Get booking photos for admin view
+     */
+    public function getPhotos($bookingId)
+    {
+        $booking = DB::table('bookings')->where('id', $bookingId)->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        $photos = [];
+        if (!empty($booking->booking_photos)) {
+            $photoPaths = json_decode($booking->booking_photos, true);
+            if (is_array($photoPaths)) {
+                foreach ($photoPaths as $photoPath) {
+                    $photos[] = [
+                        'url' => asset('storage/' . ltrim($photoPath, '/')),
+                        'filename' => basename($photoPath),
+                    ];
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'count' => count($photos),
+            'photos' => $photos,
+        ]);
+    }
+
+    /**
      * Display completed and cancelled bookings
      */
     public function completed(Request $request)

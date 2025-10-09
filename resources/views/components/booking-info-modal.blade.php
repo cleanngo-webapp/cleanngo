@@ -20,6 +20,12 @@
                 <i class="ri-map-pin-line mr-2"></i>
                 Location
             </button>
+            <button onclick="switchBookingInfoTab('photos', '{{ $modalId ?? 'booking-info-modal' }}')" 
+                    class="booking-info-tab flex-1 px-4 py-3 text-sm font-medium rounded-t-lg transition-colors cursor-pointer text-gray-500 hover:text-gray-700 border-b-2 border-emerald-500 hover:bg-gray-50" 
+                    data-tab="photos">
+                <i class="ri-image-line mr-2"></i>
+                Photos (<span id="booking-photos-count">0</span>)
+            </button>
         </div>
         
         {{-- Tab Content --}}
@@ -46,6 +52,18 @@
                         <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
                     </div>
                     <span class="ml-3 text-gray-500 text-sm">Loading location information...</span>
+                </div>
+            </div>
+
+            {{-- Photos Tab Content --}}
+            <div id="booking-photos-content" class="booking-info-tab-content hidden">
+                <div class="flex items-center justify-center py-8">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                        <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    </div>
+                    <span class="ml-3 text-gray-500 text-sm">Loading photos...</span>
                 </div>
             </div>
         </div>
@@ -101,7 +119,8 @@
     let currentUserType = 'admin';
     let bookingInfoData = {
         summary: null,
-        location: null
+        location: null,
+        photos: null
     };
 
     function openBookingInfoModal(modalId, bookingId, userType = 'admin') {
@@ -112,7 +131,8 @@
         // Reset data
         bookingInfoData = {
             summary: null,
-            location: null
+            location: null,
+            photos: null
         };
         
         // Show modal
@@ -128,6 +148,8 @@
         
         // Store photos data for later use
         bookingInfoData.photos = null;
+        const photosCountEl = document.getElementById('booking-photos-count');
+        if (photosCountEl) { photosCountEl.textContent = '0'; }
     }
 
     function closeBookingInfoModal(modalId) {
@@ -140,7 +162,8 @@
         currentBookingIdModal = null;
         bookingInfoData = {
             summary: null,
-            location: null
+            location: null,
+            photos: null
         };
     }
 
@@ -164,7 +187,7 @@
             content.classList.add('hidden');
         });
         
-        const activeContent = document.getElementById(`booking-${tabName}-content`);
+        const activeContent = document.querySelector(`#${modalId} #booking-${tabName}-content`);
         if (activeContent) {
             activeContent.classList.remove('hidden');
         }
@@ -172,13 +195,15 @@
         // Load data for the tab if not already loaded
         if (tabName === 'location' && !bookingInfoData.location) {
             loadBookingLocation(currentBookingIdModal, currentUserType);
+        } else if (tabName === 'photos' && !bookingInfoData.photos) {
+            loadBookingPhotos(currentBookingIdModal, currentUserType);
         } else if (tabName === 'summary') {
             // Summary is already loaded, no need to reload
         }
     }
 
     function loadBookingSummary(bookingId, userType) {
-        const content = document.getElementById('booking-summary-content');
+        const content = document.querySelector(`#${currentBookingInfoModal} #booking-summary-content`);
         
         // Show loading state
         content.innerHTML = `
@@ -236,7 +261,7 @@
 
 
     function loadBookingLocation(bookingId, userType = 'admin') {
-        const content = document.getElementById('booking-location-content');
+        const content = document.querySelector(`#${currentBookingInfoModal} #booking-location-content`);
         
         // Show loading state
         content.innerHTML = `
@@ -301,6 +326,92 @@
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Location</h3>
                     <p class="text-sm text-gray-500">An error occurred while loading the location information.</p>
+                </div>
+            `;
+        });
+    }
+
+    function loadBookingPhotos(bookingId, userType = 'admin') {
+        const content = document.querySelector(`#${currentBookingInfoModal} #booking-photos-content`);
+        
+        // Show loading state
+        content.innerHTML = `
+            <div class="flex items-center justify-center py-8">
+                <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                </div>
+                <span class="ml-3 text-gray-500 text-sm">Loading photos...</span>
+            </div>
+        `;
+        
+        // Fetch photos data
+        const photosUrl = userType === 'admin' ? `/admin/bookings/${bookingId}/photos` : `/employee/bookings/${bookingId}/photos`;
+        fetch(photosUrl, {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const photosCountEl = document.querySelector(`#${currentBookingInfoModal} #booking-photos-count`);
+            if (photosCountEl && typeof data.count === 'number') {
+                photosCountEl.textContent = String(data.count);
+            }
+            
+            if (data.success) {
+                bookingInfoData.photos = data.photos || [];
+                
+                if (!data.photos || data.photos.length === 0) {
+                    content.innerHTML = `
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="ri-image-line text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Photos</h3>
+                            <p class="text-sm text-gray-500">No photos were uploaded for this booking.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const items = data.photos.map(photo => `
+                    <a href="${photo.url}" target="_blank" class="group block">
+                        <div class="overflow-hidden rounded border border-gray-200 bg-gray-50">
+                            <img src="${photo.url}" alt="${photo.filename}" class="w-full h-48 md:h-40 object-cover group-hover:opacity-90 transition" />
+                        </div>
+                        <div class="mt-2 text-xs text-gray-600 truncate">${photo.filename}</div>
+                    </a>
+                `).join('');
+                
+                content.innerHTML = `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">${items}</div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="ri-error-warning-line text-2xl text-red-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Photos</h3>
+                        <p class="text-sm text-gray-500">Unable to load photos. Please try again.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading booking photos:', error);
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ri-error-warning-line text-2xl text-red-400"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Photos</h3>
+                    <p class="text-sm text-gray-500">An error occurred while loading the photos.</p>
                 </div>
             `;
         });

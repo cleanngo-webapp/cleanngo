@@ -385,6 +385,49 @@ class EmployeeJobsController extends Controller
     }
 
     /**
+     * Get booking photos for employee view (only if assigned)
+     */
+    public function getPhotos($bookingId)
+    {
+        $user = Auth::user();
+
+        // Verify the employee is assigned to this booking
+        $booking = DB::table('bookings as b')
+            ->join('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
+            ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+            ->where('b.id', $bookingId)
+            ->where('e.user_id', $user->id)
+            ->select('b.*')
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found or you are not assigned to this booking'
+            ], 404);
+        }
+
+        $photos = [];
+        if (!empty($booking->booking_photos)) {
+            $photoPaths = json_decode($booking->booking_photos, true);
+            if (is_array($photoPaths)) {
+                foreach ($photoPaths as $photoPath) {
+                    $photos[] = [
+                        'url' => asset('storage/' . ltrim($photoPath, '/')),
+                        'filename' => basename($photoPath),
+                    ];
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'count' => count($photos),
+            'photos' => $photos,
+        ]);
+    }
+
+    /**
      * Get available inventory items for equipment borrowing
      */
     public function getAvailableInventory()

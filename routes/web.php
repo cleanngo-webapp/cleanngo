@@ -114,6 +114,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     Route::post('/payment-proof/{bookingId}/upload', [App\Http\Controllers\Admin\PaymentProofController::class, 'upload'])->name('payment-proof.upload');
     Route::get('/bookings/{bookingId}/summary', [EmployeeJobsController::class, 'getSummary'])->name('bookings.summary');
     Route::get('/bookings/{bookingId}/location', [EmployeeJobsController::class, 'getLocation'])->name('bookings.location');
+    Route::get('/bookings/{bookingId}/photos', [EmployeeJobsController::class, 'getPhotos'])->name('bookings.photos');
     Route::get('/inventory/available', [EmployeeJobsController::class, 'getAvailableInventory'])->name('inventory.available');
     Route::post('/jobs/{bookingId}/equipment/borrow', [EmployeeJobsController::class, 'borrowEquipment'])->name('jobs.equipment.borrow');
     Route::get('/jobs/{bookingId}/borrowed-items', [EmployeeJobsController::class, 'getBorrowedItems'])->name('jobs.borrowed-items');
@@ -203,6 +204,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/bookings/{bookingId}/assign-employees', [AdminBookingController::class, 'assignEmployees'])->name('bookings.assign-employees');
     Route::get('/bookings/{bookingId}/summary', [AdminBookingController::class, 'getSummary'])->name('bookings.summary');
     Route::get('/bookings/{bookingId}/location', [AdminBookingController::class, 'getLocation'])->name('bookings.location');
+    Route::get('/bookings/{bookingId}/photos', [AdminBookingController::class, 'getPhotos'])->name('bookings.photos');
     Route::get('/payment-proof/{proofId}/details', [App\Http\Controllers\Admin\PaymentProofController::class, 'getDetails'])->name('payment-proof.details');
     Route::post('/payment-proof/{proofId}/approve', [App\Http\Controllers\Admin\PaymentProofController::class, 'approve'])->name('payment-proof.approve');
     Route::post('/payment-proof/{proofId}/decline', [App\Http\Controllers\Admin\PaymentProofController::class, 'decline'])->name('payment-proof.decline');
