@@ -100,38 +100,30 @@
 
         <!-- Filter Controls -->
         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-            <div class="flex flex-wrap gap-4 items-center justify-between">
-                <div class="flex flex-wrap gap-3 items-center">
-                    <!-- Rating Filter -->
-                    <div class="flex items-center space-x-2">
-                        <label class="text-sm font-medium text-gray-700">Filter by Rating:</label>
-                        <select id="ratingFilter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="all">All Ratings</option>
-                            <option value="5">5 Stars</option>
-                            <option value="4">4 Stars</option>
-                            <option value="3">3 Stars</option>
-                            <option value="2">2 Stars</option>
-                            <option value="1">1 Star</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Sort Filter -->
-                    <div class="flex items-center space-x-2">
-                        <label class="text-sm font-medium text-gray-700">Sort by:</label>
-                        <select id="sortFilter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="rating_high">Highest Rating</option>
-                            <option value="rating_low">Lowest Rating</option>
-                        </select>
-                    </div>
+            <div class="flex flex-wrap gap-4 items-center">
+                <!-- Rating Filter -->
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700">Filter by Rating:</label>
+                    <select id="ratingFilter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" onchange="applyFilters()">
+                        <option value="all">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
                 </div>
                 
-                <!-- Filter Button -->
-                <button onclick="applyFilters()" 
-                        class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-md hover:bg-emerald-700 transition-colors duration-200 cursor-pointer">
-                    Apply Filters
-                </button>
+                <!-- Sort Filter -->
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700">Sort by:</label>
+                    <select id="sortFilter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" onchange="applyFilters()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="rating_high">Highest Rating</option>
+                        <option value="rating_low">Lowest Rating</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
