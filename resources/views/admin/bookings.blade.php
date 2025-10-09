@@ -319,9 +319,9 @@
                         <td class="px-6 py-4">
                             <div class="flex flex-wrap items-center gap-2 max-w-[120px]">
                                 @if($b->status === 'confirmed')
-                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openStatusChangeModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" title="Change Status">
-                                        <i class="ri-arrow-up-down-line"></i>
-                                        <span class="hidden sm:inline">Change Status</span>
+                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-600 hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" onclick="openCancelBookingModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" title="Cancel Booking">
+                                        <i class="ri-close-line mr-2"></i>
+                                        <span class="hidden sm:inline">Cancel Book</span>
                                     </button>
                                 @endif
                                 <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingInfoModal('admin-booking-info-modal', {{ $b->id }}, 'admin')" title="View Booking Information">
@@ -808,22 +808,20 @@
         </div>
     </div>
 
-    <!-- Status Change Modal -->
-    <div id="status-change-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
+    <!-- Cancel Booking Modal -->
+    <div id="cancel-booking-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
         <div class="bg-white rounded-xl w-full max-w-md p-4">
             <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Change Booking Status</div>
-                <button class="cursor-pointer" onclick="closeStatusChangeModal()">✕</button>
+                <div class="font-semibold text-red-600">Cancel Booking</div>
+                <button class="cursor-pointer" onclick="closeCancelBookingModal()">✕</button>
             </div>
-            <p id="statusChangeModalText" class="mb-4 text-sm">Select new status for this booking:</p>
+            <p id="cancelBookingModalText" class="mb-4 text-sm">Please provide a reason for cancelling this booking:</p>
             <div class="mb-4">
-                <select id="statusChangeSelect" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-emerald-500 focus:ring-emerald-500">
-                    <!-- Options will be populated dynamically based on booking date -->
-                </select>
+                <textarea id="cancelReason" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-red-500 focus:ring-red-500" rows="3" placeholder="Enter reason for cancellation..."></textarea>
             </div>
             <div class="flex justify-end gap-2">
-                <button class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closeStatusChangeModal()">Cancel</button>
-                <button id="statusChangeConfirm" class="px-3 py-2 bg-emerald-600 text-white rounded cursor-pointer hover:bg-emerald-700">Update Status</button>
+                <button class="px-3 py-2 rounded cursor-pointer shadow-sm hover:bg-gray-50" onclick="closeCancelBookingModal()">Cancel</button>
+                <button id="cancelBookingConfirm" class="px-3 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700">Cancel Booking</button>
             </div>
         </div>
     </div>
@@ -1241,13 +1239,13 @@
         closeConfirmModal();
     });
     
-    // Status change modal handlers
-    let pendingStatusChange = null;
-    function openStatusChangeModal(bookingId, bookingCode) {
-        pendingStatusChange = { bookingId, bookingCode };
-        const modal = document.getElementById('status-change-modal');
-        const text = document.getElementById('statusChangeModalText');
-        const select = document.getElementById('statusChangeSelect');
+    // Cancel booking modal handlers
+    let pendingCancelBooking = null;
+    function openCancelBookingModal(bookingId, bookingCode) {
+        pendingCancelBooking = { bookingId, bookingCode };
+        const modal = document.getElementById('cancel-booking-modal');
+        const text = document.getElementById('cancelBookingModalText');
+        const reasonTextarea = document.getElementById('cancelReason');
         
         // Get booking date from the table row
         const bookingRow = document.querySelector(`tr[data-booking-id="${bookingId}"]`);
@@ -1262,92 +1260,80 @@
             }
         }
         
-        // Determine available status options based on booking date
+        // Update modal text
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
         const isBookingToday = bookingDate && bookingDate.toDateString() === today.toDateString();
         
-        // Clear existing options
-        select.innerHTML = '';
-        
         if (isBookingToday) {
-            // If booking is today, show all status options
-            text.textContent = `Select new status for booking ${bookingCode} (scheduled today):`;
-            select.innerHTML = `
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-            `;
+            text.textContent = `Please provide a reason for cancelling booking ${bookingCode} (scheduled today):`;
         } else {
-            // If booking is in the future, only show cancelled option
-            text.textContent = `Select new status for booking ${bookingCode} (scheduled for future):`;
-            select.innerHTML = `
-                <option value="cancelled">Cancelled</option>
-            `;
+            text.textContent = `Please provide a reason for cancelling booking ${bookingCode}${bookingDate ? ' (scheduled on ' + bookingDate.toLocaleDateString() + ')' : ''}:`;
         }
+        
+        // Clear the reason textarea
+        reasonTextarea.value = '';
         
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
     
-    function closeStatusChangeModal() {
-        const modal = document.getElementById('status-change-modal');
+    function closeCancelBookingModal() {
+        const modal = document.getElementById('cancel-booking-modal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
-        pendingStatusChange = null;
+        pendingCancelBooking = null;
     }
     
-    // Handle status change confirmation with SweetAlert
-    document.getElementById('statusChangeConfirm').addEventListener('click', function() {
-        if (!pendingStatusChange) return;
+    // Handle cancel booking confirmation with SweetAlert
+    document.getElementById('cancelBookingConfirm').addEventListener('click', function() {
+        if (!pendingCancelBooking) return;
         
-        const newStatus = document.getElementById('statusChangeSelect').value;
-        const statusText = newStatus.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const reason = document.getElementById('cancelReason').value.trim();
         
-        // Show SweetAlert confirmation
+        if (!reason) {
+            Swal.fire({
+                title: 'Reason Required',
+                text: 'Please provide a reason for cancelling this booking.',
+                icon: 'warning',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
+        }
+        
         Swal.fire({
-            title: 'Confirm Status Change?',
-            text: `Are you sure you want to change the status to "${statusText}"?`,
-            icon: 'question',
+            title: 'Confirm Booking Cancellation',
+            text: `Are you sure you want to cancel this booking? This action cannot be undone.`,
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#10b981',
+            confirmButtonColor: '#ef4444',
             cancelButtonColor: '#6b7280',
-            confirmButtonText: 'Yes, Change Status',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Yes, Cancel Booking',
+            cancelButtonText: 'Keep Booking',
             focusCancel: true
         }).then((result) => {
             if (result.isConfirmed) {
                 // Create form and submit
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = `/admin/bookings/${pendingStatusChange.bookingId}/status`;
+                form.action = `/admin/bookings/${pendingCancelBooking.bookingId}/cancel`;
                 
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_token';
                 csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
                 
-                const status = document.createElement('input');
-                status.type = 'hidden';
-                status.name = 'status';
-                status.value = newStatus;
-                
-                // If status is completed, add bypass payment proof flag
-                if (newStatus === 'completed') {
-                    const bypassPayment = document.createElement('input');
-                    bypassPayment.type = 'hidden';
-                    bypassPayment.name = 'bypass_payment_proof';
-                    bypassPayment.value = '1';
-                    form.appendChild(bypassPayment);
-                }
+                const reasonInput = document.createElement('input');
+                reasonInput.type = 'hidden';
+                reasonInput.name = 'reason';
+                reasonInput.value = reason;
                 
                 form.appendChild(csrf);
-                form.appendChild(status);
+                form.appendChild(reasonInput);
                 document.body.appendChild(form);
                 form.submit();
                 
-                closeStatusChangeModal();
+                closeCancelBookingModal();
             }
         });
     });

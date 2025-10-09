@@ -200,6 +200,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::get('/completed-bookings', [AdminBookingController::class, 'completed'])->name('completed-bookings');
     Route::post('/bookings', [AdminBookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{bookingId}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
+    Route::post('/bookings/{bookingId}/cancel', [AdminBookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{bookingId}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::match(['post','get'], '/bookings/{bookingId}/assign', [AdminBookingController::class, 'assignEmployee'])->name('bookings.assign');
     Route::get('/bookings/{bookingId}/employee-availability', [AdminBookingController::class, 'getEmployeeAvailability'])->name('bookings.employee-availability');

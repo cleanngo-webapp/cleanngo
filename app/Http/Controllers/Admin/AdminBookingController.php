@@ -466,6 +466,108 @@ class AdminBookingController extends Controller
     }
 
     /**
+     * Cancel a confirmed booking with reason
+     */
+    public function cancel(Request $request, $bookingId)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+        
+        // Use Eloquent model to check booking
+        $booking = \App\Models\Booking::find($bookingId);
+        if (!$booking) {
+            return back()->withErrors(['cancel' => 'Booking not found.']);
+        }
+        
+        // Only allow cancellation of confirmed bookings
+        if ($booking->status !== 'confirmed') {
+            return back()->withErrors(['cancel' => 'Only confirmed bookings can be cancelled.']);
+        }
+        
+        $oldStatus = $booking->status;
+        $newStatus = 'cancelled';
+        $reason = $request->reason;
+        
+        // Get assigned employees for notification
+        $assignedEmployees = $booking->staffAssignments()->with('employee.user')->get();
+        
+        // Create custom notifications with cancellation reason and service details
+        $customer = $booking->customer->user;
+        
+        // Load booking relationships to get service details
+        $booking->load(['bookingItems.service']);
+        
+        // Format services text like the NotificationService does
+        $services = $booking->bookingItems->map(function ($item) {
+            return $item->service->name;
+        })->toArray();
+        
+        // If no booking items, fall back to the main service
+        if (empty($services)) {
+            $booking->load('service');
+            $services = [$booking->service->name];
+        }
+        
+        // Group services by name and count occurrences to avoid duplication
+        $serviceCounts = array_count_values($services);
+        $serviceTexts = [];
+        
+        foreach ($serviceCounts as $serviceName => $count) {
+            if ($count > 1) {
+                $serviceTexts[] = $serviceName . " (x{$count})";
+            } else {
+                $serviceTexts[] = $serviceName;
+            }
+        }
+        
+        $servicesText = implode(', ', $serviceTexts);
+        
+        // Create single notification for customer with service details and reason
+        \App\Models\Notification::create([
+            'type' => 'booking_cancelled',
+            'title' => 'Booking Cancelled',
+            'message' => "Your booking for {$servicesText} (Code: {$booking->code}) has been cancelled. Reason: {$reason}",
+            'data' => [
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'cancellation_reason' => $reason,
+                'services' => $services,
+            ],
+            'recipient_type' => 'customer',
+            'recipient_id' => $customer->id,
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+        
+        // Notify assigned employees with cancellation reason
+        foreach ($assignedEmployees as $assignment) {
+            $employee = $assignment->employee->user;
+            \App\Models\Notification::create([
+                'type' => 'booking_cancelled',
+                'title' => 'Booking Assignment Cancelled',
+                'message' => "Your assigned booking {$booking->code} has been cancelled. Reason: {$reason}",
+                'data' => [
+                    'booking_id' => $booking->id,
+                    'booking_code' => $booking->code,
+                    'cancellation_reason' => $reason,
+                ],
+                'recipient_type' => 'employee',
+                'recipient_id' => $employee->id,
+                'is_read' => false,
+                'created_at' => now(),
+            ]);
+        }
+        
+        // Delete related records first
+        $booking->staffAssignments()->delete();
+        $booking->bookingItems()->delete();
+        $booking->delete();
+        
+        return back()->with('status', 'Booking cancelled successfully. Customer and assigned employees have been notified.');
+    }
+
+    /**
      * Handle booking confirmation or cancellation from pending status
      * This is the new workflow where pending bookings must be confirmed or cancelled first
      */
