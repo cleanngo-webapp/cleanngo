@@ -119,49 +119,50 @@
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full">
+        <div class="overflow-x-auto shadow-sm rounded-lg border border-gray-200 inventory-table-container">
+            <table class="w-full min-w-[950px]">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Code</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Value</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Re-Order Level</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Item Code</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Item Name</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 hidden sm:table-cell">Category</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Quantity</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 hidden md:table-cell">Unit Price</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28 hidden lg:table-cell">Total Value</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 hidden xl:table-cell">Re-Order</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Status</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 hidden lg:table-cell">Updated</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="inventory-table-body" class="bg-white divide-y divide-gray-200">
                     @forelse($items as $item)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $item->item_code }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4">
                             <div class="text-sm text-gray-900">{{ $item->name }}</div>
+                            <div class="text-xs text-gray-500 sm:hidden">{{ $item->category }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap hidden sm:table-cell">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                                 {{ $item->category }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ number_format($item->quantity, 0) }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap hidden md:table-cell">
                             <div class="text-sm text-gray-900">₱{{ number_format($item->unit_price, 0) }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap hidden lg:table-cell">
                             <div class="text-sm font-medium text-gray-900">₱{{ number_format($item->total_value, 0) }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap hidden xl:table-cell">
                             <div class="text-sm text-gray-900">{{ number_format($item->reorder_level, 0) }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap">
                             @if($item->status === 'In Stock')
                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                                     In Stock
@@ -176,10 +177,10 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap hidden lg:table-cell">
                             <div class="text-sm text-gray-900">{{ $item->updated_at->format('M d, Y') }}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-3 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
                                 <button onclick="openEditModal({{ $item->id }})" class="inline-flex items-center justify-center w-8 h-8 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" title="Update">
                                     <i class="ri-edit-line"></i>
@@ -195,7 +196,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="px-6 py-12 text-center">
+                        <td colspan="10" class="px-3 py-12 text-center">
                             <div class="flex flex-col items-center justify-center space-y-4">
                                 <!-- Empty State Icon -->
                                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
@@ -475,7 +476,7 @@ function performInventorySearch() {
     const tableBody = document.getElementById('inventory-table-body');
     tableBody.innerHTML = `
         <tr>
-            <td colspan="10" class="px-6 py-8 text-center">
+            <td colspan="10" class="px-3 py-8 text-center">
                 <div class="flex justify-center items-center space-x-2 mb-4">
                     <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
                     <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
@@ -514,7 +515,7 @@ function performInventorySearch() {
         })
         .catch(error => {
             console.error('Search error:', error);
-            tableBody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="10" class="px-3 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
         });
 }
 
@@ -1099,7 +1100,7 @@ function refreshInventoryTable() {
     if (tableBody) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="10" class="px-6 py-8 text-center">
+                <td colspan="10" class="px-3 py-8 text-center">
                     <div class="flex justify-center items-center space-x-2 mb-4">
                         <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
                         <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
@@ -1140,7 +1141,7 @@ function refreshInventoryTable() {
         .catch(error => {
             console.error('Refresh error:', error);
             if (tableBody) {
-                tableBody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-sm text-red-500">Error refreshing table</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="10" class="px-3 py-4 text-center text-sm text-red-500">Error refreshing table</td></tr>';
             }
         });
 }
@@ -1394,6 +1395,42 @@ function closeTransactionHistoryModal() {
     40% {
         transform: scale(1);
     }
+}
+
+/* Responsive table improvements */
+@media (max-width: 640px) {
+    .inventory-table-container {
+        font-size: 0.875rem;
+    }
+    
+    .inventory-table-container th,
+    .inventory-table-container td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Better table scrolling on mobile */
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 </style>
 @endpush
