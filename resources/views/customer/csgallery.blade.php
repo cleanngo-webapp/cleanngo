@@ -93,7 +93,7 @@
                     
                     <!-- Rating -->
                     <div class="flex-shrink-0">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Rating (Optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rating <span class="text-red-500">*</span></label>
                         <div class="flex space-x-1" id="ratingStars">
                           <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="1">★</button>
                           <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="2">★</button>
@@ -101,7 +101,15 @@
                           <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="4">★</button>
                           <button type="button" class="text-gray-300 hover:text-yellow-400 text-xl cursor-pointer" data-rating="5">★</button>
                         </div>
-                        <input type="hidden" id="rating" name="rating">
+                        <input type="hidden" id="rating" name="rating" required>
+                        <div id="ratingError" class="text-red-500 text-xs mt-1 hidden">
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                Please fill out this field.
+                            </div>
+                        </div>
                       </div>
 
                     <!-- Comment Text -->
@@ -310,6 +318,9 @@ function closeCommentsModal() {
     // Reset form
     document.getElementById('commentForm').reset();
     resetRating();
+    
+    // Hide any error messages
+    hideRatingError();
 }
 
 // Show preloader animation
@@ -467,6 +478,9 @@ function setupRating(starsContainer, ratingInput) {
             const rating = index + 1;
             ratingInput.value = rating;
             
+            // Hide rating error when a rating is selected
+            hideRatingError();
+            
             // Update star display
             stars.forEach((s, i) => {
                 s.textContent = i < rating ? '★' : '☆';
@@ -502,6 +516,25 @@ function resetRating() {
         star.textContent = '☆';
         star.className = 'text-gray-300 hover:text-yellow-400 text-xl';
     });
+    
+    // Hide rating error when resetting
+    hideRatingError();
+}
+
+// Show rating error message
+function showRatingError() {
+    const ratingError = document.getElementById('ratingError');
+    if (ratingError) {
+        ratingError.classList.remove('hidden');
+    }
+}
+
+// Hide rating error message
+function hideRatingError() {
+    const ratingError = document.getElementById('ratingError');
+    if (ratingError) {
+        ratingError.classList.add('hidden');
+    }
 }
 
 // Submit comment form
@@ -512,6 +545,16 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     
     console.log('Form submit event triggered!');
+    
+    // Clear previous error messages
+    hideRatingError();
+    
+    // Validate rating
+    const rating = document.getElementById('rating').value;
+    if (!rating || rating === '') {
+        showRatingError();
+        return;
+    }
     
     // Show loading state with spinner
     const submitBtn = document.getElementById('submitCommentBtn');
@@ -527,6 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Submitting comment data:', data);
     console.log('Form validation check - comment length:', data.comment ? data.comment.length : 'no comment');
     console.log('Form validation check - service type:', data.service_type);
+    console.log('Form validation check - rating:', data.rating);
     
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]');
