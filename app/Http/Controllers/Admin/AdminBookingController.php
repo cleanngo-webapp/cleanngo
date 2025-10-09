@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class AdminBookingController extends Controller
 {
@@ -812,10 +813,11 @@ class AdminBookingController extends Controller
         return $prefix.$year.substr((string)microtime(true), -3);
     }
 
+
     /**
-     * Get booking photos for admin view
+     * Get booking summary for admin view
      */
-    public function getPhotos($bookingId)
+    public function getSummary($bookingId)
     {
         $booking = DB::table('bookings')
             ->where('id', $bookingId)
@@ -828,22 +830,91 @@ class AdminBookingController extends Controller
             ], 404);
         }
 
-        $photos = [];
-        if ($booking->booking_photos) {
-            $photoPaths = json_decode($booking->booking_photos, true);
-            if (is_array($photoPaths)) {
-                foreach ($photoPaths as $path) {
-                    $photos[] = [
-                        'url' => asset('storage/' . $path),
-                        'filename' => basename($path)
-                    ];
-                }
-            }
+        // Get booking items
+        $items = DB::table('booking_items')
+            ->where('booking_id', $bookingId)
+            ->get();
+
+        // Get customer information
+        $customer = DB::table('customers')
+            ->where('id', $booking->customer_id)
+            ->first();
+
+        // Get assigned employees
+        $assignedEmployees = DB::table('booking_staff_assignments')
+            ->join('employees', 'booking_staff_assignments.employee_id', '=', 'employees.id')
+            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->where('booking_staff_assignments.booking_id', $bookingId)
+            ->select(DB::raw("CONCAT(users.first_name, ' ', users.last_name) as name"), 'users.phone')
+            ->get();
+
+
+        // Generate summary HTML
+        $html = view('components.booking-summary', [
+            'booking' => $booking,
+            'items' => $items,
+            'customer' => $customer,
+            'assignedEmployees' => $assignedEmployees
+        ])->render();
+
+        return response()->json([
+            'success' => true,
+            'summary' => $booking,
+            'html' => $html
+        ]);
+    }
+
+    /**
+     * Get booking location for admin view
+     */
+    public function getLocation($bookingId)
+    {
+        $booking = DB::table('bookings')
+            ->where('id', $bookingId)
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found'
+            ], 404);
+        }
+
+        // Get customer information
+        $customer = DB::table('customers')
+            ->where('id', $booking->customer_id)
+            ->first();
+
+        // Get primary address with coordinates
+        $address = null;
+        if ($customer && $customer->user_id) {
+            $address = DB::table('addresses')
+                ->where('user_id', $customer->user_id)
+                ->where('is_primary', true)
+                ->first();
+        }
+
+        // Build full address from address components
+        $fullAddress = 'No address provided';
+        if ($address) {
+            $addressParts = array_filter([
+                $address->line1,
+                $address->line2,
+                $address->barangay,
+                $address->city,
+                $address->province,
+                $address->postal_code
+            ]);
+            $fullAddress = implode(', ', $addressParts);
         }
 
         return response()->json([
             'success' => true,
-            'photos' => $photos
+            'location' => [
+                'lat' => $address->latitude ?? null,
+                'lng' => $address->longitude ?? null,
+                'address' => $fullAddress
+            ]
         ]);
     }
 

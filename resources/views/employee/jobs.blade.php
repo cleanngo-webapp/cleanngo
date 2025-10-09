@@ -256,24 +256,10 @@
                                             </button>
                                         @endif
                                 @endif
-                                <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpReceipt({{ $b->id }})" title="View Service Summary">
-                                    <i class="ri-receipt-line mr-1"></i>
-                                    <span class="hidden sm:inline">Summary</span>
+                                <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingInfoModal('employee-booking-info-modal', {{ $b->id }}, 'employee')" title="View Booking Information">
+                                    <i class="ri-information-line mr-1"></i>
+                                    <span class="hidden sm:inline">Booking Info</span>
                                 </button>
-                                <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpLocation({ id: {{ $b->id }}, lat: {{ $b->latitude ?? 0 }}, lng: {{ $b->longitude ?? 0 }} })" title="View Location">
-                                    <i class="ri-map-pin-line mr-1"></i>
-                                    <span class="hidden sm:inline">Location</span>
-                                </button>
-                                @php
-                                    $bookingPhotos = $b->booking_photos ? json_decode($b->booking_photos, true) : [];
-                                    $hasPhotos = is_array($bookingPhotos) && count($bookingPhotos) > 0;
-                                @endphp
-                                @if($hasPhotos)
-                                    <button type="button" class="inline-flex items-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openEmpBookingPhotos({{ $b->id }})" title="View Booking Photos">
-                                        <i class="ri-image-line mr-1"></i>
-                                        <span class="hidden sm:inline">Photos</span>
-                                    </button>
-                                @endif
                             </div>
                         </td>
                     </tr>
@@ -1928,3 +1914,8 @@ function closeBorrowedItemsModal() {
 
 {{-- Polling functionality removed - no longer needed --}}
 @endpush
+
+    <!-- Booking Info Modal Component -->
+    @include('components.booking-info-modal', [
+        'modalId' => 'employee-booking-info-modal'
+    ])

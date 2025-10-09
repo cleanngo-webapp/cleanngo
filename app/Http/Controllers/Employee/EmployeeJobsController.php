@@ -249,10 +249,11 @@ class EmployeeJobsController extends Controller
         return back()->with('status', 'Job marked as completed');
     }
 
+
     /**
-     * Get booking photos for employee view
+     * Get booking summary for employee view
      */
-    public function getPhotos($bookingId)
+    public function getSummary($bookingId)
     {
         $user = Auth::user();
         
@@ -268,26 +269,116 @@ class EmployeeJobsController extends Controller
         if (!$booking) {
             return response()->json([
                 'success' => false,
-                'message' => 'Booking not found or not assigned to you'
+                'message' => 'Booking not found or you are not assigned to this booking'
             ], 404);
         }
 
+        // Get booking items
+        $items = DB::table('booking_items')
+            ->where('booking_id', $bookingId)
+            ->get();
+
+        // Get customer information
+        $customer = DB::table('customers')
+            ->where('id', $booking->customer_id)
+            ->first();
+
+        // Get assigned employees
+        $assignedEmployees = DB::table('booking_staff_assignments')
+            ->join('employees', 'booking_staff_assignments.employee_id', '=', 'employees.id')
+            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->where('booking_staff_assignments.booking_id', $bookingId)
+            ->select(DB::raw("CONCAT(users.first_name, ' ', users.last_name) as name"), 'users.phone')
+            ->get();
+
+        // Get booking photos from the booking_photos column
         $photos = [];
         if ($booking->booking_photos) {
             $photoPaths = json_decode($booking->booking_photos, true);
             if (is_array($photoPaths)) {
-                foreach ($photoPaths as $path) {
+                foreach ($photoPaths as $photoPath) {
                     $photos[] = [
-                        'url' => asset('storage/' . $path),
-                        'filename' => basename($path)
+                        'url' => asset('storage/' . $photoPath),
+                        'filename' => basename($photoPath)
                     ];
                 }
             }
         }
 
+        // Generate summary HTML
+        $html = view('components.booking-summary', [
+            'booking' => $booking,
+            'items' => $items,
+            'customer' => $customer,
+            'assignedEmployees' => $assignedEmployees
+        ])->render();
+
         return response()->json([
             'success' => true,
+            'summary' => $booking,
+            'html' => $html,
             'photos' => $photos
+        ]);
+    }
+
+    /**
+     * Get booking location for employee view
+     */
+    public function getLocation($bookingId)
+    {
+        $user = Auth::user();
+        
+        // Verify the employee is assigned to this booking
+        $booking = DB::table('bookings as b')
+            ->join('booking_staff_assignments as bsa', 'bsa.booking_id', '=', 'b.id')
+            ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+            ->where('b.id', $bookingId)
+            ->where('e.user_id', $user->id)
+            ->select('b.*')
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found or you are not assigned to this booking'
+            ], 404);
+        }
+
+        // Get customer information
+        $customer = DB::table('customers')
+            ->where('id', $booking->customer_id)
+            ->first();
+
+        // Get primary address with coordinates
+        $address = null;
+        if ($customer && $customer->user_id) {
+            $address = DB::table('addresses')
+                ->where('user_id', $customer->user_id)
+                ->where('is_primary', true)
+                ->first();
+        }
+
+        // Build full address from address components
+        $fullAddress = 'No address provided';
+        if ($address) {
+            $addressParts = array_filter([
+                $address->line1,
+                $address->line2,
+                $address->barangay,
+                $address->city,
+                $address->province,
+                $address->postal_code
+            ]);
+            $fullAddress = implode(', ', $addressParts);
+        }
+
+        return response()->json([
+            'success' => true,
+            'location' => [
+                'lat' => $address->latitude ?? null,
+                'lng' => $address->longitude ?? null,
+                'address' => $fullAddress
+            ]
         ]);
     }
 

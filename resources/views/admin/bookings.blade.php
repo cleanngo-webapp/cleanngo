@@ -322,21 +322,10 @@
                                         <i class="ri-arrow-up-down-line"></i>
                                     </button>
                                 @endif
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openAdminReceipt({{ $b->id }})" title="View Service Summary">
-                                    <i class="ri-receipt-line"></i>
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingInfoModal('admin-booking-info-modal', {{ $b->id }}, 'admin')" title="View Booking Information">
+                                    <i class="ri-information-line mr-1"></i>
+                                    <span class="hidden sm:inline">Booking Info</span>
                                 </button>
-                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openLocation({{ $b->id }})" title="View Location">
-                                    <i class="ri-map-pin-line"></i>                                    
-                                </button>
-                                @php
-                                    $bookingPhotos = $b->booking_photos ? json_decode($b->booking_photos, true) : [];
-                                    $hasPhotos = is_array($bookingPhotos) && count($bookingPhotos) > 0;
-                                @endphp
-                                @if($hasPhotos)
-                                    <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingPhotos({{ $b->id }})" title="View Booking Photos">
-                                        <i class="ri-image-line"></i>
-                                    </button>
-                                @endif
                             </div>
                         </td>
                     </tr>
@@ -3852,6 +3841,11 @@
     });
     </script>
     @endpush
+
+    <!-- Booking Info Modal Component -->
+    @include('components.booking-info-modal', [
+        'modalId' => 'admin-booking-info-modal'
+    ])
 </div>
 @endsection
 
