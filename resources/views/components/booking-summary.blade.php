@@ -72,25 +72,165 @@
         </div>
     @endif
 
-    {{-- Additional Information --}}
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-        <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
-            <i class="ri-information-line mr-2 text-emerald-600"></i>
-            Additional Information
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-                <p><span class="font-medium text-gray-600">Created:</span> {{ isset($booking->created_at) && $booking->created_at ? \Carbon\Carbon::parse($booking->created_at)->format('M j, Y g:i A') : 'N/A' }}</p>
-                <p><span class="font-medium text-gray-600">Updated:</span> {{ isset($booking->updated_at) && $booking->updated_at ? \Carbon\Carbon::parse($booking->updated_at)->format('M j, Y g:i A') : 'N/A' }}</p>
-            </div>
-            <div>
-                @if(isset($booking->notes) && $booking->notes)
-                    <p><span class="font-medium text-gray-600">Notes:</span> {{ $booking->notes }}</p>
-                @endif
-                @if(isset($booking->special_instructions) && $booking->special_instructions)
-                    <p><span class="font-medium text-gray-600">Special Instructions:</span> {{ $booking->special_instructions }}</p>
-                @endif
+    {{-- Service Summary --}}
+    @if($items && count($items) > 0)
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+            <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+                <i class="ri-service-line mr-2 text-emerald-600"></i>
+                Service Summary
+            </h4>
+            
+            @php
+                // Service categorization mapping (same as receipt modal)
+                $serviceCategories = [
+                    'sofa' => [
+                        'name' => 'Sofa Deep Cleaning',
+                        'items' => [
+                            'sofa_1' => '1-Seater Sofa',
+                            'sofa_2' => '2-Seater Sofa', 
+                            'sofa_3' => '3-Seater Sofa',
+                            'sofa_4' => '4-Seater Sofa',
+                            'sofa_5' => '5-Seater Sofa',
+                            'sofa_6' => '6-Seater Sofa',
+                            'sofa_7' => '7-Seater Sofa',
+                            'sofa_8' => '8-Seater Sofa'
+                        ]
+                    ],
+                    'mattress' => [
+                        'name' => 'Mattress Deep Cleaning',
+                        'items' => [
+                            'mattress_single' => 'Single Mattress',
+                            'mattress_double' => 'Double Mattress',
+                            'mattress_king' => 'King Mattress',
+                            'mattress_california' => 'California King Mattress'
+                        ]
+                    ],
+                    'carpet' => [
+                        'name' => 'Carpet Deep Cleaning',
+                        'items' => [
+                            'carpet_sqft' => 'Square Foot'
+                        ]
+                    ],
+                    'car' => [
+                        'name' => 'Home Service Car Interior Detailing',
+                        'items' => [
+                            'car_sedan' => 'Sedan',
+                            'car_suv' => 'SUV',
+                            'car_van' => 'Van',
+                            'car_coaster' => 'Hatchback'
+                        ]
+                    ],
+                    'post_construction' => [
+                        'name' => 'Post Construction Cleaning',
+                        'items' => [
+                            'post_construction_sqm' => 'Square Meter'
+                        ]
+                    ],
+                    'disinfect' => [
+                        'name' => 'Home/Office Disinfection',
+                        'items' => [
+                            'disinfect_sqm' => 'Square Meter'
+                        ]
+                    ],
+                    'glass' => [
+                        'name' => 'Glass Cleaning',
+                        'items' => [
+                            'glass_sqft' => 'Square Foot'
+                        ]
+                    ],
+                    'house_cleaning' => [
+                        'name' => 'House Cleaning',
+                        'items' => [
+                            'house_cleaning_sqm' => 'Square Meter'
+                        ]
+                    ],
+                    'curtain_cleaning' => [
+                        'name' => 'Curtain Cleaning',
+                        'items' => [
+                            'curtain_cleaning_yard' => 'Yard'
+                        ]
+                    ]
+                ];
+                
+                // Categorize items
+                $categorized = [
+                    'sofa' => [],
+                    'mattress' => [],
+                    'car' => [],
+                    'carpet' => [],
+                    'post_construction' => [],
+                    'disinfect' => [],
+                    'glass' => [],
+                    'house_cleaning' => [],
+                    'curtain_cleaning' => []
+                ];
+                
+                foreach($items as $item) {
+                    $itemType = $item->item_type ?? '';
+                    $categorized_item = false;
+                    
+                    // Check each category
+                    foreach($serviceCategories as $categoryKey => $category) {
+                        if (isset($category['items'][$itemType])) {
+                            $categorized[$categoryKey][] = (object) array_merge((array) $item, [
+                                'displayName' => $category['items'][$itemType]
+                            ]);
+                            $categorized_item = true;
+                            break;
+                        }
+                    }
+                }
+            @endphp
+            
+            <div class="space-y-4">
+                @foreach($categorized as $categoryKey => $categoryItems)
+                    @if(count($categoryItems) > 0)
+                        <div>
+                            <div class="font-semibold text-gray-800 border-b border-gray-200 pb-1 mb-2">
+                                {{ $serviceCategories[$categoryKey]['name'] }}
+                            </div>
+                            <div class="space-y-1">
+                                @foreach($categoryItems as $item)
+                                    @php
+                                        $quantity = $item->quantity ?? 1;
+                                        $areaSqm = $item->area_sqm;
+                                        $unitPrice = ($item->unit_price_cents ?? 0) / 100; // Convert cents to pesos
+                                        $lineTotal = ($item->line_total_cents ?? 0) / 100; // Convert cents to pesos
+                                    @endphp
+                                    
+                                    <div class="flex justify-between py-1">
+                                        <span class="text-gray-700">
+                                            @if(in_array($categoryKey, ['carpet', 'post_construction', 'disinfect', 'glass', 'house_cleaning', 'curtain_cleaning']))
+                                                {{ $item->displayName }} x {{ $quantity }}
+                                            @else
+                                                {{ $item->displayName }}{{ $quantity > 1 ? ' x ' . $quantity : '' }}
+                                            @endif
+                                        </span>
+                                        <span class="font-medium">₱{{ number_format($lineTotal, 2) }}</span>
+                                    </div>
+                                    
+                                    @if(in_array($categoryKey, ['carpet', 'post_construction', 'disinfect', 'glass', 'house_cleaning', 'curtain_cleaning']))
+                                        <div class="flex justify-between py-1 text-xs text-gray-500 ml-2">
+                                            <span>
+                                                {{ $quantity }} 
+                                                @if($categoryKey === 'carpet' || $categoryKey === 'glass')
+                                                    Square Foot
+                                                @elseif($categoryKey === 'curtain_cleaning')
+                                                    Yard
+                                                @else
+                                                    Square Meter
+                                                @endif
+                                                × ₱{{ number_format($unitPrice, 2) }}
+                                            </span>
+                                            <span></span>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
             </div>
         </div>
-    </div>
+    @endif
 </div>
