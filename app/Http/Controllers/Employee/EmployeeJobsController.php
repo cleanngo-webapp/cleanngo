@@ -835,6 +835,118 @@ class EmployeeJobsController extends Controller
     /**
      * Get updated table data for AJAX table updates
      */
+    public function completedJobs(Request $request)
+    {
+        $employeeId = Auth::user()?->employee?->id;
+        if (!$employeeId) {
+            $empty = DB::table('bookings')->whereRaw('1=0')->paginate(15);
+            return view('employee.completedjobs', [
+                'bookings' => $empty,
+                'search' => '',
+                'sort' => 'scheduled_start',
+                'sortOrder' => 'desc',
+                'status' => '',
+                'totalCompleted' => 0,
+                'monthlyCompleted' => 0,
+                'totalCancelled' => 0
+            ]);
+        }
+
+        // Get search and sort parameters
+        $search = $request->get('search', '');
+        $sort = $request->get('sort', 'scheduled_start');
+        $sortOrder = $request->get('sortOrder', 'desc');
+        $status = $request->get('status', '');
+
+        // Build the base query for completed/cancelled jobs
+        $query = DB::table('bookings as b')
+            ->leftJoin('customers as c', 'c.id', '=', 'b.customer_id')
+            ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
+            ->leftJoin('booking_staff_assignments as a', 'a.booking_id', '=', 'b.id')
+            ->leftJoin('payment_proofs as pp', function($join) {
+                $join->on('pp.booking_id', '=', 'b.id')
+                     ->whereRaw('pp.id = (SELECT MAX(id) FROM payment_proofs WHERE booking_id = b.id)');
+            })
+            ->where('a.employee_id', $employeeId)
+            ->whereIn('b.status', ['completed', 'cancelled'])
+            ->select([
+                'b.id',
+                'b.code',
+                'b.scheduled_start',
+                'b.status',
+                'b.completed_at',
+                'b.updated_at',
+                'u.first_name as customer_first_name',
+                'u.last_name as customer_last_name',
+                'u.email as customer_email',
+                'u.phone as customer_phone',
+                'pp.id as payment_proof_id',
+                'pp.status as payment_status',
+                'pp.amount as payment_amount',
+                'pp.payment_method',
+                'pp.created_at as payment_created_at'
+            ]);
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('b.code', 'like', "%{$search}%")
+                  ->orWhere('b.id', 'like', "%{$search}%")
+                  ->orWhere(DB::raw("CONCAT(u.first_name, ' ', u.last_name)"), 'like', "%{$search}%")
+                  ->orWhere('b.status', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply status filter
+        if (!empty($status)) {
+            $query->where('b.status', $status);
+        }
+
+        // Apply sorting
+        $sortField = $sort === 'customer_name' ? DB::raw("CONCAT(u.first_name, ' ', u.last_name)") : $sort;
+        $query->orderBy($sortField, $sortOrder);
+
+        // Get paginated results
+        $bookings = $query->paginate(15);
+
+        // Add customer_name field for display
+        foreach ($bookings->items() as $booking) {
+            $booking->customer_name = trim($booking->customer_first_name . ' ' . $booking->customer_last_name);
+        }
+
+        // Calculate statistics
+        $totalCompleted = DB::table('booking_staff_assignments')
+            ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+            ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->where('bookings.status', 'completed')
+            ->count();
+
+        $monthlyCompleted = DB::table('booking_staff_assignments')
+            ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+            ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->where('bookings.status', 'completed')
+            ->whereMonth('bookings.completed_at', Carbon::now()->month)
+            ->whereYear('bookings.completed_at', Carbon::now()->year)
+            ->count();
+
+        $totalCancelled = DB::table('booking_staff_assignments')
+            ->join('bookings', 'booking_staff_assignments.booking_id', '=', 'bookings.id')
+            ->where('booking_staff_assignments.employee_id', $employeeId)
+            ->where('bookings.status', 'cancelled')
+            ->count();
+
+        return view('employee.completedjobs', [
+            'bookings' => $bookings,
+            'search' => $search,
+            'sort' => $sort,
+            'sortOrder' => $sortOrder,
+            'status' => $status,
+            'totalCompleted' => $totalCompleted,
+            'monthlyCompleted' => $monthlyCompleted,
+            'totalCancelled' => $totalCancelled
+        ]);
+    }
+
     public function getTableData()
     {
         $employeeId = Auth::user()?->employee?->id;

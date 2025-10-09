@@ -109,9 +109,11 @@ Route::get('/debug/inventory-transactions', function() {
 Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('employee.')->group(function () {
     Route::get('/', [EmployeeDashboardController::class, 'index'])->name('dashboard');
     Route::get('/jobs', [EmployeeJobsController::class, 'index'])->name('jobs');
+    Route::get('/completed-jobs', [EmployeeJobsController::class, 'completedJobs'])->name('completed-jobs');
     Route::post('/jobs/{bookingId}/start', [EmployeeJobsController::class, 'start'])->name('jobs.start');
     Route::post('/jobs/{bookingId}/complete', [EmployeeJobsController::class, 'complete'])->name('jobs.complete');
     Route::post('/payment-proof/{bookingId}/upload', [App\Http\Controllers\Admin\PaymentProofController::class, 'upload'])->name('payment-proof.upload');
+    Route::get('/payment-proof/{proofId}/details', [App\Http\Controllers\Admin\PaymentProofController::class, 'getDetails'])->name('payment-proof.details');
     Route::get('/bookings/{bookingId}/summary', [EmployeeJobsController::class, 'getSummary'])->name('bookings.summary');
     Route::get('/bookings/{bookingId}/location', [EmployeeJobsController::class, 'getLocation'])->name('bookings.location');
     Route::get('/bookings/{bookingId}/photos', [EmployeeJobsController::class, 'getPhotos'])->name('bookings.photos');

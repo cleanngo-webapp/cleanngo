@@ -100,6 +100,13 @@
                     <h2 class="text-xl font-semibold text-gray-900">My Job Assignments</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage your assigned jobs and track progress</p>
                 </div>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('employee.completed-jobs') }}" 
+                       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                        <i class="ri-checkbox-circle-line mr-2"></i>
+                        View Completed Jobs
+                    </a>
+                </div>
             </div>
         </div>
         <div class="overflow-x-auto lg:overflow-x-visible">
