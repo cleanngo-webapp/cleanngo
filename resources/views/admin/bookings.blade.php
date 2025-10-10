@@ -4,54 +4,6 @@
 
 @push('head')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-/* Admin Booking Modal Styles - Simplified version without fancy animations */
-.quantity-btn {
-    @apply w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200 ease-in-out;
-    @apply focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-95;
-}
-
-.quantity-btn:hover {
-    @apply transform scale-105;
-}
-
-.quantity-btn:active {
-    @apply transform scale-95;
-}
-
-.quantity-display {
-    @apply min-w-[2rem] text-center font-semibold text-white text-lg;
-    @apply bg-white/10 rounded-lg px-3 py-1;
-}
-
-/* Enhanced card styling for better visual hierarchy */
-.bg-white\/10 {
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.bg-white\/10:hover {
-    @apply bg-white/15;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Active state for navigation buttons */
-.nav-button {
-    transition: all 0.3s ease-in-out;
-}
-
-.nav-button.active {
-    background-color: white;
-    color: #059669; /* emerald-700 */
-    transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Receipt card styling */
-.receipt-card {
-    transition: all 0.3s ease-in-out;
-}
-</style>
 @endpush
 
 @section('content')
@@ -4350,6 +4302,56 @@
         'modalId' => 'admin-booking-info-modal'
     ])
 </div>
+
+{{-- Admin Booking Modal Styles - Moved from head section --}}
+<style>
+/* Admin Booking Modal Styles - Simplified version without fancy animations */
+.quantity-btn {
+    @apply w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200 ease-in-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-95;
+}
+
+.quantity-btn:hover {
+    @apply transform scale-105;
+}
+
+.quantity-btn:active {
+    @apply transform scale-95;
+}
+
+.quantity-display {
+    @apply min-w-[2rem] text-center font-semibold text-white text-lg;
+    @apply bg-white/10 rounded-lg px-3 py-1;
+}
+
+/* Enhanced card styling for better visual hierarchy */
+.bg-white\/10 {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bg-white\/10:hover {
+    @apply bg-white/15;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Active state for navigation buttons */
+.nav-button {
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-button.active {
+    background-color: white;
+    color: #059669; /* emerald-700 */
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Receipt card styling */
+.receipt-card {
+    transition: all 0.3s ease-in-out;
+}
+</style>
 @endsection
 
 

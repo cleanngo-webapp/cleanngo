@@ -6,7 +6,7 @@
 @section('content')
 <div class="min-h-screen flex flex-col items-center justify-center">
 	<img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Clean N' Go" class="h-20 mb-6" />
-	<div class="bg-white/90 rounded-xl shadow p-6 w-full max-w-md">
+	<div class="bg-white/90 rounded-xl shadow p-6 md:w-full max-w-md">
 		<h1 class="text-2xl font-bold text-center">Sign Up</h1>
 		@if ($errors->any())
 			<div class="mt-4 p-3 bg-red-100 text-red-700 rounded">

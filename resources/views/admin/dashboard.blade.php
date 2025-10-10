@@ -3,43 +3,6 @@
 @section('title','Admin Dashboard')
 
 @section('content')
-{{-- Additional mobile-specific styles for calendar responsiveness --}}
-<style>
-	/* Ensure calendar doesn't cause horizontal overflow on mobile */
-	@media (max-width: 640px) {
-		#admin-calendar {
-			width: 100% !important;
-			max-width: 100% !important;
-			overflow-x: hidden !important;
-		}
-		
-		/* Force calendar to respect container width */
-		#admin-calendar .fc-view-container {
-			width: 100% !important;
-			max-width: 100% !important;
-		}
-		
-		/* Ensure calendar header doesn't overflow */
-		#admin-calendar .fc-header-toolbar {
-			flex-wrap: wrap !important;
-			gap: 0.5rem !important;
-		}
-		
-		/* Make calendar buttons smaller on mobile */
-		#admin-calendar .fc-button {
-			font-size: 0.75rem !important;
-			padding: 0.25rem 0.5rem !important;
-		}
-		
-		/* Ensure month/year display is responsive */
-		#admin-calendar .fc-toolbar-title {
-			font-size: 1rem !important;
-			white-space: nowrap !important;
-			overflow: hidden !important;
-			text-overflow: ellipsis !important;
-		}
-	}
-</style>
 {{-- Admin Dashboard with functional metrics and data display --}}
 {{-- Purpose: Overview of business operations, booking statistics, and daily activities --}}
 
@@ -345,4 +308,42 @@
 		</div>
 	</div>
 </div>
+
+{{-- Additional mobile-specific styles for calendar responsiveness - Moved from top --}}
+<style>
+	/* Ensure calendar doesn't cause horizontal overflow on mobile */
+	@media (max-width: 640px) {
+		#admin-calendar {
+			width: 100% !important;
+			max-width: 100% !important;
+			overflow-x: hidden !important;
+		}
+		
+		/* Force calendar to respect container width */
+		#admin-calendar .fc-view-container {
+			width: 100% !important;
+			max-width: 100% !important;
+		}
+		
+		/* Ensure calendar header doesn't overflow */
+		#admin-calendar .fc-header-toolbar {
+			flex-wrap: wrap !important;
+			gap: 0.5rem !important;
+		}
+		
+		/* Make calendar buttons smaller on mobile */
+		#admin-calendar .fc-button {
+			font-size: 0.75rem !important;
+			padding: 0.25rem 0.5rem !important;
+		}
+		
+		/* Ensure month/year display is responsive */
+		#admin-calendar .fc-toolbar-title {
+			font-size: 1rem !important;
+			white-space: nowrap !important;
+			overflow: hidden !important;
+			text-overflow: ellipsis !important;
+		}
+	}
+</style>
 @endsection

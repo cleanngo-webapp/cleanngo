@@ -7,269 +7,6 @@
 @endpush
 
 @section('content')
-{{-- Mobile-specific styles for employee jobs page responsiveness --}}
-<style>
-		/* Mobile responsive styles for employee jobs page */
-		@media (max-width: 640px) {
-			/* Ensure modals are mobile-friendly */
-			#job-map-modal .bg-white,
-			#payment-modal .bg-white,
-			#emp-booking-photos-modal .bg-white,
-			#equipment-modal .bg-white,
-			#borrowed-items-modal .bg-white {
-				width: 95vw !important;
-				max-width: 95vw !important;
-				margin: 0.5rem !important;
-			}
-			
-			/* Make equipment modal items more compact on mobile */
-			#equipment-modal .equipment-item {
-				padding: 0.5rem !important;
-				margin: 0 !important;
-				border-radius: 0.375rem !important;
-			}
-			
-			#equipment-modal .equipment-item .flex {
-				flex-direction: column !important;
-				gap: 0.375rem !important;
-			}
-			
-			#equipment-modal .equipment-item .flex-1 {
-				width: 100% !important;
-				min-width: 0 !important;
-			}
-			
-			#equipment-modal .equipment-item .flex.items-center.space-x-3 {
-				flex-direction: column !important;
-				align-items: flex-start !important;
-				space-x: 0 !important;
-				gap: 0.125rem !important;
-			}
-			
-			#equipment-modal .equipment-item .flex.items-center.space-x-3 > * {
-				margin-right: 0 !important;
-			}
-			
-			#equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm {
-				font-size: 0.75rem !important;
-				line-height: 1rem !important;
-			}
-			
-			#equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm:last-child {
-				margin-top: 0.25rem !important;
-			}
-			
-			#equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
-				flex-direction: row !important;
-				justify-content: space-between !important;
-				align-items: center !important;
-				margin-top: 0.5rem !important;
-				gap: 0.5rem !important;
-			}
-			
-			#equipment-modal .equipment-item .w-20 {
-				width: 3.5rem !important;
-				flex: 0 0 3.5rem !important;
-			}
-			
-			#equipment-modal .equipment-item .px-3 {
-				padding-left: 0.5rem !important;
-				padding-right: 0.5rem !important;
-			}
-			
-			/* Make the equipment item containers smaller overall */
-			#equipment-modal .equipment-item {
-				max-width: 100% !important;
-				overflow: hidden !important;
-			}
-			
-			/* Reduce spacing between equipment items */
-			#equipment-modal .space-y-4 > * + * {
-				margin-top: 0.5rem !important;
-			}
-			
-			/* Make equipment modal content more compact */
-			#equipment-modal .modal-content-container {
-				padding: 0.5rem !important;
-			}
-			
-			#equipment-modal .equipment-item h4 {
-				font-size: 0.875rem !important;
-				line-height: 1.25rem !important;
-				margin-bottom: 0.25rem !important;
-			}
-			
-			#equipment-modal .equipment-item .text-xs {
-				font-size: 0.6875rem !important;
-				line-height: 0.875rem !important;
-			}
-			
-			#equipment-modal .equipment-item .text-sm {
-				font-size: 0.75rem !important;
-				line-height: 1rem !important;
-			}
-			
-			/* Make input and button row more compact */
-			#equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
-				gap: 0.5rem !important;
-			}
-			
-			#equipment-modal .equipment-item .equipment-quantity {
-				flex: 1 !important;
-				min-width: 0 !important;
-			}
-			
-			#equipment-modal .equipment-item button {
-				flex-shrink: 0 !important;
-				white-space: nowrap !important;
-				padding: 0.375rem 0.75rem !important;
-				font-size: 0.6875rem !important;
-			}
-			
-			/* Make equipment item badges properly sized */
-			#equipment-modal .equipment-item .inline-flex.px-2.py-1 {
-				padding: 0.25rem 0.5rem !important;
-				font-size: 0.625rem !important;
-				line-height: 0.875rem !important;
-			}
-			
-			/* Better spacing and alignment for equipment items */
-			#equipment-modal .equipment-item .flex.items-center.space-x-3 {
-				align-items: flex-start !important;
-				gap: 0.25rem !important;
-			}
-			
-			/* Improve text positioning within equipment items */
-			#equipment-modal .equipment-item .flex-1 {
-				display: flex !important;
-				flex-direction: column !important;
-				gap: 0.25rem !important;
-			}
-			
-			/* Ensure equipment items don't overflow */
-			#equipment-modal .equipment-item * {
-				max-width: 100% !important;
-				word-wrap: break-word !important;
-			}
-		
-		/* Make modal content stack vertically on mobile */
-		#job-map-modal .flex,
-		#payment-modal .flex,
-		#emp-booking-photos-modal .flex,
-		#equipment-modal .flex,
-		#borrowed-items-modal .flex {
-			flex-direction: column !important;
-		}
-		
-		/* Ensure table doesn't cause horizontal overflow */
-		.overflow-x-auto {
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-		}
-		
-		/* Make action buttons more touch-friendly */
-		.flex .inline-flex {
-			min-height: 2.5rem;
-		}
-		
-		/* Reduce card padding and spacing for mobile */
-		.block.sm\\:hidden .p-2 {
-			padding: 0.375rem !important;
-		}
-		
-		.block.sm\\:hidden .space-y-3 > * + * {
-			margin-top: 0.375rem !important;
-		}
-		
-		/* Make the entire card container more compact */
-		.block.sm\\:hidden {
-			margin-left: -0.25rem !important;
-			margin-right: -0.25rem !important;
-		}
-		
-		/* Reduce border radius for more compact look */
-		.block.sm\\:hidden .rounded-xl {
-			border-radius: 0.375rem !important;
-		}
-		
-		/* Make action buttons much more compact on mobile */
-		.block.sm\\:hidden .flex.gap-1 {
-			gap: 0.125rem !important;
-		}
-		
-		.block.sm\\:hidden .flex-1 {
-			flex: 1 1 0% !important;
-			min-width: 0 !important;
-		}
-		
-		/* Make buttons much smaller on mobile */
-		.block.sm\\:hidden .px-1 {
-			padding-left: 0.25rem !important;
-			padding-right: 0.25rem !important;
-		}
-		
-		.block.sm\\:hidden .py-1\\.5 {
-			padding-top: 0.25rem !important;
-			padding-bottom: 0.25rem !important;
-		}
-		
-		/* Make text much smaller on mobile buttons */
-		.block.sm\\:hidden .text-xs {
-			font-size: 0.6rem !important;
-			line-height: 0.875rem !important;
-		}
-		
-		/* Hide button text on very small screens, show only icons */
-		@media (max-width: 480px) {
-			.block.sm\\:hidden .text-xs {
-				font-size: 0 !important;
-				line-height: 0 !important;
-			}
-			
-			.block.sm\\:hidden .mr-0\\.5 {
-				margin-right: 0 !important;
-			}
-			
-			.block.sm\\:hidden .px-1 {
-				padding-left: 0.25rem !important;
-				padding-right: 0.25rem !important;
-			}
-			
-			.block.sm\\:hidden .py-1 {
-				padding-top: 0.125rem !important;
-				padding-bottom: 0.125rem !important;
-			}
-		}
-		
-		/* Extra small screens - make buttons even more compact */
-		@media (max-width: 360px) {
-			.block.sm\\:hidden .flex.gap-0\\.5 {
-				gap: 0.0625rem !important;
-			}
-			
-			.block.sm\\:hidden .px-1 {
-				padding-left: 0.125rem !important;
-				padding-right: 0.125rem !important;
-			}
-		}
-		
-		/* Reduce grid gap on mobile */
-		.block.sm\\:hidden .grid.gap-4 {
-			gap: 0.5rem !important;
-		}
-		
-		/* Make text smaller on mobile for more compact cards */
-		.block.sm\\:hidden .text-sm {
-			font-size: 0.8rem !important;
-			line-height: 1.125rem !important;
-		}
-		
-		.block.sm\\:hidden .text-xs {
-			font-size: 0.7rem !important;
-			line-height: 1rem !important;
-		}
-	}
-</style>
 
 <div class="max-w-6xl mx-auto px-0 sm:px-0">
     <h1 class="text-2xl sm:text-3xl font-extrabold text-center">My Jobs</h1>
@@ -842,6 +579,269 @@
         </div>
     </div>
 </div>
+{{-- Mobile-specific styles for employee jobs page responsiveness --}}
+<style>
+    /* Mobile responsive styles for employee jobs page */
+    @media (max-width: 640px) {
+        /* Ensure modals are mobile-friendly */
+        #job-map-modal .bg-white,
+        #payment-modal .bg-white,
+        #emp-booking-photos-modal .bg-white,
+        #equipment-modal .bg-white,
+        #borrowed-items-modal .bg-white {
+            width: 95vw !important;
+            max-width: 95vw !important;
+            margin: 0.5rem !important;
+        }
+        
+        /* Make equipment modal items more compact on mobile */
+        #equipment-modal .equipment-item {
+            padding: 0.5rem !important;
+            margin: 0 !important;
+            border-radius: 0.375rem !important;
+        }
+        
+        #equipment-modal .equipment-item .flex {
+            flex-direction: column !important;
+            gap: 0.375rem !important;
+        }
+        
+        #equipment-modal .equipment-item .flex-1 {
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+        
+        #equipment-modal .equipment-item .flex.items-center.space-x-3 {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            space-x: 0 !important;
+            gap: 0.125rem !important;
+        }
+        
+        #equipment-modal .equipment-item .flex.items-center.space-x-3 > * {
+            margin-right: 0 !important;
+        }
+        
+        #equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm {
+            font-size: 0.75rem !important;
+            line-height: 1rem !important;
+        }
+        
+        #equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm:last-child {
+            margin-top: 0.25rem !important;
+        }
+        
+        #equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-top: 0.5rem !important;
+            gap: 0.5rem !important;
+        }
+        
+        #equipment-modal .equipment-item .w-20 {
+            width: 3.5rem !important;
+            flex: 0 0 3.5rem !important;
+        }
+        
+        #equipment-modal .equipment-item .px-3 {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        
+        /* Make the equipment item containers smaller overall */
+        #equipment-modal .equipment-item {
+            max-width: 100% !important;
+            overflow: hidden !important;
+        }
+        
+        /* Reduce spacing between equipment items */
+        #equipment-modal .space-y-4 > * + * {
+            margin-top: 0.5rem !important;
+        }
+        
+        /* Make equipment modal content more compact */
+        #equipment-modal .modal-content-container {
+            padding: 0.5rem !important;
+        }
+        
+        #equipment-modal .equipment-item h4 {
+            font-size: 0.875rem !important;
+            line-height: 1.25rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        #equipment-modal .equipment-item .text-xs {
+            font-size: 0.6875rem !important;
+            line-height: 0.875rem !important;
+        }
+        
+        #equipment-modal .equipment-item .text-sm {
+            font-size: 0.75rem !important;
+            line-height: 1rem !important;
+        }
+        
+        /* Make input and button row more compact */
+        #equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
+            gap: 0.5rem !important;
+        }
+        
+        #equipment-modal .equipment-item .equipment-quantity {
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+        
+        #equipment-modal .equipment-item button {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.6875rem !important;
+        }
+        
+        /* Make equipment item badges properly sized */
+        #equipment-modal .equipment-item .inline-flex.px-2.py-1 {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.625rem !important;
+            line-height: 0.875rem !important;
+        }
+        
+        /* Better spacing and alignment for equipment items */
+        #equipment-modal .equipment-item .flex.items-center.space-x-3 {
+            align-items: flex-start !important;
+            gap: 0.25rem !important;
+        }
+        
+        /* Improve text positioning within equipment items */
+        #equipment-modal .equipment-item .flex-1 {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.25rem !important;
+        }
+        
+        /* Ensure equipment items don't overflow */
+        #equipment-modal .equipment-item * {
+            max-width: 100% !important;
+            word-wrap: break-word !important;
+        }
+    
+    /* Make modal content stack vertically on mobile */
+    #job-map-modal .flex,
+    #payment-modal .flex,
+    #emp-booking-photos-modal .flex,
+    #equipment-modal .flex,
+    #borrowed-items-modal .flex {
+        flex-direction: column !important;
+    }
+    
+    /* Ensure table doesn't cause horizontal overflow */
+    .overflow-x-auto {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Make action buttons more touch-friendly */
+    .flex .inline-flex {
+        min-height: 2.5rem;
+    }
+    
+    /* Reduce card padding and spacing for mobile */
+    .block.sm\\:hidden .p-2 {
+        padding: 0.375rem !important;
+    }
+    
+    .block.sm\\:hidden .space-y-3 > * + * {
+        margin-top: 0.375rem !important;
+    }
+    
+    /* Make the entire card container more compact */
+    .block.sm\\:hidden {
+        margin-left: -0.25rem !important;
+        margin-right: -0.25rem !important;
+    }
+    
+    /* Reduce border radius for more compact look */
+    .block.sm\\:hidden .rounded-xl {
+        border-radius: 0.375rem !important;
+    }
+    
+    /* Make action buttons much more compact on mobile */
+    .block.sm\\:hidden .flex.gap-1 {
+        gap: 0.125rem !important;
+    }
+    
+    .block.sm\\:hidden .flex-1 {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+    }
+    
+    /* Make buttons much smaller on mobile */
+    .block.sm\\:hidden .px-1 {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+    }
+    
+    .block.sm\\:hidden .py-1\\.5 {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    
+    /* Make text much smaller on mobile buttons */
+    .block.sm\\:hidden .text-xs {
+        font-size: 0.6rem !important;
+        line-height: 0.875rem !important;
+    }
+    
+    /* Hide button text on very small screens, show only icons */
+    @media (max-width: 480px) {
+        .block.sm\\:hidden .text-xs {
+            font-size: 0 !important;
+            line-height: 0 !important;
+        }
+        
+        .block.sm\\:hidden .mr-0\\.5 {
+            margin-right: 0 !important;
+        }
+        
+        .block.sm\\:hidden .px-1 {
+            padding-left: 0.25rem !important;
+            padding-right: 0.25rem !important;
+        }
+        
+        .block.sm\\:hidden .py-1 {
+            padding-top: 0.125rem !important;
+            padding-bottom: 0.125rem !important;
+        }
+    }
+    
+    /* Extra small screens - make buttons even more compact */
+    @media (max-width: 360px) {
+        .block.sm\\:hidden .flex.gap-0\\.5 {
+            gap: 0.0625rem !important;
+        }
+        
+        .block.sm\\:hidden .px-1 {
+            padding-left: 0.125rem !important;
+            padding-right: 0.125rem !important;
+        }
+    }
+    
+    /* Reduce grid gap on mobile */
+    .block.sm\\:hidden .grid.gap-4 {
+        gap: 0.5rem !important;
+    }
+    
+    /* Make text smaller on mobile for more compact cards */
+    .block.sm\\:hidden .text-sm {
+        font-size: 0.8rem !important;
+        line-height: 1.125rem !important;
+    }
+    
+    .block.sm\\:hidden .text-xs {
+        font-size: 0.7rem !important;
+        line-height: 1rem !important;
+    }
+}
+</style>
 @endsection
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>

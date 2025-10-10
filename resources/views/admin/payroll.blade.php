@@ -3,139 +3,6 @@
 @section('title','Payroll')
 
 @section('content')
-{{-- Mobile-specific styles for payroll page responsiveness --}}
-<style>
-	/* Mobile responsive styles for payroll page */
-	@media (max-width: 640px) {
-		/* Ensure modals are mobile-friendly */
-		#employee-qr-modal .relative,
-		#upload-payment-modal .relative {
-			width: 95vw !important;
-			max-width: 95vw !important;
-			margin: 0.5rem !important;
-		}
-		
-		/* Make modal content stack vertically on mobile */
-		#employee-qr-modal .space-y-4,
-		#upload-payment-modal .space-y-4 {
-			space-y: 1rem !important;
-		}
-		
-		/* Ensure table doesn't cause horizontal overflow */
-		.overflow-x-auto {
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-		}
-		
-		/* Make action buttons more touch-friendly but compact */
-		.flex .inline-flex {
-			min-height: 2.5rem;
-		}
-		
-		/* QR code container responsive */
-		#qr-code-container {
-			width: 12rem !important;
-			height: 12rem !important;
-		}
-		
-		/* Reduce card padding and spacing for mobile */
-		.block.sm\\:hidden .p-2 {
-			padding: 0.375rem !important;
-		}
-		
-		.block.sm\\:hidden .space-y-3 > * + * {
-			margin-top: 0.375rem !important;
-		}
-		
-		/* Make the entire card container more compact */
-		.block.sm\\:hidden {
-			margin-left: -0.25rem !important;
-			margin-right: -0.25rem !important;
-		}
-		
-		/* Reduce border radius for more compact look */
-		.block.sm\\:hidden .rounded-xl {
-			border-radius: 0.375rem !important;
-		}
-		
-		/* Make action buttons much more compact on mobile */
-		.block.sm\\:hidden .flex.gap-1 {
-			gap: 0.125rem !important;
-		}
-		
-		.block.sm\\:hidden .flex-1 {
-			flex: 1 1 0% !important;
-			min-width: 0 !important;
-		}
-		
-		/* Make buttons much smaller on mobile */
-		.block.sm\\:hidden .px-2 {
-			padding-left: 0.25rem !important;
-			padding-right: 0.25rem !important;
-		}
-		
-		.block.sm\\:hidden .py-1\\.5 {
-			padding-top: 0.25rem !important;
-			padding-bottom: 0.25rem !important;
-		}
-		
-		/* Make text much smaller on mobile buttons */
-		.block.sm\\:hidden .text-xs {
-			font-size: 0.6rem !important;
-			line-height: 0.875rem !important;
-		}
-		
-		/* Hide button text on very small screens, show only icons */
-		@media (max-width: 480px) {
-			.block.sm\\:hidden .text-xs {
-				font-size: 0 !important;
-				line-height: 0 !important;
-			}
-			
-			.block.sm\\:hidden .mr-0\\.5 {
-				margin-right: 0 !important;
-			}
-			
-			.block.sm\\:hidden .px-1 {
-				padding-left: 0.25rem !important;
-				padding-right: 0.25rem !important;
-			}
-			
-			.block.sm\\:hidden .py-1 {
-				padding-top: 0.125rem !important;
-				padding-bottom: 0.125rem !important;
-			}
-		}
-		
-		/* Extra small screens - make buttons even more compact */
-		@media (max-width: 360px) {
-			.block.sm\\:hidden .flex.gap-0\\.5 {
-				gap: 0.0625rem !important;
-			}
-			
-			.block.sm\\:hidden .px-1 {
-				padding-left: 0.125rem !important;
-				padding-right: 0.125rem !important;
-			}
-		}
-		
-		/* Reduce grid gap on mobile */
-		.block.sm\\:hidden .grid.gap-4 {
-			gap: 0.5rem !important;
-		}
-		
-		/* Make text smaller on mobile for more compact cards */
-		.block.sm\\:hidden .text-sm {
-			font-size: 0.8rem !important;
-			line-height: 1.125rem !important;
-		}
-		
-		.block.sm\\:hidden .text-xs {
-			font-size: 0.7rem !important;
-			line-height: 1rem !important;
-		}
-	}
-</style>
 
 <div class="max-w-7xl mx-auto px-0 sm:px-0">
     <h1 class="text-2xl sm:text-3xl font-extrabold text-center">Payroll</h1>
@@ -573,6 +440,139 @@
     </div>
 </div>
 
+{{-- Mobile-specific styles for payroll page responsiveness - Moved from top --}}
+<style>
+	/* Mobile responsive styles for payroll page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#employee-qr-modal .relative,
+		#upload-payment-modal .relative {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#employee-qr-modal .space-y-4,
+		#upload-payment-modal .space-y-4 {
+			space-y: 1rem !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly but compact */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+		
+		/* QR code container responsive */
+		#qr-code-container {
+			width: 12rem !important;
+			height: 12rem !important;
+		}
+		
+		/* Reduce card padding and spacing for mobile */
+		.block.sm\\:hidden .p-2 {
+			padding: 0.375rem !important;
+		}
+		
+		.block.sm\\:hidden .space-y-3 > * + * {
+			margin-top: 0.375rem !important;
+		}
+		
+		/* Make the entire card container more compact */
+		.block.sm\\:hidden {
+			margin-left: -0.25rem !important;
+			margin-right: -0.25rem !important;
+		}
+		
+		/* Reduce border radius for more compact look */
+		.block.sm\\:hidden .rounded-xl {
+			border-radius: 0.375rem !important;
+		}
+		
+		/* Make action buttons much more compact on mobile */
+		.block.sm\\:hidden .flex.gap-1 {
+			gap: 0.125rem !important;
+		}
+		
+		.block.sm\\:hidden .flex-1 {
+			flex: 1 1 0% !important;
+			min-width: 0 !important;
+		}
+		
+		/* Make buttons much smaller on mobile */
+		.block.sm\\:hidden .px-2 {
+			padding-left: 0.25rem !important;
+			padding-right: 0.25rem !important;
+		}
+		
+		.block.sm\\:hidden .py-1\\.5 {
+			padding-top: 0.25rem !important;
+			padding-bottom: 0.25rem !important;
+		}
+		
+		/* Make text much smaller on mobile buttons */
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.6rem !important;
+			line-height: 0.875rem !important;
+		}
+		
+		/* Hide button text on very small screens, show only icons */
+		@media (max-width: 480px) {
+			.block.sm\\:hidden .text-xs {
+				font-size: 0 !important;
+				line-height: 0 !important;
+			}
+			
+			.block.sm\\:hidden .mr-0\\.5 {
+				margin-right: 0 !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.25rem !important;
+				padding-right: 0.25rem !important;
+			}
+			
+			.block.sm\\:hidden .py-1 {
+				padding-top: 0.125rem !important;
+				padding-bottom: 0.125rem !important;
+			}
+		}
+		
+		/* Extra small screens - make buttons even more compact */
+		@media (max-width: 360px) {
+			.block.sm\\:hidden .flex.gap-0\\.5 {
+				gap: 0.0625rem !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.125rem !important;
+				padding-right: 0.125rem !important;
+			}
+		}
+		
+		/* Reduce grid gap on mobile */
+		.block.sm\\:hidden .grid.gap-4 {
+			gap: 0.5rem !important;
+		}
+		
+		/* Make text smaller on mobile for more compact cards */
+		.block.sm\\:hidden .text-sm {
+			font-size: 0.8rem !important;
+			line-height: 1.125rem !important;
+		}
+		
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.7rem !important;
+			line-height: 1rem !important;
+		}
+	}
+</style>
 @endsection
 
 @push('scripts')

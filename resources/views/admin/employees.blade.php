@@ -3,34 +3,6 @@
 @section('title','Manage Employees')
 
 @section('content')
-{{-- Mobile-specific styles for employees page responsiveness --}}
-<style>
-	/* Mobile responsive styles for employees page */
-	@media (max-width: 640px) {
-		/* Ensure modals are mobile-friendly */
-		#addEmployeeModal .relative {
-			width: 95vw !important;
-			max-width: 95vw !important;
-			margin: 0.5rem !important;
-		}
-		
-		/* Make modal content stack vertically on mobile */
-		#addEmployeeModal .grid-cols-1 {
-			grid-template-columns: 1fr !important;
-		}
-		
-		/* Ensure table doesn't cause horizontal overflow */
-		.overflow-x-auto {
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-		}
-		
-		/* Make action buttons more touch-friendly */
-		.flex .inline-flex {
-			min-height: 2.5rem;
-		}
-	}
-</style>
 
 <div class="max-w-6xl mx-auto px-2 sm:px-0">
     <h1 class="text-2xl sm:text-3xl font-extrabold text-center">Manage Employees</h1>
@@ -1004,6 +976,35 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+{{-- Mobile-specific styles for employees page responsiveness - Moved from top --}}
+<style>
+	/* Mobile responsive styles for employees page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#addEmployeeModal .relative {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#addEmployeeModal .grid-cols-1 {
+			grid-template-columns: 1fr !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+	}
+</style>
 @endsection
 
 

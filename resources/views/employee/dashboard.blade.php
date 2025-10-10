@@ -10,157 +10,6 @@
 {{-- Employee Dashboard with job assignments and progress tracking --}}
 {{-- Purpose: Daily jobs for cleaners, with simple instructions and progress tracking --}}
 
-{{-- Mobile-specific styles for employee dashboard responsiveness --}}
-<style>
-	/* Mobile responsive styles for employee dashboard */
-	@media (max-width: 640px) {
-		/* Ensure modals are mobile-friendly */
-		#job-map-modal .bg-white,
-		#emp-payment-qr-modal .bg-white {
-			width: 95vw !important;
-			max-width: 95vw !important;
-			margin: 0.5rem !important;
-		}
-		
-		/* Make modal content stack vertically on mobile */
-		#job-map-modal .flex,
-		#emp-payment-qr-modal .flex {
-			flex-direction: column !important;
-		}
-		
-		/* Ensure table doesn't cause horizontal overflow */
-		.overflow-x-auto {
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-		}
-		
-		/* Make action buttons more touch-friendly */
-		.flex .inline-flex {
-			min-height: 2.5rem;
-		}
-		
-		/* Reduce card padding and spacing for mobile */
-		.block.sm\\:hidden .p-2 {
-			padding: 0.375rem !important;
-		}
-		
-		.block.sm\\:hidden .space-y-3 > * + * {
-			margin-top: 0.375rem !important;
-		}
-		
-		/* Make the entire card container more compact */
-		.block.sm\\:hidden {
-			margin-left: -0.25rem !important;
-			margin-right: -0.25rem !important;
-		}
-		
-		/* Reduce border radius for more compact look */
-		.block.sm\\:hidden .rounded-xl {
-			border-radius: 0.375rem !important;
-		}
-		
-		/* Make action buttons much more compact on mobile */
-		.block.sm\\:hidden .flex.gap-1 {
-			gap: 0.125rem !important;
-		}
-		
-		.block.sm\\:hidden .flex-1 {
-			flex: 1 1 0% !important;
-			min-width: 0 !important;
-		}
-		
-		/* Make buttons much smaller on mobile */
-		.block.sm\\:hidden .px-1 {
-			padding-left: 0.25rem !important;
-			padding-right: 0.25rem !important;
-		}
-		
-		.block.sm\\:hidden .py-1\\.5 {
-			padding-top: 0.25rem !important;
-			padding-bottom: 0.25rem !important;
-		}
-		
-		/* Make text much smaller on mobile buttons */
-		.block.sm\\:hidden .text-xs {
-			font-size: 0.6rem !important;
-			line-height: 0.875rem !important;
-		}
-		
-		/* Hide button text on very small screens, show only icons */
-		@media (max-width: 480px) {
-			.block.sm\\:hidden .text-xs {
-				font-size: 0 !important;
-				line-height: 0 !important;
-			}
-			
-			.block.sm\\:hidden .mr-0\\.5 {
-				margin-right: 0 !important;
-			}
-			
-			.block.sm\\:hidden .px-1 {
-				padding-left: 0.25rem !important;
-				padding-right: 0.25rem !important;
-			}
-			
-			.block.sm\\:hidden .py-1 {
-				padding-top: 0.125rem !important;
-				padding-bottom: 0.125rem !important;
-			}
-		}
-		
-		/* Extra small screens - make buttons even more compact */
-		@media (max-width: 360px) {
-			.block.sm\\:hidden .flex.gap-0\\.5 {
-				gap: 0.0625rem !important;
-			}
-			
-			.block.sm\\:hidden .px-1 {
-				padding-left: 0.125rem !important;
-				padding-right: 0.125rem !important;
-			}
-		}
-		
-		/* Reduce grid gap on mobile */
-		.block.sm\\:hidden .grid.gap-4 {
-			gap: 0.5rem !important;
-		}
-		
-		/* Make text smaller on mobile for more compact cards */
-		.block.sm\\:hidden .text-sm {
-			font-size: 0.8rem !important;
-			line-height: 1.125rem !important;
-		}
-		
-		.block.sm\\:hidden .text-xs {
-			font-size: 0.7rem !important;
-			line-height: 1rem !important;
-		}
-		
-		/* Calendar responsive styles */
-		#employee-calendar {
-			width: 100% !important;
-			max-width: 100% !important;
-			overflow-x: hidden !important;
-		}
-		
-		.fc-header-toolbar {
-			flex-wrap: wrap !important;
-			gap: 0.5rem !important;
-		}
-		
-		.fc-button {
-			font-size: 0.75rem !important;
-			padding: 0.25rem 0.5rem !important;
-		}
-		
-		.fc-toolbar-title {
-			font-size: 1rem !important;
-			white-space: nowrap !important;
-			overflow: hidden !important;
-			text-overflow: ellipsis !important;
-		}
-	}
-</style>
 
 <div class="max-w-6xl mx-auto px-0 sm:px-0">
 	{{-- Mobile: Stacked layout, Desktop: Side by side --}}
@@ -661,3 +510,155 @@ function showJobActionErrorAlert(message) {
 }
 </script>
 @endpush
+
+{{-- Mobile-specific styles for employee dashboard responsiveness - Moved from top --}}
+<style>
+	/* Mobile responsive styles for employee dashboard */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#job-map-modal .bg-white,
+		#emp-payment-qr-modal .bg-white {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#job-map-modal .flex,
+		#emp-payment-qr-modal .flex {
+			flex-direction: column !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+		
+		/* Reduce card padding and spacing for mobile */
+		.block.sm\\:hidden .p-2 {
+			padding: 0.375rem !important;
+		}
+		
+		.block.sm\\:hidden .space-y-3 > * + * {
+			margin-top: 0.375rem !important;
+		}
+		
+		/* Make the entire card container more compact */
+		.block.sm\\:hidden {
+			margin-left: -0.25rem !important;
+			margin-right: -0.25rem !important;
+		}
+		
+		/* Reduce border radius for more compact look */
+		.block.sm\\:hidden .rounded-xl {
+			border-radius: 0.375rem !important;
+		}
+		
+		/* Make action buttons much more compact on mobile */
+		.block.sm\\:hidden .flex.gap-1 {
+			gap: 0.125rem !important;
+		}
+		
+		.block.sm\\:hidden .flex-1 {
+			flex: 1 1 0% !important;
+			min-width: 0 !important;
+		}
+		
+		/* Make buttons much smaller on mobile */
+		.block.sm\\:hidden .px-1 {
+			padding-left: 0.25rem !important;
+			padding-right: 0.25rem !important;
+		}
+		
+		.block.sm\\:hidden .py-1\\.5 {
+			padding-top: 0.25rem !important;
+			padding-bottom: 0.25rem !important;
+		}
+		
+		/* Make text much smaller on mobile buttons */
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.6rem !important;
+			line-height: 0.875rem !important;
+		}
+		
+		/* Hide button text on very small screens, show only icons */
+		@media (max-width: 480px) {
+			.block.sm\\:hidden .text-xs {
+				font-size: 0 !important;
+				line-height: 0 !important;
+			}
+			
+			.block.sm\\:hidden .mr-0\\.5 {
+				margin-right: 0 !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.25rem !important;
+				padding-right: 0.25rem !important;
+			}
+			
+			.block.sm\\:hidden .py-1 {
+				padding-top: 0.125rem !important;
+				padding-bottom: 0.125rem !important;
+			}
+		}
+		
+		/* Extra small screens - make buttons even more compact */
+		@media (max-width: 360px) {
+			.block.sm\\:hidden .flex.gap-0\\.5 {
+				gap: 0.0625rem !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.125rem !important;
+				padding-right: 0.125rem !important;
+			}
+		}
+		
+		/* Reduce grid gap on mobile */
+		.block.sm\\:hidden .grid.gap-4 {
+			gap: 0.5rem !important;
+		}
+		
+		/* Make text smaller on mobile for more compact cards */
+		.block.sm\\:hidden .text-sm {
+			font-size: 0.8rem !important;
+			line-height: 1.125rem !important;
+		}
+		
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.7rem !important;
+			line-height: 1rem !important;
+		}
+		
+		/* Calendar responsive styles */
+		#employee-calendar {
+			width: 100% !important;
+			max-width: 100% !important;
+			overflow-x: hidden !important;
+		}
+		
+		.fc-header-toolbar {
+			flex-wrap: wrap !important;
+			gap: 0.5rem !important;
+		}
+		
+		.fc-button {
+			font-size: 0.75rem !important;
+			padding: 0.25rem 0.5rem !important;
+		}
+		
+		.fc-toolbar-title {
+			font-size: 1rem !important;
+			white-space: nowrap !important;
+			overflow: hidden !important;
+			text-overflow: ellipsis !important;
+		}
+	}
+</style>

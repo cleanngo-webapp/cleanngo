@@ -4,35 +4,6 @@
 
 @push('head')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-/* Completed Bookings Page Styles */
-.completed-booking-card {
-    transition: all 0.3s ease-in-out;
-    border-left: 4px solid #10b981;
-}
-
-.completed-booking-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-
-/* Loading animation */
-.loading-dots {
-    animation: loading-dots 1.4s infinite ease-in-out both;
-}
-
-.loading-dots:nth-child(1) { animation-delay: -0.32s; }
-.loading-dots:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes loading-dots {
-    0%, 80%, 100% {
-        transform: scale(0);
-    } 40% {
-        transform: scale(1);
-    }
-}
-</style>
 @endpush
 
 @section('content')
@@ -788,4 +759,35 @@
     </script>
     @endpush
 </div>
+
+{{-- Completed Bookings Page Styles - Moved from head section --}}
+<style>
+/* Completed Bookings Page Styles */
+.completed-booking-card {
+    transition: all 0.3s ease-in-out;
+    border-left: 4px solid #10b981;
+}
+
+.completed-booking-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Loading animation */
+.loading-dots {
+    animation: loading-dots 1.4s infinite ease-in-out both;
+}
+
+.loading-dots:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loading-dots {
+    0%, 80%, 100% {
+        transform: scale(0);
+    } 40% {
+        transform: scale(1);
+    }
+}
+</style>
 @endsection
