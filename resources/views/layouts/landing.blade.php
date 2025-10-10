@@ -9,16 +9,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="min-h-screen bg-gray-100 font-sans flex flex-col">
-    {{-- Simplified Navigation for Landing Page --}}
+    {{-- Responsive Navigation for Landing Page --}}
     <nav class="bg-brand-green fixed top-0 left-0 right-0 z-50 shadow-lg backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto h-16 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto h-16 flex justify-between items-center px-4">
             <!-- Logo -->
             <div class="flex gap-4">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="CleanSaver Naga Logo" class="h-12">
             </div>
     
-            <!-- Simplified Nav Links - Overview, Services, About Us and Sign In/Up -->
-            <div class="flex items-center gap-4">
+            <!-- Desktop Navigation -->
+            <div class="hidden lg:flex items-center gap-4">
                 <a href="{{ route('landing') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">Overview</a>
                 <a href="{{ route('services') }}" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">Services</a>
                 <a href="#about-us" class="border rounded-full border-white px-3 py-2 text-white hover:bg-white hover:text-emerald-700 transition-colors">About Us</a>
@@ -32,6 +32,31 @@
                 <a href="{{ route('register') }}" class="bg-white text-emerald-700 font-semibold px-4 py-2 rounded-full hover:bg-gray-100 transition-colors">
                     Sign Up
                 </a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="lg:hidden text-white text-2xl p-2 hover:bg-white/10 rounded-lg transition-colors">
+                <i id="mobile-menu-icon" class="ri-menu-line"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-brand-green border-t border-white/20">
+            <div class="px-4 py-6 space-y-4">
+                <!-- Mobile Navigation Links -->
+                <a href="{{ route('landing') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center text-white hover:bg-white hover:text-emerald-700 transition-colors">Overview</a>
+                <a href="{{ route('services') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center text-white hover:bg-white hover:text-emerald-700 transition-colors">Services</a>
+                <a href="#about-us" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center text-white hover:bg-white hover:text-emerald-700 transition-colors">About Us</a>
+                
+                <!-- Mobile Auth Buttons -->
+                <div class="border-t border-white/20 pt-4 space-y-3">
+                    <a href="{{ route('login') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center text-white hover:bg-white hover:text-emerald-700 transition-colors">
+                        Sign In
+                    </a>
+                    <a href="{{ route('register') }}" onclick="closeMobileMenu()" class="block bg-white text-emerald-700 font-semibold px-4 py-3 text-center rounded-full hover:bg-gray-100 transition-colors">
+                        Sign Up
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -104,8 +129,48 @@
     </footer>
 
 
-    {{-- Smooth scrolling script for About Us link --}}
+    {{-- Mobile Menu and Smooth scrolling script --}}
     <script>
+        // Mobile menu functionality
+        let mobileMenuOpen = false;
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('mobile-menu-icon');
+            
+            if (mobileMenuOpen) {
+                closeMobileMenu();
+            } else {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.className = 'ri-close-line';
+                mobileMenuOpen = true;
+                
+                // Close mobile menu when clicking outside
+                setTimeout(() => {
+                    document.addEventListener('click', handleMobileMenuOutsideClick);
+                }, 100);
+            }
+        }
+
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('mobile-menu-icon');
+            
+            mobileMenu.classList.add('hidden');
+            menuIcon.className = 'ri-menu-line';
+            mobileMenuOpen = false;
+            document.removeEventListener('click', handleMobileMenuOutsideClick);
+        }
+
+        function handleMobileMenuOutsideClick(event) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuButton = event.target.closest('button[onclick="toggleMobileMenu()"]');
+            
+            if (!mobileMenu.contains(event.target) && !menuButton) {
+                closeMobileMenu();
+            }
+        }
+
         // Smooth scrolling for About Us link
         document.addEventListener('DOMContentLoaded', function() {
             // Handle About Us link smooth scrolling
@@ -114,6 +179,11 @@
             aboutUsLinks.forEach(function(link) {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
+                    
+                    // Close mobile menu if open
+                    if (mobileMenuOpen) {
+                        closeMobileMenu();
+                    }
                     
                     const aboutSection = document.getElementById('about-us');
                     

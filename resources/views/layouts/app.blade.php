@@ -10,14 +10,14 @@
 </head>
 <body class="min-h-screen bg-gray-100 font-sans flex flex-col">
     <nav class="bg-brand-green fixed top-0 left-0 right-0 z-50 shadow-lg backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto h-16 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto h-16 flex justify-between items-center px-4">
             <!-- Logo -->
             <div class="flex gap-4">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
             </div>
     
-            <!-- Nav Links + Logout -->
-            <div class="flex items-center gap-4">
+            <!-- Desktop Navigation -->
+            <div class="hidden lg:flex items-center gap-4">
                 <a href="{{ route('preview.customer') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'preview.customer' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Overview</a>
                 <a href="{{ route('customer.allservices') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.allservices' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Services</a>
                 <a href="{{ route('customer.services') }}" class="border rounded-full border-white px-3 py-2 {{ Route::currentRouteName() === 'customer.services' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Request a Booking</a>
@@ -69,6 +69,77 @@
                         <i class="ri-logout-box-line"></i> Logout
                     </button>
                 </form>
+            </div>
+
+            <!-- Mobile Navigation Icons -->
+            <div class="lg:hidden flex items-center gap-2">
+                <!-- Notification Icon with Count -->
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown()" class="relative text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700 transition-colors">
+                        <i class="ri-notification-3-line"></i>
+                    @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
+                        <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                            {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+                        </span>
+                    @endif
+                    </button>
+                    
+                    <!-- Notification Dropdown Modal -->
+                    <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                <button onclick="closeNotificationDropdown()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                    <i class="ri-close-line"></i>
+                                </button>
+                            </div>
+                            
+                            <div id="notification-dropdown-content" class="space-y-3 max-h-80 overflow-y-auto">
+                                <!-- Notifications will be loaded here via JavaScript -->
+                            </div>
+                            
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <a href="{{ route('customer.notifications') }}" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                                    View All Notifications
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Icon -->
+                <a href="{{ route('customer.settings') }}" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
+                    <i class="ri-settings-3-line"></i>
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="text-white text-2xl p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <i id="mobile-menu-icon" class="ri-menu-line"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="lg:hidden hidden bg-brand-green border-t border-white/20">
+            <div class="px-4 py-6 space-y-4">
+                <!-- Mobile Navigation Links -->
+                <a href="{{ route('preview.customer') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ Route::currentRouteName() === 'preview.customer' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Overview</a>
+                <a href="{{ route('customer.allservices') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ Route::currentRouteName() === 'customer.allservices' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Services</a>
+                <a href="{{ route('customer.services') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ Route::currentRouteName() === 'customer.services' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Request a Booking</a>
+                <a href="{{ route('customer.gallery') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ Route::currentRouteName() === 'customer.gallery' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Gallery</a>
+                <a href="{{ route('preview.customer') }}#about-us" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center text-white hover:bg-white hover:text-emerald-700">About Us</a>
+                <a href="{{ route('customer.profile') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ Route::currentRouteName() === 'customer.profile' ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Profile</a>
+                
+                <!-- Mobile Logout -->
+                <div class="border-t border-white/20 pt-4">
+                    <form method="POST" action="{{ route('logout') }}" class="block">
+                        @csrf  
+                        <button type="submit" onclick="closeMobileMenu()" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
+                            <i class="ri-logout-box-line text-xl"></i>
+                            <span class="ml-2">Logout</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>
@@ -136,8 +207,49 @@
         </div>
     </footer>
 
-    <!-- Notification Dropdown JavaScript -->
+    <!-- Mobile Menu and Notification Dropdown JavaScript -->
     <script>
+        // Mobile menu functionality
+        let mobileMenuOpen = false;
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('mobile-menu-icon');
+            
+            if (mobileMenuOpen) {
+                closeMobileMenu();
+            } else {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.className = 'ri-close-line';
+                mobileMenuOpen = true;
+                
+                // Close mobile menu when clicking outside
+                setTimeout(() => {
+                    document.addEventListener('click', handleMobileMenuOutsideClick);
+                }, 100);
+            }
+        }
+
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('mobile-menu-icon');
+            
+            mobileMenu.classList.add('hidden');
+            menuIcon.className = 'ri-menu-line';
+            mobileMenuOpen = false;
+            document.removeEventListener('click', handleMobileMenuOutsideClick);
+        }
+
+        function handleMobileMenuOutsideClick(event) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuButton = event.target.closest('button[onclick="toggleMobileMenu()"]');
+            
+            if (!mobileMenu.contains(event.target) && !menuButton) {
+                closeMobileMenu();
+            }
+        }
+
+        // Notification dropdown functionality
         let notificationDropdownOpen = false;
         let notificationsLoaded = false;
 
