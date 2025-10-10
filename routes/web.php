@@ -204,6 +204,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::post('/bookings/{bookingId}/confirm', [AdminBookingController::class, 'confirm'])->name('bookings.confirm');
     Route::match(['post','get'], '/bookings/{bookingId}/assign', [AdminBookingController::class, 'assignEmployee'])->name('bookings.assign');
     Route::get('/bookings/{bookingId}/employee-availability', [AdminBookingController::class, 'getEmployeeAvailability'])->name('bookings.employee-availability');
+    Route::get('/bookings/employee-availability', [AdminBookingController::class, 'getEmployeeAvailabilityForManualBooking'])->name('bookings.employee-availability-manual');
     Route::post('/bookings/{bookingId}/assign-employees', [AdminBookingController::class, 'assignEmployees'])->name('bookings.assign-employees');
     Route::get('/bookings/{bookingId}/summary', [AdminBookingController::class, 'getSummary'])->name('bookings.summary');
     Route::get('/bookings/{bookingId}/location', [AdminBookingController::class, 'getLocation'])->name('bookings.location');

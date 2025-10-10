@@ -695,14 +695,14 @@
                         <!-- Employee Assignment -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Assign Employees (optional)</label>
-                            <div class="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                                @foreach($employees as $e)
-                                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                        <input type="checkbox" name="employee_ids[]" value="{{ $e->id }}" 
-                                               class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 focus:ring-2">
-                                        <span class="text-sm text-gray-700">{{ $e->first_name }} {{ $e->last_name }}</span>
-                                    </label>
-                                @endforeach
+                            <div id="admin-employee-checkboxes" class="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                                <!-- Employee checkboxes will be loaded here dynamically -->
+                                <div class="text-center py-4 text-gray-500">
+                                    Please select date and time first to load available employees
+                                </div>
+                            </div>
+                            <div id="admin-employee-conflict-warning" class="mt-3 text-sm text-red-600 hidden">
+                                <!-- Conflict warnings will be shown here -->
                             </div>
                         </div>
                         
@@ -3711,6 +3711,9 @@
         
         // Clear time selection when date changes to prevent invalid combinations
         adminClearTimeSelection();
+        
+        // Load employees when date is selected
+        loadEmployeesForManualBooking();
     }
 
     // Admin Time Picker Functions
@@ -3801,6 +3804,9 @@
         const formattedTime = `${hour}:${minute} ${ampm}`;
         timeInput.value = formattedTime;
         timeInput.placeholder = formattedTime;
+        
+        // Load employees when time is selected
+        loadEmployeesForManualBooking();
     }
 
     // Function to clear admin time selection
@@ -3820,6 +3826,9 @@
         if (ampmSelect) ampmSelect.value = '';
         
         adminSelectedTime = null;
+        
+        // Reset employee list when time is cleared
+        loadEmployeesForManualBooking();
     }
 
     // Function to update admin time options based on selected date
@@ -3999,6 +4008,98 @@
         }
     });
 
+    // Employee availability functions for manual booking
+    async function loadEmployeesForManualBooking() {
+        const dateInput = document.getElementById('admin-date-picker');
+        const timeInput = document.getElementById('admin-time-picker');
+        const checkboxesContainer = document.getElementById('admin-employee-checkboxes');
+        const conflictWarning = document.getElementById('admin-employee-conflict-warning');
+        
+        // Check if both date and time are selected
+        if (!dateInput.value || !timeInput.value) {
+            checkboxesContainer.innerHTML = '<div class="text-center py-4 text-gray-500">Please select date and time first to load available employees</div>';
+            conflictWarning.classList.add('hidden');
+            return;
+        }
+        
+        // Show loading state
+        checkboxesContainer.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500 mx-auto"></div></div>';
+        
+        try {
+            // Combine date and time for the API call
+            const scheduledTime = `${dateInput.value} ${timeInput.value}`;
+            
+            // Get employee availability data
+            const response = await fetch(`/admin/bookings/employee-availability?time=${encodeURIComponent(scheduledTime)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                renderAdminEmployeeCheckboxes(data.employees, data.conflicts);
+            } else {
+                throw new Error(data.message || 'Failed to load employee data');
+            }
+        } catch (error) {
+            console.error('Error loading employees:', error);
+            checkboxesContainer.innerHTML = '<div class="text-center py-4 text-red-600">Error loading employees. Please try again.</div>';
+        }
+    }
+    
+    function renderAdminEmployeeCheckboxes(employees, conflicts) {
+        const checkboxesContainer = document.getElementById('admin-employee-checkboxes');
+        const conflictWarning = document.getElementById('admin-employee-conflict-warning');
+        
+        let html = '';
+        let hasConflicts = false;
+        let conflictMessages = [];
+        
+        employees.forEach(employee => {
+            const isConflict = conflicts.some(conflict => conflict.user_id === employee.user_id);
+            const isDisabled = isConflict;
+            
+            if (isConflict) {
+                hasConflicts = true;
+                const conflict = conflicts.find(c => c.user_id === employee.user_id);
+                conflictMessages.push(`${employee.first_name} ${employee.last_name}: ${conflict.conflict_reason}`);
+            }
+            
+            html += `
+                <label class="flex items-center space-x-2 p-1 rounded ${isDisabled ? 'bg-gray-100 opacity-60' : 'hover:bg-gray-50'}">
+                    <input type="checkbox" 
+                           name="employee_ids[]"
+                           value="${employee.user_id}" 
+                           class="admin-employee-checkbox rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 focus:ring-2"
+                           ${isDisabled ? 'disabled' : ''}>
+                    <span class="text-sm text-gray-700">${employee.first_name} ${employee.last_name}</span>
+                    ${isDisabled ? '<span class="text-xs text-red-600 ml-auto">Scheduled conflict</span>' : ''}
+                </label>
+            `;
+        });
+        
+        checkboxesContainer.innerHTML = html;
+        
+        // Show conflict warnings
+        if (hasConflicts) {
+            conflictWarning.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div class="text-sm font-medium text-red-800 mb-2">Note:</div>
+                    <div class="text-sm text-red-700">Some employees have scheduling conflicts:</div>
+                    <ul class="mt-1 text-sm text-red-700">
+                        ${conflictMessages.map(msg => `<li>• ${msg}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            conflictWarning.classList.remove('hidden');
+        } else {
+            conflictWarning.classList.add('hidden');
+        }
+    }
 
     // Initialize admin modal when opened
     document.addEventListener('DOMContentLoaded', function() {

@@ -910,6 +910,60 @@ class AdminBookingController extends Controller
 
 
     /**
+     * Get employee availability for manual booking modal
+     */
+    public function getEmployeeAvailabilityForManualBooking(Request $request)
+    {
+        try {
+            $scheduledTime = $request->get('time');
+            if (!$scheduledTime) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Scheduled time is required'
+                ], 400);
+            }
+
+            $bookingTime = \Carbon\Carbon::parse($scheduledTime);
+            
+            // Get all employees
+            $employees = DB::table('employees as e')
+                ->join('users as u', 'u.id', '=', 'e.user_id')
+                ->select('e.id as employee_id', 'u.id as user_id', 'u.first_name', 'u.last_name')
+                ->orderBy('u.first_name')
+                ->orderBy('u.last_name')
+                ->get();
+
+            $conflicts = [];
+            
+            // Check for scheduling conflicts
+            foreach ($employees as $employee) {
+                $conflictReason = $this->checkEmployeeConflict($employee->employee_id, $bookingTime);
+                if ($conflictReason) {
+                    $conflicts[] = [
+                        'employee_id' => $employee->employee_id,
+                        'user_id' => $employee->user_id,
+                        'conflict_reason' => $conflictReason
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'employees' => $employees,
+                'conflicts' => $conflicts
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Employee availability check for manual booking error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check employee availability: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get booking summary for admin view
      */
     public function getSummary($bookingId)
