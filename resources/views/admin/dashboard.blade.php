@@ -3,10 +3,47 @@
 @section('title','Admin Dashboard')
 
 @section('content')
+{{-- Additional mobile-specific styles for calendar responsiveness --}}
+<style>
+	/* Ensure calendar doesn't cause horizontal overflow on mobile */
+	@media (max-width: 640px) {
+		#admin-calendar {
+			width: 100% !important;
+			max-width: 100% !important;
+			overflow-x: hidden !important;
+		}
+		
+		/* Force calendar to respect container width */
+		#admin-calendar .fc-view-container {
+			width: 100% !important;
+			max-width: 100% !important;
+		}
+		
+		/* Ensure calendar header doesn't overflow */
+		#admin-calendar .fc-header-toolbar {
+			flex-wrap: wrap !important;
+			gap: 0.5rem !important;
+		}
+		
+		/* Make calendar buttons smaller on mobile */
+		#admin-calendar .fc-button {
+			font-size: 0.75rem !important;
+			padding: 0.25rem 0.5rem !important;
+		}
+		
+		/* Ensure month/year display is responsive */
+		#admin-calendar .fc-toolbar-title {
+			font-size: 1rem !important;
+			white-space: nowrap !important;
+			overflow: hidden !important;
+			text-overflow: ellipsis !important;
+		}
+	}
+</style>
 {{-- Admin Dashboard with functional metrics and data display --}}
 {{-- Purpose: Overview of business operations, booking statistics, and daily activities --}}
 
-<div class="max-w-6xl mx-auto">
+<div class="max-w-6xl mx-auto px-2 sm:px-0">
 	<div class="flex items-center justify-between mb-8">
 		<h1 class="text-3xl font-extrabold text-gray-900 text-center">Dashboard</h1>
 		<div class="text-sm text-gray-500">
@@ -120,41 +157,120 @@
 			<p class="text-sm text-gray-500 mt-1">View all bookings and their schedules</p>
 		</div>
 		
-		{{-- Color Legend --}}
+		{{-- Color Legend - Responsive layout for mobile --}}
 		<div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-			<div class="flex items-center gap-6 text-sm">
+			<div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm">
 				<span class="text-gray-600 font-medium">Status Colors:</span>
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 rounded" style="background-color: #F59E0B;"></div>
-					<span class="text-gray-700">Pending</span>
-				</div>
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 rounded" style="background-color: #3B82F6;"></div>
-					<span class="text-gray-700">Confirmed</span>
-				</div>
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 rounded" style="background-color: #8B5CF6;"></div>
-					<span class="text-gray-700">In Progress</span>
-				</div>
-				<div class="flex items-center gap-2">
-					<div class="w-4 h-4 rounded" style="background-color: #10B981;"></div>
-					<span class="text-gray-700">Completed</span>
+				<div class="flex flex-wrap items-center gap-3 sm:gap-4">
+					<div class="flex items-center gap-2">
+						<div class="w-4 h-4 rounded" style="background-color: #F59E0B;"></div>
+						<span class="text-gray-700">Pending</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="w-4 h-4 rounded" style="background-color: #3B82F6;"></div>
+						<span class="text-gray-700">Confirmed</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="w-4 h-4 rounded" style="background-color: #8B5CF6;"></div>
+						<span class="text-gray-700">In Progress</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="w-4 h-4 rounded" style="background-color: #10B981;"></div>
+						<span class="text-gray-700">Completed</span>
+					</div>
 				</div>
 			</div>
 		</div>
 		
-		<div class="p-4">
-			<div id="admin-calendar" class="w-full" style="height: 350px;" data-events-url="{{ route('admin.calendar.events') }}"></div>
+		{{-- Calendar Container - Mobile-optimized with proper width constraints --}}
+		<div class="p-2 sm:p-4">
+			<div class="overflow-hidden rounded-lg">
+				{{-- Mobile: Full width with constrained height, Desktop: Standard height --}}
+				<div id="admin-calendar" class="w-full" style="height: 250px; min-height: 200px;" data-events-url="{{ route('admin.calendar.events') }}"></div>
+			</div>
 		</div>
 	</div>
 
 	{{-- Recent Bookings Section --}}
 	<div class="bg-white rounded-xl shadow-sm border border-gray-100">
-		<div class="p-6 border-b border-gray-100">
-			<h2 class="text-xl font-semibold text-gray-900">Recent Bookings</h2>
+		<div class="p-4 sm:p-6 border-b border-gray-100">
+			<h2 class="text-lg sm:text-xl font-semibold text-gray-900">Recent Bookings</h2>
 			<p class="text-sm text-gray-500 mt-1">Latest customer bookings and their status</p>
 		</div>
-		<div class="overflow-x-auto">
+		
+		{{-- Mobile Card View (hidden on larger screens) --}}
+		<div class="block sm:hidden">
+			@forelse($recentBookings as $booking)
+			<div class="p-4 border-b border-gray-100 last:border-b-0">
+				<div class="space-y-3">
+					{{-- Booking Header --}}
+					<div class="flex items-center justify-between">
+						<div class="text-sm font-medium text-gray-900">{{ $booking->code }}</div>
+						@php
+							$statusColors = [
+								'pending' => 'bg-yellow-100 text-yellow-800',
+								'confirmed' => 'bg-blue-100 text-blue-800',
+								'in_progress' => 'bg-purple-100 text-purple-800',
+								'completed' => 'bg-green-100 text-green-800',
+								'cancelled' => 'bg-red-100 text-red-800',
+								'no_show' => 'bg-gray-100 text-gray-800'
+							];
+						@endphp
+						<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$booking->status] ?? 'bg-gray-100 text-gray-800' }}">
+							@if($booking->status === 'in_progress')
+								In Progress
+							@else
+								{{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+							@endif
+						</span>
+					</div>
+					
+					{{-- Customer Info --}}
+					<div>
+						<div class="text-sm font-medium text-gray-900">{{ $booking->first_name }} {{ $booking->last_name }}</div>
+					</div>
+					
+					{{-- Service Info --}}
+					<div>
+						<div class="text-xs text-gray-500 uppercase tracking-wider">Service</div>
+						<div class="text-sm text-gray-900 mt-1">{{ $serviceSummaries[$booking->id] ?? ($booking->service_name ?? 'General Service') }}</div>
+					</div>
+					
+					{{-- Schedule and Amount --}}
+					<div class="flex justify-between items-center">
+						<div>
+							<div class="text-xs text-gray-500 uppercase tracking-wider">Scheduled</div>
+							<div class="text-sm text-gray-900 mt-1">{{ \Carbon\Carbon::parse($booking->scheduled_start)->format('M j, Y g:i A') }}</div>
+						</div>
+						<div class="text-right">
+							<div class="text-xs text-gray-500 uppercase tracking-wider">Amount</div>
+							<div class="text-sm font-medium text-gray-900 mt-1">₱{{ number_format($booking->total_due_cents / 100, 2) }}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			@empty
+			<div class="p-8 text-center">
+				<div class="flex flex-col items-center justify-center space-y-4">
+					<!-- Empty State Icon -->
+					<div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+						<i class="ri-calendar-line text-2xl text-gray-400"></i>
+					</div>
+					
+					<!-- Empty State Content -->
+					<div class="text-center">
+						<h3 class="text-lg font-medium text-gray-900 mb-2">No Recent Bookings Found</h3>
+						<p class="text-sm text-gray-500 mb-4">
+							No recent bookings have been made yet. Bookings will appear here once customers start making reservations.
+						</p>
+					</div>
+				</div>
+			</div>
+			@endforelse
+		</div>
+		
+		{{-- Desktop Table View (hidden on mobile) --}}
+		<div class="hidden sm:block overflow-x-auto">
 			<table class="w-full">
 				<thead class="bg-gray-50">
 					<tr>
