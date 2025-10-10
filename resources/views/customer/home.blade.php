@@ -18,8 +18,8 @@
 
     {{-- Our Services --}}
     <section class="mt-10">
-        <h2 class="text-xl md:text-2xl font-extrabold text-emerald-900">Our Services</h2>
-        <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-4">
+        <h2 class="text-xl ml-2 md:text-2xl font-extrabold text-emerald-900">Our Services</h2>
+        <div class="mt-5 grid grid-cols-2 p-5 sm:grid-cols-3 lg:grid-cols-8 gap-4">
             <a href="{{ route('customer.services') }}#carpet" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-dashboard-carpet-cleaning.webp') }}" alt="Carpet Deep Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Carpet Deep Cleaning</div>
@@ -65,7 +65,7 @@
                     <p class="text-white/90 text-sm md:text-base font-semibold">Experience the joy of spotless living with</p>
                     <h3 class="text-white text-3xl md:text-5xl font-extrabold mt-2">Cleansaver Naga</h3>
                 </div>
-                <div class="absolute right-4 bottom-3 md:right-10 md:bottom-6">
+                <div class="absolute right-4 bottom-4 md:right-10 md:bottom-6">
                     <a href="{{ route('customer.services') }}" class="inline-block bg-white text-gray-900 font-semibold px-5 py-2 rounded-full shadow hover:bg-gray-100">Request an Estimate</a>
                 </div>
             </div>
@@ -73,14 +73,17 @@
     </section>
     
 {{-- About Us --}}
-<section id="about-us" class="relative w-screen -mx-[calc(50vw-50%)] overflow-hidden">
+<section id="about-us" class="relative w-screen -mx-[calc(50vw-50%)] overflow-hidden h-[400px] md:h-[500px]">
     <!-- Background image -->
     <img src="{{ asset('assets/cs-dashboard-about.webp') }}" 
          alt="Fresh Spaces, Happy Faces" 
-         class="w-full h-[400px] md:h-[500px] object-cover object-center opacity-25">
+         class="w-full h-full object-cover object-center">
 
-    <!-- Content -->
-    <div class="absolute inset-0 flex flex-col justify-center items-start px-6 md:px-16 gap-4 text-left">
+    <!-- Overlay for better text readability -->
+    <div class="absolute inset-0 bg-white/60"></div>
+
+    <!-- Content overlaid on the background image -->
+    <div class="absolute inset-0 flex flex-col justify-center items-start mt-10 px-6 md:px-16 gap-4 text-left">
         
         <!-- About Us small label -->
         <span class="text-emerald-600 font-semibold uppercase tracking-wide text-sm">
@@ -109,6 +112,13 @@
             Choose Cleansaver Naga for the best results at the best value because you deserve a 
             cleaner tomorrow, today.
         </p>
+
+        <!-- Call to Action -->
+        <div class="mt-6">
+            <a href="{{ route('register') }}" class="inline-block bg-brand-green text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-emerald-700 transition-colors">
+                Join Our Community Today
+            </a>
+        </div>
     </div>
 </section>
 

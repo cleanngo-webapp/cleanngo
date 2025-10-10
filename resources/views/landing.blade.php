@@ -19,12 +19,12 @@
     {{-- Our Services --}}
     <section class="mt-10">
         <div class="flex justify-between items-center mb-5">
-            <h2 class="text-xl md:text-2xl font-extrabold text-emerald-900">Our Services</h2>
-            <a href="{{ route('services') }}" class="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+            <h2 class="text-xl ml-2 md:text-2xl font-extrabold text-emerald-900">Our Services</h2>
+            <a href="{{ route('services') }}" class="text-emerald-600 hover:text-emerald-700 font-medium text-sm mr-2">
                 View All Services & Pricing →
             </a>
         </div>
-        <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-4">
+        <div class="mt-5 grid grid-cols-2 p-5 sm:grid-cols-3 lg:grid-cols-8 gap-4">
             <a href="{{ route('services') }}" class="group bg-emerald-700 rounded-xl shadow-sm overflow-hidden flex flex-col hover:-translate-y-4 hover:ring-2 hover:ring-emerald-500 transition-all duration-300 ease-in-out cursor-pointer">
                 <div class="aspect-[4/3] bg-white flex items-center justify-center text-gray-500"><img src="{{ asset('assets/cs-dashboard-carpet-cleaning.webp') }}" alt="Carpet Deep Cleaning" class="w-full h-full object-cover"></div>
                 <div class="px-2 py-1 text-center text-white text-sm font-semibold mt-2">Carpet Deep Cleaning</div>
@@ -61,13 +61,13 @@
     </section>
 
     {{-- Hero Banner --}}
-    <section class="relative w-screen -mx-[calc(50vw-50%)] bg-emerald-700 mt-10">
+    <section class="w-screen -mx-[calc(50vw-50%)] bg-emerald-700 mt-10">
         <div class="max-w-7xl mx-auto py-3 relative">
             <img src="{{ asset('assets/cs-dashborard-req-1.webp') }}" alt="Cleansaver Naga" class="w-full h-[300px] md:h-[360px] object-cover object-top rounded-xl shadow-md">
-            <div class="absolute inset-0">
+            <div class="inset-0">
                 <div class="pt-6 pl-6 md:pt-8 md:pl-10">
                     <p class="text-white/90 text-sm md:text-base font-semibold">Experience the joy of spotless living with</p>
-                    <h3 class="text-white text-3xl md:text-5xl font-extrabold mt-2">Cleansaver Naga</h3>
+                    <h3 class="text-white text-2xl md:text-5xl font-extrabold mt-2">Cleansaver Naga</h3>
                 </div>
                 <div class="absolute right-4 bottom-3 md:right-10 md:bottom-6">
                     <a href="{{ route('login') }}" class="inline-block bg-white text-gray-900 font-semibold px-5 py-2 rounded-full shadow hover:bg-gray-100">Book Now</a>
@@ -77,14 +77,17 @@
     </section>
     
 {{-- About Us --}}
-<section id="about-us" class="relative w-screen -mx-[calc(50vw-50%)] overflow-hidden">
+<section id="about-us" class="relative w-screen -mx-[calc(50vw-50%)] overflow-hidden h-[400px] md:h-[500px]">
     <!-- Background image -->
     <img src="{{ asset('assets/cs-dashboard-about.webp') }}" 
          alt="Fresh Spaces, Happy Faces" 
-         class="w-full h-[400px] md:h-[500px] object-cover object-center opacity-25">
+         class="w-full h-full object-cover object-center">
 
-    <!-- Content -->
-    <div class="absolute inset-0 flex flex-col justify-center items-start px-6 md:px-16 gap-4 text-left">
+    <!-- Overlay for better text readability -->
+    <div class="absolute inset-0 bg-white/60"></div>
+
+    <!-- Content overlaid on the background image -->
+    <div class="absolute inset-0 flex flex-col justify-center items-start mt-10 px-6 md:px-16 gap-4 text-left">
         
         <!-- About Us small label -->
         <span class="text-emerald-600 font-semibold uppercase tracking-wide text-sm">
