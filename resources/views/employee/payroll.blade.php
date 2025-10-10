@@ -115,10 +115,17 @@
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="openEmployeeReceipt({{ $record->booking_id }})" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-emerald-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
-                                    <i class="ri-receipt-line mr-1"></i>
-                                    View Receipt
-                                </button>
+                                @if(($record->payroll_status ?? 'unpaid') === 'paid')
+                                    <button type="button" onclick="openEmployeeReceipt({{ $record->booking_id }})" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-emerald-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
+                                        <i class="ri-receipt-line mr-1"></i>
+                                        View Receipt
+                                    </button>
+                                @else
+                                    <button type="button" disabled class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
+                                        <i class="ri-receipt-line mr-1"></i>
+                                        View Receipt
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -291,15 +298,6 @@ function clearFilters() {
 
 // Payroll receipt modal function for employee
 function openEmployeeReceipt(bookingId) {
-    // Only show receipt if payroll is paid
-    const payrollRecords = @json($payrollRecords);
-    const currentRecord = payrollRecords.find(r => r.booking_id == bookingId);
-    
-    if (!currentRecord || currentRecord.payroll_status !== 'paid') {
-        alert('Payroll receipt will be available once payment is processed by admin.');
-        return;
-    }
-    
     openPayrollReceipt('employee-payroll-receipt-modal', bookingId, @json($payrollData ?? []));
 }
 </script>

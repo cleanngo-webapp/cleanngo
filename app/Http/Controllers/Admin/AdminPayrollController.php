@@ -295,42 +295,15 @@ class AdminPayrollController extends Controller
             // Generate payroll code
             $payrollCode = PaymentProof::generatePayrollCode();
 
-            // Check if payroll record already exists for this employee
-            $existingPayrollRecord = PaymentProof::where('booking_id', $request->booking_id)
-                ->where('employee_id', $request->employee_id)
-                ->whereNotNull('payroll_code')
-                ->first();
-
-            if ($existingPayrollRecord) {
-                // Update existing payroll record
-                $existingPayrollRecord->update([
-                    'payroll_code' => $payrollCode,
-                    'payroll_status' => 'paid',
-                    'payroll_amount' => $request->payroll_amount,
-                    'payroll_proof' => $path,
-                    'payroll_method' => $request->payroll_method,
-                ]);
-            } else {
-                // Create new payroll record based on the original payment proof
-                PaymentProof::create([
-                    'booking_id' => $request->booking_id,
-                    'employee_id' => $request->employee_id,
-                    'customer_id' => $originalPaymentProof->customer_id,
-                    'image_path' => $originalPaymentProof->image_path,
-                    'amount' => $originalPaymentProof->amount,
-                    'payment_method' => $originalPaymentProof->payment_method,
-                    'status' => 'approved',
-                    'admin_notes' => $originalPaymentProof->admin_notes,
-                    'reviewed_by' => $originalPaymentProof->reviewed_by,
-                    'reviewed_at' => $originalPaymentProof->reviewed_at,
-                    'uploaded_by' => $originalPaymentProof->uploaded_by,
-                    'payroll_code' => $payrollCode,
-                    'payroll_status' => 'paid',
-                    'payroll_amount' => $request->payroll_amount,
-                    'payroll_proof' => $path,
-                    'payroll_method' => $request->payroll_method,
-                ]);
-            }
+            // Always update the original payment proof record with payroll details
+            // This prevents duplicate records
+            $originalPaymentProof->update([
+                'payroll_code' => $payrollCode,
+                'payroll_status' => 'paid',
+                'payroll_amount' => $request->payroll_amount,
+                'payroll_proof' => $path,
+                'payroll_method' => $request->payroll_method,
+            ]);
 
             return response()->json([
                 'success' => true,

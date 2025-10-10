@@ -581,15 +581,34 @@ document.getElementById('upload-payment-form').addEventListener('submit', functi
             // Close modal
             closeUploadPaymentModal();
             
-            // Refresh the page to show updated data
-            window.location.reload();
+            // Show success alert
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Payroll uploaded successfully!',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            
+            // Refresh payroll table via AJAX
+            refreshPayrollTable();
         } else {
-            alert(data.message || 'Error uploading payment. Please try again.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message || 'Error uploading payment. Please try again.',
+                confirmButtonText: 'OK'
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error uploading payment. Please try again.');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Error uploading payment. Please try again.',
+            confirmButtonText: 'OK'
+        });
     })
     .finally(() => {
         // Reset button state
@@ -597,6 +616,56 @@ document.getElementById('upload-payment-form').addEventListener('submit', functi
         submitButton.disabled = false;
     });
 });
+
+// Function to refresh payroll table via AJAX
+function refreshPayrollTable() {
+    const url = new URL('{{ route("admin.payroll") }}', window.location.origin);
+    
+    // Add current search and sort parameters
+    const searchInput = document.getElementById('search-payroll');
+    if (searchInput && searchInput.value) {
+        url.searchParams.set('search', searchInput.value);
+    }
+    url.searchParams.set('sort', currentSort);
+    url.searchParams.set('sortOrder', currentSortOrder);
+    
+    // Show loading state
+    const tableBody = document.getElementById('payroll-table-body');
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="px-4 py-8 text-center">
+                <div class="flex justify-center items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
+                </div>
+                <p class="text-gray-500 text-sm">Refreshing...</p>
+            </td>
+        </tr>
+    `;
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            // Parse the response HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract table body content
+            const newTableBody = doc.getElementById('payroll-table-body');
+            
+            if (newTableBody) {
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+            
+            // Update URL without page refresh
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => {
+            console.error('Refresh error:', error);
+            tableBody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-sm text-red-500">Error refreshing table</td></tr>';
+        });
+}
 
 // Close upload modal when clicking outside
 document.addEventListener('click', function(event) {
