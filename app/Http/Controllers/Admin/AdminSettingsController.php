@@ -20,8 +20,9 @@ class AdminSettingsController extends Controller
      */
     public function index()
     {
-        // Get current payment settings
-        $paymentSettings = PaymentSettings::getActive();
+        // Get current payment settings for the authenticated admin user
+        $user = Auth::guard('admin')->user();
+        $paymentSettings = PaymentSettings::getActive($user->id);
         
         return view('admin.settings', compact('paymentSettings'));
     }
@@ -132,13 +133,15 @@ class AdminSettingsController extends Controller
         ]);
 
         try {
-            // Get current active payment settings
-            $currentSettings = PaymentSettings::getActive();
+            // Get current active payment settings for the authenticated admin user
+            $user = Auth::guard('admin')->user();
+            $currentSettings = PaymentSettings::getActive($user->id);
             
             // Store original data for notification comparison
             $originalData = $currentSettings ? $currentSettings->toArray() : [];
             
             $data = [
+                'user_id' => $user->id,
                 'gcash_name' => $request->gcash_name,
                 'gcash_number' => $request->gcash_number,
                 'is_active' => true,
@@ -187,14 +190,17 @@ class AdminSettingsController extends Controller
     }
 
     /**
-     * Clean up old inactive payment settings records
+     * Clean up old inactive payment settings records for the current admin user
      * Keeps only the most recent 3 inactive records for audit purposes
      */
     private function cleanupOldPaymentSettings()
     {
         try {
-            // Get all inactive payment settings ordered by created_at desc
+            $user = Auth::guard('admin')->user();
+            
+            // Get all inactive payment settings for this admin user ordered by created_at desc
             $inactiveSettings = PaymentSettings::where('is_active', false)
+                ->where('user_id', $user->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
 

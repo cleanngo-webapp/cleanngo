@@ -135,6 +135,10 @@
                                     <i class="ri-receipt-line mr-1"></i>
                                     View Receipt
                                 </button>
+                                <button type="button" onclick="openEmployeeQR({{ $record->employee_id }}, '{{ $record->employee_name }}', '{{ $record->gcash_name ?? 'N/A' }}', '{{ $record->gcash_number ?? 'N/A' }}', '{{ $record->qr_code_path ?? '' }}')" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer">
+                                    <i class="ri-qr-code-line mr-1"></i>
+                                    View QR
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -187,6 +191,61 @@
     'title' => 'Receipt',
     'showPaymentMethod' => true
 ])
+
+<!-- Employee QR Modal Component -->
+<div id="employee-qr-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900" id="qr-modal-title">Employee Payment Information</h3>
+                <button type="button" onclick="closeEmployeeQR()" class="text-gray-400 hover:text-gray-600">
+                    <i class="ri-close-line text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="space-y-4">
+                <!-- Employee Information -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Employee Details</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">GCash Name:</span>
+                            <span class="text-sm font-medium text-gray-900" id="qr-gcash-name">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">GCash Number:</span>
+                            <span class="text-sm font-medium text-gray-900" id="qr-gcash-number">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- QR Code Section -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Payment QR Code</h4>
+                    <div class="flex flex-col items-center space-y-3">
+                        <div id="qr-code-container" class="w-48 h-48 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-center">
+                            <div id="qr-code-placeholder" class="text-center">
+                                <i class="ri-qr-code-line text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-500">QR Code will appear here</p>
+                            </div>
+                            <img id="qr-code-image" src="" alt="Payment QR Code" class="hidden w-full h-full object-contain rounded">
+                        </div>
+                        <p class="text-xs text-gray-500 text-center">Scan this QR code to send payment to the employee</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex justify-end mt-6">
+                <button type="button" onclick="closeEmployeeQR()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -317,5 +376,73 @@ function openAdminReceipt(bookingId) {
         paymentMethod: paymentMethod
     });
 }
+
+// Employee QR modal functions
+function openEmployeeQR(employeeId, employeeName, gcashName, gcashNumber, qrCodePath) {
+    // Update modal content with employee information
+    document.getElementById('qr-gcash-name').textContent = gcashName || 'N/A';
+    document.getElementById('qr-gcash-number').textContent = gcashNumber || 'N/A';
+    
+    // Handle QR code display
+    const qrCodeContainer = document.getElementById('qr-code-container');
+    const qrCodePlaceholder = document.getElementById('qr-code-placeholder');
+    const qrCodeImage = document.getElementById('qr-code-image');
+    
+    if (qrCodePath && qrCodePath.trim() !== '') {
+        // Show QR code image - ensure proper path formatting
+        const fullPath = qrCodePath.startsWith('http') ? qrCodePath : `/storage/${qrCodePath}`;
+        qrCodeImage.src = fullPath;
+        qrCodeImage.classList.remove('hidden');
+        qrCodePlaceholder.classList.add('hidden');
+    } else {
+        // Show placeholder if no QR code available
+        qrCodeImage.classList.add('hidden');
+        qrCodePlaceholder.classList.remove('hidden');
+        qrCodePlaceholder.innerHTML = `
+            <i class="ri-qr-code-line text-4xl text-gray-400 mb-2"></i>
+            <p class="text-sm text-gray-500">No QR code available</p>
+        `;
+    }
+    
+    // Show the modal
+    document.getElementById('employee-qr-modal').classList.remove('hidden');
+}
+
+function closeEmployeeQR() {
+    // Hide the modal
+    document.getElementById('employee-qr-modal').classList.add('hidden');
+    
+    // Reset modal content
+    document.getElementById('qr-gcash-name').textContent = '-';
+    document.getElementById('qr-gcash-number').textContent = '-';
+    
+    // Reset QR code display
+    const qrCodePlaceholder = document.getElementById('qr-code-placeholder');
+    const qrCodeImage = document.getElementById('qr-code-image');
+    
+    qrCodeImage.classList.add('hidden');
+    qrCodePlaceholder.classList.remove('hidden');
+    qrCodePlaceholder.innerHTML = `
+        <i class="ri-qr-code-line text-4xl text-gray-400 mb-2"></i>
+        <p class="text-sm text-gray-500">QR Code will appear here</p>
+    `;
+}
+
+// Close modal when clicking outside of it
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('employee-qr-modal');
+    const modalContent = modal.querySelector('.relative');
+    
+    if (event.target === modal) {
+        closeEmployeeQR();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeEmployeeQR();
+    }
+});
 </script>
 @endpush

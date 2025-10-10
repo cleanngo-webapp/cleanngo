@@ -134,6 +134,7 @@ Route::middleware(['auth:employee','role:employee'])->prefix('employee')->name('
     // Settings routes for employee
     Route::get('/settings', [EmployeeSettingsController::class, 'index'])->name('settings');
     Route::put('/settings/password', [EmployeeSettingsController::class, 'updatePassword'])->name('settings.password.update');
+    Route::put('/settings/payment', [EmployeeSettingsController::class, 'updatePaymentSettings'])->name('settings.payment.update');
     // Calendar events feed for employee (own assignments only)
     Route::get('/calendar/events', [CalendarController::class, 'employeeEvents'])->name('calendar.events');
 });

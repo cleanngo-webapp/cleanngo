@@ -1112,6 +1112,42 @@ class NotificationService
     }
 
     /**
+     * Create a notification when employee updates their payment settings
+     * Notifies admin about employee payment settings changes for audit purposes
+     */
+    public function notifyEmployeePaymentSettingsUpdated(User $user, array $originalData, array $newData): void
+    {
+        $changes = $this->getPaymentSettingsChanges($originalData, $newData);
+        
+        if (empty($changes)) {
+            return; // No significant changes to notify about
+        }
+
+        $changeText = implode(', ', $changes);
+        $employeeName = $user->first_name . ' ' . $user->last_name;
+        
+        Notification::create([
+            'type' => 'employee_payment_settings_updated',
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+            'title' => 'Employee Payment Settings Updated',
+            'message' => "Employee '{$employeeName}' ({$user->username}) has updated their payment settings: {$changeText}.",
+            'data' => [
+                'user_id' => $user->id,
+                'employee_name' => $employeeName,
+                'username' => $user->username,
+                'email' => $user->email,
+                'changes' => $changes,
+                'updated_fields' => array_keys($changes),
+                'new_settings' => $newData,
+                'original_settings' => $originalData,
+            ],
+            'is_read' => false,
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
      * Helper method to detect and format user profile changes
      */
     private function getUserProfileChanges(User $user, array $originalData): array

@@ -165,8 +165,8 @@ class EmployeeDashboardController extends Controller
             }
         }
         
-        // Get payment settings for displaying QR code
-        $paymentSettings = PaymentSettings::getActive();
+        // Get payment settings for displaying QR code (admin's payment settings)
+        $paymentSettings = PaymentSettings::getActiveForAdmin();
 
         return view('employee.dashboard', compact(
             'jobsAssignedToday',

@@ -142,6 +142,122 @@
                 </div>
             </div>
         </div>
+
+        <!-- Payment Settings Section -->
+        <div class="border-t pt-8 mt-8">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Payment Settings</h2>
+            
+            @if($paymentSettings)
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="bg-green-100 rounded-full p-2">
+                        <i class="ri-qr-code-line text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-green-800">Current Payment Settings</h3>
+                        <p class="text-sm text-green-600">Your GCash payment information is configured</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="font-medium text-green-700">GCash Name:</span>
+                        <span class="text-green-600">{{ $paymentSettings->gcash_name }}</span>
+                    </div>
+                    <div>
+                        <span class="font-medium text-green-700">GCash Number:</span>
+                        <span class="text-green-600">{{ $paymentSettings->gcash_number }}</span>
+                    </div>
+                </div>
+                @if($paymentSettings->qr_code_path)
+                <div class="mt-3">
+                    <span class="font-medium text-green-700">QR Code:</span>
+                    <div class="mt-2">
+                        <img src="{{ Storage::url($paymentSettings->qr_code_path) }}" 
+                             alt="GCash QR Code" 
+                             class="w-32 h-32 object-contain border border-green-200 rounded-lg">
+                    </div>
+                </div>
+                @endif
+            </div>
+            @endif
+            
+            <form method="POST" action="{{ route('employee.settings.payment.update') }}" class="space-y-6" id="paymentForm" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="gcash_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            GCash Account Name
+                        </label>
+                        <input type="text" 
+                               id="gcash_name" 
+                               name="gcash_name" 
+                               value="{{ old('gcash_name', $paymentSettings->gcash_name ?? '') }}"
+                               required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                               placeholder="Enter GCash account name">
+                    </div>
+                    
+                    <div>
+                        <label for="gcash_number" class="block text-sm font-medium text-gray-700 mb-2">
+                            GCash Phone Number
+                        </label>
+                        <input type="text" 
+                               id="gcash_number" 
+                               name="gcash_number" 
+                               value="{{ old('gcash_number', $paymentSettings->gcash_number ?? '') }}"
+                               required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                               placeholder="Enter GCash phone number">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="qr_code" class="block text-sm font-medium text-gray-700 mb-2">
+                        GCash QR Code
+                    </label>
+                    <div id="qr-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-emerald-400 transition-colors cursor-pointer" 
+                         onclick="handleUploadAreaClick(event)"
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)" 
+                         ondragenter="handleDragEnter(event)" 
+                         ondragleave="handleDragLeave(event)">
+                        <div class="space-y-1 text-center">
+                            <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="qr_code" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500">
+                                    <span>Upload QR Code</span>
+                                    <input id="qr_code" name="qr_code" type="file" class="sr-only" accept="image/*" onchange="previewQRCode(this)">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">JPEG, PNG, JPG, GIF, WebP up to 10MB</p>
+                        </div>
+                    </div>
+                    <div id="qr-preview" class="mt-3 hidden">
+                        <div class="relative inline-block">
+                            <img id="qr-preview-img" src="" alt="QR Code Preview" class="w-32 h-32 object-contain border border-gray-200 rounded-lg mx-auto">
+                            <button type="button" onclick="removeQRPreview()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer">
+                                <i class="ri-close-line text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="button" 
+                            id="updatePaymentBtn"
+                            onclick="showPaymentConfirmation()"
+                            disabled
+                            class="bg-gray-400 text-white px-6 py-3 rounded-lg focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium cursor-not-allowed">
+                        <i class="ri-save-line mr-2"></i>
+                        Update Payment Settings
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -164,6 +280,33 @@
                     Yes
                 </button>
                 <button onclick="hidePasswordConfirmation()" 
+                        class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Settings Update Confirmation Modal -->
+<div id="paymentModal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative p-5 w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
+                <i class="ri-qr-code-line text-emerald-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mt-4">Confirm Payment Settings Update</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    Are you sure you want to update your payment settings? This will change your GCash information for customer payments.
+                </p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <button id="confirmPaymentUpdate" 
+                        class="px-4 py-2 bg-emerald-500 text-white text-base font-medium rounded-md w-24 mr-2 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-300 cursor-pointer">
+                    Yes
+                </button>
+                <button onclick="hidePaymentConfirmation()" 
                         class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-24 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer">
                     Cancel
                 </button>
@@ -275,6 +418,207 @@ document.getElementById('confirmPasswordUpdate').addEventListener('click', funct
     }
     
     document.getElementById('passwordForm').submit();
+});
+
+// Track original values for comparison
+const originalValues = {
+    gcash_name: document.getElementById('gcash_name').value,
+    gcash_number: document.getElementById('gcash_number').value
+};
+
+// Function to check if payment settings have changed
+function checkPaymentChanges() {
+    const currentValues = {
+        gcash_name: document.getElementById('gcash_name').value,
+        gcash_number: document.getElementById('gcash_number').value
+    };
+    
+    // Check if QR code file has been selected
+    const qrCodeInput = document.getElementById('qr_code');
+    const hasQRCodeChange = qrCodeInput.files && qrCodeInput.files.length > 0;
+    
+    const hasChanges = (
+        currentValues.gcash_name !== originalValues.gcash_name ||
+        currentValues.gcash_number !== originalValues.gcash_number ||
+        hasQRCodeChange
+    );
+    
+    const updateBtn = document.getElementById('updatePaymentBtn');
+    
+    if (hasChanges) {
+        // Enable button
+        updateBtn.disabled = false;
+        updateBtn.className = 'bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors font-medium cursor-pointer';
+    } else {
+        // Disable button
+        updateBtn.disabled = true;
+        updateBtn.className = 'bg-gray-400 text-white px-6 py-3 rounded-lg focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium cursor-not-allowed';
+    }
+}
+
+// Add event listeners to payment settings input fields
+document.getElementById('gcash_name').addEventListener('input', checkPaymentChanges);
+document.getElementById('gcash_number').addEventListener('input', checkPaymentChanges);
+document.getElementById('qr_code').addEventListener('change', checkPaymentChanges);
+
+// Payment Settings Functions
+function handleUploadAreaClick(event) {
+    // Only trigger file input if the click wasn't on the label element
+    // This prevents double triggering when clicking the "Upload QR Code" text
+    if (event.target.tagName !== 'LABEL' && !event.target.closest('label')) {
+        document.getElementById('qr_code').click();
+    }
+}
+
+function previewQRCode(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('qr-preview-img').src = e.target.result;
+            document.getElementById('qr-preview').classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+    // Check for changes when QR code is selected
+    checkPaymentChanges();
+}
+
+// Remove QR preview
+function removeQRPreview() {
+    document.getElementById('qr-preview').classList.add('hidden');
+    document.getElementById('qr_code').value = '';
+    checkPaymentChanges();
+}
+
+// Drag and Drop Functions
+function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function handleDragEnter(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('qr-upload-area').classList.add('border-emerald-500', 'bg-emerald-50');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('qr-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('qr-upload-area').classList.remove('border-emerald-500', 'bg-emerald-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+            // Create a new FileList with the dropped file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            document.getElementById('qr_code').files = dataTransfer.files;
+            previewQRCode(document.getElementById('qr_code'));
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Please drop an image file (JPEG, PNG, JPG, GIF, WebP).',
+                confirmButtonColor: '#10b981'
+            });
+        }
+    }
+}
+
+// Paste functionality
+document.addEventListener('paste', function(e) {
+    // Check if the paste event is happening in the payment settings area
+    const activeElement = document.activeElement;
+    const isInPaymentArea = activeElement && (
+        activeElement.id === 'gcash_name' || 
+        activeElement.id === 'gcash_number' || 
+        activeElement.id === 'qr-upload-area' ||
+        activeElement.closest('#qr-upload-area')
+    );
+    
+    if (isInPaymentArea && e.clipboardData && e.clipboardData.items) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.type.indexOf('image') !== -1) {
+                e.preventDefault();
+                const file = item.getAsFile();
+                if (file) {
+                    // Create a new FileList with the pasted file
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById('qr_code').files = dataTransfer.files;
+                    previewQRCode(document.getElementById('qr_code'));
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Image Pasted',
+                        text: 'QR code image has been pasted successfully.',
+                        confirmButtonColor: '#10b981',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+                break;
+            }
+        }
+    }
+});
+
+function showPaymentConfirmation() {
+    // Validate required fields
+    const gcashName = document.getElementById('gcash_name').value;
+    const gcashNumber = document.getElementById('gcash_number').value;
+    
+    if (!gcashName || !gcashNumber) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please fill in all required fields.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+    
+    const modal = document.getElementById('paymentModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex', 'items-center', 'justify-center');
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+}
+
+function hidePaymentConfirmation() {
+    const modal = document.getElementById('paymentModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex', 'items-center', 'justify-center');
+    // Restore background scrolling
+    document.body.style.overflow = 'auto';
+}
+
+// Confirm payment settings update
+document.getElementById('confirmPaymentUpdate').addEventListener('click', function() {
+    // Close the modal
+    hidePaymentConfirmation();
+    
+    // Show spinner and disable main button
+    const mainButton = document.getElementById('updatePaymentBtn');
+    
+    if (mainButton) {
+        mainButton.disabled = true;
+        mainButton.classList.add('opacity-50', 'cursor-not-allowed');
+        mainButton.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block"></div>Updating';
+    }
+    
+    document.getElementById('paymentForm').submit();
 });
 </script>
 @endsection

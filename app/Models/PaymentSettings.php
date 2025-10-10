@@ -15,6 +15,7 @@ class PaymentSettings extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'user_id',
         'gcash_name',
         'gcash_number',
         'qr_code_path',
@@ -31,11 +32,50 @@ class PaymentSettings extends Model
     ];
 
     /**
-     * Get the active payment settings
-     * Since we only expect one active payment setting at a time
+     * Get the active payment settings for a specific user
+     * Since we only expect one active payment setting per user at a time
      */
-    public static function getActive()
+    public static function getActive($userId = null)
     {
-        return self::where('is_active', true)->first();
+        $query = self::where('is_active', true);
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        
+        return $query->first();
+    }
+
+    /**
+     * Get the active payment settings for admin users only
+     * This method is used for backward compatibility and admin-specific operations
+     */
+    public static function getActiveForAdmin()
+    {
+        return self::where('is_active', true)
+            ->whereHas('user', function($query) {
+                $query->where('role', 'admin');
+            })
+            ->first();
+    }
+
+    /**
+     * Get the active payment settings for employee users only
+     */
+    public static function getActiveForEmployee()
+    {
+        return self::where('is_active', true)
+            ->whereHas('user', function($query) {
+                $query->where('role', 'employee');
+            })
+            ->first();
+    }
+
+    /**
+     * Relationship to User model
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

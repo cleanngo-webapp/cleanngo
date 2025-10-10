@@ -43,6 +43,10 @@ class AdminPayrollController extends Controller
                 $join->on('b.id', '=', 'pp.booking_id')
                      ->where('pp.status', '=', 'approved');
             })
+            ->leftJoin('payment_settings as ps', function($join) {
+                $join->on('eu.id', '=', 'ps.user_id')
+                     ->where('ps.is_active', '=', true);
+            })
             ->where('b.status', 'completed')
             ->where('b.payment_status', 'paid')
             ->select([
@@ -52,10 +56,15 @@ class AdminPayrollController extends Controller
                 'b.total_due_cents',
                 'b.payment_method',
                 'b.payment_status',
+                'e.id as employee_id',
+                'eu.id as employee_user_id',
                 DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name"),
                 DB::raw("CONCAT(cu.first_name, ' ', cu.last_name) as customer_name"),
                 's.name as service_name',
-                'pp.amount as payment_amount'
+                'pp.amount as payment_amount',
+                'ps.gcash_name',
+                'ps.gcash_number',
+                'ps.qr_code_path'
             ]);
         
         // Apply search functionality - search across booking code, customer name, and employee name
