@@ -3,11 +3,145 @@
 @section('title','Payroll')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
-    <h1 class="text-3xl font-extrabold text-center">Payroll</h1>
+{{-- Mobile-specific styles for payroll page responsiveness --}}
+<style>
+	/* Mobile responsive styles for payroll page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#employee-qr-modal .relative,
+		#upload-payment-modal .relative {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#employee-qr-modal .space-y-4,
+		#upload-payment-modal .space-y-4 {
+			space-y: 1rem !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly but compact */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+		
+		/* QR code container responsive */
+		#qr-code-container {
+			width: 12rem !important;
+			height: 12rem !important;
+		}
+		
+		/* Reduce card padding and spacing for mobile */
+		.block.sm\\:hidden .p-2 {
+			padding: 0.375rem !important;
+		}
+		
+		.block.sm\\:hidden .space-y-3 > * + * {
+			margin-top: 0.375rem !important;
+		}
+		
+		/* Make the entire card container more compact */
+		.block.sm\\:hidden {
+			margin-left: -0.25rem !important;
+			margin-right: -0.25rem !important;
+		}
+		
+		/* Reduce border radius for more compact look */
+		.block.sm\\:hidden .rounded-xl {
+			border-radius: 0.375rem !important;
+		}
+		
+		/* Make action buttons much more compact on mobile */
+		.block.sm\\:hidden .flex.gap-1 {
+			gap: 0.125rem !important;
+		}
+		
+		.block.sm\\:hidden .flex-1 {
+			flex: 1 1 0% !important;
+			min-width: 0 !important;
+		}
+		
+		/* Make buttons much smaller on mobile */
+		.block.sm\\:hidden .px-2 {
+			padding-left: 0.25rem !important;
+			padding-right: 0.25rem !important;
+		}
+		
+		.block.sm\\:hidden .py-1\\.5 {
+			padding-top: 0.25rem !important;
+			padding-bottom: 0.25rem !important;
+		}
+		
+		/* Make text much smaller on mobile buttons */
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.6rem !important;
+			line-height: 0.875rem !important;
+		}
+		
+		/* Hide button text on very small screens, show only icons */
+		@media (max-width: 480px) {
+			.block.sm\\:hidden .text-xs {
+				font-size: 0 !important;
+				line-height: 0 !important;
+			}
+			
+			.block.sm\\:hidden .mr-0\\.5 {
+				margin-right: 0 !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.25rem !important;
+				padding-right: 0.25rem !important;
+			}
+			
+			.block.sm\\:hidden .py-1 {
+				padding-top: 0.125rem !important;
+				padding-bottom: 0.125rem !important;
+			}
+		}
+		
+		/* Extra small screens - make buttons even more compact */
+		@media (max-width: 360px) {
+			.block.sm\\:hidden .flex.gap-0\\.5 {
+				gap: 0.0625rem !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.125rem !important;
+				padding-right: 0.125rem !important;
+			}
+		}
+		
+		/* Reduce grid gap on mobile */
+		.block.sm\\:hidden .grid.gap-4 {
+			gap: 0.5rem !important;
+		}
+		
+		/* Make text smaller on mobile for more compact cards */
+		.block.sm\\:hidden .text-sm {
+			font-size: 0.8rem !important;
+			line-height: 1.125rem !important;
+		}
+		
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.7rem !important;
+			line-height: 1rem !important;
+		}
+	}
+</style>
 
-    {{-- Earnings Summary Section --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+<div class="max-w-7xl mx-auto px-0 sm:px-0">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-center">Payroll</h1>
+
+    {{-- Earnings Summary Section - Responsive grid layout --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -54,10 +188,11 @@
         </div>
     </div>
 
-    {{-- Search and Sort Section --}}
+    {{-- Search and Sort Section - Responsive layout --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center gap-4">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="search-payroll" 
@@ -65,19 +200,22 @@
                            placeholder="Search payroll by Booking ID or Employee" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
-                <div class="flex gap-2">
+                {{-- Mobile: Full width buttons, Desktop: Compact buttons --}}
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'completed_at') === 'completed_at' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'completed_at') === 'completed_at' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('completed_at')">
                         <i class="ri-calendar-line mr-2"></i>
-                        Sort by Date
+                        <span class="hidden sm:inline">Sort by Date</span>
+                        <span class="sm:hidden">Date</span>
                         <i class="ri-arrow-{{ ($sort ?? 'completed_at') === 'completed_at' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'completed_at') === 'employee_name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'completed_at') === 'employee_name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('employee_name')">
                         <i class="ri-user-line mr-2"></i>
-                        Sort by Employee
+                        <span class="hidden sm:inline">Sort by Employee</span>
+                        <span class="sm:hidden">Employee</span>
                         <i class="ri-arrow-{{ ($sort ?? 'completed_at') === 'employee_name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                 </div>
@@ -85,17 +223,113 @@
         </div>
     </div>
 
-    {{-- Payroll Records Section --}}
+    {{-- Payroll Records Section - Responsive header --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
-        <div class="p-6 border-b border-gray-100">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Payroll Records</h2>
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Payroll Records</h2>
                     <p class="text-sm text-gray-500 mt-1">Track employee payments and payroll history</p>
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto">
+        
+        {{-- Mobile Card View (hidden on larger screens) --}}
+        <div class="block sm:hidden">
+            @forelse($payrollRecords as $record)
+            <div class="p-2 border-b border-gray-100 last:border-b-0">
+                <div class="space-y-3">
+                    {{-- Payroll Header --}}
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium text-gray-900">{{ $record->booking_code }}</div>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ ($record->payroll_status ?? 'unpaid') === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' }}">
+                            {{ ucfirst($record->payroll_status ?? 'unpaid') }}
+                        </span>
+                    </div>
+                    
+                    {{-- Date and Employee --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Date</div>
+                            <div class="text-sm text-gray-900">
+                                {{ $record->completed_at ? \Carbon\Carbon::parse($record->completed_at)->format('M j, Y') : 'N/A' }}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Employee</div>
+                            <div class="text-sm text-gray-900">{{ $record->employee_name }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Amount and Payment Method --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Amount</div>
+                            <div class="text-sm text-gray-900">{{ $record->payroll_amount ? '₱' . number_format($record->payroll_amount, 2) : 'N/A' }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Method</div>
+                            <div class="text-sm text-gray-900">{{ ucfirst($record->payroll_method ?? 'N/A') }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Actions --}}
+                    <div class="flex gap-0.5">
+                        @if(($record->payroll_status ?? 'unpaid') === 'paid')
+                            <button type="button" onclick="openAdminPayrollReceipt({{ $record->booking_id }}, {{ $record->employee_id }})" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-emerald-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
+                                <i class="ri-receipt-line mr-0.5"></i>
+                                <span class="hidden xs:inline">View Receipt</span>
+                            </button>
+                        @else
+                            <button type="button" onclick="openUploadPaymentModal({{ $record->booking_id }}, {{ $record->employee_id }}, '{{ $record->employee_name }}')" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer">
+                                <i class="ri-upload-line mr-0.5"></i>
+                                <span class="hidden xs:inline">Upload Payment</span>
+                            </button>
+                        @endif
+                        <button type="button" onclick="openEmployeeQR({{ $record->employee_id }}, '{{ $record->employee_name }}', '{{ $record->gcash_name ?? 'N/A' }}', '{{ $record->gcash_number ?? 'N/A' }}', '{{ $record->qr_code_path ?? '' }}')" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-purple-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors cursor-pointer">
+                            <i class="ri-qr-code-line mr-0.5"></i>
+                            <span class="hidden xs:inline">View QR</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Empty State Icon -->
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="ri-money-dollar-circle-line text-2xl text-gray-400"></i>
+                    </div>
+                    
+                    <!-- Empty State Content -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Payroll Records Found</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            @if(request()->has('search') || request()->has('sort'))
+                                No payroll records match your current filters. Try adjusting your search criteria.
+                            @else
+                                No completed jobs with payments yet. Payroll records will appear here once jobs are completed and payments are processed.
+                            @endif
+                        </p>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            @if(request()->has('search') || request()->has('sort'))
+                                <button onclick="clearFilters()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                    <i class="ri-refresh-line mr-2"></i>
+                                    Clear Filters
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforelse
+        </div>
+        
+        {{-- Desktop Table View (hidden on mobile) --}}
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full min-w-full">
                 <thead class="bg-gray-50">
                     <tr>
