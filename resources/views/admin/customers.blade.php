@@ -3,13 +3,140 @@
 @section('title','Customers')
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-extrabold text-center">Manage Customers</h1>
+{{-- Mobile-specific styles for customers page responsiveness --}}
+<style>
+	/* Mobile responsive styles for customers page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#customer-map-modal .bg-white {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#customer-map-modal .flex {
+			flex-direction: column !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+		
+		/* Reduce card padding and spacing for mobile */
+		.block.sm\\:hidden .p-2 {
+			padding: 0.375rem !important;
+		}
+		
+		.block.sm\\:hidden .space-y-3 > * + * {
+			margin-top: 0.375rem !important;
+		}
+		
+		/* Make the entire card container more compact */
+		.block.sm\\:hidden {
+			margin-left: -0.25rem !important;
+			margin-right: -0.25rem !important;
+		}
+		
+		/* Reduce border radius for more compact look */
+		.block.sm\\:hidden .rounded-xl {
+			border-radius: 0.375rem !important;
+		}
+		
+		/* Make action buttons much more compact on mobile */
+		.block.sm\\:hidden .flex.gap-1 {
+			gap: 0.125rem !important;
+		}
+		
+		.block.sm\\:hidden .flex-1 {
+			flex: 1 1 0% !important;
+			min-width: 0 !important;
+		}
+		
+		/* Make buttons much smaller on mobile */
+		.block.sm\\:hidden .px-1 {
+			padding-left: 0.25rem !important;
+			padding-right: 0.25rem !important;
+		}
+		
+		.block.sm\\:hidden .py-1\\.5 {
+			padding-top: 0.25rem !important;
+			padding-bottom: 0.25rem !important;
+		}
+		
+		/* Make text much smaller on mobile buttons */
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.6rem !important;
+			line-height: 0.875rem !important;
+		}
+		
+		/* Hide button text on very small screens, show only icons */
+		@media (max-width: 480px) {
+			.block.sm\\:hidden .text-xs {
+				font-size: 0 !important;
+				line-height: 0 !important;
+			}
+			
+			.block.sm\\:hidden .mr-0\\.5 {
+				margin-right: 0 !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.25rem !important;
+				padding-right: 0.25rem !important;
+			}
+			
+			.block.sm\\:hidden .py-1 {
+				padding-top: 0.125rem !important;
+				padding-bottom: 0.125rem !important;
+			}
+		}
+		
+		/* Extra small screens - make buttons even more compact */
+		@media (max-width: 360px) {
+			.block.sm\\:hidden .flex.gap-0\\.5 {
+				gap: 0.0625rem !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.125rem !important;
+				padding-right: 0.125rem !important;
+			}
+		}
+		
+		/* Reduce grid gap on mobile */
+		.block.sm\\:hidden .grid.gap-4 {
+			gap: 0.5rem !important;
+		}
+		
+		/* Make text smaller on mobile for more compact cards */
+		.block.sm\\:hidden .text-sm {
+			font-size: 0.8rem !important;
+			line-height: 1.125rem !important;
+		}
+		
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.7rem !important;
+			line-height: 1rem !important;
+		}
+	}
+</style>
 
-    {{-- Search and Sort Section --}}
+<div class="max-w-6xl mx-auto px-0 sm:px-0">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-center">Manage Customers</h1>
+
+    {{-- Search and Sort Section - Responsive layout --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center gap-4">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="search-customers" 
@@ -17,19 +144,22 @@
                            placeholder="Search customers by Name, Customer ID, or Phone" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
-                <div class="flex gap-2">
+                {{-- Mobile: Full width buttons, Desktop: Compact buttons --}}
+                <div class="grid grid-cols-2 sm:flex gap-2">
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'customer_id') === 'customer_id' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'customer_id') === 'customer_id' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('customer_id')">
                         <i class="ri-customer-line mr-2"></i>
-                        Sort by Customer ID
+                        <span class="hidden sm:inline">Sort by Customer ID</span>
+                        <span class="sm:hidden">Customer ID</span>
                         <i class="ri-arrow-{{ ($sort ?? 'customer_id') === 'customer_id' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'customer_id') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'customer_id') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('name')">
                         <i class="ri-user-line mr-2"></i>
-                        Sort by Name
+                        <span class="hidden sm:inline">Sort by Name</span>
+                        <span class="sm:hidden">Name</span>
                         <i class="ri-arrow-{{ ($sort ?? 'customer_id') === 'name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                 </div>
@@ -37,17 +167,90 @@
         </div>
     </div>
 
-    {{-- Customer Records Section --}}
+    {{-- Customer Records Section - Responsive header --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
-        <div class="p-6 border-b border-gray-100">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Customer Records</h2>
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Customer Records</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage customer information and booking history</p>
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto">
+        
+        {{-- Mobile Card View (hidden on larger screens) --}}
+        <div class="block sm:hidden">
+            @forelse ($customers as $cust)
+            <div class="p-2 border-b border-gray-100 last:border-b-0">
+                <div class="space-y-3">
+                    {{-- Customer Header --}}
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium text-gray-900">{{ $cust->customer_code ?? ($cust->customer_id ? sprintf('C%04d%03d', date('Y'), $cust->customer_id % 1000) : '—') }}</div>
+                        <div class="text-sm text-gray-500">{{ number_format($cust->bookings_count ?? 0) }} bookings</div>
+                    </div>
+                    
+                    {{-- Customer Name and Contact --}}
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Name</div>
+                            <div class="text-sm text-gray-900">{{ trim(($cust->first_name ?? '') . ' ' . ($cust->last_name ?? '')) ?: $cust->username }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Contact</div>
+                            <div class="text-sm text-gray-900">{{ $cust->phone ?? '—' }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Actions --}}
+                    <div class="flex gap-0.5">
+                        <button type="button" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('showCustomerMap',{detail:{userId:{{ $cust->user_id }}}}))" title="View Location">
+                            <i class="ri-map-pin-line mr-0.5"></i>
+                            <span class="hidden xs:inline">Location</span>
+                        </button>
+                        <button onclick="deleteCustomer({{ $cust->user_id }}, this)" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" aria-label="Delete Customer">
+                            <i class="ri-delete-bin-line mr-0.5"></i>
+                            <span class="hidden xs:inline">Delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Empty State Icon -->
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="ri-user-line text-2xl text-gray-400"></i>
+                    </div>
+                    
+                    <!-- Empty State Content -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Customers Found</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            @if(request()->has('search') || request()->has('sort'))
+                                No customers match your current filters. Try adjusting your search criteria.
+                            @else
+                                No customers have been registered yet. Customers will appear here once they create accounts.
+                            @endif
+                        </p>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            @if(request()->has('search') || request()->has('sort'))
+                                <button onclick="clearFilters()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                    <i class="ri-refresh-line mr-2"></i>
+                                    Clear Filters
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforelse
+        </div>
+        
+        {{-- Desktop Table View (hidden on mobile) --}}
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -130,17 +333,19 @@
             @endisset
         </div>
     </div>
+    {{-- Customer Map Modal - Mobile responsive --}}
     <div id="customer-map-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-xl p-4 m-4">
-            <div class="flex items-center justify-between mb-3">
-                <div class="font-semibold text-lg">Customer Location</div>
-                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="hideCustMap()">✕</button>
+        <div class="bg-white rounded-xl w-full max-w-xl p-2 sm:p-4 m-2 sm:m-4">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                <div class="font-semibold text-base sm:text-lg">Customer Location</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold self-end sm:self-center" onclick="hideCustMap()">✕</button>
             </div>
-            <div id="custLocationAddress" class="text-sm mb-3 text-gray-700 bg-gray-50 p-2 rounded border"></div>
+            <div id="custLocationAddress" class="text-xs sm:text-sm mb-3 text-gray-700 bg-gray-50 p-2 rounded border"></div>
             <div id="custLocationPhone" class="text-xs mb-3 text-gray-500"></div>
-            <div id="customerMap" class="h-80 rounded border border-gray-300 bg-gray-100"></div>
+            <div id="customerMap" class="h-64 sm:h-80 rounded border border-gray-300 bg-gray-100"></div>
             <div class="flex justify-end gap-2 mt-3">
-                <button type="button" onclick="hideCustMap()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer">
+                <button type="button" onclick="hideCustMap()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer text-sm">
                     Close
                 </button>
             </div>
