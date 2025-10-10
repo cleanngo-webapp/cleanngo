@@ -62,7 +62,7 @@
                     <input type="text" 
                            id="search-payroll" 
                            value="{{ $search ?? '' }}"
-                           placeholder="Search payroll by Booking ID, Customer, or Employee" 
+                           placeholder="Search payroll by Booking ID or Employee" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
                 <div class="flex gap-2">
@@ -79,13 +79,6 @@
                         <i class="ri-user-line mr-2"></i>
                         Sort by Employee
                         <i class="ri-arrow-{{ ($sort ?? 'completed_at') === 'employee_name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
-                    </button>
-                    <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'completed_at') === 'total_due_cents' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
-                            onclick="toggleSort('total_due_cents')">
-                        <i class="ri-money-dollar-circle-line mr-2"></i>
-                        Sort by Amount
-                        <i class="ri-arrow-{{ ($sort ?? 'completed_at') === 'total_due_cents' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                 </div>
             </div>
@@ -108,9 +101,7 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Booking ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Customer</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Employee</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Total Amount</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payment Method</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
@@ -128,13 +119,7 @@
                             <div class="text-sm font-medium text-gray-900">{{ $record->booking_code }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $record->customer_name }}</div>
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $record->employee_name }}</div>
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">₱{{ number_format(($record->payment_amount ?? ($record->total_due_cents / 100)), 2) }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ ucfirst($record->payment_method ?? 'N/A') }}</div>
@@ -155,7 +140,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-12 text-center">
+                        <td colspan="6" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center space-y-4">
                                 <!-- Empty State Icon -->
                                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
@@ -269,7 +254,7 @@ function performSearch() {
     const tableBody = document.getElementById('payroll-table-body');
     tableBody.innerHTML = `
         <tr>
-            <td colspan="8" class="px-4 py-8 text-center">
+            <td colspan="6" class="px-4 py-8 text-center">
                 <div class="flex justify-center items-center space-x-2 mb-4">
                     <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
                     <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
@@ -299,7 +284,7 @@ function performSearch() {
         })
         .catch(error => {
             console.error('Search error:', error);
-            tableBody.innerHTML = '<tr><td colspan="8" class="px-4 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
         });
 }
 

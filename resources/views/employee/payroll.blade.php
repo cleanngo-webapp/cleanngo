@@ -46,7 +46,7 @@
                     <input type="text" 
                            id="search-payroll" 
                            value="{{ $search ?? '' }}"
-                           placeholder="Search payroll by Booking ID or Customer" 
+                           placeholder="Search payroll by Booking ID" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
                 <div class="flex gap-2">
@@ -85,8 +85,7 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Booking ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Customer</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">My Payment</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Amount</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payment Method</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
@@ -102,9 +101,6 @@
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $record->booking_code }}</div>
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $record->customer_name }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">₱600.00</div>
@@ -128,7 +124,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-12 text-center">
+                        <td colspan="6" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center space-y-4">
                                 <!-- Empty State Icon -->
                                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
@@ -243,7 +239,7 @@ function performSearch() {
     const tableBody = document.getElementById('payroll-table-body');
     tableBody.innerHTML = `
         <tr>
-            <td colspan="7" class="px-4 py-8 text-center">
+            <td colspan="6" class="px-4 py-8 text-center">
                 <div class="flex justify-center items-center space-x-2 mb-4">
                     <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
                     <div class="w-3 h-3 bg-emerald-500 rounded-full loading-dots"></div>
@@ -273,7 +269,7 @@ function performSearch() {
         })
         .catch(error => {
             console.error('Search error:', error);
-            tableBody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-sm text-red-500">Error loading results</td></tr>';
         });
 }
 
