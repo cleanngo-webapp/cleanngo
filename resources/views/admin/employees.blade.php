@@ -3,8 +3,37 @@
 @section('title','Manage Employees')
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-extrabold text-center">Manage Employees</h1>
+{{-- Mobile-specific styles for employees page responsiveness --}}
+<style>
+	/* Mobile responsive styles for employees page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#addEmployeeModal .relative {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#addEmployeeModal .grid-cols-1 {
+			grid-template-columns: 1fr !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+	}
+</style>
+
+<div class="max-w-6xl mx-auto px-2 sm:px-0">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-center">Manage Employees</h1>
 
     {{-- Success Message --}}
     @if (session('status'))
@@ -16,8 +45,8 @@
         </div>
     @endif
 
-    {{-- Employee Statistics Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+    {{-- Employee Statistics Cards - Responsive grid layout --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
         {{-- Employees Assigned Today Card --}}
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
@@ -67,10 +96,11 @@
         </div>
     </div>
 
-    {{-- Search and Sort Section --}}
+    {{-- Search and Sort Section - Responsive layout --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center gap-4">
+        <div class="p-4 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="search-employees" 
@@ -78,19 +108,22 @@
                            placeholder="Search employees by Name, Employee ID, or Phone" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
-                <div class="flex gap-2">
+                {{-- Mobile: Full width buttons, Desktop: Compact buttons --}}
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'employee_id') === 'employee_id' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'employee_id') === 'employee_id' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('employee_id')">
                         <i class="ri-user-settings-line mr-2"></i>
-                        Sort by Employee ID
+                        <span class="hidden sm:inline">Sort by Employee ID</span>
+                        <span class="sm:hidden">Employee ID</span>
                         <i class="ri-arrow-{{ ($sort ?? 'employee_id') === 'employee_id' && ($sortOrder ?? 'asc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'employee_id') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'employee_id') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('name')">
                         <i class="ri-user-line mr-2"></i>
-                        Sort by Name
+                        <span class="hidden sm:inline">Sort by Name</span>
+                        <span class="sm:hidden">Name</span>
                         <i class="ri-arrow-{{ ($sort ?? 'employee_id') === 'name' && ($sortOrder ?? 'asc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
                     </button>
                 </div>
@@ -98,25 +131,120 @@
         </div>
     </div>
 
-    {{-- Employee Records Section --}}
+    {{-- Employee Records Section - Responsive header --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center justify-between">
+        <div class="p-4 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Employee Records</h2>
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Employee Records</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage employee information and job assignments</p>
                 </div>
                 <div>
                     <button type="button" 
                             onclick="openAddEmployeeModal()"
-                            class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
                         <i class="ri-add-line mr-2"></i>
                         Add Employee
                     </button>
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto">
+        
+        {{-- Mobile Card View (hidden on larger screens) --}}
+        <div class="block sm:hidden">
+            @forelse ($employees as $emp)
+            <div class="p-4 border-b border-gray-100 last:border-b-0">
+                <div class="space-y-3">
+                    {{-- Employee Header --}}
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium text-gray-900">{{ $emp->employee_code ?? ($emp->employee_id ? sprintf('EMP-%03d', $emp->employee_id) : '—') }}</div>
+                        @php
+                            $status = ($emp->is_active ?? true) ? 'Active' : 'Inactive';
+                            $statusColors = [
+                                'Active' => 'bg-green-100 text-green-800',
+                                'Inactive' => 'bg-red-100 text-red-800',
+                            ];
+                        @endphp
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$status] ?? 'bg-gray-100 text-gray-800' }}">
+                            {{ $status }}
+                        </span>
+                    </div>
+                    
+                    {{-- Employee Name and Contact --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Full Name</div>
+                            <div class="text-sm text-gray-900">{{ trim(($emp->first_name ?? '') . ' ' . ($emp->last_name ?? '')) ?: $emp->username }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Contact</div>
+                            <div class="text-sm text-gray-900">{{ $emp->contact_number ?? $emp->phone ?? '—' }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Job Statistics --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Total Bookings</div>
+                            <div class="text-sm text-gray-900">{{ number_format($emp->total_bookings ?? 0) }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Jobs Today</div>
+                            <div class="text-sm text-gray-900">{{ number_format($emp->jobs_assigned_today ?? 0) }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Actions --}}
+                    <div class="flex gap-2">
+                        <a href="{{ route('admin.employee.show', $emp->user_id) }}" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" aria-label="View Employee Information">
+                            <i class="ri-eye-line mr-1"></i>
+                            View Details
+                        </a>
+                        <button onclick="deleteEmployee({{ $emp->user_id }}, this)" class="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" aria-label="Delete Employee">
+                            <i class="ri-delete-bin-line mr-1"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Empty State Icon -->
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="ri-user-settings-line text-2xl text-gray-400"></i>
+                    </div>
+                    
+                    <!-- Empty State Content -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Employees Found</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            @if(request()->has('search') || request()->has('sort'))
+                                No employees match your current filters. Try adjusting your search criteria.
+                            @else
+                                No employees have been registered yet. Add employees to start managing your workforce.
+                            @endif
+                        </p>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            @if(request()->has('search') || request()->has('sort'))
+                                <button onclick="clearFilters()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                    <i class="ri-refresh-line mr-2"></i>
+                                    Clear Filters
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforelse
+        </div>
+        
+        {{-- Desktop Table View (hidden on mobile) --}}
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -211,7 +339,7 @@
                 </tbody>
             </table>
         </div>
-        <div id="pagination-container" class="px-6 py-4 border-t border-gray-100">
+        <div id="pagination-container" class="px-4 sm:px-6 py-4 border-t border-gray-100">
             {{ $employees->links() }}
         </div>
     </div>
