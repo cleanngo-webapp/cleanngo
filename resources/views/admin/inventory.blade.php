@@ -3,11 +3,141 @@
 @section('title','Inventory')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
-    <h1 class="text-3xl font-extrabold text-center">Inventory Management</h1>
+{{-- Mobile-specific styles for inventory page responsiveness --}}
+<style>
+	/* Mobile responsive styles for inventory page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#addModal .relative,
+		#editModal .relative,
+		#viewModal .relative,
+		#transactionModal .relative {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#addModal .grid-cols-1,
+		#editModal .grid-cols-1 {
+			grid-template-columns: 1fr !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+		
+		/* Reduce card padding and spacing for mobile */
+		.block.sm\\:hidden .p-2 {
+			padding: 0.375rem !important;
+		}
+		
+		.block.sm\\:hidden .space-y-3 > * + * {
+			margin-top: 0.375rem !important;
+		}
+		
+		/* Make the entire card container more compact */
+		.block.sm\\:hidden {
+			margin-left: -0.25rem !important;
+			margin-right: -0.25rem !important;
+		}
+		
+		/* Reduce border radius for more compact look */
+		.block.sm\\:hidden .rounded-xl {
+			border-radius: 0.375rem !important;
+		}
+		
+		/* Make action buttons much more compact on mobile */
+		.block.sm\\:hidden .flex.gap-1 {
+			gap: 0.125rem !important;
+		}
+		
+		.block.sm\\:hidden .flex-1 {
+			flex: 1 1 0% !important;
+			min-width: 0 !important;
+		}
+		
+		/* Make buttons much smaller on mobile */
+		.block.sm\\:hidden .px-1 {
+			padding-left: 0.25rem !important;
+			padding-right: 0.25rem !important;
+		}
+		
+		.block.sm\\:hidden .py-1\\.5 {
+			padding-top: 0.25rem !important;
+			padding-bottom: 0.25rem !important;
+		}
+		
+		/* Make text much smaller on mobile buttons */
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.6rem !important;
+			line-height: 0.875rem !important;
+		}
+		
+		/* Hide button text on very small screens, show only icons */
+		@media (max-width: 480px) {
+			.block.sm\\:hidden .text-xs {
+				font-size: 0 !important;
+				line-height: 0 !important;
+			}
+			
+			.block.sm\\:hidden .mr-0\\.5 {
+				margin-right: 0 !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.25rem !important;
+				padding-right: 0.25rem !important;
+			}
+			
+			.block.sm\\:hidden .py-1 {
+				padding-top: 0.125rem !important;
+				padding-bottom: 0.125rem !important;
+			}
+		}
+		
+		/* Extra small screens - make buttons even more compact */
+		@media (max-width: 360px) {
+			.block.sm\\:hidden .flex.gap-0\\.5 {
+				gap: 0.0625rem !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.125rem !important;
+				padding-right: 0.125rem !important;
+			}
+		}
+		
+		/* Reduce grid gap on mobile */
+		.block.sm\\:hidden .grid.gap-4 {
+			gap: 0.5rem !important;
+		}
+		
+		/* Make text smaller on mobile for more compact cards */
+		.block.sm\\:hidden .text-sm {
+			font-size: 0.8rem !important;
+			line-height: 1.125rem !important;
+		}
+		
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.7rem !important;
+			line-height: 1rem !important;
+		}
+	}
+</style>
 
-    {{-- Inventory Statistics Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+<div class="max-w-7xl mx-auto px-0 sm:px-0">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-center">Inventory Management</h1>
+
+    {{-- Inventory Statistics Cards - Responsive grid layout --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center">
                 <div class="p-2 bg-blue-100 rounded-lg">
@@ -54,10 +184,11 @@
         </div>
     </div>
 
-    {{-- Search and Sort Section --}}
+    {{-- Search and Sort Section - Responsive layout --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center gap-4">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="search-inventory" 
@@ -65,33 +196,38 @@
                            placeholder="Search inventory by Item Code, Item Name, or Category" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
-                <div class="flex gap-2">
+                {{-- Mobile: Full width buttons, Desktop: Compact buttons --}}
+                <div class="grid grid-cols-2 sm:flex gap-2">
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('name')">
                         <i class="ri-text mr-2"></i>
-                        Sort by Name
+                        <span class="hidden sm:inline">Sort by Name</span>
+                        <span class="sm:hidden">Name</span>
                         <i class="ri-arrow-{{ ($sort ?? 'name') === 'name' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'category' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'category' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('category')">
                         <i class="ri-folder-line mr-2"></i>
-                        Sort by Category
+                        <span class="hidden sm:inline">Sort by Category</span>
+                        <span class="sm:hidden">Category</span>
                         <i class="ri-arrow-{{ ($sort ?? 'name') === 'category' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'quantity' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'quantity' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('quantity')">
                         <i class="ri-number-1 mr-2"></i>
-                        Sort by Quantity
+                        <span class="hidden sm:inline">Sort by Quantity</span>
+                        <span class="sm:hidden">Quantity</span>
                         <i class="ri-arrow-{{ ($sort ?? 'name') === 'quantity' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'updated_at' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'name') === 'updated_at' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('updated_at')">
                         <i class="ri-calendar-line mr-2"></i>
-                        Sort by Date
+                        <span class="hidden sm:inline">Sort by Date</span>
+                        <span class="sm:hidden">Date</span>
                         <i class="ri-arrow-{{ ($sort ?? 'name') === 'updated_at' && ($sortOrder ?? 'asc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                 </div>
@@ -99,27 +235,156 @@
         </div>
     </div>
 
-    {{-- Inventory Records Section --}}
+    {{-- Inventory Records Section - Responsive header --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center justify-between">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Inventory Records</h2>
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Inventory Records</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage inventory items and track stock levels</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="openTransactionHistoryModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <button onclick="openTransactionHistoryModal()" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer">
                         <i class="ri-history-line mr-2"></i>
-                        Transaction History
+                        <span class="hidden sm:inline">Transaction History</span>
+                        <span class="sm:hidden">History</span>
                     </button>
-                    <button onclick="openAddModal()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+                    <button onclick="openAddModal()" class="w-full sm:w-auto px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
                         <i class="ri-add-line mr-2"></i>
                         Add Item
                     </button>
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto shadow-sm rounded-lg border border-gray-200 inventory-table-container">
+        {{-- Mobile Card View (hidden on larger screens) --}}
+        <div class="block sm:hidden">
+            @forelse($items as $item)
+            <div class="p-2 border-b border-gray-100 last:border-b-0">
+                <div class="space-y-3">
+                    {{-- Item Header --}}
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium text-gray-900">{{ $item->item_code }}</div>
+                        @if($item->status === 'In Stock')
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                In Stock
+                            </span>
+                        @elseif($item->status === 'Low Stock')
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Low Stock
+                            </span>
+                        @else
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                Out of Stock
+                            </span>
+                        @endif
+                    </div>
+                    
+                    {{-- Item Name and Category --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Item Name</div>
+                            <div class="text-sm text-gray-900">{{ $item->name }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Category</div>
+                            <div class="text-sm text-gray-900">{{ $item->category }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Quantity and Unit Price --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Quantity</div>
+                            <div class="text-sm text-gray-900">{{ number_format($item->quantity, 0) }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Unit Price</div>
+                            <div class="text-sm text-gray-900">₱{{ number_format($item->unit_price, 0) }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Total Value and Re-order Level --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Total Value</div>
+                            <div class="text-sm font-medium text-gray-900">₱{{ number_format($item->total_value, 0) }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Re-order Level</div>
+                            <div class="text-sm text-gray-900">{{ number_format($item->reorder_level, 0) }}</div>
+                        </div>
+                    </div>
+                    
+                    {{-- Updated Date --}}
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wider">Last Updated</div>
+                        <div class="text-sm text-gray-900">{{ $item->updated_at->format('M d, Y') }}</div>
+                    </div>
+                    
+                    {{-- Actions --}}
+                    <div class="flex gap-0.5">
+                        <button onclick="openEditModal({{ $item->id }})" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
+                            <i class="ri-edit-line mr-0.5"></i>
+                            <span class="hidden xs:inline">Edit</span>
+                        </button>
+                        <button onclick="openViewModal({{ $item->id }})" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-700 bg-white hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
+                            <i class="ri-eye-line mr-0.5"></i>
+                            <span class="hidden xs:inline">View</span>
+                        </button>
+                        <button onclick="deleteItem({{ $item->id }}, this)" class="flex-1 inline-flex items-center justify-center px-1 py-1 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer">
+                            <i class="ri-delete-bin-line mr-0.5"></i>
+                            <span class="hidden xs:inline">Delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Empty State Icon -->
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="ri-box-3-line text-2xl text-gray-400"></i>
+                    </div>
+                    
+                    <!-- Empty State Content -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Inventory Items Found</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            @if(request()->has('search') || request()->has('sort'))
+                                No inventory items match your current filters. Try adjusting your search criteria.
+                            @else
+                                No inventory items have been added yet. Click "Add Item" to start managing your inventory.
+                            @endif
+                        </p>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            @if(request()->has('search') || request()->has('sort'))
+                                <button onclick="clearInventoryFilters()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                    <i class="ri-refresh-line mr-2"></i>
+                                    Clear Filters
+                                </button>
+                            @endif
+                            <button onclick="openAddModal()" 
+                                    class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+                                <i class="ri-add-line mr-2"></i>
+                                @if(request()->has('search') || request()->has('sort'))
+                                    Add New Item
+                                @else
+                                    Add First Item
+                                @endif
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforelse
+        </div>
+        
+        {{-- Desktop Table View (hidden on mobile) --}}
+        <div class="hidden sm:block overflow-x-auto shadow-sm rounded-lg border border-gray-200 inventory-table-container">
             <table class="w-full min-w-[950px]">
                 <thead class="bg-gray-50">
                     <tr>
