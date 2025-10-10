@@ -7,11 +7,275 @@
 @endpush
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-extrabold text-center">My Jobs</h1>
+{{-- Mobile-specific styles for employee jobs page responsiveness --}}
+<style>
+		/* Mobile responsive styles for employee jobs page */
+		@media (max-width: 640px) {
+			/* Ensure modals are mobile-friendly */
+			#job-map-modal .bg-white,
+			#payment-modal .bg-white,
+			#emp-booking-photos-modal .bg-white,
+			#equipment-modal .bg-white,
+			#borrowed-items-modal .bg-white {
+				width: 95vw !important;
+				max-width: 95vw !important;
+				margin: 0.5rem !important;
+			}
+			
+			/* Make equipment modal items more compact on mobile */
+			#equipment-modal .equipment-item {
+				padding: 0.5rem !important;
+				margin: 0 !important;
+				border-radius: 0.375rem !important;
+			}
+			
+			#equipment-modal .equipment-item .flex {
+				flex-direction: column !important;
+				gap: 0.375rem !important;
+			}
+			
+			#equipment-modal .equipment-item .flex-1 {
+				width: 100% !important;
+				min-width: 0 !important;
+			}
+			
+			#equipment-modal .equipment-item .flex.items-center.space-x-3 {
+				flex-direction: column !important;
+				align-items: flex-start !important;
+				space-x: 0 !important;
+				gap: 0.125rem !important;
+			}
+			
+			#equipment-modal .equipment-item .flex.items-center.space-x-3 > * {
+				margin-right: 0 !important;
+			}
+			
+			#equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm {
+				font-size: 0.75rem !important;
+				line-height: 1rem !important;
+			}
+			
+			#equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm:last-child {
+				margin-top: 0.25rem !important;
+			}
+			
+			#equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
+				flex-direction: row !important;
+				justify-content: space-between !important;
+				align-items: center !important;
+				margin-top: 0.5rem !important;
+				gap: 0.5rem !important;
+			}
+			
+			#equipment-modal .equipment-item .w-20 {
+				width: 3.5rem !important;
+				flex: 0 0 3.5rem !important;
+			}
+			
+			#equipment-modal .equipment-item .px-3 {
+				padding-left: 0.5rem !important;
+				padding-right: 0.5rem !important;
+			}
+			
+			/* Make the equipment item containers smaller overall */
+			#equipment-modal .equipment-item {
+				max-width: 100% !important;
+				overflow: hidden !important;
+			}
+			
+			/* Reduce spacing between equipment items */
+			#equipment-modal .space-y-4 > * + * {
+				margin-top: 0.5rem !important;
+			}
+			
+			/* Make equipment modal content more compact */
+			#equipment-modal .modal-content-container {
+				padding: 0.5rem !important;
+			}
+			
+			#equipment-modal .equipment-item h4 {
+				font-size: 0.875rem !important;
+				line-height: 1.25rem !important;
+				margin-bottom: 0.25rem !important;
+			}
+			
+			#equipment-modal .equipment-item .text-xs {
+				font-size: 0.6875rem !important;
+				line-height: 0.875rem !important;
+			}
+			
+			#equipment-modal .equipment-item .text-sm {
+				font-size: 0.75rem !important;
+				line-height: 1rem !important;
+			}
+			
+			/* Make input and button row more compact */
+			#equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
+				gap: 0.5rem !important;
+			}
+			
+			#equipment-modal .equipment-item .equipment-quantity {
+				flex: 1 !important;
+				min-width: 0 !important;
+			}
+			
+			#equipment-modal .equipment-item button {
+				flex-shrink: 0 !important;
+				white-space: nowrap !important;
+				padding: 0.375rem 0.75rem !important;
+				font-size: 0.6875rem !important;
+			}
+			
+			/* Make equipment item badges properly sized */
+			#equipment-modal .equipment-item .inline-flex.px-2.py-1 {
+				padding: 0.25rem 0.5rem !important;
+				font-size: 0.625rem !important;
+				line-height: 0.875rem !important;
+			}
+			
+			/* Better spacing and alignment for equipment items */
+			#equipment-modal .equipment-item .flex.items-center.space-x-3 {
+				align-items: flex-start !important;
+				gap: 0.25rem !important;
+			}
+			
+			/* Improve text positioning within equipment items */
+			#equipment-modal .equipment-item .flex-1 {
+				display: flex !important;
+				flex-direction: column !important;
+				gap: 0.25rem !important;
+			}
+			
+			/* Ensure equipment items don't overflow */
+			#equipment-modal .equipment-item * {
+				max-width: 100% !important;
+				word-wrap: break-word !important;
+			}
+		
+		/* Make modal content stack vertically on mobile */
+		#job-map-modal .flex,
+		#payment-modal .flex,
+		#emp-booking-photos-modal .flex,
+		#equipment-modal .flex,
+		#borrowed-items-modal .flex {
+			flex-direction: column !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		.overflow-x-auto {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex .inline-flex {
+			min-height: 2.5rem;
+		}
+		
+		/* Reduce card padding and spacing for mobile */
+		.block.sm\\:hidden .p-2 {
+			padding: 0.375rem !important;
+		}
+		
+		.block.sm\\:hidden .space-y-3 > * + * {
+			margin-top: 0.375rem !important;
+		}
+		
+		/* Make the entire card container more compact */
+		.block.sm\\:hidden {
+			margin-left: -0.25rem !important;
+			margin-right: -0.25rem !important;
+		}
+		
+		/* Reduce border radius for more compact look */
+		.block.sm\\:hidden .rounded-xl {
+			border-radius: 0.375rem !important;
+		}
+		
+		/* Make action buttons much more compact on mobile */
+		.block.sm\\:hidden .flex.gap-1 {
+			gap: 0.125rem !important;
+		}
+		
+		.block.sm\\:hidden .flex-1 {
+			flex: 1 1 0% !important;
+			min-width: 0 !important;
+		}
+		
+		/* Make buttons much smaller on mobile */
+		.block.sm\\:hidden .px-1 {
+			padding-left: 0.25rem !important;
+			padding-right: 0.25rem !important;
+		}
+		
+		.block.sm\\:hidden .py-1\\.5 {
+			padding-top: 0.25rem !important;
+			padding-bottom: 0.25rem !important;
+		}
+		
+		/* Make text much smaller on mobile buttons */
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.6rem !important;
+			line-height: 0.875rem !important;
+		}
+		
+		/* Hide button text on very small screens, show only icons */
+		@media (max-width: 480px) {
+			.block.sm\\:hidden .text-xs {
+				font-size: 0 !important;
+				line-height: 0 !important;
+			}
+			
+			.block.sm\\:hidden .mr-0\\.5 {
+				margin-right: 0 !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.25rem !important;
+				padding-right: 0.25rem !important;
+			}
+			
+			.block.sm\\:hidden .py-1 {
+				padding-top: 0.125rem !important;
+				padding-bottom: 0.125rem !important;
+			}
+		}
+		
+		/* Extra small screens - make buttons even more compact */
+		@media (max-width: 360px) {
+			.block.sm\\:hidden .flex.gap-0\\.5 {
+				gap: 0.0625rem !important;
+			}
+			
+			.block.sm\\:hidden .px-1 {
+				padding-left: 0.125rem !important;
+				padding-right: 0.125rem !important;
+			}
+		}
+		
+		/* Reduce grid gap on mobile */
+		.block.sm\\:hidden .grid.gap-4 {
+			gap: 0.5rem !important;
+		}
+		
+		/* Make text smaller on mobile for more compact cards */
+		.block.sm\\:hidden .text-sm {
+			font-size: 0.8rem !important;
+			line-height: 1.125rem !important;
+		}
+		
+		.block.sm\\:hidden .text-xs {
+			font-size: 0.7rem !important;
+			line-height: 1rem !important;
+		}
+	}
+</style>
 
-    {{-- Job Statistics Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-6">
+<div class="max-w-6xl mx-auto px-0 sm:px-0">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-center">My Jobs</h1>
+
+    {{-- Job Statistics Cards - Responsive grid layout --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8 mt-4 sm:mt-6">
         {{-- Active Jobs Card --}}
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
@@ -61,55 +325,228 @@
         </div>
     </div>
 
-    {{-- Search and Sort Section --}}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center gap-4">
+    {{-- Search and Sort Section - Responsive layout --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4 sm:mt-6">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="search-jobs" 
                            value="{{ $search ?? '' }}"
                            placeholder="Search jobs by Booking ID, Customer Name, or Status" 
-                           class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                           class="w-full px-3 sm:px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
                 </div>
-                <div class="flex gap-2">
+                {{-- Mobile: Grid layout, Desktop: Flex --}}
+                <div class="grid grid-cols-2 sm:flex gap-2">
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'date') === 'date' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'date') === 'date' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('date')">
-                        <i class="ri-calendar-line mr-2"></i>
-                        Sort by Date
-                        <i class="ri-arrow-{{ ($sort ?? 'date') === 'date' && ($sortOrder ?? 'desc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
+                        <i class="ri-calendar-line mr-1 sm:mr-2"></i>
+                        <span class="hidden sm:inline">Sort by Date</span>
+                        <span class="sm:hidden">Date</span>
+                        <i class="ri-arrow-{{ ($sort ?? 'date') === 'date' && ($sortOrder ?? 'desc') === 'desc' ? 'down' : 'up' }}-line ml-1 sm:ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'date') === 'customer' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'date') === 'customer' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('customer')">
-                        <i class="ri-user-line mr-2"></i>
-                        Sort by Customer
-                        <i class="ri-arrow-{{ ($sort ?? 'date') === 'customer' && ($sortOrder ?? 'desc') === 'desc' ? 'down' : 'up' }}-line ml-2"></i>
+                        <i class="ri-user-line mr-1 sm:mr-2"></i>
+                        <span class="hidden sm:inline">Sort by Customer</span>
+                        <span class="sm:hidden">Customer</span>
+                        <i class="ri-arrow-{{ ($sort ?? 'date') === 'customer' && ($sortOrder ?? 'desc') === 'desc' ? 'down' : 'up' }}-line ml-1 sm:ml-2"></i>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- My Jobs Section --}}
+    {{-- My Jobs Section - Responsive layout --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center justify-between">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">My Job Assignments</h2>
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">My Job Assignments</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage your assigned jobs and track progress</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <a href="{{ route('employee.completed-jobs') }}" 
-                       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                       class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
                         <i class="ri-checkbox-circle-line mr-2"></i>
-                        View Completed Jobs
+                        <span class="hidden sm:inline">View Completed Jobs</span>
+                        <span class="sm:hidden">Completed Jobs</span>
                     </a>
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto lg:overflow-x-visible">
+        {{-- Mobile Card View - Hidden on desktop --}}
+        <div class="block sm:hidden p-2 sm:p-6">
+            <div class="space-y-3">
+                @forelse($bookings as $b)
+                <div class="bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                    {{-- Mobile: Stacked layout --}}
+                    <div class="flex flex-col gap-3">
+                        {{-- Job Header - Mobile: Stacked, Desktop: Side by side --}}
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</h3>
+                                <p class="text-xs text-gray-500 truncate">{{ $b->customer_name ?? '—' }}</p>
+                            </div>
+                            @php
+                                $statusColors = [
+                                    'pending' => 'bg-yellow-100 text-yellow-800',
+                                    'confirmed' => 'bg-blue-100 text-blue-800',
+                                    'in_progress' => 'bg-purple-100 text-purple-800',
+                                    'completed' => 'bg-green-100 text-green-800',
+                                    'cancelled' => 'bg-red-100 text-red-800',
+                                    'no_show' => 'bg-gray-100 text-gray-800'
+                                ];
+                            @endphp
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$b->status] ?? 'bg-gray-100 text-gray-800' }} self-end sm:self-start flex-shrink-0">
+                                {{ $b->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $b->status)) }}
+                            </span>
+                        </div>
+                        
+                        {{-- Job Details - Mobile: Stacked --}}
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <p><span class="font-medium">Date & Time:</span> {{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y g:i A') : '—' }}</p>
+                        </div>
+                        
+                        {{-- Action Buttons - Mobile: Horizontal row --}}
+                        <div class="flex flex-wrap gap-1">
+                            @if($b->status === 'in_progress')
+                                @php
+                                    $currentEmployeeId = Auth::user()->employee->id;
+                                    $jobStartedBy = $b->job_started_by;
+                                    $jobCompletedBy = $b->job_completed_by;
+                                    $jobCompletedByMe = $jobCompletedBy == $currentEmployeeId;
+                                    $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
+                                @endphp
+                                
+                                @if($canCompleteJob)
+                                    @if($b->payment_approved)
+                                        <button type="button" onclick="confirmCompleteJob({{ $b->id }}, '{{ addslashes($b->code ?? 'B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors cursor-pointer" title="Mark as complete">
+                                            <i class="ri-check-line mr-1"></i>
+                                            <span class="hidden xs:inline">Complete</span>
+                                        </button>
+                                    @else
+                                        <button class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Payment proof required" disabled>
+                                            <i class="ri-check-line mr-1"></i>
+                                            <span class="hidden xs:inline">Complete</span>
+                                        </button>
+                                    @endif
+                                @elseif($jobCompletedByMe)
+                                    <span class="flex-1 inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-green-600 bg-green-50 rounded">
+                                        <i class="ri-check-line mr-1"></i>
+                                        <span class="hidden xs:inline">Completed by You</span>
+                                    </span>
+                                @else
+                                    <span class="flex-1 inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-500 bg-gray-50 rounded">
+                                        <i class="ri-check-line mr-1"></i>
+                                        <span class="hidden xs:inline">Completed by Another</span>
+                                    </span>
+                                @endif
+                                @if(!$b->payment_approved)
+                                    <button class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openPaymentModal({{ $b->id }})" title="Attach Payment Proof">
+                                        <i class="ri-attachment-line mr-1"></i>
+                                        <span class="hidden xs:inline">Attachments</span>
+                                    </button>
+                                @endif
+                            @elseif($b->status === 'pending' || $b->status === 'confirmed')
+                                @php
+                                    $scheduledDate = \Carbon\Carbon::parse($b->scheduled_start, 'Asia/Manila');
+                                    $today = \Carbon\Carbon::now('Asia/Manila');
+                                    $isScheduledToday = $scheduledDate->isSameDay($today);
+                                    $canStartJob = $isScheduledToday || $b->status === 'in_progress';
+                                @endphp
+                                @if($canStartJob)
+                                    @php
+                                        $currentEmployeeId = Auth::user()->employee->id;
+                                        $equipmentBorrowedBy = $b->equipment_borrowed_by;
+                                        $jobStartedBy = $b->job_started_by;
+                                        $jobCompletedBy = $b->job_completed_by;
+                                        
+                                        $equipmentBorrowedByMe = $equipmentBorrowedBy == $currentEmployeeId;
+                                        $jobStartedByMe = $jobStartedBy == $currentEmployeeId;
+                                        $jobCompletedByMe = $jobCompletedBy == $currentEmployeeId;
+                                        
+                                        $canBorrowEquipment = !$equipmentBorrowedBy;
+                                        $canStartJob = !$jobStartedBy && $equipmentBorrowedBy;
+                                        $canCompleteJob = $jobStartedBy && !$jobCompletedBy;
+                                    @endphp
+                                    
+                                    @if($equipmentBorrowedBy)
+                                        <button type="button" onclick="openBorrowedItemsModal({{ $b->id }})" class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-purple-300 shadow-sm text-xs font-medium rounded text-purple-600 bg-purple-50 hover:bg-purple-100 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer" title="View Borrowed Items">
+                                            <i class="ri-list-check mr-1"></i>
+                                            <span class="hidden xs:inline">Items</span>
+                                        </button>
+                                        
+                                        @if($canStartJob)
+                                            <button type="button" onclick="confirmStartJob({{ $b->id }})" id="start-job-btn-{{ $b->id }}" class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Start Job">
+                                                <i class="ri-play-line mr-1"></i>
+                                                <span class="hidden xs:inline">Start Job</span>
+                                            </button>
+                                        @elseif($jobStartedByMe)
+                                            <span class="flex-1 inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded">
+                                                <i class="ri-play-line mr-1"></i>
+                                                <span class="hidden xs:inline">Started by You</span>
+                                            </span>
+                                        @else
+                                            <span class="flex-1 inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-500 bg-gray-50 rounded">
+                                                <i class="ri-play-line mr-1"></i>
+                                                <span class="hidden xs:inline">Started by Another</span>
+                                            </span>
+                                        @endif
+                                    @else
+                                        <button type="button" onclick="getEquipment({{ $b->id }})" class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer" title="Get Equipment">
+                                            <i class="ri-tools-line mr-1"></i>
+                                            <span class="hidden xs:inline">Get Equipment</span>
+                                        </button>
+                                    @endif
+                                @else
+                                    <button type="button" disabled class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-400 bg-gray-100 cursor-not-allowed" title="Job scheduled for {{ \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y') }}">
+                                        <i class="ri-play-line mr-1"></i>
+                                        <span class="hidden xs:inline">Start Job</span>
+                                    </button>
+                                @endif
+                            @endif
+                            <button type="button" class="flex-1 inline-flex items-center justify-center px-2 py-1 border border-emerald-300 shadow-sm text-xs font-medium rounded text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingInfoModal('employee-booking-info-modal', {{ $b->id }}, 'employee')" title="View Booking Information">
+                                <i class="ri-information-line mr-1"></i>
+                                <span class="hidden xs:inline">Booking Info</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-6">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                        <i class="ri-briefcase-3-line text-2xl text-gray-400"></i>
+                    </div>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No Job Assignments Found</h3>
+                    <p class="mt-1 text-xs text-gray-500">
+                        @if(request()->has('search') || request()->has('sort'))
+                            No job assignments match your current filters. Try adjusting your search criteria.
+                        @else
+                            You don't have any job assignments yet. Jobs will appear here once the admin assigns them to you.
+                        @endif
+                    </p>
+                    
+                    @if(request()->has('search') || request()->has('sort'))
+                    <div class="mt-4">
+                        <button onclick="clearFilters()" 
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                            <i class="ri-refresh-line mr-2"></i>
+                            Clear Filters
+                        </button>
+                    </div>
+                    @endif
+                </div>
+                @endforelse
+            </div>
+        </div>
+
+        {{-- Desktop Table View - Hidden on mobile --}}
+        <div class="hidden sm:block overflow-x-auto lg:overflow-x-visible">
             <table class="w-full min-w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -306,32 +743,35 @@
                 </tbody>
             </table>
         </div>
-        <div id="pagination-container" class="px-6 py-4 border-t border-gray-100">
+        <div id="pagination-container" class="px-2 sm:px-6 py-4 border-t border-gray-100">
             {{ $bookings->links() }}
         </div>
     </div>
+    <!-- Job Map Modal - Mobile responsive -->
     <div id="job-map-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-xl p-4 m-4">
-            <div class="flex items-center justify-between mb-3">
-                <div class="font-semibold text-lg">Customer Location</div>
-                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="const m=document.getElementById('job-map-modal'); m.classList.add('hidden'); m.classList.remove('flex');">✕</button>
+        <div class="bg-white rounded-xl w-full max-w-xl p-2 sm:p-4 m-2 sm:m-4">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                <div class="font-semibold text-base sm:text-lg">Customer Location</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold self-end sm:self-center" onclick="const m=document.getElementById('job-map-modal'); m.classList.add('hidden'); m.classList.remove('flex');">✕</button>
             </div>
-            <div id="empLocationAddress" class="text-sm mb-3 text-gray-700 bg-gray-50 p-2 rounded border"></div>
+            <div id="empLocationAddress" class="text-xs sm:text-sm mb-3 text-gray-700 bg-gray-50 p-2 rounded border"></div>
             <div id="empLocationPhone" class="text-xs mb-3 text-gray-500"></div>
-            <div id="jobMap" class="h-80 rounded border border-gray-300 bg-gray-100"></div>
+            <div id="jobMap" class="h-64 sm:h-80 rounded border border-gray-300 bg-gray-100"></div>
             <div class="flex justify-end gap-2 mt-3">
-                <button type="button" onclick="const m=document.getElementById('job-map-modal'); m.classList.add('hidden'); m.classList.remove('flex');" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer">
+                <button type="button" onclick="const m=document.getElementById('job-map-modal'); m.classList.add('hidden'); m.classList.remove('flex');" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors cursor-pointer text-sm">
                     Close
                 </button>
             </div>
         </div>
     </div>
-    <!-- Payment Proof Modal -->
+    <!-- Payment Proof Modal - Mobile responsive -->
     <div id="payment-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-md p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold">Attach Proof of Payment</div>
-                <button class="cursor-pointer" onclick="closePaymentModal()">✕</button>
+        <div class="bg-white rounded-xl w-full max-w-md p-2 sm:p-4 m-2 sm:m-4">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+                <div class="font-semibold text-sm sm:text-base">Attach Proof of Payment</div>
+                <button class="cursor-pointer self-end sm:self-center" onclick="closePaymentModal()">✕</button>
             </div>
             <form id="payment-form" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -388,12 +828,13 @@
         'bookingId' => null
     ])
 
-    <!-- Booking Photos Modal -->
+    <!-- Booking Photos Modal - Mobile responsive -->
     <div id="emp-booking-photos-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[1000]">
-        <div class="bg-white rounded-xl w-full max-w-4xl p-4 m-4" style="max-height: 90vh; overflow-y: auto;">
-            <div class="flex items-center justify-between mb-4">
-                <div class="font-semibold text-lg">Booking Photos</div>
-                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold" onclick="closeEmpBookingPhotosModal()">✕</button>
+        <div class="bg-white rounded-xl w-full max-w-4xl p-2 sm:p-4 m-2 sm:m-4" style="max-height: 90vh; overflow-y: auto;">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                <div class="font-semibold text-base sm:text-lg">Booking Photos</div>
+                <button class="cursor-pointer text-gray-500 hover:text-gray-700 text-xl font-bold self-end sm:self-center" onclick="closeEmpBookingPhotosModal()">✕</button>
             </div>
             <div id="emp-booking-photos-content" class="space-y-4">
                 <!-- Content will be loaded dynamically -->
@@ -1857,14 +2298,14 @@ function closeBorrowedItemsModal() {
     }
 </style>
 
-{{-- Employee Equipment Modal --}}
+{{-- Employee Equipment Modal - Mobile responsive --}}
 <div id="equipment-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-4 mx-auto p-0 border w-full max-w-4xl shadow-2xl rounded-lg bg-white" style="max-height: calc(100vh - 2rem);">
+    <div class="relative top-2 sm:top-4 mx-auto p-0 border w-full max-w-4xl shadow-2xl rounded-lg bg-white m-2 sm:m-4" style="max-height: calc(100vh - 1rem);">
         <div class="flex flex-col h-full">
             <!-- Header - Fixed at top -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0 bg-white relative z-10">
-                <h3 class="text-xl font-semibold text-gray-900">Get Equipment for Job</h3>
-                <button onclick="closeEquipmentModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-6 border-b border-gray-200 flex-shrink-0 bg-white relative z-10 gap-2">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Get Equipment for Job</h3>
+                <button onclick="closeEquipmentModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1 self-end sm:self-center">
                     <i class="ri-close-line text-2xl"></i>
                 </button>
             </div>
@@ -1873,16 +2314,16 @@ function closeBorrowedItemsModal() {
                 <input type="hidden" id="equipment-booking-id" name="booking_id">
                 
                 <!-- Scrollable content area - Takes remaining space -->
-                <div id="equipment-content" class="flex-1 overflow-y-auto p-6 bg-white relative z-10 modal-content-container">
+                <div id="equipment-content" class="flex-1 overflow-y-auto p-3 sm:p-6 bg-white relative z-10 modal-content-container">
                     <!-- Dynamic content will be loaded here -->
                 </div>
                 
                 <!-- Footer - Fixed at bottom -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 p-6 flex-shrink-0 bg-gray-50 relative z-10">
-                    <button type="button" onclick="closeEquipmentModal()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
+                <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200 p-3 sm:p-6 flex-shrink-0 bg-gray-50 relative z-10">
+                    <button type="button" onclick="closeEquipmentModal()" class="w-full sm:w-auto px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
                         Cancel
                     </button>
-                    <button type="button" onclick="confirmGetEquipment()" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors cursor-pointer">
+                    <button type="button" onclick="confirmGetEquipment()" class="w-full sm:w-auto px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors cursor-pointer">
                         <i class="ri-tools-line mr-2"></i>
                         Borrow Equipment
                     </button>
@@ -1892,26 +2333,26 @@ function closeBorrowedItemsModal() {
     </div>
 </div>
 
-{{-- Borrowed Items Modal --}}
+{{-- Borrowed Items Modal - Mobile responsive --}}
 <div id="borrowed-items-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-4 mx-auto p-0 border w-full max-w-4xl shadow-2xl rounded-lg bg-white" style="max-height: calc(100vh - 2rem);">
+    <div class="relative top-2 sm:top-4 mx-auto p-0 border w-full max-w-4xl shadow-2xl rounded-lg bg-white m-2 sm:m-4" style="max-height: calc(100vh - 1rem);">
         <div class="flex flex-col h-full">
             <!-- Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-                <h3 class="text-xl font-semibold text-gray-900">Borrowed Equipment</h3>
-                <button onclick="closeBorrowedItemsModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-6 border-b border-gray-200 flex-shrink-0 gap-2">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Borrowed Equipment</h3>
+                <button onclick="closeBorrowedItemsModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer p-1 self-end sm:self-center">
                     <i class="ri-close-line text-2xl"></i>
                 </button>
             </div>
             
             <!-- Scrollable content area -->
-            <div id="borrowed-items-content" class="flex-1 overflow-y-auto p-6">
+            <div id="borrowed-items-content" class="flex-1 overflow-y-auto p-3 sm:p-6">
                 <!-- Dynamic content will be loaded here -->
             </div>
             
             <!-- Footer -->
-            <div class="flex justify-end pt-4 border-t border-gray-200 p-6 flex-shrink-0 bg-gray-50">
-                <button onclick="closeBorrowedItemsModal()" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
+            <div class="flex justify-end pt-4 border-t border-gray-200 p-3 sm:p-6 flex-shrink-0 bg-gray-50">
+                <button onclick="closeBorrowedItemsModal()" class="w-full sm:w-auto px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer">
                     Close
                 </button>
             </div>
