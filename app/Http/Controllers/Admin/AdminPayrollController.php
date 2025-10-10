@@ -275,12 +275,20 @@ class AdminPayrollController extends Controller
                 ], 403);
             }
 
-            // Check if there's an approved payment proof for this booking
-            $originalPaymentProof = PaymentProof::where('booking_id', $request->booking_id)
+            // First, try to find an employee-specific payment proof record
+            $employeePaymentProof = PaymentProof::where('booking_id', $request->booking_id)
+                ->where('employee_id', $request->employee_id)
                 ->where('status', 'approved')
                 ->first();
 
-            if (!$originalPaymentProof) {
+            // If not found, look for any approved payment proof for this booking
+            if (!$employeePaymentProof) {
+                $employeePaymentProof = PaymentProof::where('booking_id', $request->booking_id)
+                    ->where('status', 'approved')
+                    ->first();
+            }
+
+            if (!$employeePaymentProof) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Payment proof not found or not approved for this booking.'
@@ -295,15 +303,37 @@ class AdminPayrollController extends Controller
             // Generate payroll code
             $payrollCode = PaymentProof::generatePayrollCode();
 
-            // Always update the original payment proof record with payroll details
-            // This prevents duplicate records
-            $originalPaymentProof->update([
-                'payroll_code' => $payrollCode,
-                'payroll_status' => 'paid',
-                'payroll_amount' => $request->payroll_amount,
-                'payroll_proof' => $path,
-                'payroll_method' => $request->payroll_method,
-            ]);
+            // Check if this is an employee-specific payment proof or a shared one
+            if ($employeePaymentProof->employee_id == $request->employee_id) {
+                // Update the employee's own payment proof record
+                $employeePaymentProof->update([
+                    'payroll_code' => $payrollCode,
+                    'payroll_status' => 'paid',
+                    'payroll_amount' => $request->payroll_amount,
+                    'payroll_proof' => $path,
+                    'payroll_method' => $request->payroll_method,
+                ]);
+            } else {
+                // This is a shared payment proof, create a new record for this specific employee
+                PaymentProof::create([
+                    'booking_id' => $request->booking_id,
+                    'employee_id' => $request->employee_id,
+                    'customer_id' => $employeePaymentProof->customer_id,
+                    'image_path' => $employeePaymentProof->image_path,
+                    'amount' => $employeePaymentProof->amount,
+                    'payment_method' => $employeePaymentProof->payment_method,
+                    'status' => 'approved',
+                    'admin_notes' => $employeePaymentProof->admin_notes,
+                    'reviewed_by' => $employeePaymentProof->reviewed_by,
+                    'reviewed_at' => $employeePaymentProof->reviewed_at,
+                    'uploaded_by' => $employeePaymentProof->uploaded_by,
+                    'payroll_code' => $payrollCode,
+                    'payroll_status' => 'paid',
+                    'payroll_amount' => $request->payroll_amount,
+                    'payroll_proof' => $path,
+                    'payroll_method' => $request->payroll_method,
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
