@@ -258,7 +258,7 @@ class AdminPayrollController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'payroll_amount' => 'required|numeric|min:0.01',
             'payroll_method' => 'required|in:cash,gcash,bank_transfer',
-            'payroll_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'payroll_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         try {

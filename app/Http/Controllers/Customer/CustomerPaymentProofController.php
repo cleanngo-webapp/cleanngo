@@ -20,7 +20,7 @@ class CustomerPaymentProofController extends Controller
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:cash,gcash',
-            'proof_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'proof_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         $user = Auth::guard('customer')->user();

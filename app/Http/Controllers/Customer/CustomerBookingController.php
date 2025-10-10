@@ -24,7 +24,7 @@ class CustomerBookingController extends Controller
             'total' => 'required|numeric|min:0',
             'items_json' => 'nullable|string',
             'booking_photos' => 'required|array|min:1|max:3',
-            'booking_photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'booking_photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         // Ensure customer row exists

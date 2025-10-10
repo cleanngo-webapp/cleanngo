@@ -1287,7 +1287,7 @@ function openBookingForm(){
             <span id="booking-photos-text" class="text-gray-500">Choose Photos (1-3 images)</span>
           </div>
         </div>
-        <p class="text-xs text-gray-500">Supported formats: JPG, PNG, GIF (max 2MB each)</p>
+        <p class="text-xs text-gray-500">Supported formats: JPG, PNG, GIF (max 10MB each)</p>
         
         <!-- Image Preview Container -->
         <div id="booking-photos-preview-container" class="hidden">
@@ -1816,7 +1816,7 @@ function openBookingForm(){
   // Booking Photos Handling
   let selectedBookingPhotos = [];
   const maxPhotos = 3;
-  const maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
+  const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
 
   function resetBookingPhotos() {
     selectedBookingPhotos = [];
@@ -1842,7 +1842,7 @@ function openBookingForm(){
       
       // Check file size
       if (file.size > maxFileSize) {
-        errors.push(`${file.name}: File size must be less than 2MB`);
+        errors.push(`${file.name}: File size must be less than 10MB`);
         continue;
       }
       
