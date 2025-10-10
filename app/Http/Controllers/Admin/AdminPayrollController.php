@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PaymentProof;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminPayrollController extends Controller
 {
@@ -31,7 +34,7 @@ class AdminPayrollController extends Controller
         $sort = $request->get('sort', 'completed_at');
         $sortOrder = $request->get('sortOrder', 'desc');
         
-        // Build the base query for payroll records
+        // Build the base query for payroll records - show all employees assigned to completed bookings
         $query = DB::table('bookings as b')
             ->join('booking_staff_assignments as bsa', 'b.id', '=', 'bsa.booking_id')
             ->join('employees as e', 'bsa.employee_id', '=', 'e.id')
@@ -41,6 +44,7 @@ class AdminPayrollController extends Controller
             ->join('services as s', 'b.service_id', '=', 's.id')
             ->leftJoin('payment_proofs as pp', function($join) {
                 $join->on('b.id', '=', 'pp.booking_id')
+                     ->on('bsa.employee_id', '=', 'pp.employee_id')
                      ->where('pp.status', '=', 'approved');
             })
             ->leftJoin('payment_settings as ps', function($join) {
@@ -62,6 +66,11 @@ class AdminPayrollController extends Controller
                 DB::raw("CONCAT(cu.first_name, ' ', cu.last_name) as customer_name"),
                 's.name as service_name',
                 'pp.amount as payment_amount',
+                'pp.payroll_code',
+                'pp.payroll_status',
+                'pp.payroll_amount',
+                'pp.payroll_proof',
+                'pp.payroll_method',
                 'ps.gcash_name',
                 'ps.gcash_number',
                 'ps.qr_code_path'
@@ -97,6 +106,7 @@ class AdminPayrollController extends Controller
         
         // Execute the query
         $payrollRecords = $query->get();
+        
 
         // Build service summaries for better service display
         $serviceSummaries = [];
@@ -182,7 +192,6 @@ class AdminPayrollController extends Controller
         }
 
         // Calculate monthly earnings summary for admin
-        // Admin receives total amount minus 600 per job (employee payment)
         $monthlyJobsCompleted = $payrollRecords
             ->where('completed_at', '>=', now()->startOfMonth())
             ->count();
@@ -196,13 +205,40 @@ class AdminPayrollController extends Controller
                 return $carry + $amount;
             }, 0);
         
-        // Admin earnings = total earnings - (600 * number of jobs)
-        $monthlyEarnings = $monthlyTotalEarnings - (600 * $monthlyJobsCompleted);
+        // Calculate payroll amounts paid out
+        $monthlyPayrollPaid = $payrollRecords
+            ->where('completed_at', '>=', now()->startOfMonth())
+            ->where('payroll_status', 'paid')
+            ->reduce(function($carry, $record) {
+                return $carry + ($record->payroll_amount ?? 600);
+            }, 0);
+        
+        // Admin earnings = total earnings - payroll amounts paid
+        $monthlyEarnings = $monthlyTotalEarnings - $monthlyPayrollPaid;
+
+        // Build payroll data for the payroll receipt modal
+        // Use a composite key of booking_id + employee_id to handle multiple employees per booking
+        $payrollData = [];
+        foreach ($payrollRecords as $record) {
+            $key = $record->booking_id . '_' . $record->employee_id;
+            $payrollData[$key] = [
+                'booking_code' => $record->booking_code,
+                'completed_date' => $record->completed_at ? \Carbon\Carbon::parse($record->completed_at)->format('M j, Y') : 'N/A',
+                'payroll_code' => $record->payroll_code,
+                'payroll_amount' => $record->payroll_amount,
+                'payroll_method' => $record->payroll_method,
+                'payroll_status' => $record->payroll_status ?? 'unpaid',
+                'payroll_proof' => $record->payroll_proof,
+            ];
+        }
+        
+
 
         return view('admin.payroll', [
             'payrollRecords' => $payrollRecords,
             'serviceSummaries' => $serviceSummaries,
             'receiptData' => $receiptData,
+            'payrollData' => $payrollData,
             'monthlyEarnings' => $monthlyEarnings,
             'monthlyTotalEarnings' => $monthlyTotalEarnings,
             'monthlyJobsCompleted' => $monthlyJobsCompleted,
@@ -210,5 +246,103 @@ class AdminPayrollController extends Controller
             'sort' => $sort,
             'sortOrder' => $sortOrder,
         ]);
+    }
+
+    /**
+     * Upload payment proof for employee payroll
+     */
+    public function uploadPayment(Request $request)
+    {
+        $request->validate([
+            'booking_id' => 'required|exists:bookings,id',
+            'employee_id' => 'required|exists:employees,id',
+            'payroll_amount' => 'required|numeric|min:0.01',
+            'payroll_method' => 'required|in:cash,gcash,bank_transfer',
+            'payroll_proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        try {
+            // Verify that the employee is assigned to this booking
+            $isAssigned = DB::table('booking_staff_assignments')
+                ->where('booking_id', $request->booking_id)
+                ->where('employee_id', $request->employee_id)
+                ->exists();
+
+            if (!$isAssigned) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Employee is not assigned to this booking.'
+                ], 403);
+            }
+
+            // Check if there's an approved payment proof for this booking
+            $originalPaymentProof = PaymentProof::where('booking_id', $request->booking_id)
+                ->where('status', 'approved')
+                ->first();
+
+            if (!$originalPaymentProof) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment proof not found or not approved for this booking.'
+                ], 404);
+            }
+
+            // Handle file upload
+            $file = $request->file('payroll_proof');
+            $filename = 'payroll_proof_' . $request->booking_id . '_' . $request->employee_id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('payroll_proofs', $filename, 'public');
+
+            // Generate payroll code
+            $payrollCode = PaymentProof::generatePayrollCode();
+
+            // Check if payroll record already exists for this employee
+            $existingPayrollRecord = PaymentProof::where('booking_id', $request->booking_id)
+                ->where('employee_id', $request->employee_id)
+                ->whereNotNull('payroll_code')
+                ->first();
+
+            if ($existingPayrollRecord) {
+                // Update existing payroll record
+                $existingPayrollRecord->update([
+                    'payroll_code' => $payrollCode,
+                    'payroll_status' => 'paid',
+                    'payroll_amount' => $request->payroll_amount,
+                    'payroll_proof' => $path,
+                    'payroll_method' => $request->payroll_method,
+                ]);
+            } else {
+                // Create new payroll record based on the original payment proof
+                PaymentProof::create([
+                    'booking_id' => $request->booking_id,
+                    'employee_id' => $request->employee_id,
+                    'customer_id' => $originalPaymentProof->customer_id,
+                    'image_path' => $originalPaymentProof->image_path,
+                    'amount' => $originalPaymentProof->amount,
+                    'payment_method' => $originalPaymentProof->payment_method,
+                    'status' => 'approved',
+                    'admin_notes' => $originalPaymentProof->admin_notes,
+                    'reviewed_by' => $originalPaymentProof->reviewed_by,
+                    'reviewed_at' => $originalPaymentProof->reviewed_at,
+                    'uploaded_by' => $originalPaymentProof->uploaded_by,
+                    'payroll_code' => $payrollCode,
+                    'payroll_status' => 'paid',
+                    'payroll_amount' => $request->payroll_amount,
+                    'payroll_proof' => $path,
+                    'payroll_method' => $request->payroll_method,
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment uploaded successfully.',
+                'payroll_code' => $payrollCode
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error uploading payment: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

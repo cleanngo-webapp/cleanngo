@@ -23,10 +23,17 @@ class PaymentProof extends Model
         'reviewed_by',
         'reviewed_at',
         'uploaded_by',
+        // Payroll fields
+        'payroll_code',
+        'payroll_status',
+        'payroll_amount',
+        'payroll_proof',
+        'payroll_method',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'payroll_amount' => 'decimal:2',
         'reviewed_at' => 'datetime',
     ];
 
@@ -84,6 +91,32 @@ class PaymentProof extends Model
     public function isDeclined(): bool
     {
         return $this->status === 'declined';
+    }
+
+    /**
+     * Check if payroll is paid
+     */
+    public function isPayrollPaid(): bool
+    {
+        return $this->payroll_status === 'paid';
+    }
+
+    /**
+     * Check if payroll is unpaid
+     */
+    public function isPayrollUnpaid(): bool
+    {
+        return $this->payroll_status === 'unpaid';
+    }
+
+    /**
+     * Generate unique payroll code in format PRYYYY[3randomdigits]
+     */
+    public static function generatePayrollCode(): string
+    {
+        $year = date('Y');
+        $randomDigits = str_pad(mt_rand(0, 999), 3, '0', STR_PAD_LEFT);
+        return 'PR' . $year . $randomDigits;
     }
 
     /**

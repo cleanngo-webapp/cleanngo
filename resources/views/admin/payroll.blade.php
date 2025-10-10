@@ -102,7 +102,8 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Booking ID</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Employee</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payment Method</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Amount</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payroll Method</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
                     </tr>
@@ -122,20 +123,30 @@
                             <div class="text-sm text-gray-900">{{ $record->employee_name }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ ucfirst($record->payment_method ?? 'N/A') }}</div>
+                            <div class="text-sm text-gray-900">{{ $record->payroll_amount ? '₱' . number_format($record->payroll_amount, 2) : 'N/A' }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                {{ ucfirst($record->payment_status) }}
+                            <div class="text-sm text-gray-900">{{ ucfirst($record->payroll_method ?? 'N/A') }}</div>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ ($record->payroll_status ?? 'unpaid') === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' }}">
+                                {{ ucfirst($record->payroll_status ?? 'unpaid') }}
                             </span>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="openAdminReceipt({{ $record->booking_id }})" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-emerald-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
-                                    <i class="ri-receipt-line mr-1"></i>
-                                    View Receipt
-                                </button>
-                                <button type="button" onclick="openEmployeeQR({{ $record->employee_id }}, '{{ $record->employee_name }}', '{{ $record->gcash_name ?? 'N/A' }}', '{{ $record->gcash_number ?? 'N/A' }}', '{{ $record->qr_code_path ?? '' }}')" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer">
+                                @if(($record->payroll_status ?? 'unpaid') === 'paid')
+                                    <button type="button" onclick="openAdminPayrollReceipt({{ $record->booking_id }}, {{ $record->employee_id }})" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-emerald-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer">
+                                        <i class="ri-receipt-line mr-1"></i>
+                                        View Receipt
+                                    </button>
+                                @else
+                                    <button type="button" onclick="openUploadPaymentModal({{ $record->booking_id }}, {{ $record->employee_id }}, '{{ $record->employee_name }}')" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer">
+                                        <i class="ri-upload-line mr-1"></i>
+                                        Upload Payment
+                                    </button>
+                                @endif
+                                <button type="button" onclick="openEmployeeQR({{ $record->employee_id }}, '{{ $record->employee_name }}', '{{ $record->gcash_name ?? 'N/A' }}', '{{ $record->gcash_number ?? 'N/A' }}', '{{ $record->qr_code_path ?? '' }}')" class="inline-flex items-center px-2 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-purple-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors cursor-pointer">
                                     <i class="ri-qr-code-line mr-1"></i>
                                     View QR
                                 </button>
@@ -144,7 +155,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-12 text-center">
+                        <td colspan="7" class="px-4 py-12 text-center">
                             <div class="flex flex-col items-center justify-center space-y-4">
                                 <!-- Empty State Icon -->
                                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
@@ -183,13 +194,12 @@
     </div>
 </div>
 
-<!-- Receipt Modal Component -->
-@include('components.receipt-modal', [
-    'modalId' => 'admin-receipt-modal',
-    'receiptData' => $receiptData ?? [],
+<!-- Payroll Receipt Modal Component -->
+@include('components.payroll-receipt-modal', [
+    'modalId' => 'admin-payroll-receipt-modal',
+    'payrollData' => $payrollData ?? [],
     'bookingId' => null,
-    'title' => 'Receipt',
-    'showPaymentMethod' => true
+    'title' => 'Payroll Details'
 ])
 
 <!-- Employee QR Modal Component -->
@@ -243,6 +253,88 @@
                     Close
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Payment Modal Component -->
+<div id="upload-payment-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Upload Payment</h3>
+                <button type="button" onclick="closeUploadPaymentModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="ri-close-line text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <form id="upload-payment-form" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" id="upload-booking-id" name="booking_id">
+                <input type="hidden" id="upload-employee-id" name="employee_id">
+                
+                <div class="space-y-4">
+                    <!-- Employee Information -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Employee Information</h4>
+                        <div class="text-sm text-gray-900" id="upload-employee-name">-</div>
+                    </div>
+                    
+                    <!-- Amount Field -->
+                    <div>
+                        <label for="payroll-amount" class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
+                            <input type="number" 
+                                   id="payroll-amount" 
+                                   name="payroll_amount" 
+                                   value="600" 
+                                   min="0" 
+                                   step="0.01" 
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Method -->
+                    <div>
+                        <label for="payroll-method" class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                        <select id="payroll-method" 
+                                name="payroll_method" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="">Select Payment Method</option>
+                            <option value="cash">Cash</option>
+                            <option value="gcash">GCash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Payment Proof Upload -->
+                    <div>
+                        <label for="payroll-proof" class="block text-sm font-medium text-gray-700 mb-2">Payment Proof</label>
+                        <input type="file" 
+                               id="payroll-proof" 
+                               name="payroll_proof" 
+                               accept="image/*" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                        <p class="text-xs text-gray-500 mt-1">Upload an image of the payment proof (JPG, PNG, GIF)</p>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" 
+                            onclick="closeUploadPaymentModal()" 
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+                        Upload Payment
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -364,17 +456,10 @@ function clearFilters() {
     performSearch();
 }
 
-// Receipt modal function for admin
-function openAdminReceipt(bookingId) {
-    // Get payment method from the payroll records data
-    const payrollRecords = @json($payrollRecords);
-    const currentRecord = payrollRecords.find(r => r.booking_id == bookingId);
-    const paymentMethod = currentRecord ? currentRecord.payment_method : null;
-    
-    openReceipt('admin-receipt-modal', bookingId, @json($receiptData ?? []), {
-        showPaymentMethod: true,
-        paymentMethod: paymentMethod
-    });
+// Payroll receipt modal function for admin
+function openAdminPayrollReceipt(bookingId, employeeId) {
+    const compositeKey = bookingId + '_' + employeeId;
+    openPayrollReceipt('admin-payroll-receipt-modal', compositeKey, @json($payrollData ?? []));
 }
 
 // Employee QR modal functions
@@ -442,6 +527,84 @@ document.addEventListener('click', function(event) {
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeEmployeeQR();
+        closeUploadPaymentModal();
+    }
+});
+
+// Upload Payment Modal functions
+function openUploadPaymentModal(bookingId, employeeId, employeeName) {
+    // Set form data
+    document.getElementById('upload-booking-id').value = bookingId;
+    document.getElementById('upload-employee-id').value = employeeId;
+    document.getElementById('upload-employee-name').textContent = employeeName;
+    
+    // Reset form
+    document.getElementById('payroll-amount').value = '600';
+    document.getElementById('payroll-method').value = '';
+    document.getElementById('payroll-proof').value = '';
+    
+    // Show modal
+    document.getElementById('upload-payment-modal').classList.remove('hidden');
+}
+
+function closeUploadPaymentModal() {
+    // Hide modal
+    document.getElementById('upload-payment-modal').classList.add('hidden');
+    
+    // Reset form
+    document.getElementById('upload-payment-form').reset();
+}
+
+// Handle upload payment form submission
+document.getElementById('upload-payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    
+    // Show loading state
+    submitButton.textContent = 'Uploading...';
+    submitButton.disabled = true;
+    
+    // Submit form via AJAX
+    fetch('{{ route("admin.payroll.upload-payment") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal
+            closeUploadPaymentModal();
+            
+            // Refresh the page to show updated data
+            window.location.reload();
+        } else {
+            alert(data.message || 'Error uploading payment. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error uploading payment. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+    });
+});
+
+// Close upload modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('upload-payment-modal');
+    const modalContent = modal.querySelector('.relative');
+    
+    if (event.target === modal) {
+        closeUploadPaymentModal();
     }
 });
 </script>

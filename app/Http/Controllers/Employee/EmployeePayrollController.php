@@ -45,8 +45,9 @@ class EmployeePayrollController extends Controller
             ->join('customers as c', 'b.customer_id', '=', 'c.id')
             ->join('users as cu', 'c.user_id', '=', 'cu.id')
             ->join('services as s', 'b.service_id', '=', 's.id')
-            ->leftJoin('payment_proofs as pp', function($join) {
+            ->leftJoin('payment_proofs as pp', function($join) use ($employeeId) {
                 $join->on('b.id', '=', 'pp.booking_id')
+                     ->where('pp.employee_id', '=', $employeeId)
                      ->where('pp.status', '=', 'approved');
             })
             ->where('b.status', 'completed')
@@ -62,7 +63,12 @@ class EmployeePayrollController extends Controller
                 DB::raw("CONCAT(eu.first_name, ' ', eu.last_name) as employee_name"),
                 DB::raw("CONCAT(cu.first_name, ' ', cu.last_name) as customer_name"),
                 's.name as service_name',
-                'pp.amount as payment_amount'
+                'pp.amount as payment_amount',
+                'pp.payroll_code',
+                'pp.payroll_status',
+                'pp.payroll_amount',
+                'pp.payroll_proof',
+                'pp.payroll_method'
             ]);
         
         // Apply search functionality - search across booking code and customer name
@@ -173,18 +179,38 @@ class EmployeePayrollController extends Controller
         }
 
         // Calculate earnings summary for this month
-        // Employee receives fixed 600 per completed job
         $monthlyJobsCompleted = $payrollRecords
             ->where('completed_at', '>=', now()->startOfMonth())
             ->count();
         
-        // Employee earnings = 600 per job
-        $monthlyEarnings = 600 * $monthlyJobsCompleted;
+        // Calculate actual payroll earnings (only paid payrolls)
+        $monthlyEarnings = $payrollRecords
+            ->where('completed_at', '>=', now()->startOfMonth())
+            ->where('payroll_status', 'paid')
+            ->reduce(function($carry, $record) {
+                return $carry + ($record->payroll_amount ?? 600);
+            }, 0);
+
+        // Build payroll data for the payroll receipt modal
+        $payrollData = [];
+        foreach ($payrollRecords as $record) {
+            $payrollData[$record->booking_id] = [
+                'booking_code' => $record->booking_code,
+                'completed_date' => $record->completed_at ? \Carbon\Carbon::parse($record->completed_at)->format('M j, Y') : 'N/A',
+                'payroll_code' => $record->payroll_code,
+                'payroll_amount' => $record->payroll_amount,
+                'payroll_method' => $record->payroll_method,
+                'payroll_status' => $record->payroll_status ?? 'unpaid',
+                'payroll_proof' => $record->payroll_proof,
+            ];
+        }
+
 
         return view('employee.payroll', [
             'payrollRecords' => $payrollRecords,
             'serviceSummaries' => $serviceSummaries,
             'receiptData' => $receiptData,
+            'payrollData' => $payrollData,
             'monthlyEarnings' => $monthlyEarnings,
             'monthlyJobsCompleted' => $monthlyJobsCompleted,
             'search' => $search,

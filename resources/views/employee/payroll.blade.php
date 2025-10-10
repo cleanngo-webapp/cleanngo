@@ -86,7 +86,7 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Date</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Booking ID</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">Amount</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payment Method</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Payroll Method</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Actions</th>
                     </tr>
@@ -103,14 +103,14 @@
                             <div class="text-sm font-medium text-gray-900">{{ $record->booking_code }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">₱600.00</div>
+                            <div class="text-sm text-gray-900">{{ $record->payroll_amount ? '₱' . number_format($record->payroll_amount, 2) : 'N/A' }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ ucfirst($record->payment_method ?? 'N/A') }}</div>
+                            <div class="text-sm text-gray-900">{{ ucfirst($record->payroll_method ?? 'N/A') }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                {{ ucfirst($record->payment_status) }}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ ($record->payroll_status ?? 'unpaid') === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' }}">
+                                {{ ucfirst($record->payroll_status ?? 'unpaid') }}
                             </span>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
@@ -164,13 +164,12 @@
 
 </div>
 
-<!-- Receipt Modal Component -->
-@include('components.receipt-modal', [
-    'modalId' => 'employee-receipt-modal',
-    'receiptData' => $receiptData ?? [],
+<!-- Payroll Receipt Modal Component -->
+@include('components.payroll-receipt-modal', [
+    'modalId' => 'employee-payroll-receipt-modal',
+    'payrollData' => $payrollData ?? [],
     'bookingId' => null,
-    'title' => 'Receipt',
-    'showPaymentMethod' => true
+    'title' => 'Payroll Details'
 ])
 
 @endsection
@@ -290,17 +289,18 @@ function clearFilters() {
     performSearch();
 }
 
-// Receipt modal function for employee
+// Payroll receipt modal function for employee
 function openEmployeeReceipt(bookingId) {
-    // Get payment method from the payroll records data
+    // Only show receipt if payroll is paid
     const payrollRecords = @json($payrollRecords);
     const currentRecord = payrollRecords.find(r => r.booking_id == bookingId);
-    const paymentMethod = currentRecord ? currentRecord.payment_method : null;
     
-    openReceipt('employee-receipt-modal', bookingId, @json($receiptData ?? []), {
-        showPaymentMethod: true,
-        paymentMethod: paymentMethod
-    });
+    if (!currentRecord || currentRecord.payroll_status !== 'paid') {
+        alert('Payroll receipt will be available once payment is processed by admin.');
+        return;
+    }
+    
+    openPayrollReceipt('employee-payroll-receipt-modal', bookingId, @json($payrollData ?? []));
 }
 </script>
 @endpush

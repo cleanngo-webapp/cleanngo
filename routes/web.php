@@ -241,6 +241,7 @@ Route::middleware(['auth:admin','role:admin'])->prefix('admin')->name('admin.')-
     Route::put('/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
     Route::put('/settings/payment', [AdminSettingsController::class, 'updatePaymentSettings'])->name('settings.payment.update');
     Route::get('/payroll', [AdminPayrollController::class, 'index'])->name('payroll');
+    Route::post('/payroll/upload-payment', [AdminPayrollController::class, 'uploadPayment'])->name('payroll.upload-payment');
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/api', [AdminNotificationController::class, 'getNotifications'])->name('notifications.api');
     Route::get('/notifications/dropdown', [AdminNotificationController::class, 'getDropdownNotifications'])->name('notifications.dropdown');
