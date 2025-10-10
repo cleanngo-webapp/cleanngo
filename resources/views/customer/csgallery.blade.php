@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto pt-20">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-extrabold text-emerald-900">Our Work Gallery</h1>
+        <h1 class="text-3xl ml-2 font-extrabold text-emerald-900">Our Work Gallery</h1>
         <p class="text-gray-600">See the quality of our cleaning services</p>
     </div>
 
@@ -32,7 +32,7 @@
     @endif
 
     <!-- Services Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 p-5 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($services as $service)
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
                 

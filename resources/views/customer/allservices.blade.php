@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto pt-20">
-    <h1 class="text-2xl md:text-2xl font-extrabold text-emerald-900">OFFERED SERVICES</h1>
+    <h1 class="text-2xl ml-2 md:text-2xl font-extrabold text-emerald-900">OFFERED SERVICES</h1>
 
     <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
