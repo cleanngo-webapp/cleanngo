@@ -77,7 +77,7 @@
     </section>
     
 {{-- About Us --}}
-<section id="about-us" class="relative w-screen -mx-[calc(50vw-50%)] overflow-hidden h-[400px] md:h-[500px]">
+<section id="about-us" class="relative w-screen -mx-[calc(50vw-50%)] overflow-hidden h-[500px] md:h-[600px]">
     <!-- Background image -->
     <img src="{{ asset('assets/cs-dashboard-about.webp') }}" 
          alt="Fresh Spaces, Happy Faces" 
@@ -87,7 +87,7 @@
     <div class="absolute inset-0 bg-white/60"></div>
 
     <!-- Content overlaid on the background image -->
-    <div class="absolute inset-0 flex flex-col justify-center items-start mt-10 px-6 md:px-16 gap-4 text-left">
+    <div class="absolute inset-0 flex flex-col justify-start items-start px-6 md:px-16 py-8 md:py-0 md:justify-center gap-4 text-left">
         
         <!-- About Us small label -->
         <span class="text-emerald-600 font-semibold uppercase tracking-wide text-sm">
@@ -95,31 +95,31 @@
         </span>
 
         <!-- Heading -->
-        <h1 class="text-3xl md:text-5xl font-extrabold text-black max-w-3xl leading-snug">
+        <h1 class="text-2xl md:text-5xl font-extrabold text-black max-w-3xl leading-snug">
             Fresh Spaces, Happy Faces
         </h1>
 
         <!-- Paragraph -->
-        <p class="text-gray-700 max-w-2xl">
+        <p class="text-gray-700 text-sm md:text-base md:max-w-2xl">
             Cleansaver Naga is your trusted cleaning service provider in Naga City, Camarines Sur. 
             We take pride in helping homes and businesses achieve spotless spaces for a healthier 
             and more comfortable environment.
         </p>
 
-        <p class="text-gray-700 max-w-2xl">
+        <p class="text-gray-700 text-sm md:text-base md:max-w-2xl">
             Our dedicated team specializes in thorough cleaning methods, trusted and appreciated by 
             our growing number of satisfied clients.
         </p>
 
         <!-- Tagline -->
-        <p class="italic font-semibold text-gray-800 max-w-2xl">
+        <p class="italic font-semibold text-gray-800 text-sm md:text-base md:max-w-2xl">
             Choose Cleansaver Naga for the best results at the best value because you deserve a 
             cleaner tomorrow, today.
         </p>
 
         <!-- Call to Action -->
-        <div class="mt-6">
-            <a href="{{ route('register') }}" class="inline-block bg-brand-green text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-emerald-700 transition-colors">
+        <div class="mt-4 md:mt-6">
+            <a href="{{ route('register') }}" class="inline-block bg-brand-green text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-emerald-700 transition-colors text-sm md:text-base">
                 Join Our Community Today
             </a>
         </div>
