@@ -9,49 +9,125 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="min-h-screen bg-emerald-100 font-sans">
-    <header class="h-12 md:h-14 bg-emerald-900 text-white flex items-center justify-between px-4 fixed top-0 left-0 right-0 z-20">
-        <div class="flex items-center gap-4">
+    <nav class="bg-emerald-900 fixed top-0 left-0 right-0 z-50 shadow-lg backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto h-12 md:h-14 flex justify-between items-center px-4">
+            <!-- Logo -->
+            <div class="flex gap-4">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
-                <span class="font-semibold">CLEANSAVER NAGA</span>
-        </div>
-        <div class="flex items-center gap-4 text-white">
-            <div class="relative">
-                <button onclick="toggleNotificationDropdown()" class="relative hover:text-emerald-700 cursor-pointer transition-colors">
-                    <i class="ri-notification-3-line text-2xl"></i>
+                <span class="font-semibold text-white hidden sm:block">CLEANSAVER NAGA</span>
+            </div>
+    
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-4 text-white">
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown()" class="relative hover:text-emerald-700 cursor-pointer transition-colors">
+                        <i class="ri-notification-3-line text-2xl"></i>
+                        @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
+                            <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                                {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+                            </span>
+                        @endif
+                    </button>
+                    
+                    <!-- Notification Dropdown Modal -->
+                    <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                <button onclick="closeNotificationDropdown()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                    <i class="ri-close-line"></i>
+                                </button>
+                            </div>
+                            
+                            <div id="notification-dropdown-content" class="space-y-3 max-h-80 overflow-y-auto">
+                                <!-- Notifications will be loaded here via JavaScript -->
+                            </div>
+                            
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <a href="{{ route('employee.notifications') }}" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                                    View All Notifications
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ route('employee.profile.show') }}" class="hover:text-emerald-700 cursor-pointer transition-colors"><i class="ri-user-3-fill text-xl"></i></a>
+            </div>
+
+            <!-- Mobile Navigation Icons -->
+            <div class="md:hidden flex items-center gap-2">
+                <!-- Notification Icon with Count -->
+                <div class="relative">
+                    <button onclick="toggleNotificationDropdown()" class="relative text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700 transition-colors">
+                        <i class="ri-notification-3-line"></i>
                     @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
                         <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                             {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
                         </span>
                     @endif
-                </button>
-                
-                <!-- Notification Dropdown Modal -->
-                <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
-                    <div class="p-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-gray-900">Notifications</h3>
-                            <button onclick="closeNotificationDropdown()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                                <i class="ri-close-line"></i>
-                            </button>
-                        </div>
-                        
-                        <div id="notification-dropdown-content" class="space-y-3 max-h-80 overflow-y-auto">
-                            <!-- Notifications will be loaded here via JavaScript -->
-                        </div>
-                        
-                        <div class="mt-3 pt-3 border-t border-gray-100">
-                            <a href="{{ route('employee.notifications') }}" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
-                                View All Notifications
-                            </a>
+                    </button>
+                    
+                    <!-- Notification Dropdown Modal -->
+                    <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-900">Notifications</h3>
+                                <button onclick="closeNotificationDropdown()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                    <i class="ri-close-line"></i>
+                                </button>
+                            </div>
+                            
+                            <div id="notification-dropdown-content" class="space-y-3 max-h-80 overflow-y-auto">
+                                <!-- Notifications will be loaded here via JavaScript -->
+                            </div>
+                            
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <a href="{{ route('employee.notifications') }}" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+                                    View All Notifications
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Profile Icon -->
+                <a href="{{ route('employee.profile.show') }}" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
+                    <i class="ri-user-3-fill"></i>
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="text-white text-2xl p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <i id="mobile-menu-icon" class="ri-menu-line"></i>
+                </button>
             </div>
-            <a href="{{ route('employee.profile.show') }}" class="hover:text-emerald-700 cursor-pointer transition-colors"><i class="ri-user-3-fill text-xl"></i></a>
         </div>
-    </header>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-emerald-700 border-t border-white/20">
+            <div class="px-4 py-6 space-y-4">
+                <!-- Mobile Navigation Links -->
+                <a href="{{ route('employee.dashboard') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ request()->routeIs('employee.dashboard') ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Dashboard</a>
+                <a href="{{ route('employee.jobs') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ request()->routeIs('employee.jobs') ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">My Jobs</a>
+                <a href="{{ route('employee.payroll') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ request()->routeIs('employee.payroll') ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Payroll</a>
+                <a href="{{ route('employee.notifications') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ request()->routeIs('employee.notifications') ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Notifications</a>
+                <a href="{{ route('employee.profile.show') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ request()->routeIs('employee.profile.*') ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">My Profile</a>
+                <a href="{{ route('employee.settings') }}" onclick="closeMobileMenu()" class="block border rounded-full border-white px-4 py-3 text-center {{ request()->routeIs('employee.settings') ? 'bg-white text-emerald-700' : 'text-white hover:bg-white hover:text-emerald-700' }}">Settings</a>
+                
+                <!-- Mobile Logout -->
+                <div class="border-t border-white/20 pt-4">
+                    <form method="POST" action="{{ route('logout') }}" class="block">
+                        @csrf  
+                        <button type="submit" onclick="closeMobileMenu()" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
+                            <i class="ri-logout-box-line text-xl"></i>
+                            <span class="ml-2">Logout</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
     <div class="flex">
-        <aside class="w-56 bg-emerald-700 text-white fixed left-0 top-14 h-[calc(100vh-3.5rem)] overflow-y-auto z-10">
+        <aside class="hidden md:block w-56 bg-emerald-700 text-white fixed left-0 top-14 h-[calc(100vh-3.5rem)] overflow-y-auto z-10">
             <div class="bg-brand-green flex items-center gap-2 px-4 py-4 w-full">
                 <i class="ri-user-line"></i>
                 <span class=" text-white font-semibold">Hi, {{ auth()->user()->first_name }}!</span>
@@ -69,13 +145,54 @@
                 </form>
             </nav>
         </aside>
-        <main class="flex-1 p-6 ml-56 mt-14">
+        <main class="flex-1 p-6 md:ml-56 pt-20 md:pt-14">
             @yield('content')
         </main>
     </div>
 
-    <!-- Notification Dropdown JavaScript -->
+    <!-- Mobile Menu and Notification Dropdown JavaScript -->
     <script>
+        // Mobile menu functionality
+        let mobileMenuOpen = false;
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('mobile-menu-icon');
+            
+            if (mobileMenuOpen) {
+                closeMobileMenu();
+            } else {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.className = 'ri-close-line';
+                mobileMenuOpen = true;
+                
+                // Close mobile menu when clicking outside
+                setTimeout(() => {
+                    document.addEventListener('click', handleMobileMenuOutsideClick);
+                }, 100);
+            }
+        }
+
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('mobile-menu-icon');
+            
+            mobileMenu.classList.add('hidden');
+            menuIcon.className = 'ri-menu-line';
+            mobileMenuOpen = false;
+            document.removeEventListener('click', handleMobileMenuOutsideClick);
+        }
+
+        function handleMobileMenuOutsideClick(event) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuButton = event.target.closest('button[onclick="toggleMobileMenu()"]');
+            
+            if (!mobileMenu.contains(event.target) && !menuButton) {
+                closeMobileMenu();
+            }
+        }
+
+        // Notification dropdown functionality
         let notificationDropdownOpen = false;
         let notificationsLoaded = false;
 
