@@ -12,8 +12,8 @@
                     <i class="ri-notification-3-line text-2xl text-emerald-600"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
-                    <p class="text-sm text-gray-500">Stay updated with your job assignments and payment status</p>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">Notifications</h1>
+                    <p class="text-xs md:text-sm text-gray-500">Stay updated with your job assignments and payment status</p>
                 </div>
             </div>
             @if($unreadCount > 0)

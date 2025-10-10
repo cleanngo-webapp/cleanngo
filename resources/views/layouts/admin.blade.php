@@ -56,39 +56,15 @@
 
             <!-- Mobile Navigation Icons -->
             <div class="md:hidden flex items-center gap-2">
-                <!-- Notification Icon with Count -->
-                <div class="relative">
-                    <button onclick="toggleNotificationDropdown()" class="relative text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700 transition-colors">
-                        <i class="ri-notification-3-line"></i>
+                <!-- Notification Icon with Count - Mobile: Direct Link -->
+                <a href="{{ route('admin.notifications') }}" class="relative text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700 transition-colors">
+                    <i class="ri-notification-3-line"></i>
                     @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
                         <span class="notification-badge absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                             {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
                         </span>
                     @endif
-                    </button>
-                    
-                    <!-- Notification Dropdown Modal -->
-                    <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
-                        <div class="p-4">
-                            <div class="flex items-center justify-between mb-3">
-                                <h3 class="font-semibold text-gray-900">Notifications</h3>
-                                <button onclick="closeNotificationDropdown()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                                    <i class="ri-close-line"></i>
-                                </button>
-                            </div>
-                            
-                            <div id="notification-dropdown-content" class="space-y-3 max-h-80 overflow-y-auto">
-                                <!-- Notifications will be loaded here via JavaScript -->
-                            </div>
-                            
-                            <div class="mt-3 pt-3 border-t border-gray-100">
-                                <a href="{{ route('admin.notifications') }}" class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
-                                    View All Notifications
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </a>
 
                 <!-- Mobile Menu Button -->
                 <button onclick="toggleMobileMenu()" class="text-white text-2xl p-2 hover:bg-white/10 rounded-lg transition-colors">
