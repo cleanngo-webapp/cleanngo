@@ -55,11 +55,40 @@
 @endpush
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-bold text-center">Manage Bookings</h1>
+{{-- Mobile-specific styles for bookings page responsiveness --}}
+<style>
+	/* Mobile responsive styles for bookings page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#create-booking-modal .bg-white {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#create-booking-modal .grid-cols-1 {
+			grid-template-columns: 1fr !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		#bookings-table-container {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex-wrap .inline-flex {
+			min-height: 2.5rem;
+		}
+	}
+</style>
 
-    {{-- Stats Cards Section --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+<div class="max-w-6xl mx-auto px-2 sm:px-0">
+    <h1 class="text-2xl sm:text-3xl font-bold text-center">Manage Bookings</h1>
+
+    {{-- Stats Cards Section - Responsive grid layout --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
                 {{-- Total Bookings Card --}}
                 <div class="bg-white rounded-xl p-7 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
@@ -125,10 +154,11 @@
                 </div>
     </div>
 
-    {{-- Search and Sort Section --}}
+    {{-- Search and Sort Section - Responsive layout --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center gap-4">
+        <div class="p-4 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="search-bookings" 
@@ -136,26 +166,30 @@
                            placeholder="Search bookings by ID, Customer Name, or Employee" 
                            class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
-                <div class="flex gap-2">
+                {{-- Mobile: Full width buttons, Desktop: Compact buttons --}}
+                <div class="flex flex-col sm:flex-row gap-2">
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'scheduled_start' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'scheduled_start' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('scheduled_start')">
                         <i class="ri-calendar-line mr-2"></i>
-                        Sort by Date
+                        <span class="hidden sm:inline">Sort by Date</span>
+                        <span class="sm:hidden">Date</span>
                         <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'scheduled_start' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'customer_name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'customer_name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('customer_name')">
                         <i class="ri-user-line mr-2"></i>
-                        Sort by Customer
+                        <span class="hidden sm:inline">Sort by Customer</span>
+                        <span class="sm:hidden">Customer</span>
                         <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'customer_name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'status' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'status' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('status')">
                         <i class="ri-flag-line mr-2"></i>
-                        Sort by Status
+                        <span class="hidden sm:inline">Sort by Status</span>
+                        <span class="sm:hidden">Status</span>
                         <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'status' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
                     </button>
                 </div>
@@ -163,28 +197,214 @@
         </div>
     </div>
 
-    {{-- Booking Records Section --}}
+    {{-- Booking Records Section - Responsive header --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 mt-4">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center justify-between">
+        <div class="p-4 sm:p-6 border-b border-gray-100">
+            {{-- Mobile: Stacked layout, Desktop: Side by side --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Booking Records</h2>
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Booking Records</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage all customer bookings and assignments</p>
                 </div>
-                <div class="flex items-center gap-3">
+                {{-- Mobile: Full width buttons, Desktop: Compact buttons --}}
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                     <a href="{{ route('admin.completed-bookings') }}" 
-                       class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                       class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer text-center">
                         <i class="ri-checkbox-circle-line mr-2"></i>
-                        View Completed Bookings
+                        <span class="hidden sm:inline">View Completed Bookings</span>
+                        <span class="sm:hidden">Completed Bookings</span>
                     </a>
                     <button class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer" onclick="document.getElementById('create-booking-modal').classList.remove('hidden')">
-                        <i class="ri-add-line"></i>
+                        <i class="ri-add-line mr-2"></i>
                         Add Booking
                     </button>
                 </div>
             </div>
         </div>
-        <div id="bookings-table-container" class="overflow-x-auto">
+        {{-- Mobile Card View (hidden on larger screens) --}}
+        <div class="block sm:hidden">
+            @forelse($bookings as $b)
+            <div class="p-4 border-b border-gray-100 last:border-b-0" data-booking-id="{{ $b->id }}">
+                <div class="space-y-3">
+                    {{-- Booking Header --}}
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium text-gray-900">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</div>
+                        @if($b->status === 'pending')
+                            {{-- Show confirmation buttons for pending bookings --}}
+                            <div class="flex gap-2">
+                                @php
+                                    $bookingEmployees = $assignedEmployees->get($b->id, collect());
+                                    $hasEmployees = $bookingEmployees->isNotEmpty();
+                                @endphp
+                                <button id="confirm-btn-{{ $b->id }}" 
+                                        class="px-3 py-1 text-xs rounded transition-colors {{ $hasEmployees ? 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer' : 'bg-gray-400 text-gray-200 cursor-not-allowed' }}" 
+                                        onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'confirm')"
+                                        {{ $hasEmployees ? '' : 'disabled title="Please assign an employee first"' }}>
+                                    Confirm
+                                </button>
+                                <button id="cancel-btn-{{ $b->id }}" class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors cursor-pointer" 
+                                        onclick="openConfirmModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', 'cancel')">
+                                    Cancel
+                                </button>
+                            </div>
+                        @else
+                            {{-- Show status with colored span --}}
+                            @php
+                                $statusClasses = [
+                                    'confirmed' => 'bg-blue-100 text-blue-800',
+                                    'in_progress' => 'bg-purple-100 text-purple-800',
+                                    'completed' => 'bg-green-100 text-green-800',
+                                    'cancelled' => 'bg-red-100 text-red-800'
+                                ];
+                                $statusClass = $statusClasses[$b->status] ?? 'bg-gray-100 text-gray-800';
+                            @endphp
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusClass }}">
+                                {{ $b->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $b->status)) }}
+                            </span>
+                        @endif
+                    </div>
+                    
+                    {{-- Customer and Date Info --}}
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Customer</div>
+                            <div class="text-sm text-gray-900">{{ $b->customer_name ?? '—' }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Date & Time</div>
+                            <div class="text-sm text-gray-900">
+                                {{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y g:i A') : '—' }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {{-- Assigned Employees --}}
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wider mb-1">Assigned Employees</div>
+                        @if($b->status === 'cancelled')
+                            <div class="text-sm text-gray-500 italic">Booking cancelled</div>
+                        @else
+                            @php
+                                $bookingEmployees = $assignedEmployees->get($b->id, collect());
+                            @endphp
+                            @if($bookingEmployees->isNotEmpty())
+                                <div class="space-y-1">
+                                    @foreach($bookingEmployees as $employee)
+                                        <div class="flex items-center text-sm text-gray-700">
+                                            <i class="ri-user-line text-gray-400 mr-1"></i>
+                                            <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
+                                        </div>
+                                    @endforeach
+                                    @if($b->status === 'pending')
+                                        <button onclick="openAssignModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', '{{ $b->scheduled_start }}')" 
+                                                class="text-xs text-emerald-600 hover:text-emerald-800 underline">
+                                            Edit Assignment
+                                        </button>
+                                    @endif
+                                </div>
+                            @else
+                                <div class="flex items-center gap-1">
+                                    <span class="text-sm text-gray-500 italic">No employee assigned</span>
+                                    @if($b->status === 'pending')
+                                        <button onclick="openAssignModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}', '{{ $b->scheduled_start }}')" 
+                                                class="ml-2 text-xs text-emerald-600 hover:text-emerald-800 underline">
+                                            Assign
+                                        </button>
+                                    @endif
+                                </div>
+                            @endif
+                        @endif
+                    </div>
+                    
+                    {{-- Payment Proof and Actions --}}
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-1">Payment</div>
+                            @if($b->status === 'in_progress' || $b->status === 'completed')
+                                @if($b->payment_proof_id)
+                                    <button class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full
+                                        @php
+                                            $paymentStatusClasses = [
+                                                'approved' => 'bg-green-100 text-green-800',
+                                                'declined' => 'bg-red-100 text-red-800',
+                                                'pending' => 'bg-yellow-100 text-yellow-800'
+                                            ];
+                                            $paymentStatusClass = $paymentStatusClasses[$b->payment_status] ?? 'bg-yellow-100 text-yellow-800';
+                                        @endphp
+                                        {{ $paymentStatusClass }}
+                                        hover:opacity-80 transition-colors cursor-pointer"
+                                        onclick="openPaymentProofModal({{ $b->payment_proof_id }})" 
+                                        title="View payment proof">
+                                        <i class="ri-receipt-line mr-1"></i>
+                                        @if($b->payment_status === 'approved')
+                                            Approved
+                                        @elseif($b->payment_status === 'declined')
+                                            Declined
+                                        @else
+                                            View Payment
+                                        @endif
+                                    </button>
+                                @else
+                                    <span class="text-xs text-gray-500 italic">No proof uploaded</span>
+                                @endif
+                            @else
+                                <span class="text-xs text-gray-400">—</span>
+                            @endif
+                        </div>
+                        
+                        {{-- Actions --}}
+                        <div class="flex gap-2">
+                            @if($b->status === 'confirmed')
+                                <button type="button" class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded-md text-red-600 hover:bg-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer" onclick="openCancelBookingModal({{ $b->id }}, '{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}')" title="Cancel Booking">
+                                    <i class="ri-close-line mr-1"></i>
+                                    Cancel
+                                </button>
+                            @endif
+                            <button type="button" class="inline-flex items-center px-3 py-1.5 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" onclick="openBookingInfoModal('admin-booking-info-modal', {{ $b->id }}, 'admin')" title="View Booking Information">
+                                <i class="ri-information-line mr-1"></i>
+                                Info
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-8 text-center">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Empty State Icon -->
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="ri-calendar-line text-2xl text-gray-400"></i>
+                    </div>
+                    
+                    <!-- Empty State Content -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Bookings Found</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            @if(request()->has('search') || request()->has('status') || request()->has('date_from') || request()->has('date_to'))
+                                No bookings match your current filters. Try adjusting your search criteria.
+                            @else
+                                Get started by creating your first booking or wait for customers to make bookings.
+                            @endif
+                        </p>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex items-center justify-center space-x-3">
+                            @if(request()->has('search') || request()->has('status') || request()->has('date_from') || request()->has('date_to'))
+                                <button onclick="clearFilters()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                    <i class="ri-refresh-line mr-2"></i>
+                                    Clear Filters
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforelse
+        </div>
+        
+        {{-- Desktop Table View (hidden on mobile) --}}
+        <div class="hidden sm:block overflow-x-auto">
             <table id="bookings-table" class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -372,7 +592,7 @@
                 </tbody>
             </table>
         </div>
-        <div id="pagination-container" class="px-6 py-4 border-t border-gray-100">
+        <div id="pagination-container" class="px-4 sm:px-6 py-4 border-t border-gray-100">
             {{ $bookings->links() }}
         </div>
     </div>
