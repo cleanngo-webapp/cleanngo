@@ -2323,8 +2323,8 @@ function closeBorrowedItemsModal() {
 </style>
 
 {{-- Employee Equipment Modal - Mobile responsive --}}
-<div id="equipment-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-2 sm:top-4 mx-auto p-0 border w-full max-w-sm sm:max-w-2xl lg:max-w-4xl shadow-2xl rounded-lg bg-white m-2 sm:m-4" style="max-height: calc(100vh - 1rem);">
+<div id="equipment-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-2 sm:p-4">
+    <div class="relative p-0 border w-full max-w-sm sm:max-w-2xl lg:max-w-4xl shadow-2xl rounded-lg bg-white" style="max-height: calc(100vh - 2rem);">
         <div class="flex flex-col h-full">
             <!-- Header - Fixed at top -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-6 border-b border-gray-200 flex-shrink-0 bg-white relative z-10 gap-2">
