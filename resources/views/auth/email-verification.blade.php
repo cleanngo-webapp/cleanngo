@@ -19,6 +19,9 @@
 		@if (session('success'))
 			<div class="mt-4 p-3 bg-green-100 text-green-700 rounded">
 				{{ session('success') }}
+				<p class="mt-2 text-sm text-green-600">
+					💡 <strong>Tip:</strong> If you don't see the email, please check your spam/junk folder.
+				</p>
 			</div>
 		@endif
 
