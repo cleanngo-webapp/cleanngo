@@ -592,10 +592,10 @@
                                     <option value="sofa_8">8 seater</option>
                                 </optgroup>
                                 <optgroup label="Mattress Types">
-                                    <option value="mattress_single">Single bed</option>
-                                    <option value="mattress_double">Double bed</option>
-                                    <option value="mattress_king">King bed</option>
-                                    <option value="mattress_california">California bed</option>
+                                    <option value="mattress_single">Single</option>
+                                    <option value="mattress_double">Double</option>
+                                    <option value="mattress_queen">Queen</option>
+                                    <option value="mattress_king">King</option>
                                 </optgroup>
                             </select>
                             <div id="admin-sofa-quantity-selector" class="hidden mt-3">
@@ -2727,10 +2727,10 @@
                     <option value="sofa_8">8 seater</option>
                 </optgroup>
                 <optgroup label="Mattress Types">
-                    <option value="mattress_single">Single bed</option>
-                    <option value="mattress_double">Double bed</option>
-                    <option value="mattress_king">King bed</option>
-                    <option value="mattress_california">California bed</option>
+                    <option value="mattress_single">Single</option>
+                    <option value="mattress_double">Double</option>
+                    <option value="mattress_queen">Queen</option>
+                    <option value="mattress_king">King</option>
                 </optgroup>
             `;
         } else if (serviceName === 'car') {
@@ -2852,8 +2852,8 @@
 
         // Mattress pricing
         const mattressPrices = {
-                    'mattress_single': 1200, 'mattress_double': 1500, 
-                    'mattress_king': 1800, 'mattress_california': 2000
+                    'mattress_single': 950, 'mattress_double': 1100, 
+                    'mattress_queen': 1350, 'mattress_king': 1450
                 };
                 
                 const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
@@ -2902,8 +2902,8 @@
                 
                 // Mattress pricing
                 const mattressPrices = {
-                    'mattress_single': 1200, 'mattress_double': 1500, 
-                    'mattress_king': 1800, 'mattress_california': 2000
+                    'mattress_single': 950, 'mattress_double': 1100, 
+                    'mattress_queen': 1350, 'mattress_king': 1450
                 };
                 
                 const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
@@ -3384,8 +3384,8 @@
                 
                 // Mattress pricing
                 const mattressPrices = {
-                    'mattress_single': 1200, 'mattress_double': 1500, 
-                    'mattress_king': 1800, 'mattress_california': 2000
+                    'mattress_single': 950, 'mattress_double': 1100, 
+                    'mattress_queen': 1350, 'mattress_king': 1450
                 };
                 
                 const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
@@ -3413,8 +3413,8 @@
                 
                 // Mattress pricing
                 const mattressPrices = {
-                    'mattress_single': 1200, 'mattress_double': 1500, 
-                    'mattress_king': 1800, 'mattress_california': 2000
+                    'mattress_single': 950, 'mattress_double': 1100, 
+                    'mattress_queen': 1350, 'mattress_king': 1450
                 };
                 
                 const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;

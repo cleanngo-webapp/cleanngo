@@ -31,7 +31,7 @@
                 <!-- All Types Dropdown -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Select Type</label>
-                    <select id="sofa-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30">
+                    <select id="sofa-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30" style="position: relative; z-index: 10;">
                         <option value="">Choose type...</option>
                         <optgroup label="Sofa Types">
                             <option value="sofa_1">1 seater</option>
@@ -44,10 +44,10 @@
                             <option value="sofa_8">8 seater</option>
                         </optgroup>
                         <optgroup label="Mattress Types">
-                            <option value="mattress_single">Single bed</option>
-                            <option value="mattress_double">Double bed</option>
-                            <option value="mattress_king">King bed</option>
-                            <option value="mattress_california">California bed</option>
+                            <option value="mattress_single">Single</option>
+                            <option value="mattress_double">Double</option>
+                            <option value="mattress_queen">Queen</option>
+                            <option value="mattress_king">King</option>
                         </optgroup>
                     </select>
                     
@@ -103,7 +103,7 @@
                 <!-- Vehicle Type Dropdown -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Select Vehicle Type</label>
-                    <select id="car-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30">
+                    <select id="car-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30" style="position: relative; z-index: 10;">
                         <option value="">Choose vehicle type...</option>
                         <option value="car_sedan">Sedan</option>
                         <option value="car_suv">SUV</option>
@@ -268,6 +268,61 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <style>
+/* Ensure select dropdowns appear below the element */
+select {
+    position: relative;
+    z-index: 10;
+}
+
+/* Force dropdown to appear below on focus */
+select:focus {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Additional styling for select elements to ensure proper dropdown positioning */
+select option {
+    position: relative;
+    z-index: 1001;
+}
+
+/* Specific styling for additional type selects */
+.additional-type-select {
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.additional-type-select:focus {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+/* Force dropdowns to appear below by ensuring container has sufficient space */
+#sofa-additional-items,
+#car-additional-items {
+    min-height: 300px !important;
+    padding-bottom: 150px !important;
+}
+
+/* Ensure each additional item has enough space below it */
+.additional-item {
+    margin-bottom: 100px !important;
+}
+
+/* Override for the last item to prevent excessive spacing */
+.additional-item:last-child {
+    margin-bottom: 20px !important;
+}
+
+/* Force select elements to have enough space below them */
+.additional-type-select {
+    margin-bottom: 100px !important;
+}
+
+.additional-type-select:last-child {
+    margin-bottom: 0 !important;
+}
+
 /* Modern Quantity Control Styles */
 .quantity-btn {
     @apply w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-all duration-200 ease-in-out;
@@ -455,10 +510,10 @@ function addAdditionalItem(serviceName) {
                 <option value="sofa_8">8 seater</option>
             </optgroup>
             <optgroup label="Mattress Types">
-                <option value="mattress_single">Single bed</option>
-                <option value="mattress_double">Double bed</option>
-                <option value="mattress_king">King bed</option>
-                <option value="mattress_california">California bed</option>
+                <option value="mattress_single">Single</option>
+                <option value="mattress_double">Double</option>
+                <option value="mattress_queen">Queen</option>
+                <option value="mattress_king">King</option>
             </optgroup>
         `;
     } else if (serviceName === 'car') {
@@ -485,7 +540,7 @@ function addAdditionalItem(serviceName) {
     const itemHtml = `
         <div class="mb-4 additional-item" data-item-id="${itemId}">
             <label class="block text-sm font-medium mb-2">Select Additional Type</label>
-            <select class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 additional-type-select">
+            <select class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 additional-type-select" style="position: relative; z-index: 10;">
                 <option value="">Choose additional type...</option>
                 ${optionsHtml}
             </select>
@@ -698,10 +753,10 @@ function calc(){
   
   // Mattress pricing
   const mattressPrices = {
-    'mattress_single': 1200,     // Single bed
-    'mattress_double': 1500,     // Double bed
-    'mattress_king': 1800,       // King bed
-    'mattress_california': 2000  // California bed
+    'mattress_single': 950,      // Single
+    'mattress_double': 1100,     // Double
+    'mattress_queen': 1350,      // Queen
+    'mattress_king': 1450        // King
   };
   
   // Primary selection
@@ -1076,8 +1131,8 @@ function openBookingForm(){
       
       // Mattress pricing
       const mattressPrices = {
-        'mattress_single': 1200, 'mattress_double': 1500, 
-        'mattress_king': 1800, 'mattress_california': 2000
+        'mattress_single': 950, 'mattress_double': 1100, 
+        'mattress_queen': 1350, 'mattress_king': 1450
       };
       
       const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
@@ -1105,8 +1160,8 @@ function openBookingForm(){
       
       // Mattress pricing
       const mattressPrices = {
-        'mattress_single': 1200, 'mattress_double': 1500, 
-        'mattress_king': 1800, 'mattress_california': 2000
+        'mattress_single': 950, 'mattress_double': 1100, 
+        'mattress_queen': 1350, 'mattress_king': 1450
       };
       
       const price = sofaPrices[selectedType] || mattressPrices[selectedType] || 0;
