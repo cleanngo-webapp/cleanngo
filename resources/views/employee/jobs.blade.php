@@ -872,8 +872,7 @@ let jobMap, jobMarker;
 function openEmpLocation(payload){
     const lat = payload?.lat ?? 0, lng = payload?.lng ?? 0;
     const modal = document.getElementById('job-map-modal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
     const addr = document.getElementById('empLocationAddress');
     const phone = document.getElementById('empLocationPhone');
     // find address and phone from server-provided locationsData if available
@@ -911,14 +910,12 @@ function openPaymentModal(bookingId) {
     const modal = document.getElementById('payment-modal');
     const form = document.getElementById('payment-form');
     form.action = `/employee/payment-proof/${bookingId}/upload`;
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
 }
 
 function closePaymentModal() {
     const modal = document.getElementById('payment-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.style.display = 'none';
     currentBookingId = null;
     // Reset form
     document.getElementById('payment-form').reset();
@@ -1527,8 +1524,7 @@ function openEmpBookingPhotos(bookingId) {
             <p class="text-gray-500 text-sm">Loading booking photos...</p>
         </div>
     `;
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
     
     // Fetch booking photos
     fetch(`/employee/bookings/${bookingId}/photos`)
@@ -1585,8 +1581,7 @@ function openEmpBookingPhotos(bookingId) {
 
 function closeEmpBookingPhotosModal() {
     const modal = document.getElementById('emp-booking-photos-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.style.display = 'none';
     currentEmpBookingPhotos = null;
 }
 
@@ -1651,8 +1646,7 @@ function getEquipment(bookingId) {
         </div>
     `;
     
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
     
     // Fetch available inventory items
     fetch('/employee/inventory/available')
@@ -2061,8 +2055,7 @@ function submitEquipmentRequest() {
 
 function closeEquipmentModal() {
     const modal = document.getElementById('equipment-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.style.display = 'none';
     
     // Reset selected equipment
     selectedEquipmentList = [];
@@ -2211,8 +2204,7 @@ function openBorrowedItemsModal(bookingId) {
         </div>
     `;
     
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
     
     // Fetch borrowed items for this booking
     fetch(`/employee/jobs/${bookingId}/borrowed-items`, {
@@ -2283,8 +2275,7 @@ function openBorrowedItemsModal(bookingId) {
 
 function closeBorrowedItemsModal() {
     const modal = document.getElementById('borrowed-items-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    modal.style.display = 'none';
 }
 </script>
 
@@ -2323,7 +2314,7 @@ function closeBorrowedItemsModal() {
 </style>
 
 {{-- Employee Equipment Modal - Mobile responsive --}}
-<div id="equipment-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-2 sm:p-4">
+<div id="equipment-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50 items-center justify-center p-2 sm:p-4" style="display: none;">
     <div class="relative p-0 border w-full max-w-sm sm:max-w-2xl lg:max-w-4xl shadow-2xl rounded-lg bg-white" style="max-height: calc(100vh - 2rem);">
         <div class="flex flex-col h-full">
             <!-- Header - Fixed at top -->
