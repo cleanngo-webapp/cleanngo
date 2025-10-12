@@ -7,35 +7,6 @@
 @endpush
 
 @section('content')
-{{-- Mobile-specific styles for bookings page responsiveness --}}
-<style>
-	/* Mobile responsive styles for bookings page */
-	@media (max-width: 640px) {
-		/* Ensure modals are mobile-friendly */
-		#create-booking-modal .bg-white {
-			width: 95vw !important;
-			max-width: 95vw !important;
-			margin: 0.5rem !important;
-		}
-		
-		/* Make modal content stack vertically on mobile */
-		#create-booking-modal .grid-cols-1 {
-			grid-template-columns: 1fr !important;
-		}
-		
-		/* Ensure table doesn't cause horizontal overflow */
-		#bookings-table-container {
-			overflow-x: auto;
-			-webkit-overflow-scrolling: touch;
-		}
-		
-		/* Make action buttons more touch-friendly */
-		.flex-wrap .inline-flex {
-			min-height: 2.5rem;
-		}
-	}
-</style>
-
 <div class="max-w-6xl mx-auto px-2 sm:px-0">
     <h1 class="text-2xl sm:text-3xl font-bold text-center">Manage Bookings</h1>
 
@@ -835,7 +806,7 @@
                                 <input type="text" id="admin-time-picker" name="time" readonly placeholder="Select time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
                                 <i class="ri-time-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
                                 <!-- Custom Time Picker -->
-                                <div id="admin-time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden" style="width: 160px;">
+                                <div id="admin-time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden" style="width: 170px;">
                                     <div class="flex items-center justify-center gap-1 mb-3">
                                         <input type="text" id="admin-hour-input" placeholder="HH" maxlength="2" class="border border-gray-300 rounded px-1 py-1 text-center w-12 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                                         <span class="text-gray-500 text-sm">:</span>
@@ -4267,6 +4238,35 @@
         'modalId' => 'admin-booking-info-modal'
     ])
 </div>
+
+{{-- Mobile-specific styles for bookings page responsiveness --}}
+<style>
+	/* Mobile responsive styles for bookings page */
+	@media (max-width: 640px) {
+		/* Ensure modals are mobile-friendly */
+		#create-booking-modal .bg-white {
+			width: 95vw !important;
+			max-width: 95vw !important;
+			margin: 0.5rem !important;
+		}
+		
+		/* Make modal content stack vertically on mobile */
+		#create-booking-modal .grid-cols-1 {
+			grid-template-columns: 1fr !important;
+		}
+		
+		/* Ensure table doesn't cause horizontal overflow */
+		#bookings-table-container {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		
+		/* Make action buttons more touch-friendly */
+		.flex-wrap .inline-flex {
+			min-height: 2.5rem;
+		}
+	}
+</style>
 
 {{-- Admin Booking Modal Styles - Moved from head section --}}
 <style>

@@ -1299,12 +1299,12 @@ function openBookingForm(){
           <input type="text" id="time-picker" name="time" readonly placeholder="Select time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
           <i class="ri-time-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
           <!-- Custom Time Picker -->
-          <div id="time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-4 hidden" style="width: 200px;">
-            <div class="flex items-center justify-center gap-2 mb-3">
-              <input type="text" id="hour-input" placeholder="HH" maxlength="2" class="border border-gray-300 rounded px-2 py-1 text-center w-16 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-              <span class="text-gray-500">:</span>
-              <input type="text" id="minute-input" placeholder="MM" maxlength="2" class="border border-gray-300 rounded px-2 py-1 text-center w-16 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-              <select id="ampm-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+          <div id="time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden" style="width: 160px;">
+            <div class="flex items-center justify-center gap-1 mb-3">
+              <input type="text" id="hour-input" placeholder="HH" maxlength="2" class="border border-gray-300 rounded px-1 py-1 text-center w-12 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <span class="text-gray-500 text-sm">:</span>
+              <input type="text" id="minute-input" placeholder="MM" maxlength="2" class="border border-gray-300 rounded px-1 py-1 text-center w-12 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+              <select id="ampm-select" class="border border-gray-300 rounded px-1 py-1 text-center w-12 text-sm">
                 <option value="">--</option>
                 <option value="AM">AM</option>
                 <option value="PM">PM</option>
@@ -1631,17 +1631,22 @@ function openBookingForm(){
         // Update time options based on selected date
         updateTimeOptions();
         
-        // Position time picker directly below the input with fixed positioning
+        // Position time picker directly below the input with mobile-friendly constraints
         const inputRect = timeInput.getBoundingClientRect();
-        const timePickerWidth = inputRect.width; // Use the same width as the input field
-        const timePickerHeight = 120;
+        const modal = timeInput.closest('.modal, [role="dialog"]');
+        const modalRect = modal ? modal.getBoundingClientRect() : null;
         
-        // Position directly below the input field
         let top = inputRect.bottom + 4;
         let left = inputRect.left;
+        const timePickerWidth = 160; // Fixed width for consistency
         
-        // Adjust if time picker would go off right edge
-        if (left + timePickerWidth > window.innerWidth) {
+        // Adjust if time picker would go off right edge of modal or viewport
+        if (modalRect) {
+          const maxRight = Math.min(modalRect.right, window.innerWidth) - 10;
+          if (left + timePickerWidth > maxRight) {
+            left = maxRight - timePickerWidth;
+          }
+        } else if (left + timePickerWidth > window.innerWidth - 10) {
           left = window.innerWidth - timePickerWidth - 10;
         }
         
@@ -1650,7 +1655,17 @@ function openBookingForm(){
           left = 10;
         }
         
-        // Apply fixed positioning - always below the input
+        // Adjust if time picker would go off bottom of modal or viewport
+        if (modalRect) {
+          const maxBottom = Math.min(modalRect.bottom, window.innerHeight) - 10;
+          if (top + 80 > maxBottom) {
+            top = inputRect.top - 85; // Position above the input instead
+          }
+        } else if (top + 80 > window.innerHeight - 10) {
+          top = inputRect.top - 85; // Position above the input instead
+        }
+        
+        // Apply fixed positioning
         timeDropdown.style.position = 'fixed';
         timeDropdown.style.top = top + 'px';
         timeDropdown.style.left = left + 'px';
