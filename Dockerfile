@@ -48,9 +48,16 @@
     # Copy built assets from vite-builder
     COPY --from=vite-builder /app/public/build ./public/build
     
+    # Create storage symlink for public access to uploaded files
+    RUN php artisan storage:link || ln -sf /var/www/html/storage/app/public /var/www/html/public/storage
+    
+    # Copy and make entrypoint script executable
+    COPY docker-entrypoint.sh /usr/local/bin/
+    RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+    
     # Permissions for storage and cache
     RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
     
     EXPOSE 80
-    CMD ["apache2-foreground"]
+    CMD ["/usr/local/bin/docker-entrypoint.sh"]
     
