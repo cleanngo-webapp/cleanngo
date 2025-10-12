@@ -29,10 +29,6 @@ class EmailVerificationController extends Controller
             return redirect()->route('register')->with('error', 'Email address is required for verification.');
         }
 
-        // Clear any existing OTP session data to ensure fresh start
-
-        $request->session()->forget('otp_sent');
-
         return view('auth.email-verification', compact('email'));
     }
 
