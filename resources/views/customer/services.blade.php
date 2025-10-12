@@ -1294,36 +1294,55 @@ function openBookingForm(){
             </div>
           </div>
         </div>
-        <div class="relative">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
-          <input type="text" id="time-picker" name="time" readonly placeholder="Select time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
-          <i class="ri-time-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
-          <!-- Custom Time Picker -->
-          <div id="time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-4 hidden" style="width: 200px;">
-            <div class="flex items-center justify-center gap-2 mb-3">
-              <select id="ampm-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+        <div class="space-y-3">
+          <label class="block text-sm font-medium text-gray-700">Time</label>
+          <div class="flex items-end gap-2">
+            <!-- Hour Input -->
+            <div class="w-16">
+              <label class="block text-xs text-gray-500 mb-1">Hour</label>
+              <input type="text" 
+                     id="hour-input" 
+                     name="hour" 
+                     placeholder="HH" 
+                     maxlength="2"
+                     class="border border-gray-300 rounded px-2 py-2 w-full text-center text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                     required>
+            </div>
+            
+            <!-- Colon Separator -->
+            <div class="flex items-center pb-2">
+              <span class="text-gray-500 text-lg">:</span>
+            </div>
+            
+            <!-- Minute Input -->
+            <div class="w-16">
+              <label class="block text-xs text-gray-500 mb-1">Minute</label>
+              <input type="text" 
+                     id="minute-input" 
+                     name="minute" 
+                     placeholder="MM" 
+                     maxlength="2"
+                     class="border border-gray-300 rounded px-2 py-2 w-full text-center text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                     required>
+            </div>
+            
+            <!-- AM/PM Selector -->
+            <div class="w-20">
+              <label class="block text-xs text-gray-500 mb-1">Period</label>
+              <select id="ampm-select" 
+                      name="ampm" 
+                      class="border border-gray-300 rounded px-2 py-2 w-full text-center text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                      required>
                 <option value="">--</option>
                 <option value="AM">AM</option>
                 <option value="PM">PM</option>
               </select>
-              <select id="hour-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
-                <option value="">--</option>
-                @for($i = 1; $i <= 12; $i++)
-                  <option value="{{ $i }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                @endfor
-              </select>
-              <span class="text-gray-500">:</span>
-              <select id="minute-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
-                <option value="">--</option>
-                @for($i = 0; $i < 60; $i += 10)
-                  <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                @endfor
-              </select>
             </div>
-            <div class="flex justify-between pt-3 border-t">
-              <button type="button" id="clear-time" class="text-sm text-gray-500 hover:text-gray-700 cursor-pointer">Clear</button>
-              <button type="button" id="apply-time" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium cursor-pointer">Apply</button>
-            </div>
+          </div>
+          
+          <!-- Time Display -->
+          <div class="text-center">
+            <span id="time-display" class="text-sm text-gray-600 font-medium"></span>
           </div>
         </div>
       </div>
@@ -1552,156 +1571,93 @@ function openBookingForm(){
     clearTimeSelection();
   }
 
-  // Function to update time options based on selected date
-  function updateTimeOptions() {
-    const hourSelect = document.getElementById('hour-select');
-    const minuteSelect = document.getElementById('minute-select');
-    const ampmSelect = document.getElementById('ampm-select');
-    
-    if (!hourSelect || !minuteSelect || !ampmSelect) return;
-    
-    // Clear existing options
-    hourSelect.innerHTML = '<option value="">--</option>';
-    minuteSelect.innerHTML = '<option value="">--</option>';
-    ampmSelect.innerHTML = '<option value="">--</option>';
-    
-    // Add AM/PM options
-    ampmSelect.innerHTML += '<option value="AM">AM</option><option value="PM">PM</option>';
-  }
-
-  // Function to update hour options based on selected AM/PM
-  function updateHourOptions() {
-    const hourSelect = document.getElementById('hour-select');
-    const minuteSelect = document.getElementById('minute-select');
-    const ampmSelect = document.getElementById('ampm-select');
-    
-    if (!hourSelect || !minuteSelect || !ampmSelect) return;
-    
-    const selectedAMPM = ampmSelect.value;
-    
-    if (!selectedAMPM) {
-      // Clear hour and minute options if AM/PM not selected
-      hourSelect.innerHTML = '<option value="">--</option>';
-      minuteSelect.innerHTML = '<option value="">--</option>';
-      return;
-    }
-    
-    // Get current time
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    
-    // Check if selected date is today
-    const isToday = selectedDate && 
-      selectedDate.getDate() === now.getDate() &&
-      selectedDate.getMonth() === now.getMonth() &&
-      selectedDate.getFullYear() === now.getFullYear();
-    
-    // Clear existing hour options
-    hourSelect.innerHTML = '<option value="">--</option>';
-    
-    // Generate hour options (1-12) - remove past hours instead of disabling them
-    for (let i = 1; i <= 12; i++) {
-      // If today, check if this hour is in the past for the selected AM/PM
-      if (isToday) {
-        let hour24;
-        if (selectedAMPM === 'AM' && i === 12) {
-          hour24 = 0; // 12 AM = 0:00
-        } else if (selectedAMPM === 'AM') {
-          hour24 = i; // 1-11 AM = 1-11
-        } else if (selectedAMPM === 'PM' && i === 12) {
-          hour24 = 12; // 12 PM = 12:00
-        } else {
-          hour24 = i + 12; // 1-11 PM = 13-23
-        }
-        
-        // Skip this hour if it's in the past
-        if (hour24 < currentHour) {
-          continue;
-        }
-      }
-      
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = String(i).padStart(2, '0');
-      hourSelect.appendChild(option);
-    }
-    
-    // Clear minute options (will be updated when hour is selected)
-    minuteSelect.innerHTML = '<option value="">--</option>';
-  }
-
   // Function to clear time selection
   function clearTimeSelection() {
-    const timeInput = document.getElementById('time-picker');
-    const hourSelect = document.getElementById('hour-select');
-    const minuteSelect = document.getElementById('minute-select');
+    const hourInput = document.getElementById('hour-input');
+    const minuteInput = document.getElementById('minute-input');
     const ampmSelect = document.getElementById('ampm-select');
+    const timeDisplay = document.getElementById('time-display');
     
-    if (timeInput) {
-      timeInput.value = '';
-      timeInput.placeholder = 'Select time';
-    }
-    
-    if (hourSelect) hourSelect.value = '';
-    if (minuteSelect) minuteSelect.value = '';
+    if (hourInput) hourInput.value = '';
+    if (minuteInput) minuteInput.value = '';
     if (ampmSelect) ampmSelect.value = '';
+    if (timeDisplay) timeDisplay.textContent = '';
     
     selectedTime = null;
   }
 
-  // Function to update minute options based on selected hour and AM/PM
-  function updateMinuteOptions() {
-    const hourSelect = document.getElementById('hour-select');
-    const minuteSelect = document.getElementById('minute-select');
+  // Function to validate and format hour input
+  function validateHourInput(input) {
+    let value = input.value.replace(/\D/g, ''); // Remove non-digits
+    
+    // Limit to 2 digits
+    if (value.length > 2) {
+      value = value.substring(0, 2);
+    }
+    
+    // Validate hour range (1-12)
+    if (value && (parseInt(value) < 1 || parseInt(value) > 12)) {
+      input.setCustomValidity('Hour must be between 1 and 12');
+      input.reportValidity();
+      return false;
+    } else {
+      input.setCustomValidity('');
+    }
+    
+    input.value = value;
+    updateTimeDisplay();
+    return true;
+  }
+
+  // Function to validate and format minute input
+  function validateMinuteInput(input) {
+    let value = input.value.replace(/\D/g, ''); // Remove non-digits
+    
+    // Limit to 2 digits
+    if (value.length > 2) {
+      value = value.substring(0, 2);
+    }
+    
+    // Validate minute range (0-59)
+    if (value && (parseInt(value) < 0 || parseInt(value) > 59)) {
+      input.setCustomValidity('Minute must be between 0 and 59');
+      input.reportValidity();
+      return false;
+    } else {
+      input.setCustomValidity('');
+    }
+    
+    input.value = value;
+    updateTimeDisplay();
+    return true;
+  }
+
+  // Function to update time display
+  function updateTimeDisplay() {
+    const hourInput = document.getElementById('hour-input');
+    const minuteInput = document.getElementById('minute-input');
     const ampmSelect = document.getElementById('ampm-select');
+    const timeDisplay = document.getElementById('time-display');
     
-    if (!hourSelect || !minuteSelect || !ampmSelect) return;
+    if (!hourInput || !minuteInput || !ampmSelect || !timeDisplay) return;
     
-    const selectedHour = parseInt(hourSelect.value);
-    const selectedAMPM = ampmSelect.value;
+    const hour = hourInput.value;
+    const minute = minuteInput.value;
+    const ampm = ampmSelect.value;
     
-    if (!selectedHour || !selectedAMPM) {
-      // Clear minute options if hour or AM/PM not selected
-      minuteSelect.innerHTML = '<option value="">--</option>';
-      return;
-    }
-    
-    // Get current time
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    
-    // Check if selected date is today
-    const isToday = selectedDate && 
-      selectedDate.getDate() === now.getDate() &&
-      selectedDate.getMonth() === now.getMonth() &&
-      selectedDate.getFullYear() === now.getFullYear();
-    
-    // Clear existing minute options
-    minuteSelect.innerHTML = '<option value="">--</option>';
-    
-    // Convert 12-hour to 24-hour format
-    let hour24 = selectedHour;
-    if (selectedAMPM === 'AM' && selectedHour === 12) {
-      hour24 = 0;
-    } else if (selectedAMPM === 'PM' && selectedHour !== 12) {
-      hour24 = selectedHour + 12;
-    }
-    
-    // Generate minute options (0, 10, 20, 30, 40, 50)
-    for (let i = 0; i < 60; i += 10) {
-      const option = document.createElement('option');
-      option.value = String(i).padStart(2, '0');
-      option.textContent = String(i).padStart(2, '0');
+    if (hour && minute && ampm) {
+      // Pad single digits with leading zero
+      const paddedHour = hour.padStart(2, '0');
+      const paddedMinute = minute.padStart(2, '0');
       
-      // If today and this is the current hour, disable past minutes
-      if (isToday && hour24 === currentHour && i < currentMinute) {
-        option.disabled = true;
-        option.style.color = '#ccc';
-      }
+      const timeString = `${paddedHour}:${paddedMinute} ${ampm}`;
+      timeDisplay.textContent = timeString;
       
-      minuteSelect.appendChild(option);
+      // Store the formatted time for validation
+      selectedTime = timeString;
+    } else {
+      timeDisplay.textContent = '';
+      selectedTime = null;
     }
   }
 
@@ -1734,116 +1690,81 @@ function openBookingForm(){
 
   // Time Picker Functions
   function initTimePicker() {
-    const timeInput = document.getElementById('time-picker');
-    const timeDropdown = document.getElementById('time-picker-dropdown');
-    const hourSelect = document.getElementById('hour-select');
-    const minuteSelect = document.getElementById('minute-select');
+    const hourInput = document.getElementById('hour-input');
+    const minuteInput = document.getElementById('minute-input');
     const ampmSelect = document.getElementById('ampm-select');
-    const applyBtn = document.getElementById('apply-time');
-    const clearBtn = document.getElementById('clear-time');
 
     // Check if elements exist
-    if (!timeInput || !timeDropdown) {
+    if (!hourInput || !minuteInput || !ampmSelect) {
       console.log('Time picker elements not found');
       return;
     }
 
-    // Remove existing event listeners to prevent duplicates
-    timeInput.removeEventListener('click', timeInput._timeClickHandler);
-    
-    // Create new event handler
-    timeInput._timeClickHandler = (e) => {
-      e.stopPropagation();
-      timeDropdown.classList.toggle('hidden');
-      if (!timeDropdown.classList.contains('hidden')) {
-        // Update time options based on selected date
-        updateTimeOptions();
-        
-        // Position time picker directly below the input with fixed positioning
-        const inputRect = timeInput.getBoundingClientRect();
-        const timePickerWidth = inputRect.width; // Use the same width as the input field
-        const timePickerHeight = 120;
-        
-        // Position directly below the input field
-        let top = inputRect.bottom + 4;
-        let left = inputRect.left;
-        
-        // Adjust if time picker would go off right edge
-        if (left + timePickerWidth > window.innerWidth) {
-          left = window.innerWidth - timePickerWidth - 10;
-        }
-        
-        // Adjust if time picker would go off left edge
-        if (left < 10) {
-          left = 10;
-        }
-        
-        // Apply fixed positioning - always below the input
-        timeDropdown.style.position = 'fixed';
-        timeDropdown.style.top = top + 'px';
-        timeDropdown.style.left = left + 'px';
-        timeDropdown.style.width = timePickerWidth + 'px';
-        timeDropdown.style.right = 'auto';
-        timeDropdown.style.bottom = 'auto';
-        timeDropdown.style.transform = 'none';
-      }
-    };
+    // Add event listeners for input validation and formatting
+    hourInput.addEventListener('input', (e) => {
+      validateHourInput(e.target);
+    });
 
-    // Add event listener
-    timeInput.addEventListener('click', timeInput._timeClickHandler);
+    minuteInput.addEventListener('input', (e) => {
+      validateMinuteInput(e.target);
+    });
 
-    // Add event listener to ampm select to update hour options
+    // Add event listener for AM/PM selection
     ampmSelect.addEventListener('change', () => {
-      updateHourOptions();
+      updateTimeDisplay();
+      validateTimeSelection();
     });
 
-    // Add event listener to hour select to update minute options
-    hourSelect.addEventListener('change', () => {
-      updateMinuteOptions();
+    // Add event listeners for time validation on blur
+    hourInput.addEventListener('blur', () => {
+      validateTimeSelection();
     });
 
-    // Apply time selection
-    applyBtn.addEventListener('click', () => {
-      const hour = hourSelect.value;
-      const minute = minuteSelect.value;
-      const ampm = ampmSelect.value;
+    minuteInput.addEventListener('blur', () => {
+      validateTimeSelection();
+    });
 
-      if (hour && minute && ampm) {
-        // Validate that the selected time is not in the past
-        if (isTimeInPast(hour, minute, ampm)) {
-          Swal.fire({
-            title: 'Invalid Time',
-            text: 'Please select a time that is not in the past.',
-            icon: 'warning',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#10b981'
-          });
-          return;
-        }
+    // Add event listeners for auto-formatting on focus
+    hourInput.addEventListener('focus', () => {
+      hourInput.select();
+    });
+
+    minuteInput.addEventListener('focus', () => {
+      minuteInput.select();
+    });
+  }
+
+  // Function to validate the complete time selection
+  function validateTimeSelection() {
+    const hourInput = document.getElementById('hour-input');
+    const minuteInput = document.getElementById('minute-input');
+    const ampmSelect = document.getElementById('ampm-select');
+    
+    if (!hourInput || !minuteInput || !ampmSelect) return;
+    
+    const hour = hourInput.value;
+    const minute = minuteInput.value;
+    const ampm = ampmSelect.value;
+    
+    // Only validate if all fields are filled
+    if (hour && minute && ampm) {
+      // Check if the time is in the past
+      if (isTimeInPast(hour, minute, ampm)) {
+        Swal.fire({
+          title: 'Invalid Time',
+          text: 'You cannot book a time that has already passed. Please select a future time.',
+          icon: 'warning',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#10b981'
+        });
         
-        selectedTime = `${hour}:${minute} ${ampm}`;
-        timeInput.value = selectedTime;
-        timeInput.placeholder = selectedTime;
-        timeDropdown.classList.add('hidden');
+        // Clear the time selection
+        clearTimeSelection();
+        return false;
       }
-    });
-
-    // Clear time
-    clearBtn.addEventListener('click', () => {
-      selectedTime = null;
-      timeInput.value = '';
-      timeInput.placeholder = 'Select time';
-      hourSelect.value = '';
-      minuteSelect.value = '';
-      ampmSelect.value = '';
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!timeInput.contains(e.target) && !timeDropdown.contains(e.target)) {
-        timeDropdown.classList.add('hidden');
-      }
-    });
+    }
+    
+    return true;
   }
 
   // Function to close the booking modal
