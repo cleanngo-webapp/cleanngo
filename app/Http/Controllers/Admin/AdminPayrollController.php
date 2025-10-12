@@ -313,9 +313,11 @@ class AdminPayrollController extends Controller
                     'payroll_proof' => $path,
                     'payroll_method' => $request->payroll_method,
                 ]);
+                // Notify employee and admin about payroll upload
+                app(\App\Services\NotificationService::class)->notifyPayrollPaymentUploaded($employeePaymentProof->fresh());
             } else {
                 // This is a shared payment proof, create a new record for this specific employee
-                PaymentProof::create([
+                $newProof = PaymentProof::create([
                     'booking_id' => $request->booking_id,
                     'employee_id' => $request->employee_id,
                     'customer_id' => $employeePaymentProof->customer_id,
@@ -333,6 +335,8 @@ class AdminPayrollController extends Controller
                     'payroll_proof' => $path,
                     'payroll_method' => $request->payroll_method,
                 ]);
+                // Notify employee and admin about payroll upload using the specific record
+                app(\App\Services\NotificationService::class)->notifyPayrollPaymentUploaded($newProof);
             }
 
             return response()->json([

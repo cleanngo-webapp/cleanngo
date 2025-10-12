@@ -1358,6 +1358,89 @@ class NotificationService
     }
 
     /**
+     * Create notifications when admin uploads a payroll payment for an employee
+     * Notifies both the specific employee and the admin with booking and payroll details
+     */
+    public function notifyPayrollPaymentUploaded(PaymentProof $paymentProof): void
+    {
+        // Load required relations to build meaningful messages
+        $paymentProof->load(['booking.customer.user', 'employee.user']);
+
+        $booking = $paymentProof->booking;
+        $employee = $paymentProof->employee;
+
+        // Guard: ensure we have the necessary context
+        if (!$booking || !$employee || !$employee->user) {
+            return;
+        }
+
+        $employeeUser = $employee->user;
+        $customerName = $booking->customer && $booking->customer->user
+            ? ($booking->customer->user->first_name . ' ' . $booking->customer->user->last_name)
+            : 'customer';
+
+        // Prepare common payroll details
+        $amount = (float) ($paymentProof->payroll_amount ?? 0);
+        $method = $paymentProof->payroll_method ?: 'unknown';
+        $payrollCode = $paymentProof->payroll_code ?: '';
+
+        // Notify employee about their payroll payment
+        $this->createNotification([
+            'type' => 'employee_payroll_paid',
+            'title' => 'Payroll Paid',
+            'message' => sprintf(
+                'Your payroll for booking %s (%s) has been paid. Amount: ₱%s via %s%s',
+                $booking->code,
+                $customerName,
+                number_format($amount, 2),
+                str_replace('_', ' ', $method),
+                $payrollCode ? (". Code: {$payrollCode}") : ''
+            ),
+            'data' => [
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'employee_id' => $employee->id,
+                'customer_name' => $customerName,
+                'payroll_amount' => $amount,
+                'payroll_method' => $method,
+                'payroll_code' => $payrollCode,
+                'payroll_status' => $paymentProof->payroll_status,
+            ],
+            'recipient_type' => 'employee',
+            'recipient_id' => $employeeUser->id,
+        ]);
+
+        // Notify admin that they uploaded a payroll payment for this employee
+        $this->createNotification([
+            'type' => 'admin_uploaded_employee_payroll',
+            'title' => 'Payroll Uploaded',
+            'message' => sprintf(
+                'Payroll uploaded for %s %s on booking %s. Amount: ₱%s via %s%s',
+                $employeeUser->first_name,
+                $employeeUser->last_name,
+                $booking->code,
+                number_format($amount, 2),
+                str_replace('_', ' ', $method),
+                $payrollCode ? (". Code: {$payrollCode}") : ''
+            ),
+            'data' => [
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->code,
+                'employee_id' => $employee->id,
+                'employee_name' => $employeeUser->first_name . ' ' . $employeeUser->last_name,
+                'customer_name' => $customerName,
+                'payroll_amount' => $amount,
+                'payroll_method' => $method,
+                'payroll_code' => $payrollCode,
+                'payroll_status' => $paymentProof->payroll_status,
+                'payment_proof_id' => $paymentProof->id,
+            ],
+            'recipient_type' => 'admin',
+            'recipient_id' => null,
+        ]);
+    }
+
+    /**
      * Create notifications for equipment borrowing (batch version)
      * Notifies admin and employee when equipment is borrowed for a job
      * This method accepts a list of items that were just borrowed in a single action
