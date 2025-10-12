@@ -6,7 +6,7 @@
 <div class="max-w-6xl mx-auto pt-20">
     <h1 class="text-3xl font-extrabold text-center">Request a Booking</h1>
 
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="mt-6 p-3 grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Left: Services Nav -->
         <aside class="bg-emerald-700 flex flex-col rounded-xl border-none p-3 gap-2">
             <div class="font-semibold flex flex-col mb-2 text-center text-white">SERVICES</div>
@@ -31,7 +31,7 @@
                 <!-- All Types Dropdown -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Select Type</label>
-                    <select id="sofa-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30" style="position: relative; z-index: 10;">
+                    <select id="sofa-type-select" class="w-full p-2 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 text-sm" style="position: relative; z-index: 10; max-height: 200px; overflow-y: auto;">
                         <option value="">Choose type...</option>
                         <optgroup label="Sofa Types">
                             <option value="sofa_1">1 seater</option>
@@ -540,7 +540,7 @@ function addAdditionalItem(serviceName) {
     const itemHtml = `
         <div class="mb-4 additional-item" data-item-id="${itemId}">
             <label class="block text-sm font-medium mb-2">Select Additional Type</label>
-            <select class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 additional-type-select" style="position: relative; z-index: 10;">
+            <select class="w-full p-2 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 additional-type-select text-sm" style="position: relative; z-index: 10; max-height: 200px; overflow-y: auto;">
                 <option value="">Choose additional type...</option>
                 ${optionsHtml}
             </select>
@@ -2587,4 +2587,24 @@ function openBookingForm(){
         </div>
     </div>
 </div>
+
+<style>
+/* Make sofa/mattress dropdown appear smaller and more compact */
+#sofa-type-select, .additional-type-select {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    padding: 0.5rem !important;
+}
+
+#sofa-type-select option, .additional-type-select option {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+#sofa-type-select optgroup, .additional-type-select optgroup {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+}
+</style>
 

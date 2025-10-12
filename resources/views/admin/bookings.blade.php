@@ -579,7 +579,7 @@
                         <h2 class="font-semibold text-center mb-4">Sofa / Mattress Deep Cleaning</h2>
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Select Type</label>
-                            <select id="admin-sofa-type-select" class="w-full p-3 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <select id="admin-sofa-type-select" class="w-full p-2 rounded-lg bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 text-sm" style="max-height: 200px; overflow-y: auto;">
                                 <option value="">Choose type...</option>
                                 <optgroup label="Sofa Types">
                                     <option value="sofa_1">1 seater</option>
@@ -2752,7 +2752,7 @@
                     <i class="ri-close-line text-lg"></i>
                 </button>
             </div>
-            <select class="additional-type-select w-full p-2 rounded bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 mb-2">
+            <select class="additional-type-select w-full p-2 rounded bg-white border border-white/20 text-black focus:outline-none focus:ring-2 focus:ring-white/30 mb-2 text-sm" style="max-height: 200px; overflow-y: auto;">
                 ${options}
             </select>
             <div class="flex items-center justify-between bg-white/10 rounded-lg p-2">
@@ -4361,6 +4361,24 @@
 /* Receipt card styling */
 .receipt-card {
     transition: all 0.3s ease-in-out;
+}
+
+/* Make sofa/mattress dropdown appear smaller and more compact */
+#admin-sofa-type-select, .additional-type-select {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    padding: 0.5rem !important;
+}
+
+#admin-sofa-type-select option, .additional-type-select option {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+#admin-sofa-type-select optgroup, .additional-type-select optgroup {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
 }
 </style>
 @endsection
