@@ -708,6 +708,37 @@
             }
         }
         
+        /* Selected equipment section mobile responsiveness */
+        #equipment-modal .selected-equipment-section .bg-gray-50 {
+            padding: 0.75rem !important;
+        }
+        
+        #equipment-modal .selected-equipment-section .flex.flex-col.sm\\:flex-row {
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+        }
+        
+        #equipment-modal .selected-equipment-section .flex.flex-col.sm\\:flex-row .flex-1 {
+            width: 100% !important;
+        }
+        
+        #equipment-modal .selected-equipment-section .flex.flex-col.sm\\:flex-row .flex-1 .flex.flex-col.sm\\:flex-row {
+            flex-direction: column !important;
+            gap: 0.25rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #equipment-modal .selected-equipment-section .block.px-2.py-1 {
+            width: 100% !important;
+            display: block !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        #equipment-modal .selected-equipment-section .flex.items-center.justify-between.sm\\:justify-end {
+            justify-content: space-between !important;
+            margin-top: 0.5rem !important;
+        }
+        
         /* Ensure equipment items don't overflow */
         #equipment-modal .equipment-item * {
             max-width: 100% !important;
@@ -1866,20 +1897,23 @@ function updateSelectedEquipmentList() {
         const badgeText = item.is_returnable ? 'Returnable' : 'Consumable';
         
         listHtml += `
-            <div class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded border">
-                <div class="flex items-center space-x-3">
-                    <span class="text-sm font-medium text-gray-900">${item.name}</span>
-                    <span class="text-xs text-gray-500">${item.category}</span>
-                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badgeClass}">
-                        ${badgeText}
-                    </span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-sm font-medium text-gray-900">Quantity: ${item.quantity}</span>
-                    <button type="button" onclick="removeEquipmentFromList(${index})" class="text-red-500 hover:text-red-700">
-                        <i class="ri-close-line"></i>
-
-</button>
+            <div class="bg-gray-50 rounded border p-3">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div class="flex-1">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                            <span class="text-sm font-medium text-gray-900">${item.name}</span>
+                            <span class="text-xs text-gray-500">${item.category}</span>
+                        </div>
+                        <span class="block px-2 py-1 text-xs font-medium rounded-full text-center ${badgeClass}">
+                            ${badgeText}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between sm:justify-end gap-2 mt-2 sm:mt-0">
+                        <span class="text-sm font-medium text-gray-900">Quantity: ${item.quantity}</span>
+                        <button type="button" onclick="removeEquipmentFromList(${index})" class="text-red-500 hover:text-red-700 p-1">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
