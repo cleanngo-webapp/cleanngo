@@ -139,7 +139,7 @@
                                     'no_show' => 'bg-gray-100 text-gray-800'
                                 ];
                             @endphp
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$b->status] ?? 'bg-gray-100 text-gray-800' }} self-end sm:self-start flex-shrink-0">
+                            <span class="inline-block px-2 py-1 text-xs font-medium rounded-full text-center {{ $statusColors[$b->status] ?? 'bg-gray-100 text-gray-800' }}">
                                 {{ $b->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $b->status)) }}
                             </span>
                         </div>
@@ -319,7 +319,7 @@
                                     'no_show' => 'bg-gray-100 text-gray-800'
                                 ];
                             @endphp
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$b->status] ?? 'bg-gray-100 text-gray-800' }}">
+                            <span class="inline-block px-2 py-1 text-xs font-medium rounded-full text-center {{ $statusColors[$b->status] ?? 'bg-gray-100 text-gray-800' }}">
                                 {{ $b->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $b->status)) }}
                             </span>
                         </td>
@@ -2359,8 +2359,6 @@ function closeBorrowedItemsModal() {
         </div>
     </div>
 </div>
-
-{{-- Polling functionality removed - no longer needed --}}
 @endpush
 
     <!-- Booking Info Modal Component -->

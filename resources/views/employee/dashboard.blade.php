@@ -96,7 +96,7 @@
 									'no_show' => 'bg-gray-100 text-gray-800'
 								];
 							@endphp
-							<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$job->status] ?? 'bg-gray-100 text-gray-800' }} self-start">
+							<span class="inline-block px-2 py-1 text-xs font-medium rounded-full text-center {{ $statusColors[$job->status] ?? 'bg-gray-100 text-gray-800' }}">
 								{{ $job->status === 'in_progress' ? 'In Progress' : ucfirst(str_replace('_', ' ', $job->status)) }}
 							</span>
 						</div>
