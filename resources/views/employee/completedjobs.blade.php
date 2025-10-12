@@ -7,25 +7,26 @@
 @endpush
 
 @section('content')
-<div class="max-w-7xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
+<div class="max-w-7xl mx-auto px-0 sm:px-0">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Completed Jobs</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Completed Jobs</h1>
             <p class="text-sm text-gray-600 mt-1">View all your completed jobs and their details</p>
         </div>
         <div class="flex items-center space-x-3">
             <a href="{{ route('employee.jobs') }}" 
-               class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                <i class="ri-arrow-left-line mr-2"></i>
-                Back to Active Jobs
+               class="inline-flex items-center px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
+                <i class="ri-arrow-left-line mr-1 sm:mr-2"></i>
+                <span class="hidden sm:inline">Back to Active Jobs</span>
+                <span class="sm:hidden">Back</span>
             </a>
         </div>
     </div>
 
     {{-- Stats Cards Section --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
         {{-- Total Completed Card --}}
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Completed</p>
@@ -41,7 +42,7 @@
         </div>
 
         {{-- Completed This Month Card --}}
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Completed This Month</p>
@@ -57,7 +58,7 @@
         </div>
 
         {{-- Total Cancelled Card --}}
-        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Cancelled</p>
@@ -74,35 +75,37 @@
     </div>
 
     {{-- Search and Filter Section --}}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
-        <div class="p-6 border-b border-gray-100">
-            <div class="flex items-center gap-4">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-4 sm:mb-6">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="search-completed-jobs" 
                            value="{{ $search ?? '' }}"
                            placeholder="Search by booking ID, customer name, or status" 
-                           class="w-full px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                           class="w-full px-3 sm:px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
                 </div>
-                <div class="flex gap-2">
-                    <select id="status-filter" class="px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                <div class="grid grid-cols-1 sm:flex gap-2">
+                    <select id="status-filter" class="px-3 sm:px-4 py-2 border border-gray-100 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm">
                         <option value="">All Status</option>
                         <option value="completed" {{ ($status ?? '') === 'completed' ? 'selected' : '' }}>Completed</option>
                         <option value="cancelled" {{ ($status ?? '') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'scheduled_start' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'scheduled_start' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('scheduled_start')">
-                        <i class="ri-calendar-line mr-2"></i>
-                        Sort by Date
-                        <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'scheduled_start' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                        <i class="ri-calendar-line mr-1 sm:mr-2"></i>
+                        <span class="hidden sm:inline">Sort by Date</span>
+                        <span class="sm:hidden">Date</span>
+                        <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'scheduled_start' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-1 sm:ml-2"></i>
                     </button>
                     <button type="button" 
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'customer_name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
+                            class="px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer {{ ($sort ?? 'scheduled_start') === 'customer_name' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}"
                             onclick="toggleSort('customer_name')">
-                        <i class="ri-user-line mr-2"></i>
-                        Sort by Customer
-                        <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'customer_name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-2"></i>
+                        <i class="ri-user-line mr-1 sm:mr-2"></i>
+                        <span class="hidden sm:inline">Sort by Customer</span>
+                        <span class="sm:hidden">Customer</span>
+                        <i class="ri-arrow-{{ ($sort ?? 'scheduled_start') === 'customer_name' && ($sortOrder ?? 'desc') === 'asc' ? 'up' : 'down' }}-line ml-1 sm:ml-2"></i>
                     </button>
                 </div>
             </div>
@@ -111,10 +114,10 @@
 
     {{-- Completed Jobs Table --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div class="p-6 border-b border-gray-100">
+        <div class="p-2 sm:p-6 border-b border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900" id="table-title">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-900" id="table-title">
                         @if($status === 'cancelled')
                             Cancelled Jobs
                         @else
@@ -131,7 +134,163 @@
                 </div>
             </div>
         </div>
-        <div id="completed-jobs-table-container" class="overflow-x-auto">
+        
+        {{-- Mobile Card View --}}
+        <div class="block sm:hidden p-2">
+            @forelse($bookings as $b)
+            <div class="bg-white border border-gray-200 rounded-xl p-4 mb-3 shadow-sm">
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Booking ID</p>
+                        <p class="text-sm font-medium text-gray-900 mt-1">{{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Status</p>
+                        <div class="mt-1">
+                            @php
+                                $statusClasses = [
+                                    'completed' => 'bg-green-100 text-green-800',
+                                    'cancelled' => 'bg-red-100 text-red-800'
+                                ];
+                                $statusClass = $statusClasses[$b->status] ?? 'bg-gray-100 text-gray-800';
+                            @endphp
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusClass }}">
+                                {{ $b->status === 'completed' ? 'Completed' : 'Cancelled' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Date & Time</p>
+                    <p class="text-sm text-gray-900 mt-1">
+                        {{ $b->scheduled_start ? \Carbon\Carbon::parse($b->scheduled_start)->format('M j, Y g:i A') : '—' }}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Customer</p>
+                    <p class="text-sm text-gray-900 mt-1">{{ $b->customer_name ?? '—' }}</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Payment Status</p>
+                        <div class="mt-1">
+                            @if($b->status === 'completed')
+                                @if($b->payment_proof_id)
+                                    @php
+                                        $paymentStatusClasses = [
+                                            'approved' => 'bg-green-100 text-green-800',
+                                            'declined' => 'bg-red-100 text-red-800',
+                                            'pending' => 'bg-yellow-100 text-yellow-800'
+                                        ];
+                                        $paymentStatusClass = $paymentStatusClasses[$b->payment_status] ?? 'bg-yellow-100 text-yellow-800';
+                                    @endphp
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full {{ $paymentStatusClass }}">
+                                        {{ ucfirst($b->payment_status ?? 'pending') }}
+                                    </span>
+                                @else
+                                    <span class="text-xs text-gray-500 italic">No payment proof</span>
+                                @endif
+                            @else
+                                <span class="text-xs text-gray-400">—</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Completed Date</p>
+                        <p class="text-sm text-gray-900 mt-1">
+                            @if($b->status === 'completed' && $b->completed_at)
+                                {{ \Carbon\Carbon::parse($b->completed_at)->format('M j, Y g:i A') }}
+                            @elseif($b->status === 'cancelled' && $b->updated_at)
+                                {{ \Carbon\Carbon::parse($b->updated_at)->format('M j, Y g:i A') }}
+                            @else
+                                —
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button type="button" 
+                            class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-emerald-300 shadow-sm text-xs font-medium rounded-md text-emerald-600 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors cursor-pointer" 
+                            onclick="openBookingInfoModal('completed-job-info-modal', {{ $b->id }}, 'employee')" 
+                            title="View Job Information for {{ $b->code ?? ('B'.date('Y').str_pad($b->id,3,'0',STR_PAD_LEFT)) }}">
+                        <i class="ri-information-line mr-2"></i>
+                        <span>Job Info</span>
+                    </button>
+                    @if($b->status === 'completed' && $b->payment_proof_id)
+                        <button type="button" 
+                                class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-green-300 shadow-sm text-xs font-medium rounded-md text-green-600 hover:bg-green-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer" 
+                                onclick="openCompletedPaymentProof({{ $b->payment_proof_id }})" 
+                                title="View Payment Proof - Status: {{ ucfirst($b->payment_status ?? 'pending') }}">
+                            <i class="ri-money-dollar-circle-line mr-2"></i>
+                            <span>Payment</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div class="text-center py-12">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- Empty State Icon -->
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        @if($status === 'cancelled')
+                            <i class="ri-close-circle-line text-2xl text-gray-400"></i>
+                        @else
+                            <i class="ri-checkbox-circle-line text-2xl text-gray-400"></i>
+                        @endif
+                    </div>
+                    
+                    <!-- Empty State Content -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">
+                            @if($status === 'cancelled')
+                                No Cancelled Jobs Found
+                            @else
+                                No Completed Jobs Found
+                            @endif
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            @if(request()->has('search') || request()->has('status'))
+                                @if($status === 'cancelled')
+                                    No cancelled jobs match your current filters. Try adjusting your search criteria.
+                                @else
+                                    No completed jobs match your current filters. Try adjusting your search criteria.
+                                @endif
+                            @else
+                                @if($status === 'cancelled')
+                                    No jobs have been cancelled yet.
+                                @else
+                                    No jobs have been completed yet.
+                                @endif
+                            @endif
+                        </p>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            @if(request()->has('search') || request()->has('status'))
+                                <button onclick="clearFilters()" 
+                                        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                                    <i class="ri-refresh-line mr-2"></i>
+                                    Clear Filters
+                                </button>
+                            @endif
+                            <a href="{{ route('employee.jobs') }}" 
+                               class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+                                <i class="ri-calendar-line mr-2"></i>
+                                View Active Jobs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforelse
+        </div>
+        
+        {{-- Desktop Table View --}}
+        <div class="hidden sm:block" id="completed-jobs-table-container">
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -287,7 +446,7 @@
                 </tbody>
             </table>
         </div>
-        <div id="completed-pagination-container" class="px-6 py-4 border-t border-gray-100">
+        <div id="completed-pagination-container" class="px-2 sm:px-6 py-4 border-t border-gray-100">
             {{ $bookings->links() }}
         </div>
     </div>
@@ -530,6 +689,97 @@
 
 {{-- Completed Jobs Page Styles - Moved from head section --}}
 <style>
+/* Mobile responsive styles */
+@media (max-width: 640px) {
+    /* Make modals mobile-friendly */
+    #completed-job-info-modal,
+    #completed-payment-proof-modal {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin: 0.5rem !important;
+    }
+    
+    /* Ensure table containers handle overflow */
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Make buttons touch-friendly */
+    button {
+        min-height: 2.5rem;
+    }
+    
+    /* Mobile card adjustments */
+    .block.sm\:hidden .p-4 {
+        padding: 0.5rem !important;
+    }
+    
+    .block.sm\:hidden .space-y-3 > * + * {
+        margin-top: 0.5rem !important;
+    }
+    
+    .block.sm\:hidden .rounded-xl {
+        border-radius: 0.5rem !important;
+    }
+    
+    .block.sm\:hidden .flex.gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    .block.sm\:hidden .px-3 {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+    
+    .block.sm\:hidden .py-1\.5 {
+        padding-top: 0.375rem !important;
+        padding-bottom: 0.375rem !important;
+    }
+    
+    .block.sm\:hidden .text-xs {
+        font-size: 0.75rem !important;
+        line-height: 1rem !important;
+    }
+    
+    .block.sm\:hidden .grid.gap-4 {
+        gap: 0.75rem !important;
+    }
+    
+    .block.sm\:hidden .text-sm {
+        font-size: 0.875rem !important;
+        line-height: 1.25rem !important;
+    }
+    
+    /* Make labels more visible */
+    .block.sm\:hidden .text-xs.text-gray-500 {
+        font-weight: 600 !important;
+        color: #6b7280 !important;
+    }
+    
+    /* Ensure button text is always visible for completed jobs cards */
+    .block.sm\:hidden button span {
+        display: inline !important;
+    }
+    
+    /* Make buttons more prominent */
+    .block.sm\:hidden button {
+        min-height: 2.5rem !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Ultra-minimal spacing for very small screens */
+    @media (max-width: 360px) {
+        .block.sm\:hidden .flex.gap-2 {
+            gap: 0.25rem !important;
+        }
+        
+        .block.sm\:hidden .px-3 {
+            padding-left: 0.25rem !important;
+            padding-right: 0.25rem !important;
+        }
+    }
+}
+
 /* Completed Jobs Page Styles */
 .completed-job-card {
     transition: all 0.3s ease-in-out;
