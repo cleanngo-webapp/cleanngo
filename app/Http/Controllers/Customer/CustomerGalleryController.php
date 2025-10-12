@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\GalleryImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerGalleryController extends Controller
 {
@@ -111,7 +112,12 @@ class CustomerGalleryController extends Controller
         $serviceName = $serviceNames[$serviceType];
         
         // Get only active images for this service
-        $images = GalleryImage::forService($serviceType)->active()->ordered()->get();
+        $allImages = GalleryImage::forService($serviceType)->active()->ordered()->get();
+        
+        // Filter out images where the file doesn't exist
+        $images = $allImages->filter(function ($image) {
+            return Storage::disk('public')->exists($image->image_path);
+        });
 
         return view('customer.gallery-service', compact('serviceType', 'serviceName', 'images'));
     }

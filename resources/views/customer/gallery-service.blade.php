@@ -26,7 +26,14 @@
                     <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                         <img src="{{ asset('storage/' . $image->image_path) }}" 
                              alt="{{ $image->alt_text ?: $serviceName }}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-200" style="display: none;">
+                            <div class="text-center text-gray-500">
+                                <i class="ri-image-2-line text-4xl mb-2"></i>
+                                <p class="text-sm">Image not available</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endforeach

@@ -107,7 +107,14 @@
                         <div class="aspect-square bg-gray-100">
                             <img src="{{ asset('storage/' . $image->image_path) }}" 
                                  alt="{{ $image->alt_text ?: $image->original_name }}"
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-cover"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200" style="display: none;">
+                                <div class="text-center text-gray-500">
+                                    <i class="ri-image-2-line text-2xl mb-1"></i>
+                                    <p class="text-xs">Image not available</p>
+                                </div>
+                            </div>
                         </div>
                         
                         {{-- Image Info --}}

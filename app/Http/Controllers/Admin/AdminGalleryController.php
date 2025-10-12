@@ -105,6 +105,27 @@ class AdminGalleryController extends Controller
         
         // Get all images for this service (including inactive ones for admin management)
         $images = GalleryImage::forService($serviceType)->ordered()->get();
+        
+        // Filter out images where the file doesn't exist and clean up orphaned records
+        $validImages = collect();
+        $orphanedIds = [];
+        
+        foreach ($images as $image) {
+            if (Storage::disk('public')->exists($image->image_path)) {
+                $validImages->push($image);
+            } else {
+                // Mark for deletion - file doesn't exist
+                $orphanedIds[] = $image->id;
+            }
+        }
+        
+        // Clean up orphaned database records
+        if (!empty($orphanedIds)) {
+            GalleryImage::whereIn('id', $orphanedIds)->delete();
+        }
+
+        // Use the filtered valid images for display
+        $images = $validImages;
 
         return view('admin.gallery-service', compact('serviceType', 'serviceName', 'images'));
     }
@@ -130,6 +151,11 @@ class AdminGalleryController extends Controller
             
             // Store the file in public/gallery directory
             $path = $file->storeAs('gallery', $filename, 'public');
+            
+            // Verify the file was actually stored
+            if (!$path || !Storage::disk('public')->exists($path)) {
+                throw new \Exception('Failed to store the uploaded file.');
+            }
 
             // Create gallery image record
             $galleryImage = GalleryImage::create([
@@ -144,6 +170,11 @@ class AdminGalleryController extends Controller
             return redirect()->back()->with('success', 'Image uploaded successfully!');
 
         } catch (\Exception $e) {
+            // If database record was created but file storage failed, clean up the record
+            if (isset($galleryImage)) {
+                $galleryImage->delete();
+            }
+            
             return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
     }
