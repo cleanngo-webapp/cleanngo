@@ -13,9 +13,9 @@ class ServicesController extends Controller
      */
     public function index()
     {
-        // Get all active services from the database, excluding General, Sofa Mattress Deep Cleaning, and Enhanced Disinfection services
+        // Get all active services from the database, excluding General, Mattress Deep Cleaning, and Enhanced Disinfection services
         $services = Service::where('is_active', true)
-            ->whereNotIn('name', ['General', 'Sofa Mattress Deep Cleaning', 'Enhanced Disinfection'])
+            ->whereNotIn('name', ['General', 'Mattress Deep Cleaning', 'Enhanced Disinfection'])
             ->orderBy('name')
             ->get()
             ->map(function ($service) {
@@ -29,7 +29,7 @@ class ServicesController extends Controller
                 
                 return [
                     'id' => $service->id,
-                    'name' => $service->name,
+                    'name' => $service->name === 'Sofa Mattress Deep Cleaning' ? 'Sofa / Mattress Deep Cleaning' : $service->name,
                     'description' => $service->description,
                     'base_price_cents' => $service->base_price_cents,
                     'base_price_formatted' => '₱' . number_format($startingPrice / 100, 2),
@@ -132,7 +132,9 @@ class ServicesController extends Controller
         $name = strtolower($service->name);
         
         // Services with tiered pricing - use more specific checks to avoid false matches
-        if (strpos($name, 'sofa') !== false) {
+        if (strpos($name, 'sofa mattress deep cleaning') !== false) {
+            return true;
+        } elseif (strpos($name, 'sofa') !== false) {
             return true;
         } elseif (strpos($name, 'mattress') !== false) {
             return true;
@@ -151,7 +153,27 @@ class ServicesController extends Controller
     {
         $name = strtolower($service->name);
         
-        if (strpos($name, 'sofa') !== false) {
+        if (strpos($name, 'sofa mattress deep cleaning') !== false) {
+            // Combined pricing for both sofa and mattress deep cleaning
+            return [
+                // Sofa Deep Cleaning section
+                ['type' => 'Sofa Deep Cleaning', 'price' => ''],
+                ['type' => 'Single chair', 'price' => '₱750'],
+                ['type' => '2-seater', 'price' => '₱1,250'],
+                ['type' => '3-seater', 'price' => '₱1,750'],
+                ['type' => '4-seater', 'price' => '₱2,250'],
+                ['type' => '5-seater', 'price' => '₱2,750'],
+                ['type' => '6-seater', 'price' => '₱3,250'],
+                ['type' => '7-seater', 'price' => '₱3,750'],
+                ['type' => '8-seater', 'price' => '₱4,250'],
+                // Mattress Deep Cleaning section
+                ['type' => 'Mattress Deep Cleaning', 'price' => ''],
+                ['type' => 'Single', 'price' => '₱950'],
+                ['type' => 'Double', 'price' => '₱1,100'],
+                ['type' => 'Queen', 'price' => '₱1,350'],
+                ['type' => 'King', 'price' => '₱1,450']
+            ];
+        } elseif (strpos($name, 'sofa') !== false) {
             return [
                 ['type' => 'Single chair', 'price' => '₱750'],
                 ['type' => '2-seater', 'price' => '₱1,250'],
@@ -190,9 +212,14 @@ class ServicesController extends Controller
         $lowestPrice = PHP_INT_MAX;
         
         foreach ($pricingTiers as $tier) {
+            // Skip section headers (empty prices)
+            if (empty($tier['price'])) {
+                continue;
+            }
+            
             // Extract numeric value from price string (e.g., "₱750" -> 750)
             $price = (int) str_replace(['₱', ','], '', $tier['price']);
-            if ($price < $lowestPrice) {
+            if ($price > 0 && $price < $lowestPrice) {
                 $lowestPrice = $price;
             }
         }

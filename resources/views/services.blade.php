@@ -183,11 +183,21 @@ function openPricingModal(serviceName, pricingTiers) {
     
     pricingTiers.forEach(tier => {
         const row = document.createElement('tr');
-        row.className = 'hover:bg-gray-50';
-        row.innerHTML = `
-            <td class="border border-gray-200 px-4 py-3 text-sm text-gray-900">${tier.type}</td>
-            <td class="border border-gray-200 px-4 py-3 text-sm font-semibold text-emerald-600">${tier.price}</td>
-        `;
+        
+        // Check if this is a section header (empty price)
+        if (tier.price === '') {
+            row.className = 'bg-blue-50 font-semibold';
+            row.innerHTML = `
+                <td class="border border-gray-200 px-4 py-3 text-sm text-blue-700" colspan="2">${tier.type}</td>
+            `;
+        } else {
+            row.className = 'hover:bg-gray-50';
+            row.innerHTML = `
+                <td class="border border-gray-200 px-4 py-3 text-sm text-gray-900">${tier.type}</td>
+                <td class="border border-gray-200 px-4 py-3 text-sm font-semibold text-emerald-600">${tier.price}</td>
+            `;
+        }
+        
         tableBody.appendChild(row);
     });
     

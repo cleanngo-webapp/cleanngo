@@ -135,7 +135,7 @@
                     </p>
                     <div class="flex items-center justify-center gap-2 text-sm opacity-90">
                         <i class="ri-map-pin-fill text-green-300"></i>
-                        <span>0772 Maescoy Compound, San Felipe Naga City</span>
+                        <span>0772 Macaroy Compound Lomeda Subd. San Felipe Naga City</span>
                     </div>
                 </div>
 

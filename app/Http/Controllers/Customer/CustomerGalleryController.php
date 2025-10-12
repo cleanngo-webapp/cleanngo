@@ -48,7 +48,7 @@ class CustomerGalleryController extends Controller
             ],
             [
                 'type' => 'sofa',
-                'name' => 'Sofa Mattress Deep Cleaning',
+                'name' => 'Sofa / Mattress Deep Cleaning',
                 'description' => 'Eliminates dust, stains, and allergens to restore comfort and hygiene.',
                 'image' => 'cs-services-sofa-mattress-cleaning.webp'
             ],
@@ -103,7 +103,7 @@ class CustomerGalleryController extends Controller
             'glass' => 'Glass Cleaning',
             'carInterior' => 'Home Service Car Interior Detailing',
             'postConstruction' => 'Post Construction Cleaning',
-            'sofa' => 'Sofa Mattress Deep Cleaning',
+            'sofa' => 'Sofa / Mattress Deep Cleaning',
             'houseCleaning' => 'House Cleaning',
             'curtainCleaning' => 'Curtain Cleaning'
         ];
