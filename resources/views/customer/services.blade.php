@@ -1059,7 +1059,7 @@ function removeSofaMattressGroup() {
     }
   });
   // Clear all mattress quantity displays
-  ['mattress_single', 'mattress_double', 'mattress_king', 'mattress_california'].forEach(id => {
+  ['mattress_single', 'mattress_double', 'mattress_queen', 'mattress_king'].forEach(id => {
     const element = document.getElementById(id);
     if (element) {
       if (element.tagName === 'INPUT') {
@@ -2435,7 +2435,7 @@ function openBookingForm(){
       if (element) element.value = 0;
     });
     
-    ['mattress_single', 'mattress_double', 'mattress_king', 'mattress_california'].forEach(id => {
+    ['mattress_single', 'mattress_double', 'mattress_queen', 'mattress_king'].forEach(id => {
       const element = document.getElementById(id);
       if (element) element.value = 0;
     });

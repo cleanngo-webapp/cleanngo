@@ -49,8 +49,8 @@ const serviceCategories = {
         items: {
             'mattress_single': 'Single Mattress',
             'mattress_double': 'Double Mattress',
-            'mattress_king': 'King Mattress',
-            'mattress_california': 'California King Mattress'
+            'mattress_queen': 'Queen Mattress',
+            'mattress_king': 'King Mattress'
         }
     },
     'carpet': {
