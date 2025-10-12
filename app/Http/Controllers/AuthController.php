@@ -27,6 +27,10 @@ class AuthController extends Controller
     {
         // For customer registration, redirect to email verification
         if ($request->role === 'customer' || !$request->has('role')) {
+            // Clear any existing OTP session data from previous registration attempts
+            // This ensures every new registration starts fresh and shows the "Send OTP" button
+            $request->session()->forget(['otp_sent', 'pending_registration']);
+            
             // Validate basic registration data first
             $data = $request->validate([
                 'username' => ['required','string','alpha_dash','min:3','max:50','unique:users,username'],
