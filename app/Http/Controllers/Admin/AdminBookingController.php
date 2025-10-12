@@ -927,28 +927,43 @@ class AdminBookingController extends Controller
      */
     private function checkEmployeeConflict($employeeId, $bookingTime)
     {
-        // First check if employee has any ongoing booking (in_progress status)
-        // This takes priority over time-based conflicts
-        $ongoingBooking = DB::table('booking_staff_assignments as bsa')
+        // First check if employee has any in_progress booking (regardless of time)
+        $inProgressBooking = DB::table('booking_staff_assignments as bsa')
             ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
             ->where('bsa.employee_id', $employeeId)
             ->where('b.status', 'in_progress')
             ->first();
 
-        if ($ongoingBooking) {
-            $ongoingTime = \Carbon\Carbon::parse($ongoingBooking->scheduled_start);
-            return "Currently has an ongoing booking {$ongoingBooking->code} that started at " . 
+        if ($inProgressBooking) {
+            $ongoingTime = \Carbon\Carbon::parse($inProgressBooking->scheduled_start);
+            return "Currently has an ongoing booking {$inProgressBooking->code} (in progress) that started at " . 
                    $ongoingTime->format('g:i A') . " on " . 
                    $ongoingTime->format('M j, Y') . ". Cannot assign to new bookings while current booking is in progress.";
         }
 
-        // Check for existing assignments at the same time (excluding completed/cancelled)
+        // Check for confirmed bookings on the same day that haven't been completed
+        $confirmedBooking = DB::table('booking_staff_assignments as bsa')
+            ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
+            ->where('bsa.employee_id', $employeeId)
+            ->where('b.status', 'confirmed')
+            ->whereDate('b.scheduled_start', $bookingTime->toDateString())
+            ->first();
+
+        if ($confirmedBooking) {
+            $confirmedTime = \Carbon\Carbon::parse($confirmedBooking->scheduled_start);
+            return "Already assigned to confirmed booking {$confirmedBooking->code} at " . 
+                   $confirmedTime->format('g:i A') . " on " . 
+                   $confirmedTime->format('M j, Y') . ". Cannot assign to multiple bookings on the same day.";
+        }
+
+        // Check for other status bookings at the same time (excluding completed/cancelled)
         $conflictingBooking = DB::table('booking_staff_assignments as bsa')
             ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
             ->where('bsa.employee_id', $employeeId)
             ->where('b.status', '!=', 'completed')
             ->where('b.status', '!=', 'cancelled')
             ->where('b.status', '!=', 'in_progress') // Exclude in_progress as it's handled above
+            ->where('b.status', '!=', 'confirmed') // Exclude confirmed as it's handled above
             ->whereDate('b.scheduled_start', $bookingTime->toDateString())
             ->whereTime('b.scheduled_start', $bookingTime->format('H:i:s'))
             ->first();
@@ -964,22 +979,37 @@ class AdminBookingController extends Controller
     }
 
     /**
-     * Check if an employee has any ongoing booking (in_progress status)
+     * Check if an employee has any ongoing booking (confirmed or in_progress status)
      * This is a separate method for checking ongoing conflicts without time consideration
      */
     private function checkEmployeeOngoingConflict($employeeId)
     {
-        $ongoingBooking = DB::table('booking_staff_assignments as bsa')
+        // Check for in_progress bookings (regardless of time)
+        $inProgressBooking = DB::table('booking_staff_assignments as bsa')
             ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
             ->where('bsa.employee_id', $employeeId)
             ->where('b.status', 'in_progress')
             ->first();
 
-        if ($ongoingBooking) {
-            $ongoingTime = \Carbon\Carbon::parse($ongoingBooking->scheduled_start);
-            return "Employee currently has an ongoing booking {$ongoingBooking->code} that started at " . 
+        if ($inProgressBooking) {
+            $ongoingTime = \Carbon\Carbon::parse($inProgressBooking->scheduled_start);
+            return "Employee currently has an ongoing booking {$inProgressBooking->code} (in progress) that started at " . 
                    $ongoingTime->format('g:i A') . " on " . 
                    $ongoingTime->format('M j, Y') . ". Cannot assign to new bookings while current booking is in progress.";
+        }
+
+        // Check for confirmed bookings (any confirmed booking prevents new assignments)
+        $confirmedBooking = DB::table('booking_staff_assignments as bsa')
+            ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
+            ->where('bsa.employee_id', $employeeId)
+            ->where('b.status', 'confirmed')
+            ->first();
+
+        if ($confirmedBooking) {
+            $confirmedTime = \Carbon\Carbon::parse($confirmedBooking->scheduled_start);
+            return "Employee currently has a confirmed booking {$confirmedBooking->code} at " . 
+                   $confirmedTime->format('g:i A') . " on " . 
+                   $confirmedTime->format('M j, Y') . ". Cannot assign to new bookings while employee has confirmed work.";
         }
 
         return null;
