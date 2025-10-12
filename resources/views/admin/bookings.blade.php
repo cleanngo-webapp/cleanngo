@@ -356,7 +356,7 @@
         </div>
         
         {{-- Desktop Table View (hidden on mobile) --}}
-        <div class="hidden sm:block overflow-x-auto">
+        <div id="bookings-table-container" class="hidden sm:block overflow-x-auto">
             <table id="bookings-table" class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
@@ -3600,19 +3600,27 @@
 
     // Function to refresh bookings table via AJAX
     function refreshBookingsTable() {
-        const tableContainer = document.getElementById('bookings-table-container');
+        const tableBody = document.getElementById('bookings-table-body');
         const paginationContainer = document.getElementById('pagination-container');
         
-        if (!tableContainer) return;
+        if (!tableBody) {
+            return;
+        }
 
         // Show loading state
-        tableContainer.innerHTML = `
-            <div class="flex items-center justify-center py-8">
-                <div class="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
-                <span class="ml-2 text-gray-600">Loading bookings...</span>
-            </div>
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-8 text-center">
+                    <div class="flex justify-center items-center space-x-2 mb-4">
+                        <div class="animate-spin rounded-full h-8 w-8 border-2 border-emerald-500 border-t-transparent"></div>
+                        <span class="text-gray-600">Loading bookings...</span>
+                    </div>
+                </td>
+            </tr>
         `;
-        paginationContainer.innerHTML = '';
+        if (paginationContainer) {
+            paginationContainer.innerHTML = '';
+        }
 
         // Fetch updated bookings with current search/sort parameters
         const searchTerm = document.getElementById('search-bookings').value;
@@ -3631,12 +3639,12 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 
-                // Extract table container content
-                const newTableContainer = doc.getElementById('bookings-table-container');
+                // Extract table body content
+                const newTableBody = doc.getElementById('bookings-table-body');
                 const newPagination = doc.getElementById('pagination-container');
                 
-                if (newTableContainer) {
-                    tableContainer.innerHTML = newTableContainer.innerHTML;
+                if (newTableBody) {
+                    tableBody.innerHTML = newTableBody.innerHTML;
                 }
                 if (newPagination) {
                     paginationContainer.innerHTML = newPagination.innerHTML;
@@ -3650,10 +3658,12 @@
             })
             .catch(error => {
                 console.error('Error refreshing table:', error);
-                tableContainer.innerHTML = `
-                    <div class="text-center py-8 text-red-600">
-                        <p>Error loading bookings. Please refresh the page.</p>
-                    </div>
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-red-600">
+                            <p>Error loading bookings. Please refresh the page.</p>
+                        </td>
+                    </tr>
                 `;
             });
     }
