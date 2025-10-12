@@ -596,14 +596,15 @@
         
         /* Make equipment modal items more compact on mobile */
         #equipment-modal .equipment-item {
-            padding: 0.5rem !important;
+            padding: 0.75rem !important;
             margin: 0 !important;
-            border-radius: 0.375rem !important;
+            border-radius: 0.5rem !important;
         }
         
+        /* Stack equipment item content vertically on mobile */
         #equipment-modal .equipment-item .flex {
             flex-direction: column !important;
-            gap: 0.375rem !important;
+            gap: 0.5rem !important;
         }
         
         #equipment-modal .equipment-item .flex-1 {
@@ -611,26 +612,26 @@
             min-width: 0 !important;
         }
         
+        /* Equipment item header - name and badge */
         #equipment-modal .equipment-item .flex.items-center.space-x-3 {
             flex-direction: column !important;
             align-items: flex-start !important;
-            space-x: 0 !important;
-            gap: 0.125rem !important;
+            gap: 0.5rem !important;
+            margin-bottom: 0.25rem !important;
         }
         
         #equipment-modal .equipment-item .flex.items-center.space-x-3 > * {
             margin-right: 0 !important;
         }
         
-        #equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm {
+        /* Equipment item details */
+        #equipment-modal .equipment-item .text-sm {
             font-size: 0.75rem !important;
             line-height: 1rem !important;
+            margin-bottom: 0.25rem !important;
         }
         
-        #equipment-modal .equipment-item .flex.items-center.space-x-3 .text-sm:last-child {
-            margin-top: 0.25rem !important;
-        }
-        
+        /* Input and button row - keep horizontal but make responsive */
         #equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
             flex-direction: row !important;
             justify-content: space-between !important;
@@ -639,9 +640,10 @@
             gap: 0.5rem !important;
         }
         
+        /* Quantity input */
         #equipment-modal .equipment-item .w-20 {
-            width: 3.5rem !important;
-            flex: 0 0 3.5rem !important;
+            width: 4rem !important;
+            flex: 0 0 4rem !important;
         }
         
         #equipment-modal .equipment-item .px-3 {
@@ -657,18 +659,18 @@
         
         /* Reduce spacing between equipment items */
         #equipment-modal .space-y-4 > * + * {
-            margin-top: 0.5rem !important;
+            margin-top: 0.75rem !important;
         }
         
         /* Make equipment modal content more compact */
         #equipment-modal .modal-content-container {
-            padding: 0.5rem !important;
+            padding: 0.75rem !important;
         }
         
         #equipment-modal .equipment-item h4 {
             font-size: 0.875rem !important;
             line-height: 1.25rem !important;
-            margin-bottom: 0.25rem !important;
+            margin-bottom: 0 !important;
         }
         
         #equipment-modal .equipment-item .text-xs {
@@ -676,16 +678,7 @@
             line-height: 0.875rem !important;
         }
         
-        #equipment-modal .equipment-item .text-sm {
-            font-size: 0.75rem !important;
-            line-height: 1rem !important;
-        }
-        
         /* Make input and button row more compact */
-        #equipment-modal .equipment-item .flex.items-center.space-x-3:last-child {
-            gap: 0.5rem !important;
-        }
-        
         #equipment-modal .equipment-item .equipment-quantity {
             flex: 1 !important;
             min-width: 0 !important;
@@ -694,28 +687,25 @@
         #equipment-modal .equipment-item button {
             flex-shrink: 0 !important;
             white-space: nowrap !important;
-            padding: 0.375rem 0.75rem !important;
-            font-size: 0.6875rem !important;
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.75rem !important;
         }
         
-        /* Make equipment item badges properly sized */
-        #equipment-modal .equipment-item .inline-flex.px-2.py-1 {
+        /* Make equipment item badges properly sized and stretched on mobile */
+        #equipment-modal .equipment-item .block.px-2.py-1 {
             padding: 0.25rem 0.5rem !important;
             font-size: 0.625rem !important;
             line-height: 0.875rem !important;
+            width: 100% !important;
+            display: block !important;
         }
         
-        /* Better spacing and alignment for equipment items */
-        #equipment-modal .equipment-item .flex.items-center.space-x-3 {
-            align-items: flex-start !important;
-            gap: 0.25rem !important;
-        }
-        
-        /* Improve text positioning within equipment items */
-        #equipment-modal .equipment-item .flex-1 {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 0.25rem !important;
+        /* Ensure status badges stretch on mobile */
+        @media (max-width: 640px) {
+            #equipment-modal .equipment-item .block.px-2.py-1 {
+                width: 100% !important;
+                display: block !important;
+            }
         }
         
         /* Ensure equipment items don't overflow */
@@ -1648,15 +1638,15 @@ function getEquipment(bookingId) {
                     
                     equipmentHtml += `
                         <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow bg-white relative z-10 equipment-item">
-                            <div class="flex items-center justify-between">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                 <div class="flex-1">
-                                    <div class="flex items-center space-x-3">
-                                        <h4 class="font-medium text-gray-900">${item.name}</h4>
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${badgeClass}">
+                                    <div class="mb-2">
+                                        <h4 class="font-medium text-gray-900 mb-1">${item.name}</h4>
+                                        <span class="block px-2 py-1 text-xs font-medium rounded-full text-center ${badgeClass}">
                                             ${badgeText}
                                         </span>
                                     </div>
-                                    <div class="text-sm text-gray-500 mt-1">
+                                    <div class="text-sm text-gray-500 mb-1">
                                         <span class="font-medium">${item.category}</span> • Code: ${item.item_code}
                                     </div>
                                     <div class="text-sm text-gray-500">
@@ -2300,7 +2290,7 @@ function closeBorrowedItemsModal() {
 
 {{-- Employee Equipment Modal - Mobile responsive --}}
 <div id="equipment-modal" class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-2 sm:top-4 mx-auto p-0 border w-full max-w-4xl shadow-2xl rounded-lg bg-white m-2 sm:m-4" style="max-height: calc(100vh - 1rem);">
+    <div class="relative top-2 sm:top-4 mx-auto p-0 border w-full max-w-sm sm:max-w-2xl lg:max-w-4xl shadow-2xl rounded-lg bg-white m-2 sm:m-4" style="max-height: calc(100vh - 1rem);">
         <div class="flex flex-col h-full">
             <!-- Header - Fixed at top -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-6 border-b border-gray-200 flex-shrink-0 bg-white relative z-10 gap-2">
