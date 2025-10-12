@@ -835,25 +835,15 @@
                                 <input type="text" id="admin-time-picker" name="time" readonly placeholder="Select time" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 cursor-pointer" required>
                                 <i class="ri-time-line absolute right-3 top-8 text-gray-400 pointer-events-none"></i>
                                 <!-- Custom Time Picker -->
-                                <div id="admin-time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-4 hidden" style="width: 200px;">
-                                    <div class="flex items-center justify-center gap-2 mb-3">
-                                        <select id="admin-ampm-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
+                                <div id="admin-time-picker-dropdown" class="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden" style="width: 160px;">
+                                    <div class="flex items-center justify-center gap-1 mb-3">
+                                        <input type="text" id="admin-hour-input" placeholder="HH" maxlength="2" class="border border-gray-300 rounded px-1 py-1 text-center w-12 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                        <span class="text-gray-500 text-sm">:</span>
+                                        <input type="text" id="admin-minute-input" placeholder="MM" maxlength="2" class="border border-gray-300 rounded px-1 py-1 text-center w-12 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                        <select id="admin-ampm-select" class="border border-gray-300 rounded px-1 py-1 text-center w-12 text-sm">
                                             <option value="">--</option>
                                             <option value="AM">AM</option>
                                             <option value="PM">PM</option>
-                                        </select>
-                                        <select id="admin-hour-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
-                                            <option value="">--</option>
-                                            @for($i = 1; $i <= 12; $i++)
-                                                <option value="{{ $i }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                                            @endfor
-                                        </select>
-                                        <span class="text-gray-500">:</span>
-                                        <select id="admin-minute-select" class="border border-gray-300 rounded px-2 py-1 text-center w-16">
-                                            <option value="">--</option>
-                                            @for($i = 0; $i < 60; $i += 10)
-                                                <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
-                                            @endfor
                                         </select>
                                     </div>
                                     <div class="flex justify-between">
@@ -3192,6 +3182,9 @@
         adminSelectedTime = null;
         document.getElementById('admin-date-picker').value = '';
         document.getElementById('admin-time-picker').value = '';
+        document.getElementById('admin-hour-input').value = '';
+        document.getElementById('admin-minute-input').value = '';
+        document.getElementById('admin-ampm-select').value = '';
         document.getElementById('admin-date-picker').placeholder = 'Select date';
         document.getElementById('admin-time-picker').placeholder = 'Select time';
         document.getElementById('admin-date-picker-dropdown').classList.add('hidden');
@@ -3902,8 +3895,8 @@
     function initAdminTimePicker() {
         const timeInput = document.getElementById('admin-time-picker');
         const timeDropdown = document.getElementById('admin-time-picker-dropdown');
-        const hourSelect = document.getElementById('admin-hour-select');
-        const minuteSelect = document.getElementById('admin-minute-select');
+        const hourInput = document.getElementById('admin-hour-input');
+        const minuteInput = document.getElementById('admin-minute-input');
         const ampmSelect = document.getElementById('admin-ampm-select');
         const applyBtn = document.getElementById('admin-apply-time');
         const clearBtn = document.getElementById('admin-clear-time');
@@ -3925,47 +3918,126 @@
                 // Update time options based on selected date
                 adminUpdateTimeOptions();
                 
-                // Position time picker directly below the input
+                // Position time picker directly below the input with proper modal constraints
                 const rect = timeInput.getBoundingClientRect();
-                timeDropdown.style.left = rect.left + 'px';
-                timeDropdown.style.top = (rect.bottom + 5) + 'px';
+                const modal = timeInput.closest('.modal');
+                const modalRect = modal ? modal.getBoundingClientRect() : null;
+                
+                let left = rect.left;
+                let top = rect.bottom + 5;
+                
+                // Adjust if time picker would go off right edge of modal or viewport
+                if (modalRect) {
+                    const maxRight = Math.min(modalRect.right, window.innerWidth) - 10;
+                    if (left + 160 > maxRight) {
+                        left = maxRight - 160;
+                    }
+                } else if (left + 160 > window.innerWidth - 10) {
+                    left = window.innerWidth - 170;
+                }
+                
+                // Adjust if time picker would go off left edge
+                if (left < 10) {
+                    left = 10;
+                }
+                
+                // Adjust if time picker would go off bottom of modal or viewport
+                if (modalRect) {
+                    const maxBottom = Math.min(modalRect.bottom, window.innerHeight) - 10;
+                    if (top + 80 > maxBottom) {
+                        top = rect.top - 85; // Position above the input instead
+                    }
+                } else if (top + 80 > window.innerHeight - 10) {
+                    top = rect.top - 85; // Position above the input instead
+                }
+                
+                timeDropdown.style.left = left + 'px';
+                timeDropdown.style.top = top + 'px';
             }
         };
 
         timeInput.addEventListener('click', timeInput._adminTimeClickHandler);
 
-        // Add event listener to ampm select to update hour options
-        ampmSelect.addEventListener('change', () => {
-            adminUpdateHourOptions();
+        // Add input validation for hour field (1-12)
+        hourInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+            if (value && parseInt(value) > 12) {
+                value = '12';
+            }
+            e.target.value = value;
         });
 
-        // Add event listener to hour select to update minute options
-        hourSelect.addEventListener('change', () => {
-            adminUpdateMinuteOptions();
+        // Add input validation for minute field (0-59)
+        minuteInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+            if (value && parseInt(value) > 59) {
+                value = '59';
+            }
+            e.target.value = value;
         });
 
         // Apply button
         if (applyBtn) applyBtn.addEventListener('click', () => {
-            const hour = hourSelect.value;
-            const minute = minuteSelect.value;
+            let hour = hourInput.value.trim();
+            let minute = minuteInput.value.trim();
             const ampm = ampmSelect.value;
 
-            if (hour && minute && ampm) {
-                // Validate that the selected time is not in the past
-                if (adminIsTimeInPast(hour, minute, ampm)) {
-                    Swal.fire({
-                        title: 'Invalid Time',
-                        text: 'Please select a time that is not in the past.',
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#10b981'
-                    });
-                    return;
-                }
-                
-                adminSelectTime(hour, minute, ampm);
-                timeDropdown.classList.add('hidden');
+            // Validate inputs
+            if (!hour || !minute || !ampm) {
+                Swal.fire({
+                    title: 'Incomplete Time',
+                    text: 'Please fill in all time fields (hour, minute, and AM/PM).',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#10b981'
+                });
+                return;
             }
+
+            // Auto-pad single digits
+            hour = hour.padStart(2, '0');
+            minute = minute.padStart(2, '0');
+
+            // Validate hour range (1-12)
+            const hourNum = parseInt(hour);
+            if (hourNum < 1 || hourNum > 12) {
+                Swal.fire({
+                    title: 'Invalid Hour',
+                    text: 'Hour must be between 1 and 12.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#10b981'
+                });
+                return;
+            }
+
+            // Validate minute range (0-59)
+            const minuteNum = parseInt(minute);
+            if (minuteNum < 0 || minuteNum > 59) {
+                Swal.fire({
+                    title: 'Invalid Minute',
+                    text: 'Minute must be between 0 and 59.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#10b981'
+                });
+                return;
+            }
+
+            // Validate that the selected time is not in the past
+            if (adminIsTimeInPast(hour, minute, ampm)) {
+                Swal.fire({
+                    title: 'Invalid Time',
+                    text: 'Please select a time that is not in the past.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#10b981'
+                });
+                return;
+            }
+            
+            adminSelectTime(hour, minute, ampm);
+            timeDropdown.classList.add('hidden');
         });
 
         // Clear button
@@ -3973,8 +4045,8 @@
             adminSelectedTime = null;
             timeInput.value = '';
             timeInput.placeholder = 'Select time';
-            hourSelect.value = '';
-            minuteSelect.value = '';
+            hourInput.value = '';
+            minuteInput.value = '';
             ampmSelect.value = '';
             timeDropdown.classList.add('hidden');
         });
@@ -3994,8 +4066,8 @@
     // Function to clear admin time selection
     function adminClearTimeSelection() {
         const timeInput = document.getElementById('admin-time-picker');
-        const hourSelect = document.getElementById('admin-hour-select');
-        const minuteSelect = document.getElementById('admin-minute-select');
+        const hourInput = document.getElementById('admin-hour-input');
+        const minuteInput = document.getElementById('admin-minute-input');
         const ampmSelect = document.getElementById('admin-ampm-select');
         
         if (timeInput) {
@@ -4003,8 +4075,8 @@
             timeInput.placeholder = 'Select time';
         }
         
-        if (hourSelect) hourSelect.value = '';
-        if (minuteSelect) minuteSelect.value = '';
+        if (hourInput) hourInput.value = '';
+        if (minuteInput) minuteInput.value = '';
         if (ampmSelect) ampmSelect.value = '';
         
         adminSelectedTime = null;
@@ -4015,137 +4087,19 @@
 
     // Function to update admin time options based on selected date
     function adminUpdateTimeOptions() {
-        const hourSelect = document.getElementById('admin-hour-select');
-        const minuteSelect = document.getElementById('admin-minute-select');
+        const hourInput = document.getElementById('admin-hour-input');
+        const minuteInput = document.getElementById('admin-minute-input');
         const ampmSelect = document.getElementById('admin-ampm-select');
         
-        if (!hourSelect || !minuteSelect || !ampmSelect) return;
+        if (!hourInput || !minuteInput || !ampmSelect) return;
         
-        // Clear existing options
-        hourSelect.innerHTML = '<option value="">--</option>';
-        minuteSelect.innerHTML = '<option value="">--</option>';
-        ampmSelect.innerHTML = '<option value="">--</option>';
-        
-        // Add AM/PM options
-        ampmSelect.innerHTML += '<option value="AM">AM</option><option value="PM">PM</option>';
+        // Clear existing values
+        hourInput.value = '';
+        minuteInput.value = '';
+        ampmSelect.value = '';
     }
 
-    // Function to update admin hour options based on selected AM/PM
-    function adminUpdateHourOptions() {
-        const hourSelect = document.getElementById('admin-hour-select');
-        const minuteSelect = document.getElementById('admin-minute-select');
-        const ampmSelect = document.getElementById('admin-ampm-select');
-        
-        if (!hourSelect || !minuteSelect || !ampmSelect) return;
-        
-        const selectedAMPM = ampmSelect.value;
-        
-        if (!selectedAMPM) {
-            // Clear hour and minute options if AM/PM not selected
-            hourSelect.innerHTML = '<option value="">--</option>';
-            minuteSelect.innerHTML = '<option value="">--</option>';
-            return;
-        }
-        
-        // Get current time
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        
-        // Check if selected date is today
-        const isToday = adminSelectedDate && 
-            adminSelectedDate.getDate() === now.getDate() &&
-            adminSelectedDate.getMonth() === now.getMonth() &&
-            adminSelectedDate.getFullYear() === now.getFullYear();
-        
-        // Clear existing hour options
-        hourSelect.innerHTML = '<option value="">--</option>';
-        
-        // Generate hour options (1-12) - remove past hours instead of disabling them
-        for (let i = 1; i <= 12; i++) {
-            // If today, check if this hour is in the past for the selected AM/PM
-            if (isToday) {
-                let hour24;
-                if (selectedAMPM === 'AM' && i === 12) {
-                    hour24 = 0; // 12 AM = 0:00
-                } else if (selectedAMPM === 'AM') {
-                    hour24 = i; // 1-11 AM = 1-11
-                } else if (selectedAMPM === 'PM' && i === 12) {
-                    hour24 = 12; // 12 PM = 12:00
-                } else {
-                    hour24 = i + 12; // 1-11 PM = 13-23
-                }
-                
-                // Skip this hour if it's in the past
-                if (hour24 < currentHour) {
-                    continue;
-                }
-            }
-            
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = String(i).padStart(2, '0');
-            hourSelect.appendChild(option);
-        }
-        
-        // Clear minute options (will be updated when hour is selected)
-        minuteSelect.innerHTML = '<option value="">--</option>';
-    }
 
-    // Function to update admin minute options based on selected hour and AM/PM
-    function adminUpdateMinuteOptions() {
-        const hourSelect = document.getElementById('admin-hour-select');
-        const minuteSelect = document.getElementById('admin-minute-select');
-        const ampmSelect = document.getElementById('admin-ampm-select');
-        
-        if (!hourSelect || !minuteSelect || !ampmSelect) return;
-        
-        const selectedHour = parseInt(hourSelect.value);
-        const selectedAMPM = ampmSelect.value;
-        
-        if (!selectedHour || !selectedAMPM) {
-            // Clear minute options if hour or AM/PM not selected
-            minuteSelect.innerHTML = '<option value="">--</option>';
-            return;
-        }
-        
-        // Get current time
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        
-        // Check if selected date is today
-        const isToday = adminSelectedDate && 
-            adminSelectedDate.getDate() === now.getDate() &&
-            adminSelectedDate.getMonth() === now.getMonth() &&
-            adminSelectedDate.getFullYear() === now.getFullYear();
-        
-        // Clear existing minute options
-        minuteSelect.innerHTML = '<option value="">--</option>';
-        
-        // Convert 12-hour to 24-hour format
-        let hour24 = selectedHour;
-        if (selectedAMPM === 'AM' && selectedHour === 12) {
-            hour24 = 0;
-        } else if (selectedAMPM === 'PM' && selectedHour !== 12) {
-            hour24 = selectedHour + 12;
-        }
-        
-        // Generate minute options (0, 10, 20, 30, 40, 50)
-        for (let i = 0; i < 60; i += 10) {
-            const option = document.createElement('option');
-            option.value = String(i).padStart(2, '0');
-            option.textContent = String(i).padStart(2, '0');
-            
-            // If today and this is the current hour, disable past minutes
-            if (isToday && hour24 === currentHour && i < currentMinute) {
-                option.disabled = true;
-                option.style.color = '#ccc';
-            }
-            
-            minuteSelect.appendChild(option);
-        }
-    }
 
 
     // Function to check if an admin time is in the past
