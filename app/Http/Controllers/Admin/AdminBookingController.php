@@ -256,25 +256,63 @@ class AdminBookingController extends Controller
 
         // Handle employee assignments if provided
         if (!empty($data['employee_ids'])) {
+            // First validate all employees for ongoing conflicts before creating any assignments
+            $conflictErrors = [];
+            $validEmployeeIds = [];
+            
             foreach ($data['employee_ids'] as $employeeUserId) {
                 $employeeId = DB::table('employees')->where('user_id', $employeeUserId)->value('id');
                 if ($employeeId) {
-                    // Check if assignment already exists (prevent duplicates)
-                    $existingAssignment = DB::table('booking_staff_assignments')
-                        ->where('booking_id', $bookingId)
-                        ->where('employee_id', $employeeId)
-                        ->first();
-                    
-                    if (!$existingAssignment) {
-                        // Insert new assignment - this will make the employee appear in the table
-                        DB::table('booking_staff_assignments')->insert([
-                            'booking_id' => $bookingId,
-                            'employee_id' => $employeeId,
-                            'role' => 'cleaner',
-                            'assigned_at' => now(),
-                            'assigned_by' => Auth::id()
-                        ]);
+                    // Check if employee has ongoing bookings before assignment
+                    $ongoingConflict = $this->checkEmployeeOngoingConflict($employeeId);
+                    if ($ongoingConflict) {
+                        $employeeName = DB::table('users')
+                            ->where('id', $employeeUserId)
+                            ->selectRaw("CONCAT(first_name, ' ', last_name) as name")
+                            ->value('name');
+                        $conflictErrors[] = "{$employeeName}: {$ongoingConflict}";
+                    } else {
+                        $validEmployeeIds[] = $employeeId;
                     }
+                }
+            }
+            
+            // If there are conflicts, return error
+            if (!empty($conflictErrors)) {
+                // Delete the booking that was just created since we can't assign employees
+                DB::table('bookings')->where('id', $bookingId)->delete();
+                
+                $errorMessage = "Cannot assign employees due to ongoing booking conflicts:\n" . implode("\n", $conflictErrors);
+                
+                // Handle AJAX requests with JSON response for SweetAlert
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $errorMessage,
+                        'error_type' => 'employee_conflict'
+                    ], 422);
+                }
+                
+                return back()->withErrors(['employee_assignment' => $errorMessage]);
+            }
+            
+            // Create assignments for valid employees
+            foreach ($validEmployeeIds as $employeeId) {
+                // Check if assignment already exists (prevent duplicates)
+                $existingAssignment = DB::table('booking_staff_assignments')
+                    ->where('booking_id', $bookingId)
+                    ->where('employee_id', $employeeId)
+                    ->first();
+                
+                if (!$existingAssignment) {
+                    // Insert new assignment - this will make the employee appear in the table
+                    DB::table('booking_staff_assignments')->insert([
+                        'booking_id' => $bookingId,
+                        'employee_id' => $employeeId,
+                        'role' => 'cleaner',
+                        'assigned_at' => now(),
+                        'assigned_by' => Auth::id()
+                    ]);
                 }
             }
         }
@@ -562,6 +600,12 @@ class AdminBookingController extends Controller
             if ($selectedEmployeeUserId) {
                 $employee = \App\Models\Employee::where('user_id', $selectedEmployeeUserId)->first();
                 if ($employee) {
+                    // Check if employee has ongoing bookings before assignment
+                    $ongoingConflict = $this->checkEmployeeOngoingConflict($employee->id);
+                    if ($ongoingConflict) {
+                        return back()->withErrors(['confirm' => $ongoingConflict]);
+                    }
+
                     // Check if assignment already exists (prevent duplicates)
                     $existingAssignment = \App\Models\BookingStaffAssignment::where('booking_id', $bookingId)
                         ->where('employee_id', $employee->id)
@@ -670,6 +714,12 @@ class AdminBookingController extends Controller
                 ]);
                 if (!$employee) {
                     return back()->withErrors(['assign' => 'Employee not found.']);
+                }
+
+                // Check if employee has ongoing bookings before assignment
+                $ongoingConflict = $this->checkEmployeeOngoingConflict($employee->id);
+                if ($ongoingConflict) {
+                    return back()->withErrors(['assign' => $ongoingConflict]);
                 }
             }
             
@@ -877,12 +927,28 @@ class AdminBookingController extends Controller
      */
     private function checkEmployeeConflict($employeeId, $bookingTime)
     {
-        // Check for existing assignments at the same time
+        // First check if employee has any ongoing booking (in_progress status)
+        // This takes priority over time-based conflicts
+        $ongoingBooking = DB::table('booking_staff_assignments as bsa')
+            ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
+            ->where('bsa.employee_id', $employeeId)
+            ->where('b.status', 'in_progress')
+            ->first();
+
+        if ($ongoingBooking) {
+            $ongoingTime = \Carbon\Carbon::parse($ongoingBooking->scheduled_start);
+            return "Currently has an ongoing booking {$ongoingBooking->code} that started at " . 
+                   $ongoingTime->format('g:i A') . " on " . 
+                   $ongoingTime->format('M j, Y') . ". Cannot assign to new bookings while current booking is in progress.";
+        }
+
+        // Check for existing assignments at the same time (excluding completed/cancelled)
         $conflictingBooking = DB::table('booking_staff_assignments as bsa')
             ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
             ->where('bsa.employee_id', $employeeId)
             ->where('b.status', '!=', 'completed')
             ->where('b.status', '!=', 'cancelled')
+            ->where('b.status', '!=', 'in_progress') // Exclude in_progress as it's handled above
             ->whereDate('b.scheduled_start', $bookingTime->toDateString())
             ->whereTime('b.scheduled_start', $bookingTime->format('H:i:s'))
             ->first();
@@ -892,6 +958,28 @@ class AdminBookingController extends Controller
             return "Already assigned to booking {$conflictingBooking->code} at " . 
                    $conflictTime->format('g:i A') . " on " . 
                    $conflictTime->format('M j, Y');
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if an employee has any ongoing booking (in_progress status)
+     * This is a separate method for checking ongoing conflicts without time consideration
+     */
+    private function checkEmployeeOngoingConflict($employeeId)
+    {
+        $ongoingBooking = DB::table('booking_staff_assignments as bsa')
+            ->join('bookings as b', 'b.id', '=', 'bsa.booking_id')
+            ->where('bsa.employee_id', $employeeId)
+            ->where('b.status', 'in_progress')
+            ->first();
+
+        if ($ongoingBooking) {
+            $ongoingTime = \Carbon\Carbon::parse($ongoingBooking->scheduled_start);
+            return "Employee currently has an ongoing booking {$ongoingBooking->code} that started at " . 
+                   $ongoingTime->format('g:i A') . " on " . 
+                   $ongoingTime->format('M j, Y') . ". Cannot assign to new bookings while current booking is in progress.";
         }
 
         return null;
