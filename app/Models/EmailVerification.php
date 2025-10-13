@@ -95,6 +95,52 @@ class EmailVerification extends Model
     }
 
     /**
+     * Validate an OTP code without marking it as used
+     * This allows us to check if the OTP is valid before proceeding with registration
+     *
+     * @param string $email
+     * @param string $otpCode
+     * @param string $verificationType
+     * @return bool
+     */
+    public static function validateOTP(string $email, string $otpCode, string $verificationType = 'registration'): bool
+    {
+        $verification = self::where('email', $email)
+            ->where('otp_code', $otpCode)
+            ->where('is_used', false)
+            ->where('verification_type', $verificationType)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        return $verification !== null;
+    }
+
+    /**
+     * Mark an OTP as used after successful verification
+     *
+     * @param string $email
+     * @param string $otpCode
+     * @param string $verificationType
+     * @return bool
+     */
+    public static function markOTPAsUsed(string $email, string $otpCode, string $verificationType = 'registration'): bool
+    {
+        $verification = self::where('email', $email)
+            ->where('otp_code', $otpCode)
+            ->where('is_used', false)
+            ->where('verification_type', $verificationType)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($verification) {
+            $verification->update(['is_used' => true]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Check if OTP is expired
      *
      * @return bool

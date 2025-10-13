@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -76,13 +77,21 @@ class User extends Authenticatable
 
         // Trigger notification when a new user is created
         static::created(function ($user) {
-            $notificationService = app(\App\Services\NotificationService::class);
-            
-            // Notify admin about new customer registrations
-            if ($user->role === 'customer') {
-                $notificationService->notifyNewCustomerRegistered($user);
-                // Also notify the customer about their account creation
-                $notificationService->notifyCustomerAccountCreated($user);
+            try {
+                $notificationService = app(\App\Services\NotificationService::class);
+                
+                // Notify admin about new customer registrations
+                if ($user->role === 'customer') {
+                    $notificationService->notifyNewCustomerRegistered($user);
+                    // Also notify the customer about their account creation
+                    $notificationService->notifyCustomerAccountCreated($user);
+                }
+            } catch (\Exception $e) {
+                // Log notification errors but don't fail user creation
+                Log::error('Notification error during user creation', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage()
+                ]);
             }
         });
 
@@ -100,18 +109,26 @@ class User extends Authenticatable
             }
             
             if ($hasProfileChanges) {
-                $notificationService = app(\App\Services\NotificationService::class);
-                
-                // Get original data for comparison
-                $originalData = $user->getOriginal();
-                
-                // Notify admin based on user role
-                if ($user->role === 'customer') {
-                    $notificationService->notifyCustomerProfileUpdated($user, $originalData);
-                } elseif ($user->role === 'admin') {
-                    $notificationService->notifyAdminProfileUpdated($user, $originalData);
+                try {
+                    $notificationService = app(\App\Services\NotificationService::class);
+                    
+                    // Get original data for comparison
+                    $originalData = $user->getOriginal();
+                    
+                    // Notify admin based on user role
+                    if ($user->role === 'customer') {
+                        $notificationService->notifyCustomerProfileUpdated($user, $originalData);
+                    } elseif ($user->role === 'admin') {
+                        $notificationService->notifyAdminProfileUpdated($user, $originalData);
+                    }
+                    // Note: Employee profile updates are handled in Employee model observer
+                } catch (\Exception $e) {
+                    // Log notification errors but don't fail user update
+                    Log::error('Notification error during user profile update', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage()
+                    ]);
                 }
-                // Note: Employee profile updates are handled in Employee model observer
             }
         });
     }

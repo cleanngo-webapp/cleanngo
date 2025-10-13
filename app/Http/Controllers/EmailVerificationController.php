@@ -10,6 +10,7 @@ use App\Mail\EmailVerificationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
@@ -101,13 +102,22 @@ class EmailVerificationController extends Controller
             return redirect()->route('register')->with('error', 'Registration session expired. Please register again.');
         }
 
-        // Verify OTP
-        if (!EmailVerification::verifyOTP($email, $otpCode, 'registration')) {
+        // Validate OTP without marking it as used yet
+        if (!EmailVerification::validateOTP($email, $otpCode, 'registration')) {
             return back()->withErrors(['otp_code' => 'Invalid or expired verification code.']);
         }
 
         try {
             DB::beginTransaction();
+
+            // Log registration data for debugging
+            Log::info('Starting user registration', [
+                'email' => $email,
+                'username' => $registrationData['username'] ?? 'not_set',
+                'first_name' => $registrationData['first_name'] ?? 'not_set',
+                'last_name' => $registrationData['last_name'] ?? 'not_set',
+                'contact' => $registrationData['contact'] ?? 'not_set'
+            ]);
 
             // Create the user using session data
             $user = User::create([
@@ -121,20 +131,30 @@ class EmailVerificationController extends Controller
                 'email_verified_at' => now(), // Mark email as verified
             ]);
 
+            Log::info('User created successfully', ['user_id' => $user->id]);
+
             // Create customer profile
+            Log::info('Creating customer profile', ['user_id' => $user->id]);
             $year = now()->format('Y');
             for ($i = 0; $i < 1000; $i++) {
                 $suffix = str_pad((string)random_int(0, 999), 3, '0', STR_PAD_LEFT);
                 $code = 'C' . $year . $suffix;
                 $exists = DB::table('customers')->where('customer_code', $code)->exists();
                 if (!$exists) {
-                    Customer::create([
+                    $customer = Customer::create([
                         'user_id' => $user->id,
                         'customer_code' => $code,
+                    ]);
+                    Log::info('Customer profile created successfully', [
+                        'customer_id' => $customer->id,
+                        'customer_code' => $code
                     ]);
                     break;
                 }
             }
+
+            // Mark OTP as used only after successful registration
+            EmailVerification::markOTPAsUsed($email, $otpCode, 'registration');
 
             // Clear session data
             $request->session()->forget('pending_registration');
@@ -145,7 +165,15 @@ class EmailVerificationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['email' => 'Registration failed. Please try again.']);
+            
+            // Log the specific error for debugging
+            Log::error('Registration failed during OTP verification', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->withErrors(['email' => 'Registration failed: ' . $e->getMessage() . '. Please try again.']);
         }
     }
 
