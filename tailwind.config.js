@@ -9,13 +9,24 @@ module.exports = {
         extend: {
             colors: {
                 brand: {
-                    green:"#248639", // dark shade
-                    gray:"#D9D9D9", // dark shade
+                    green: "#248639", // dark shade
+                    gray: "#D9D9D9", // dark shade
                     highlight: "#42A457", // selected shade
                 },
             },
             fontFamily: {
-                poppins: ['"Poppins"', "sans-serif"],
+                sans: [
+                    '"Lexend"',
+                    "ui-sans-serif",
+                    "system-ui",
+                    "-apple-system",
+                    "Segoe UI",
+                    "Roboto",
+                    "Helvetica",
+                    "Arial",
+                    "sans-serif",
+                ],
+                lexend: ['"Lexend"', "sans-serif"],
             },
         },
     },
