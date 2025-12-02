@@ -6,17 +6,80 @@
 <div class="max-w-3xl mx-auto">
 
     <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
-    <h1 class="text-3xl font-extrabold text-center">{{ trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: $user->username }}</h1>
-    <p class="text-center text-gray-600">Employee ID: {{ $employee?->employee_code ?? sprintf('EMP-%03d', $employee?->id ?? 0) }}</p>
+        <div class="flex flex-col items-center gap-4">
+            {{-- Profile Picture (optional) --}}
+            <div class="relative">
+                @if($user->avatar)
+                    <img src="{{ Storage::url($user->avatar) }}" 
+                         alt="Profile Picture" 
+                         class="w-24 h-24 rounded-full object-cover border-4 border-emerald-200">
+                @else
+                    <div class="w-24 h-24 rounded-full bg-emerald-100 border-4 border-emerald-200 flex items-center justify-center">
+                        <span class="text-3xl font-semibold text-emerald-600">
+                            {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                        </span>
+                    </div>
+                @endif
+            </div>
+
+            <div class="text-center">
+                <h1 class="text-3xl font-extrabold">
+                    {{ trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) ?: $user->username }}
+                </h1>
+                <p class="text-gray-600">Employee ID: {{ $employee?->employee_code ?? sprintf('EMP-%03d', $employee?->id ?? 0) }}</p>
+            </div>
+        </div>
     </div>
 
     @if (session('status'))
         <div class="mt-4 p-3 bg-emerald-100 text-emerald-900 rounded">{{ session('status') }}</div>
     @endif
 
-    <form method="POST" action="{{ route('employee.profile.update') }}" class="mt-6 space-y-6">
+    <form method="POST" action="{{ route('employee.profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('PUT')
+
+        {{-- Optional Profile Picture Upload --}}
+        <div class="bg-white rounded-xl p-4 shadow-sm">
+            <h2 class="text-xl font-semibold flex items-center mb-4">
+                <i class="ri-image-add-line mr-2 text-emerald-700"></i>
+                Profile Picture
+                <span class="ml-2 text-sm text-gray-500 font-normal">(Optional)</span>
+            </h2>
+
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <div class="flex-shrink-0">
+                    @if($user->avatar)
+                        <img src="{{ Storage::url($user->avatar) }}" 
+                             alt="Current Profile Picture" 
+                             class="w-20 h-20 rounded-full object-cover border-4 border-emerald-200">
+                    @else
+                        <div class="w-20 h-20 rounded-full bg-emerald-100 border-4 border-emerald-200 flex items-center justify-center">
+                            <span class="text-2xl font-semibold text-emerald-600">
+                                {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                            </span>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="flex-1 w-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Upload New Profile Picture (optional)
+                    </label>
+                    <input type="file" 
+                           name="avatar" 
+                           accept="image/*"
+                           class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-emerald-50 file:text-emerald-700
+                                  hover:file:bg-emerald-100 cursor-pointer">
+                    <p class="text-xs text-gray-500 mt-1">
+                        JPEG, PNG, JPG, GIF up to 10MB. Leave empty to keep your current picture.
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <div class="bg-white rounded-xl p-4 shadow-sm">
             <h2 class="text-xl font-semibold flex items-center">
@@ -86,10 +149,6 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-500">Recent Job</label>
                     <div class="mt-1 p-3 bg-gray-50 border rounded text-gray-700">{{ $employee?->recent_job ?? 'Not specified' }}</div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-500">Attendance</label>
-                    <div class="mt-1 p-3 bg-gray-50 border rounded text-gray-700">{{ $employee?->attendance_summary ?? 'Not specified' }}</div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-500">Performance Rating</label>

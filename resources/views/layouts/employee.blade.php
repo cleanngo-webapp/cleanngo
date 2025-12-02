@@ -91,9 +91,9 @@
                 
                 <!-- Mobile Logout -->
                 <div class="border-t border-white/20 pt-4">
-                    <form method="POST" action="{{ route('logout') }}" class="block">
+                    <form id="employee-mobile-logout-form" method="POST" action="{{ route('logout') }}" class="block">
                         @csrf  
-                        <button type="submit" onclick="closeMobileMenu()" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
+                        <button type="button" onclick="confirmEmployeeLogout('employee-mobile-logout-form', true)" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
                             <i class="ri-logout-box-line text-xl"></i>
                             <span class="ml-2">Logout</span>
                         </button>
@@ -115,9 +115,9 @@
                 <a href="{{ route('employee.notifications') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors {{ request()->routeIs('employee.notifications') ? 'bg-white text-emerald-800 font-semibold' : '' }}"><i class="ri-notification-3-line"></i> <span>Notifications</span></a>
                 <a href="{{ route('employee.profile.show') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors {{ request()->routeIs('employee.profile.*') ? 'bg-white text-emerald-800 font-semibold' : '' }}"><i class="ri-user-3-fill"></i> <span>My Profile</span></a>
                 <a href="{{ route('employee.settings') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors {{ request()->routeIs('employee.settings') ? 'bg-white text-emerald-800 font-semibold' : '' }}"><i class="ri-settings-3-line"></i> <span>Settings</span></a>
-                <form method="POST" action="{{ route('logout') }}">
+                <form id="employee-desktop-logout-form" method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button class="w-full text-left flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors"><i class="ri-logout-box-line"></i> <span>Logout</span></button>
+                    <button type="button" onclick="confirmEmployeeLogout('employee-desktop-logout-form')" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors"><i class="ri-logout-box-line"></i> <span>Logout</span></button>
                 </form>
             </nav>
         </aside>
@@ -428,6 +428,30 @@
         window.addEventListener('beforeunload', function() {
             stopNotificationPolling();
         });
+
+        // Logout confirmation (employee)
+        function confirmEmployeeLogout(formId, isMobile = false) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            Swal.fire({
+                title: 'Are you sure you want to log out?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#047857',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (isMobile) {
+                        closeMobileMenu();
+                    }
+                    form.submit();
+                }
+            });
+        }
     </script>
 </body>
 @stack('scripts')

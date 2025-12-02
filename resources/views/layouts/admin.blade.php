@@ -89,9 +89,9 @@
                 
                 <!-- Mobile Logout -->
                 <div class="border-t border-white/20 pt-4">
-                    <form method="POST" action="{{ route('logout') }}" class="block">
+                    <form id="admin-mobile-logout-form" method="POST" action="{{ route('logout') }}" class="block">
                         @csrf  
-                        <button type="submit" onclick="closeMobileMenu()" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
+                        <button type="button" onclick="confirmLogout('admin-mobile-logout-form', true)" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
                             <i class="ri-logout-box-line text-xl"></i>
                             <span class="ml-2">Logout</span>
                         </button>
@@ -117,9 +117,9 @@
                 <a href="{{ route('admin.gallery') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors {{ request()->routeIs('admin.gallery') ? 'bg-white text-emerald-800 font-semibold' : '' }}"><i class="ri-image-2-line"></i> <span>Gallery</span></a>
                 <a href="{{ route('admin.notifications') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors {{ request()->routeIs('admin.notifications') ? 'bg-white text-emerald-800 font-semibold' : '' }}"><i class="ri-notification-3-line"></i> <span>Notifications</span></a>
                 <a href="{{ route('admin.settings') }}" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors {{ request()->routeIs('admin.settings') ? 'bg-white text-emerald-800 font-semibold' : '' }}"><i class="ri-settings-3-line"></i> <span>Settings</span></a>
-                <form method="POST" action="{{ route('logout') }}">
+                <form id="admin-desktop-logout-form" method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button class="w-full text-left flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors"><i class="ri-logout-box-line"></i> <span>Logout</span></button>
+                    <button type="button" onclick="confirmLogout('admin-desktop-logout-form')" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded hover:bg-white hover:text-emerald-800 cursor-pointer transition-colors"><i class="ri-logout-box-line"></i> <span>Logout</span></button>
                 </form>
             </nav>
         </aside>
@@ -439,6 +439,30 @@
         window.addEventListener('beforeunload', function() {
             stopNotificationPolling();
         });
+
+        // Logout confirmation (admin)
+        function confirmLogout(formId, isMobile = false) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            Swal.fire({
+                title: 'Are you sure you want to log out?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#047857',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (isMobile) {
+                        closeMobileMenu();
+                    }
+                    form.submit();
+                }
+            });
+        }
     </script>
 </body>
 @stack('scripts')

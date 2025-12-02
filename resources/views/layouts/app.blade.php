@@ -63,9 +63,9 @@
                     <i class="ri-settings-3-line"></i>
                 </a>
     
-                <form method="POST" action="{{ route('logout') }}" class="ml-2">
+                <form id="customer-desktop-logout-form" method="POST" action="{{ route('logout') }}" class="ml-2">
                     @csrf  
-                    <button class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
+                    <button type="button" onclick="confirmCustomerLogout('customer-desktop-logout-form')" class="text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700">
                         <i class="ri-logout-box-line"></i> Logout
                     </button>
                 </form>
@@ -108,9 +108,9 @@
                 
                 <!-- Mobile Logout -->
                 <div class="border-t border-white/20 pt-4">
-                    <form method="POST" action="{{ route('logout') }}" class="block">
+                    <form id="customer-mobile-logout-form" method="POST" action="{{ route('logout') }}" class="block">
                         @csrf  
-                        <button type="submit" onclick="closeMobileMenu()" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
+                        <button type="button" onclick="confirmCustomerLogout('customer-mobile-logout-form', true)" class="w-full text-white hover:text-emerald-300 transition-colors text-center py-3">
                             <i class="ri-logout-box-line text-xl"></i>
                             <span class="ml-2">Logout</span>
                         </button>
@@ -484,6 +484,30 @@
         window.addEventListener('beforeunload', function() {
             stopNotificationPolling();
         });
+
+        // Logout confirmation (customer)
+        function confirmCustomerLogout(formId, isMobile = false) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            Swal.fire({
+                title: 'Are you sure you want to log out?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#047857',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (isMobile) {
+                        closeMobileMenu();
+                    }
+                    form.submit();
+                }
+            });
+        }
     </script>
 </body>
 @stack('scripts')

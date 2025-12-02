@@ -113,12 +113,6 @@
             cleaner tomorrow, today.
         </p>
 
-        <!-- Call to Action -->
-        <div class="mt-4 md:mt-6">
-            <a href="{{ route('register') }}" class="inline-block bg-brand-green text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-emerald-700 transition-colors text-sm md:text-base">
-                Join Our Community Today
-            </a>
-        </div>
     </div>
 </section>
 
