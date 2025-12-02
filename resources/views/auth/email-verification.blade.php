@@ -56,17 +56,25 @@
 
 				<div class="text-center">
 					<p class="text-sm text-gray-600">Didn't receive the code?</p>
-					<form method="POST" action="{{ route('email.verification.resend') }}" class="inline">
-						@csrf
-						<input type="hidden" name="email" value="{{ $email }}" />
-						<button type="submit" class="text-emerald-700 hover:text-brand-highlight underline">Resend Code</button>
-					</form>
+					<button
+						type="button"
+						class="text-emerald-700 hover:text-brand-highlight underline"
+						onclick="document.getElementById('resendOtpForm').submit();"
+					>
+						Resend Code
+					</button>
 				</div>
 
 				<div class="flex justify-between items-center">
 					<a href="{{ route('register') }}" class="text-emerald-700 cursor-pointer hover:text-brand-highlight">Back to Registration</a>
-					<button id="verifyOtpButton" class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-highlight" type="submit">Verify & Complete Registration</button>
+					<button id="verifyOtpButton" class="bg-emerald-700 text-white px-4 py-2 rounded cursor-pointer hover:bg-brand-highlight" type="submit">Verify</button>
 				</div>
+			</form>
+			
+			<!-- Hidden form for resending OTP code -->
+			<form method="POST" action="{{ route('email.verification.resend') }}" id="resendOtpForm" class="hidden">
+				@csrf
+				<input type="hidden" name="email" value="{{ $email }}" />
 			</form>
 		@endif
 	</div>

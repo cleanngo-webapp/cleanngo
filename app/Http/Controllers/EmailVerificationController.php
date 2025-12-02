@@ -99,7 +99,9 @@ class EmailVerificationController extends Controller
         $registrationData = $request->session()->get('pending_registration');
         
         if (!$registrationData) {
-            return redirect()->route('register')->with('error', 'Registration session expired. Please register again.');
+            // If the registration session is gone, still send the user to the login page
+            // so they are not bounced back to the registration form.
+            return redirect()->route('login')->with('error', 'Registration session expired. Please register again.');
         }
 
         // Validate OTP without marking it as used yet
