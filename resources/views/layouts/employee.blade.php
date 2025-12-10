@@ -10,7 +10,7 @@
 </head>
 <body class="min-h-screen bg-emerald-100 font-sans">
     <nav class="bg-emerald-900 fixed top-0 left-0 right-0 z-50 shadow-lg backdrop-blur-sm">
-        <div class="h-12 md:h-14 flex items-center relative">
+        <div class="h-12 md:h-14 flex items-center justify-between relative">
             <!-- Logo -->
             <div class="flex gap-4 pl-10 items-center">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
@@ -55,7 +55,7 @@
             </div>
 
             <!-- Mobile Navigation Icons -->
-            <div class="md:hidden flex items-center gap-2">
+            <div class="md:hidden flex items-center gap-2 pr-4">
                 <!-- Notification Icon with Count - Mobile: Direct Link -->
                 <a href="{{ route('employee.notifications') }}" class="relative text-xl px-3 py-1 rounded text-white cursor-pointer hover:bg-white hover:text-emerald-700 transition-colors">
                     <i class="ri-notification-3-line"></i>
