@@ -3,7 +3,7 @@
 @section('title','Request a Booking')
 
 @section('content')
-<div class="max-w-6xl mx-auto pt-20">
+<div class="max-w-6xl mx-auto pt-4 lg:pt-20">
     <h1 class="text-3xl font-extrabold text-center">Request a Booking</h1>
 
     <div class="mt-6 p-3 grid grid-cols-1 md:grid-cols-3 gap-6">

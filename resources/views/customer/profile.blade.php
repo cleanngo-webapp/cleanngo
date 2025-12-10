@@ -6,7 +6,7 @@
 {{-- Customer Profile: Modern Bookings tracker and Address book --}}
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-	<div class="max-w-7xl mx-auto pt-20 pb-10 px-4 sm:px-6 lg:px-8">
+	<div class="max-w-7xl mx-auto pt-4 lg:pt-20 pb-10 px-4 sm:px-6 lg:px-8">
 		<!-- Header Section -->
 		<div class="mb-8">
 			<h1 class="text-3xl font-bold text-gray-900 mb-2">Profile</h1>

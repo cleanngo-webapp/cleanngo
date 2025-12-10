@@ -3,7 +3,7 @@
 @section('title','Overview')
 
 @section('content')
-<div class="max-w-7xl mx-auto pt-7">
+<div class="max-w-7xl mx-auto pt-4 lg:pt-7">
     {{-- Hero Section --}}
     <section class="relative w-screen -mx-[calc(50vw-50%)] rounded-2xl overflow-hidden">
         <img id="heroImage" src="{{ asset('assets/cs-dashborard-req-2.webp') }}" alt="Fresh Spaces, Happy Faces" class="w-full h-[600px] md:h-[500px] object-cover transition-opacity duration-700">

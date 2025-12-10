@@ -3,7 +3,7 @@
 @section('title','Gallery')
 
 @section('content')
-<div class="max-w-7xl mx-auto pt-20">
+<div class="max-w-7xl mx-auto pt-4 lg:pt-20">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl ml-2 font-extrabold text-emerald-900">Our Work Gallery</h1>
         <p class="text-gray-600">See the quality of our cleaning services</p>
