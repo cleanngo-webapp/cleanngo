@@ -187,48 +187,132 @@ class CustomerDashboardController extends Controller
         // Apply search filter
         if (!empty($search)) {
             $searchTerm = strtolower($search);
-            $query->where(function($q) use ($search, $searchTerm) {
+            // Split search into words for better matching
+            $searchWords = array_filter(explode(' ', $searchTerm));
+            
+            $query->where(function($q) use ($search, $searchTerm, $searchWords) {
+                // Search for full phrase
                 $q->where('b.code', 'like', "%{$search}%")
-                  ->orWhere('s.name', 'like', "%{$search}%")
-                  ->orWhere('s.description', 'like', "%{$search}%")
-                  ->orWhere('s.category', 'like', "%{$search}%")
+                  ->orWhere(DB::raw("LOWER(s.name)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("LOWER(s.description)"), 'like', "%{$searchTerm}%")
+                  ->orWhere(DB::raw("LOWER(s.category)"), 'like', "%{$searchTerm}%")
                   ->orWhere(DB::raw("LOWER(a.line1)"), 'like', "%{$searchTerm}%")
                   ->orWhere(DB::raw("LOWER(a.city)"), 'like', "%{$searchTerm}%")
                   ->orWhere(DB::raw("LOWER(a.province)"), 'like', "%{$searchTerm}%")
                   ->orWhere(DB::raw("LOWER(a.barangay)"), 'like', "%{$searchTerm}%")
-                  // Search in booking items for service types like car cleaning
-                  ->orWhereExists(function($subQuery) use ($search, $searchTerm) {
+                 
+                  ->orWhere(function($wordQuery) use ($searchWords) {
+                      $firstWord = true;
+                      foreach ($searchWords as $word) {
+                          if (strlen($word) > 2) { // Only search words longer than 2 characters
+                              if ($firstWord) {
+                                  $wordQuery->where(DB::raw("LOWER(s.name)"), 'like', "%{$word}%");
+                                  $firstWord = false;
+                              } else {
+                                  $wordQuery->orWhere(DB::raw("LOWER(s.name)"), 'like', "%{$word}%");
+                              }
+                          }
+                      }
+                  })
+                  // Special handling for "home service" search
+                  // When user searches "home service", match bookings that are home services
+                  // This includes car items (which show as "Home Service Car Interior Detailing")
+                  // and other home services like house cleaning, sofa cleaning, etc.
+                  ->orWhere(function($homeServiceQuery) use ($searchTerm) {
+                      // If search contains both "home" and "service", match bookings with items
+                      // that are typically home services (not office-only services)
+                      if (strpos($searchTerm, 'home') !== false && strpos($searchTerm, 'service') !== false) {
+                          $homeServiceQuery->whereExists(function($subQuery) {
+                              $subQuery->select(DB::raw(1))
+                                       ->from('booking_items as bi')
+                                       ->whereRaw('bi.booking_id = b.id')
+                                       ->where(function($itemTypeQuery) {
+                                           // Match common home service item types
+                                           $itemTypeQuery->where(DB::raw("LOWER(bi.item_type)"), 'like', '%car%')
+                                                        ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%house%')
+                                                        ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%sofa%')
+                                                        ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%mattress%')
+                                                        ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%carpet%')
+                                                        ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%curtain%')
+                                                        ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%post_construction%')
+                                                        ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%disinfect%');
+                                       });
+                          });
+                      }
+                  })
+                  ->orWhereExists(function($subQuery) use ($search, $searchTerm, $searchWords) {
                       $subQuery->select(DB::raw(1))
                                ->from('booking_items as bi')
                                ->whereRaw('bi.booking_id = b.id')
-                               ->where(function($itemQuery) use ($search, $searchTerm) {
+                               ->where(function($itemQuery) use ($search, $searchTerm, $searchWords) {
+                                   // Search for full phrase in item_type
                                    $itemQuery->where('bi.item_type', 'like', "%{$search}%")
                                             ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', "%{$searchTerm}%")
-                                            // Search for common service patterns
+                                            // Search for individual words in item_type
+                                            ->orWhere(function($wordQuery) use ($searchWords) {
+                                                $firstWord = true;
+                                                foreach ($searchWords as $word) {
+                                                    if (strlen($word) > 2) { // Only search words longer than 2 characters
+                                                        if ($firstWord) {
+                                                            $wordQuery->where(DB::raw("LOWER(bi.item_type)"), 'like', "%{$word}%");
+                                                            $firstWord = false;
+                                                        } else {
+                                                            $wordQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', "%{$word}%");
+                                                        }
+                                                    }
+                                                }
+                                            })
+                                            // Search for common service patterns (case-insensitive)
                                             ->orWhere(function($patternQuery) use ($searchTerm) {
-                                                if (strpos($searchTerm, 'car') !== false) {
-                                                    $patternQuery->where('bi.item_type', 'like', '%car%');
+                                                if (strpos($searchTerm, 'car') !== false || strpos($searchTerm, 'interior') !== false || strpos($searchTerm, 'detailing') !== false) {
+                                                    $patternQuery->where(DB::raw("LOWER(bi.item_type)"), 'like', '%car%');
                                                 }
                                                 if (strpos($searchTerm, 'sofa') !== false) {
-                                                    $patternQuery->orWhere('bi.item_type', 'like', '%sofa%');
+                                                    $patternQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%sofa%');
                                                 }
                                                 if (strpos($searchTerm, 'mattress') !== false) {
-                                                    $patternQuery->orWhere('bi.item_type', 'like', '%mattress%');
+                                                    $patternQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%mattress%');
                                                 }
                                                 if (strpos($searchTerm, 'carpet') !== false) {
-                                                    $patternQuery->orWhere('bi.item_type', 'like', '%carpet%');
+                                                    $patternQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%carpet%');
                                                 }
                                                 if (strpos($searchTerm, 'glass') !== false) {
-                                                    $patternQuery->orWhere('bi.item_type', 'like', '%glass%');
+                                                    $patternQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%glass%');
                                                 }
                                                 if (strpos($searchTerm, 'disinfect') !== false) {
-                                                    $patternQuery->orWhere('bi.item_type', 'like', '%disinfect%');
+                                                    $patternQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%disinfect%');
                                                 }
                                                 if (strpos($searchTerm, 'construction') !== false) {
-                                                    $patternQuery->orWhere('bi.item_type', 'like', '%post_construction%');
+                                                    $patternQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%post_construction%');
+                                                }
+                                                // "Home Service" typically refers to car interior detailing and other home services
+                                                // Match car items (which show as "Home Service Car Interior Detailing" in summary)
+                                                // and other home-related services
+                                                if (strpos($searchTerm, 'home') !== false || strpos($searchTerm, 'service') !== false) {
+                                                    // Match car items (Home Service Car Interior Detailing)
+                                                    $patternQuery->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%car%')
+                                                                 ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%house%')
+                                                                 ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%sofa%')
+                                                                 ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%mattress%')
+                                                                 ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%carpet%')
+                                                                 ->orWhere(DB::raw("LOWER(bi.item_type)"), 'like', '%curtain%');
                                                 }
                                             });
                                });
+                  })
+                  // Search by employee name - join with booking_staff_assignments, employees, and users
+                  ->orWhereExists(function($employeeSubQuery) use ($search, $searchTerm) {
+                      $employeeSubQuery->select(DB::raw(1))
+                                       ->from('booking_staff_assignments as bsa')
+                                       ->join('employees as e', 'e.id', '=', 'bsa.employee_id')
+                                       ->join('users as eu', 'eu.id', '=', 'e.user_id')
+                                       ->whereRaw('bsa.booking_id = b.id')
+                                       ->where(function($employeeQuery) use ($search, $searchTerm) {
+                                           // Search in first name, last name, or full name
+                                           $employeeQuery->where(DB::raw("LOWER(eu.first_name)"), 'like', "%{$searchTerm}%")
+                                                        ->orWhere(DB::raw("LOWER(eu.last_name)"), 'like', "%{$searchTerm}%")
+                                                        ->orWhere(DB::raw("LOWER(CONCAT(eu.first_name, ' ', eu.last_name))"), 'like', "%{$searchTerm}%");
+                                       });
                   });
             });
         }
@@ -310,15 +394,7 @@ class CustomerDashboardController extends Controller
                     return $booking->employee_name ?? '';
                 })->values();
             }
-
-            // Filter by employee name if searching
-            if (!empty($search)) {
-                $searchTerm = strtolower($search);
-                $bookings = $bookings->filter(function($booking) use ($searchTerm) {
-                    return $booking->employee_name && 
-                           (stripos($booking->employee_name, $searchTerm) !== false);
-                })->values();
-            }
+            
         }
 
         // Build service summaries for the search results
@@ -340,14 +416,15 @@ class CustomerDashboardController extends Controller
                 foreach ($itemTypes as $itemType) {
                     $category = '';
                     
+                    // Use the same service category format as the index method for consistency
                     if (strpos($itemType, 'sofa') === 0) {
-                        $category = 'Sofa Cleaning';
+                        $category = 'Sofa Mattress Deep Cleaning';
                     } elseif (strpos($itemType, 'mattress') === 0) {
-                        $category = 'Mattress Cleaning';
+                        $category = 'Mattress Deep Cleaning';
                     } elseif (strpos($itemType, 'carpet') === 0) {
                         $category = 'Carpet Deep Cleaning';
                     } elseif (strpos($itemType, 'car') === 0) {
-                        $category = 'Car Interior Detailing';
+                        $category = 'Home Service Car Interior Detailing';
                     } elseif (strpos($itemType, 'post_construction') === 0) {
                         $category = 'Post Construction Cleaning';
                     } elseif (strpos($itemType, 'disinfect') === 0) {
