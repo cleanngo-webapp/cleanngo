@@ -11,15 +11,15 @@
 </head>
 <body class="min-h-screen bg-emerald-100 font-sans">
     <nav class="bg-emerald-900 fixed top-0 left-0 right-0 z-50 shadow-lg backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto h-12 md:h-14 flex justify-between items-center px-4">
+        <div class="h-12 md:h-14 flex items-center relative">
             <!-- Logo -->
-            <div class="flex gap-4">
+            <div class="flex gap-4 pl-10 items-center">
                 <img src="{{ asset('assets/clean_saver_logo.png') }}" alt="Logo" class="h-12">
-                <span class="font-semibold justify-center hidden sm:block text-white">CLEANSAVER NAGA</span>
+                <span class="font-semibold hidden sm:block text-white">CLEANSAVER NAGA</span>
             </div>
     
             <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center gap-4 text-white">
+            <div class="hidden md:flex items-center gap-4 text-white absolute right-4">
                  <div class="relative">
                      <button onclick="toggleNotificationDropdown()" class="relative hover:text-emerald-700 cursor-pointer transition-colors">
                         <i class="ri-notification-3-line text-2xl"></i>
