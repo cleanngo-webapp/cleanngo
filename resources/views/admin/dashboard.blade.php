@@ -7,8 +7,9 @@
 {{-- Purpose: Overview of business operations, booking statistics, and daily activities --}}
 
 <div class="max-w-6xl mx-auto px-2 sm:px-0">
-	<div class="flex items-center justify-between mb-8">
-		<h1 class="text-3xl font-extrabold text-gray-900 text-center">Dashboard</h1>
+	{{-- Mobile: Stacked layout, Desktop: Side by side --}}
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+		<h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Dashboard</h1>
 		<div class="text-sm text-gray-500">
 			{{ now()->format('l, F j, Y') }}
 		</div>
