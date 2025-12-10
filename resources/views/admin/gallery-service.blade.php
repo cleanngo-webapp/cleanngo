@@ -105,7 +105,7 @@
                     <div class="border border-gray-200 rounded-lg overflow-hidden {{ !$image->is_active ? 'opacity-50' : '' }}">
                         {{-- Image Preview --}}
                         <div class="aspect-square bg-gray-100">
-                            <img src="{{ asset('storage/' . $image->image_path) }}" 
+                            <img src="{{ $image->url }}" 
                                  alt="{{ $image->alt_text ?: $image->original_name }}"
                                  class="w-full h-full object-cover"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

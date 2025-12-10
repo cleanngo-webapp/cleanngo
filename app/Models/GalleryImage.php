@@ -77,4 +77,22 @@ class GalleryImage extends Model
     {
         return $query->orderBy('sort_order')->orderBy('created_at', 'desc');
     }
+
+    /**
+     * Get the full URL for the image
+     * Returns the URL directly if it's a full URL (Supabase), 
+     * or generates asset URL if it's a local path
+     * 
+     * @return string The full URL to the image
+     */
+    public function getUrlAttribute()
+    {
+        // Check if image_path is already a full URL (Supabase)
+        if (filter_var($this->image_path, FILTER_VALIDATE_URL) !== false) {
+            return $this->image_path;
+        }
+        
+        // Otherwise, it's a local path - generate asset URL
+        return asset('storage/' . $this->image_path);
+    }
 }

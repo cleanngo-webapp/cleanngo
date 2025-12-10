@@ -6,11 +6,87 @@ use App\Http\Controllers\Controller;
 use App\Models\GalleryImage;
 use App\Models\ServiceComment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdminGalleryController extends Controller
 {
+    /**
+     * Check if image_path is a full URL (Supabase) or a local path
+     * 
+     * @param string $imagePath The image path from the database
+     * @return bool True if it's a full URL, false if it's a local path
+     */
+    private function isUrl($imagePath)
+    {
+        return filter_var($imagePath, FILTER_VALIDATE_URL) !== false;
+    }
+
+    /**
+     * Check if a gallery image file exists
+     * Handles both Supabase URLs and local file paths
+     * 
+     * @param string $imagePath The image path from the database (URL or local path)
+     * @return bool True if file exists, false otherwise
+     */
+    private function imageFileExists($imagePath)
+    {
+        try {
+            // If it's a full URL (Supabase), we assume it exists if it's a valid URL
+            // In production, you might want to make an HTTP HEAD request to verify
+            if ($this->isUrl($imagePath)) {
+                return true; // Assume Supabase URLs are valid
+            }
+            
+            // For local paths, check using Storage
+            if (Storage::disk('public')->exists($imagePath)) {
+                return true;
+            }
+            
+            // Fallback: Try checking the file directly
+            $fullPath = storage_path('app/public/' . $imagePath);
+            if (file_exists($fullPath)) {
+                return true;
+            }
+            
+            return false;
+        } catch (\Exception $e) {
+            Log::warning("Error checking image file existence: {$imagePath}", [
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Get the storage disk and path for an image
+     * Returns the disk name and the actual path (without URL prefix for Supabase)
+     * 
+     * @param string $imagePath The image path from the database
+     * @return array ['disk' => 'supabase'|'public', 'path' => 'actual/path']
+     */
+    private function getStorageInfo($imagePath)
+    {
+        if ($this->isUrl($imagePath)) {
+            $urlParts = parse_url($imagePath);
+            $pathParts = explode('/', trim($urlParts['path'], '/'));
+            
+            $bucket = env('SUPABASE_STORAGE_BUCKET');
+            $bucketIndex = array_search($bucket, $pathParts);
+            if ($bucketIndex !== false) {
+                $path = implode('/', array_slice($pathParts, $bucketIndex + 1));
+                return ['disk' => 'supabase', 'path' => $path];
+            }
+            
+            // Fallback: try to extract path manually
+            $path = str_replace('/storage/v1/object/public/' . $bucket . '/', '', $urlParts['path']);
+            return ['disk' => 'supabase', 'path' => ltrim($path, '/')];
+        }
+        
+        return ['disk' => 'public', 'path' => $imagePath];
+    }
+
     /**
      * Display the gallery management page with service cards
      * This shows all 8 services and allows admin to manage images for each
@@ -75,8 +151,9 @@ class AdminGalleryController extends Controller
             $allImages = GalleryImage::forService($service['type'])->active()->get();
             
             // Filter out images where the file doesn't exist
+            // Use our helper method which handles both Supabase URLs and local paths
             $validImages = $allImages->filter(function ($image) {
-                return Storage::disk('public')->exists($image->image_path);
+                return $this->imageFileExists($image->image_path);
             });
             
             // Count only valid images
@@ -117,8 +194,10 @@ class AdminGalleryController extends Controller
         $allImages = GalleryImage::forService($serviceType)->ordered()->get();
         
 
+        // Filter out images where the file doesn't exist
+        // Use our helper method which handles both Supabase URLs and local paths
         $images = $allImages->filter(function ($image) {
-            return Storage::disk('public')->exists($image->image_path);
+            return $this->imageFileExists($image->image_path);
         });
 
         return view('admin.gallery-service', compact('serviceType', 'serviceName', 'images'));
@@ -143,18 +222,44 @@ class AdminGalleryController extends Controller
             $originalName = $file->getClientOriginalName();
             $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
             
-            // Store the file in public/gallery directory
-            $path = $file->storeAs('gallery', $filename, 'public');
+            // Check if Supabase Storage is configured
+            $useSupabase = !empty(env('SUPABASE_STORAGE_KEY')) 
+                && !empty(env('SUPABASE_STORAGE_SECRET')) 
+                && !empty(env('SUPABASE_STORAGE_BUCKET'));
             
-            // Verify the file was actually stored
-            if (!$path || !Storage::disk('public')->exists($path)) {
-                throw new \Exception('Failed to store the uploaded file.');
+            if ($useSupabase) {
+                // Upload to Supabase Storage
+                $path = $file->storeAs('gallery', $filename, 'supabase');
+                
+                // Verify the file was actually stored
+                if (!$path || !Storage::disk('supabase')->exists($path)) {
+                    throw new \Exception('Failed to store the file to Supabase Storage.');
+                }
+                
+                $supabaseUrl = env('SUPABASE_STORAGE_URL');
+                $bucket = env('SUPABASE_STORAGE_BUCKET');
+                $imageUrl = rtrim($supabaseUrl, '/') . '/' . $bucket . '/' . $path;
+                
+                // Store the full URL in the database
+                $imagePath = $imageUrl;
+            } else {
+                // Fallback to local storage
+                $path = $file->storeAs('gallery', $filename, 'public');
+                
+                // Verify the file was actually stored
+                if (!$path || !Storage::disk('public')->exists($path)) {
+                    throw new \Exception('Failed to store the uploaded file.');
+                }
+                
+                // Store the relative path for local storage
+                $imagePath = $path;
             }
 
             // Create gallery image record
+            // image_path will contain either the full Supabase URL or the relative local path
             $galleryImage = GalleryImage::create([
                 'service_type' => $request->service_type,
-                'image_path' => $path,
+                'image_path' => $imagePath,
                 'original_name' => $originalName,
                 'alt_text' => $request->alt_text,
                 'sort_order' => GalleryImage::forService($request->service_type)->max('sort_order') + 1,
@@ -201,9 +306,22 @@ class AdminGalleryController extends Controller
         $image = GalleryImage::findOrFail($id);
         
         try {
-            // Delete the physical file
-            if (Storage::disk('public')->exists($image->image_path)) {
-                Storage::disk('public')->delete($image->image_path);
+            // Delete the physical file from storage
+            // Handle both Supabase URLs and local paths
+            $storageInfo = $this->getStorageInfo($image->image_path);
+            $disk = $storageInfo['disk'];
+            $path = $storageInfo['path'];
+            
+            if ($disk === 'supabase' || Storage::disk($disk)->exists($path)) {
+                try {
+                    Storage::disk($disk)->delete($path);
+                } catch (\Exception $e) {
+                    // Log but don't fail if file deletion fails
+                    Log::warning("Failed to delete image file: {$path}", [
+                        'error' => $e->getMessage(),
+                        'disk' => $disk
+                    ]);
+                }
             }
 
             // Delete the database record

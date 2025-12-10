@@ -77,7 +77,14 @@ class CustomerGalleryController extends Controller
                 ->get();
             
             // Filter out images where the file doesn't exist
+            // For Supabase URLs, we assume they exist (they're stored as full URLs)
+            // For local paths, check using Storage
             $validImages = $allImages->filter(function ($image) {
+                // If it's a full URL (Supabase), assume it exists
+                if (filter_var($image->image_path, FILTER_VALIDATE_URL) !== false) {
+                    return true;
+                }
+                // Otherwise check local storage
                 return Storage::disk('public')->exists($image->image_path);
             });
             
@@ -124,7 +131,14 @@ class CustomerGalleryController extends Controller
         $allImages = GalleryImage::forService($serviceType)->active()->ordered()->get();
         
         // Filter out images where the file doesn't exist
+        // For Supabase URLs, we assume they exist (they're stored as full URLs)
+        // For local paths, check using Storage
         $images = $allImages->filter(function ($image) {
+            // If it's a full URL (Supabase), assume it exists
+            if (filter_var($image->image_path, FILTER_VALIDATE_URL) !== false) {
+                return true;
+            }
+            // Otherwise check local storage
             return Storage::disk('public')->exists($image->image_path);
         });
 

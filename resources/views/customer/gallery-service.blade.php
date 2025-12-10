@@ -22,9 +22,9 @@
     @if($images->count() > 0)
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach($images as $image)
-                <div class="group cursor-pointer" onclick="openImageModal('{{ asset('storage/' . $image->image_path) }}', '{{ $image->alt_text ?: $serviceName }}')">
+                <div class="group cursor-pointer" onclick="openImageModal('{{ $image->url }}', '{{ $image->alt_text ?: $serviceName }}')">
                     <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                        <img src="{{ asset('storage/' . $image->image_path) }}" 
+                        <img src="{{ $image->url }}" 
                              alt="{{ $image->alt_text ?: $serviceName }}"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
