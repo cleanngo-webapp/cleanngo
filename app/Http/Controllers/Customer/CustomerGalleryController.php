@@ -68,17 +68,31 @@ class CustomerGalleryController extends Controller
         ];
 
         // Get image counts for each service and all active images grouped by service type
+        // Only count images where the actual file exists on disk
         $galleryImages = [];
         foreach ($services as &$service) {
-            $service['image_count'] = GalleryImage::forService($service['type'])->active()->count();
-            
-            $images = GalleryImage::forService($service['type'])
+            $allImages = GalleryImage::forService($service['type'])
                 ->active()
                 ->ordered()
                 ->get();
             
-            if ($images->count() > 0) {
-                $galleryImages[$service['type']] = $images;
+            // Filter out images where the file doesn't exist
+            $validImages = $allImages->filter(function ($image) {
+                return Storage::disk('public')->exists($image->image_path);
+            });
+            
+            // Count only valid images
+            $service['image_count'] = $validImages->count();
+            
+            // Only add valid images to the gallery images array
+            if ($validImages->count() > 0) {
+                $galleryImages[$service['type']] = $validImages;
+            }
+            
+            // Clean up orphaned database records 
+            $orphanedIds = $allImages->diff($validImages)->pluck('id')->toArray();
+            if (!empty($orphanedIds)) {
+                GalleryImage::whereIn('id', $orphanedIds)->delete();
             }
         }
 

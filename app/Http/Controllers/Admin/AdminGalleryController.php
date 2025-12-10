@@ -70,8 +70,23 @@ class AdminGalleryController extends Controller
         ];
 
         // Get image counts for each service
+        // Only count images where the actual file exists on disk
         foreach ($services as &$service) {
-            $service['image_count'] = GalleryImage::forService($service['type'])->active()->count();
+            $allImages = GalleryImage::forService($service['type'])->active()->get();
+            
+            // Filter out images where the file doesn't exist
+            $validImages = $allImages->filter(function ($image) {
+                return Storage::disk('public')->exists($image->image_path);
+            });
+            
+            // Count only valid images
+            $service['image_count'] = $validImages->count();
+            
+            // Clean up orphaned database records 
+            $orphanedIds = $allImages->diff($validImages)->pluck('id')->toArray();
+            if (!empty($orphanedIds)) {
+                GalleryImage::whereIn('id', $orphanedIds)->delete();
+            }
         }
 
         return view('admin.gallery', compact('services'));
