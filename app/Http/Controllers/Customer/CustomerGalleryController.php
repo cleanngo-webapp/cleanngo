@@ -89,11 +89,6 @@ class CustomerGalleryController extends Controller
                 $galleryImages[$service['type']] = $validImages;
             }
             
-            // Clean up orphaned database records 
-            $orphanedIds = $allImages->diff($validImages)->pluck('id')->toArray();
-            if (!empty($orphanedIds)) {
-                GalleryImage::whereIn('id', $orphanedIds)->delete();
-            }
         }
 
         return view('customer.csgallery', compact('services', 'galleryImages'));

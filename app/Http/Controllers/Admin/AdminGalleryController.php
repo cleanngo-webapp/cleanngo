@@ -82,11 +82,6 @@ class AdminGalleryController extends Controller
             // Count only valid images
             $service['image_count'] = $validImages->count();
             
-            // Clean up orphaned database records 
-            $orphanedIds = $allImages->diff($validImages)->pluck('id')->toArray();
-            if (!empty($orphanedIds)) {
-                GalleryImage::whereIn('id', $orphanedIds)->delete();
-            }
         }
 
         return view('admin.gallery', compact('services'));
@@ -119,28 +114,12 @@ class AdminGalleryController extends Controller
         $serviceName = $serviceNames[$serviceType];
         
         // Get all images for this service (including inactive ones for admin management)
-        $images = GalleryImage::forService($serviceType)->ordered()->get();
+        $allImages = GalleryImage::forService($serviceType)->ordered()->get();
         
-        // Filter out images where the file doesn't exist and clean up orphaned records
-        $validImages = collect();
-        $orphanedIds = [];
-        
-        foreach ($images as $image) {
-            if (Storage::disk('public')->exists($image->image_path)) {
-                $validImages->push($image);
-            } else {
-                // Mark for deletion - file doesn't exist
-                $orphanedIds[] = $image->id;
-            }
-        }
-        
-        // Clean up orphaned database records
-        if (!empty($orphanedIds)) {
-            GalleryImage::whereIn('id', $orphanedIds)->delete();
-        }
 
-        // Use the filtered valid images for display
-        $images = $validImages;
+        $images = $allImages->filter(function ($image) {
+            return Storage::disk('public')->exists($image->image_path);
+        });
 
         return view('admin.gallery-service', compact('serviceType', 'serviceName', 'images'));
     }
